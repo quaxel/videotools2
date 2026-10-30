@@ -1,0 +1,87 @@
+# Component library
+
+Everything a scene imports comes from `src/engine` (`import { ... } from "../../engine"`). A complete worked
+example is `src/videos/slot-machines/Scene.tsx`; copy its structure.
+
+## Scene file contract (`src/videos/<slug>/Scene.tsx`)
+
+```tsx
+import TIMING_JSON from "./timing.json";
+const TIMING = TIMING_JSON as Timing;
+export const SLUG = "<slug>";
+export const timing = TIMING;
+const SHOTS: Shot[] = [ [from, to, ShotComponent, dissolveIn], ... ]; // final frames, contiguous, first from 0, last to TIMING.totalFrames
+const SFX: Sfx[] = [...];
+const MUSIC: MusicCue[] = [...];
+export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} />;
+```
+
+- Write each SHOTS entry on one line as `[123, 456, Name, false]` (numbers or `TIMING.totalFrames`); `pipeline.py check` parses it.
+- Cut points come from `timing.json` → `lines[i].from / to` and `captions[k].from`.
+- Inside a shot: `const f = useShotFrame();` (0 at the cut; negative while the shot whips in). `useFinalFrame()` gives the video frame.
+- Mouth sync is automatic: a puppet in a `Stage` whose `id` equals a speaker in `lines.json` opens its mouth from the voice (`timing.json` → `mouth`) while that speaker talks, over any authored `mouthOpen`. So give the talking puppet the speaker's name as its id. `voice` writes the tracks; `voice_assemble.py <slug> --mouth` adds them to an older video.
+- Acting is automatic too: a talking puppet makes a beat gesture (nod, arm or lean) on stressed syllables; every puppet breathes, blinks at its own rhythm and glances to a spot and holds there. Author big actions in the pose; leave the small life to `Stage`.
+- Impacts shake the camera automatically: a `boom`, `reel-stop` or `stamp` cue in the effect list gives a short jolt and punch-in, scaled by its volume. For the prop that takes the hit, spread `squash(f, hitFrame, 0.25)` into its group `scale` (squashes, springs back, settles).
+
+## Engine
+
+| Export | Use |
+| --- | --- |
+| `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. |
+| `CameraShot = { position, target, fov }` | Every set must receive the camera and contain `<CameraRig>` (the kit's `Room` does this). |
+| `lerp3, ramp, clamp01, breathe, talk, walk` | Animation helpers. `ramp(f, a, b)` 0→1 between frames a and b. `...walk(f)` inside a pose while walking. |
+| `Easing, interpolate` | From `remotion`. |
+| `FADE` | Location-change transition length (8 frames): the old shot whips out left, the new one in from the right. |
+| `sfx("stamp")`, `MUSIC_FILES.lounge / .mystery / .upbeat / .tension` | Sound file paths. |
+
+## Set kit (`src/three/kit.tsx`, also exported from the engine)
+
+- `Room({ camera, mood, floor, wall, width?, depth?, sideWalls?, stripe?, wallPattern?, floorPattern?, sun?, children })` — floor, back wall at
+  z = -depth/2, a shadow-casting key light, contact shadow where wall meets floor, camera rig.
+  `wallPattern`: plaster (default), brick, panel, wallpaper, tile, plain. `floorPattern`: wood (default), tile, carpet, concrete, plain.
+  `sun: { x, color?, bars? }` lays window light (soft bars) on the floor and wall. Give every location its own pattern pair.
+- `LightPool`, `Halo({ position, size, color })` — extra window light and additive glow (screens and lamps already have halos).
+  Moods: `warm`, `daylight`, `cold`, `dream`, `night`, `neon`, `golden`, `office`; `moodBackground(mood)` gives the Stage `bg`.
+- Props (positions in metres, y = 0 floor): `Door({position, open, sign, glow})`, `Window`, `Desk`, `Counter`, `Chair`, `Shelf`,
+  `Lamp`, `Plant`, `Crates`, `Board({cards})` corkboard, `Screen({text, appear?, count?})` (glowing text; `appear`/`count` as on Label, for a figure that comes up on a monitor), `BigButton({label, press})`, `Switch({label, on})`,
+  `Label({text, position, width, appear?, count?})` readable UPPERCASE card (use "\n" for two lines). `appear` = frames since it came on: pops in past full size with a white flash (pass `f - at` from the shot; negative hides it). `count` 0..1 counts its numbers up from zero (`countText(text, p)` does the same for any string). Add a `pop` sound on the frame it appears. Never count years or IDs (1982, FLIGHT 214).
+- Lower-level: `InkBox`, `InkCylinder` (cel-shaded with ink outline), `toonRamp`, `canvasTexture(w, h, draw)`.
+- `ZodiacBadge({sign, position, size?, bg?, fg?, appear?})` round emblem with the sign's glyph (aries ... pisces). Zodiac videos
+  show it in the hook, next to the sign's name.
+- `pipeline.py collide` flags a standing puppet whose body is inside a set mesh. Wrap smoke, held props and effects that may
+  overlap a character in `<group userData={{ ghost: true }}>` so they are not counted.
+- Write a new prop as a small component in `src/videos/<slug>/props.tsx` from these pieces; move it to the kit if it is reusable.
+
+Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `InteriorStrip`, `XrayWheel`, `AtmSet`, `ExteriorSet`, `LabSet`.
+
+## Puppets
+
+`PuppetPlacement = { id, look, pose, at: [x, z] }` — feet on the floor at (x, z); always faces the camera.
+Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HIP_HEIGHT` ≈ 0.34 m.
+
+- `PuppetLook`: `skin, hair, outfit, pattern?` (leaf print colour), `lanyard?`, `cap?`, `chain?`, `glasses?`, `long?` (long hair to the shoulders; use it for women).
+- `PuppetPose`:
+  - `expression`: `neutral | excited | skeptical | smug | shocked`; `blink`, `lookX` (-1..1), `headTilt` (deg), `mouthOpen` (0..1)
+  - `armL / armR: [shoulder, elbow]` degrees, 0 = hanging; `[150, -25]` arms up, `[10, -78]` holding in front, `[8, 62]` carry in profile
+  - `bob`, `legSwing`, `sit`
+  - `view: front | side | back`, `facing: 1 | -1` (side view). Leave both unset and the cut-out turns itself: profile when the camera is 60° or more off the set's front (+z), its back past 125° (not when sitting). Set `view: "front"` to keep it facing the camera.
+  - Walk-ins: `const w = stroll(f, start, frames, from, to)`, then place at `w.at` and spread `...w.pose` last: it strides (in profile when crossing sideways) and stands once it arrives.
+  - Mouth shapes (`viseme`), the lanyard/cap follow-through (`swing`) and beat gestures come from `Stage` automatically.
+  - `hold: { item: cup | drink | phone | toolbox | key | popcorn | briefcase | candy | wine, hand: L | R }`, `itemTilt` (deg), `coinDrop` (units fallen)
+- Vertical frame is narrow: at fov 40 the visible half-width is only about 0.23 × camera distance (1.5 m away → ±0.35 m).
+  Keep props and puppets that must share a shot within that width, stack mechanism props vertically, and keep key
+  text above the caption band (lower ~30 % of the frame). Puppets behind a counter need it ≤ 0.65 m tall to show their torso.
+- Framing references (puppet at z ≈ 1): medium `position [x-0.9, 1.25, 4.2] target [x-0.1, 1.0, 0.4] fov 36`;
+  close-up `position [x-0.55, 1.05, 2.95] target [x-0.28, 0.9, 1.1] fov 36` with `blur 7`.
+
+## Sound
+
+Effects (`public/sfx/*.wav`, synthesised by `scripts/sfx_generate.py`): `reel-spin` (loop), `reel-stop`, `near-miss` (sad wah),
+`chime`, `button`, `bill-whirr`, `credit-blip`, `whoosh`, `tape-stop`, `hum` (loop), `stamp`, `tick`, `boom`, `paper`, `ambience` (loop),
+`pop` (a sign popping in), `drawer` (cash drawer out + stop), `card` (card slid or swiped), `door` (creak + shut), `sting` (twist hit:
+put it on the twist line), `riser` (1.6 s build; start it so it ends on the twist).
+Music loops: `lounge` (112 BPM, light), `mystery` (84 BPM, dark), `upbeat` (124 BPM, bright: hooks), `tension` (100 BPM, pulsing:
+the numbers and the reveal). Use at least three beds across a video. New sounds: add a function at the end of `sfx_generate.py`
+(after the originals, so their files stay identical) and re-run it with `../tts/qwen/.venv/bin/python`.
+
+`Sfx = { at, src, volume, until? }` (`until` loops to that frame). `MusicCue = { src, from, to, volume }`; music ducks under the voice automatically.
