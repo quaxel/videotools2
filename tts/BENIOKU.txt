@@ -1,0 +1,30 @@
+Supertonic 3 TTS - komut satırı (macOS, Apple Silicon)
+
+  ./tts "Merhaba, nasılsınız?"                       # Türkçe, M1 sesi, hoparlörden çalar
+  ./tts "Merhaba" -v F1 -o merhaba.wav               # dosyaya yaz
+  ./tts "Hello there" -l en -v maximilian -s 1.1     # başka dil / klon ses / hız
+  ./supertonic --help                                # tüm seçenekler
+
+Sesler: M1-M5, F1-F5, maximilian, maximilian_tr (model/voice_styles içindeki JSON adları)
+Diller: tr, en, de, fr, es, ... veya "na" (otomatik)
+Kalite: -q 5 (en hızlı) .. 12 (en iyi), varsayılan 8
+Cihaz: --device auto (CoreML/GPU) | cpu
+
+İlk çalıştırmada CoreML modeli derler (birkaç saniye); sonuç .coreml-cache/ içinde saklanır.
+Gatekeeper engellerse:  xattr -dr com.apple.quarantine .
+
+Savaş nidası / bağırış sesleri: savas_M0..M5, savas_maximilian_tr
+  ./tts "Hücum!" -v savas_M3 -o hucum.wav
+  Stil = %15 hazır ses + %85 çığlık klonu (yalnızca tını/tonlama tensörü). Perde 200-380 Hz arası çıkar,
+  her üretim farklıdır: birkaç kez üretip en iyisini seçin. Tiz kalırsa 2-4 yarım ton pesleştirin.
+  Çığlık klonu: araclar/ciglik_klonu.json (sound-library/insan-sesi/aargh-erkek-cigligi-03..07, CC0,
+  "supertonic clone -l tr --init-voice M3 --denoise 0 --w-pitch 4 --w-spectrum 1.5 --probe ..." ile).
+  Yeni karışım: node araclar/stilkaristir.js (dosyanın başındaki açıklamaya bakın).
+  Satır içi etiketler (<breath>, <sigh>, <laugh>) sözsüz ses ekler, perdeyi/yoğunluğu değiştirmez.
+
+İkinci seçenek: Qwen3-TTS 1.7B (qwen/, MLX, CustomVoice)
+  Kurulum: qwen/setup.sh   (.venv + ~4.2 GB model, Hugging Face önbelleğine)
+  Sesler: Ryan, Aiden (İngilizce erkek), Vivian, Serena (kadın), Uncle_Fu, Dylan, Eric (erkek), Ono_Anna, Sohee (kadın)
+  Diller: en, zh, ja, ko, de, fr, ru, pt, es, it — Türkçe YOK (anlaşılmaz çıkıyor; Türkçe için supertonic).
+  Duygu: sahne satırında "tone": "Very angry, shouting." gibi İngilizce talimat. Hız ayarı yok; "speed" ffmpeg atempo ile uygulanır.
+  cartoon-animator sesi adından tanır (ör. "voice": "Ryan") ve worker.py'yi bir kez başlatıp model yüklü tutar.

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Kullanım: ./tts "Metin" [-v M1] [-l tr] [-o cikti.wav] [-s 1.0] [-q 8] [--device cpu]
+# -o verilmezse ses doğrudan çalınır.
+D="$(cd "$(dirname "$0")" && pwd)"
+# CoreML derlenmiş modeli burada kalıcı tutar; yoksa her çalıştırmada $TMPDIR'e ~400 MB yazılır.
+export SUPERTONIC_COREML_CACHE="${SUPERTONIC_COREML_CACHE:-$D/.coreml-cache}"
+TEXT="$1"; shift
+exec "$D/supertonic" -r "$D/model" -l tr -t "$TEXT" "$@"

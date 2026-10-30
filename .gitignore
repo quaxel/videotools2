@@ -1,2 +1,22 @@
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# macOS
+.DS_Store
+
+# Dependencies / environments
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Caches and build output
+.coreml-cache/
+.cache/
+.remotion/
+*.log
+
+# Editor / local settings
+.idea/
+.vscode/
+.claude/settings.local.json
