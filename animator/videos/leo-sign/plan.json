@@ -1,0 +1,40 @@
+{
+  "title": "Your Leo Friend Is Never Off Stage",
+  "topic": "Leo zodiac satire: a Leo is never off stage",
+  "mechanism": "Inside a Leo there is a theater with one SPOTLIGHT switch that only points one way, at her; backstage an APPLAUSE meter must stay in the red, there is a MAIN mirror and a BACKUP mirror, and a big heart with a GENEROUS sign, so she outshines the bride and still pays for everyone's drinks.",
+  "beats": {
+    "hook": "Your wedding, under a big LEO sign: Sofia arrives in gold sequins and outshines the bride (you)",
+    "story": "Sofia brings her own ring light to the ceremony and fixes her hair in the trumpeter's bell during the vows",
+    "rise": "Her toast is mostly about her; the crowd loves it, the applause meter climbs; Sofia is winning",
+    "twist": "Lights go down for the first dance; the one spotlight lands on the bride and Sofia stands in the dark for the first time ever",
+    "mechanism": "Inside her head: a red velvet theater with a SPOTLIGHT switch that only points at her; backstage an APPLAUSE meter in the red, MAIN and BACKUP mirrors, a GENEROUS heart sign and a bar tab she pays for everyone",
+    "ending": "Sofia walks into the light to dance with the bride, trips on the dress train and lands in the cake; the photographer's flash makes it the best photo of the night"
+  },
+  "seed": {
+    "what": "Sofia's gold sequin dress (it ends up in the cake in the best photo of the night)",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "entrance", "set": "Room warm, white and gold wedding entrance, flower arch, LEO sign", "colour": "white / gold" },
+    { "id": "aisle", "set": "Room daylight, ceremony rows of chairs, arch, ring light", "colour": "pastel blue" },
+    { "id": "trumpet", "set": "Room golden, trumpeter, big brass bell close-up", "colour": "brass" },
+    { "id": "toast", "set": "Room warm, toast stage with mic, curtains, guests", "colour": "burgundy" },
+    { "id": "dancefloor", "set": "Room night, dark dance floor, one spotlight cone, disco ball", "colour": "night purple" },
+    { "id": "theater", "set": "Room alarm, red velvet theater, SPOTLIGHT switch and lamp", "colour": "red velvet" },
+    { "id": "backstage", "set": "Room golden, dressing room mirrors MAIN / BACKUP, APPLAUSE meter, GENEROUS heart, bar tab", "colour": "warm yellow" },
+    { "id": "cake", "set": "Room dream, pink cake table, tiered cake", "colour": "pink" }
+  ],
+  "characters": [
+    { "id": "sofia", "look": "gold sequin dress, long big auburn hair" },
+    { "id": "chloe", "look": "the bride: white dress, long dark hair, train on the floor" },
+    { "id": "mia", "look": "bridesmaid, lilac dress, long blonde hair" },
+    { "id": "ava", "look": "photographer, black outfit, glasses, long black hair" },
+    { "id": "trumpeter", "look": "burgundy suit, short hair" }
+  ],
+  "gags": [
+    { "line": 3, "what": "During the vows Sofia leans into the trumpet and fixes her hair in the shiny bell; the trumpeter honks" },
+    { "line": 18, "what": "Sofia trips on the bride's train and falls face first into the wedding cake" },
+    { "line": 10, "what": "In the dark Sofia taps the spotlight like a broken microphone" }
+  ],
+  "story_numbers": ["one", "1", "first", "1st"]
+}

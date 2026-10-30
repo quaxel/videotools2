@@ -1,0 +1,92 @@
+{
+  "title": "The Science Behind Slot Machines",
+  "topic": "Why slot machines show so many near misses",
+  "mechanism": "Virtual reel mapping gives the jackpot symbol one hidden stop and the blanks next to it many, so near misses appear far more often than chance.",
+  "beats": {
+    "hook": "Two sevens, third one click short",
+    "story": "Player switches machines, buddy eggs him on, ATM",
+    "rise": "Credits drain, cup empty",
+    "twist": "Repair guy seen earlier unlocks the machine",
+    "mechanism": "Virtual reel strip, stamps, design-lab dials, weighted wheel",
+    "ending": "Buddy stays, same near miss"
+  },
+  "seed": {
+    "what": "Repair guy with toolbox crossing the floor",
+    "first_line": 2
+  },
+  "locations": [
+    {
+      "id": "casino",
+      "set": "CasinoSet",
+      "colour": "red"
+    },
+    {
+      "id": "atm",
+      "set": "AtmSet",
+      "colour": "teal"
+    },
+    {
+      "id": "casino-night",
+      "set": "CasinoSet night",
+      "colour": "blue"
+    },
+    {
+      "id": "inside",
+      "set": "InteriorStrip",
+      "colour": "orange"
+    },
+    {
+      "id": "lab",
+      "set": "LabSet",
+      "colour": "blue-white"
+    },
+    {
+      "id": "xray",
+      "set": "XrayWheel",
+      "colour": "navy"
+    },
+    {
+      "id": "exterior",
+      "set": "ExteriorSet",
+      "colour": "purple"
+    }
+  ],
+  "characters": [
+    {
+      "id": "player",
+      "look": "teal leaf shirt"
+    },
+    {
+      "id": "buddy",
+      "look": "red cap, chain"
+    },
+    {
+      "id": "tech",
+      "look": "yellow cap, toolbox"
+    },
+    {
+      "id": "engineer",
+      "look": "glasses, white coat"
+    }
+  ],
+  "gags": [
+    {
+      "line": 2,
+      "what": "smacks the machine"
+    },
+    {
+      "line": 6,
+      "what": "one coin falls from the upturned cup"
+    },
+    {
+      "line": 12,
+      "what": "near-miss knob pops off"
+    }
+  ],
+  "story_numbers": [
+    "two",
+    "seven",
+    "sevens",
+    "hundred"
+  ]
+}

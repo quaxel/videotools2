@@ -1,0 +1,38 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.14
+    },
+    "coach": {
+      "voice": "Eric",
+      "instruct": "Overly enthusiastic gym salesman, loud, pumped up, big grin.",
+      "seed": 4,
+      "tempo": 1.12
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "It's January first. You just signed up for the gym, seventy dollars a month." },
+    { "speaker": "coach", "text": "Best decision of your life! See you every day!" },
+    { "speaker": "narrator", "text": "You go Monday, Tuesday, Wednesday. You feel unstoppable." },
+    { "speaker": "narrator", "text": "Your neighbor laughs from his couch." },
+    { "speaker": "narrator", "text": "By March, your gym bag hasn't left the car." },
+    { "speaker": "narrator", "text": "Then the salesman rings the little bell on his desk. Your payment just went through.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "The gym isn't selling you workouts. It's selling you the plan to work out." },
+    { "speaker": "narrator", "text": "Economists tracked thousands of gym members for three years." },
+    { "speaker": "narrator", "text": "New members expected to go about nine times a month. They actually went about four." },
+    { "speaker": "narrator", "text": "On the seventy dollar plan, that's over seventeen dollars a visit." },
+    { "speaker": "narrator", "text": "A ten-visit pass would have cost them ten dollars a visit." },
+    { "speaker": "narrator", "text": "On average, they wasted about six hundred dollars." },
+    { "speaker": "narrator", "text": "And after their last workout, people kept paying for over two months before cancelling." },
+    { "speaker": "narrator", "text": "One budget chain averages around seven thousand members per gym." },
+    { "speaker": "narrator", "text": "That only works if they don't all show up at once." },
+    { "speaker": "narrator", "text": "Your neighbor finally gets off the couch." },
+    { "speaker": "narrator", "text": "He signs up for the gym, seventy dollars a month." },
+    { "speaker": "coach", "text": "See you every day!" },
+    { "speaker": "narrator", "text": "The bell is already ringing." }
+  ]
+}

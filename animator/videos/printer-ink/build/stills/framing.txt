@@ -1,0 +1,6 @@
+   15  face of you cut by the frame edge (40% outside)
+  255  sign "STARTER INK" cut by the frame edge (48% outside)
+  300  face of you cut by the frame edge (66% outside)
+  400  sign "$68.00" cut by the frame edge (28% outside)
+  400  face of you cut by the frame edge (83% outside)
+ 1600  face of you cut by the frame edge (47% outside)

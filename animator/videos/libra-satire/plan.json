@@ -1,0 +1,39 @@
+{
+  "title": "Your Libra Friend Cannot Pick a Restaurant",
+  "topic": "Libra zodiac satire: a Libra cannot pick a restaurant",
+  "mechanism": "Inside a Libra there is a giant scale labelled DECISIONS whose two sides are always perfectly level, a PLEASE EVERYONE dial turned all the way up, and a lucky coin with YES on both sides, so every choice ends in a tie and even a coin flip lands on its edge.",
+  "beats": {
+    "hook": "Minute forty in a parked car under a big LIBRA sign: Nina still can't choose where to eat",
+    "story": "Nina loves every idea equally; Kate demands tacos or pizza, Nina loves both; a three-column pros and cons list; the group-chat poll is a perfect tie",
+    "rise": "They find a restaurant with no menu at all; no choices, no fights; for the first time tonight Nina is winning",
+    "twist": "The waitress walks out of the kitchen with a tray: tonight you pick, chicken or fish; the whole table freezes",
+    "mechanism": "Inside her head: a giant scale DECISIONS always perfectly level (it wobbles and flings a menu), a PLEASE EVERYONE dial turned all the way up, a lucky coin with YES on both sides",
+    "ending": "Nina flips the coin, it lands on its edge, Kate bangs her head on the table, the kitchen closes; Nina goes home hungry and orders both; next week Kate asks where she wants to go for her birthday and Nina freezes again"
+  },
+  "seed": {
+    "what": "Nina's lucky coin (on the car dashboard in the hook, flipped at the restaurant)",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "car", "set": "Room office, parked car interior, LIBRA sign", "colour": "grey" },
+    { "id": "chat", "set": "Room daylight, giant phone, idea and poll bubbles", "colour": "green" },
+    { "id": "notebook", "set": "Room warm, desk, giant three-column pros and cons notebook", "colour": "cream" },
+    { "id": "restaurant", "set": "Room warm, round table, NO MENU board", "colour": "warm orange" },
+    { "id": "kitchen", "set": "Room daylight, white tiled wall, KITCHEN door, OPEN / CLOSED sign", "colour": "white" },
+    { "id": "scales", "set": "Room dream, giant scale DECISIONS, PLEASE EVERYONE dial, YES coin", "colour": "lilac" },
+    { "id": "couch", "set": "Room night, sofa, TV glow, birthday banner", "colour": "night blue" },
+    { "id": "delivery", "set": "Room daylight, yellow front door, delivery bags", "colour": "yellow" }
+  ],
+  "characters": [
+    { "id": "nina", "look": "pastel pink outfit, long blonde hair" },
+    { "id": "kate", "look": "red hoodie, long dark hair" },
+    { "id": "tara", "look": "green top, glasses, long black hair" },
+    { "id": "waitress", "look": "white shirt, black apron strap, long auburn hair" }
+  ],
+  "gags": [
+    { "line": 18, "what": "The coin lands on its edge and Kate bangs her head on the table" },
+    { "line": 15, "what": "The DECISIONS scale wobbles and flings a menu onto the floor" },
+    { "line": 20, "what": "The same waitress turns up as the delivery driver with both orders and extra fries" }
+  ],
+  "story_numbers": ["forty", "40", "three", "3", "first", "1st", "one", "1", "50", "fifty", "%"]
+}

@@ -1,0 +1,37 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "owner": {
+      "voice": "Dylan",
+      "instruct": "Sly, cheerful shop owner letting you in on a secret, quick and smug.",
+      "seed": 4,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You just grabbed a jacket for forty-nine ninety-nine. Basically forty bucks." },
+    { "speaker": "narrator", "text": "You feel smart. You even skipped the one that cost fifty." },
+    { "speaker": "narrator", "text": "At the register you pay, grab your bag, and grin all the way out." },
+    { "speaker": "narrator", "text": "Then the back door swings open. The owner is re-tagging every price with a little gun.", "pauseAfter": 0.4 },
+    { "speaker": "owner", "text": "One cent off. Works every single time." },
+    { "speaker": "narrator", "text": "That cent was never a discount. It was aimed at your eyes." },
+    { "speaker": "narrator", "text": "We read prices left to right, and the first digit hits hardest." },
+    { "speaker": "narrator", "text": "In two thousand five, researchers showed why two ninety-nine feels smaller than three dollars." },
+    { "speaker": "narrator", "text": "One cent changes the left digit, and your brain stops reading there." },
+    { "speaker": "narrator", "text": "A clothing catalog tested the same dress at forty-four, forty-nine and fifty-four dollars." },
+    { "speaker": "narrator", "text": "At forty-four and fifty-four, sales were almost the same." },
+    { "speaker": "narrator", "text": "At forty-nine, the dress sold clearly more." },
+    { "speaker": "narrator", "text": "It even works on cars." },
+    { "speaker": "narrator", "text": "Economists checked over twenty-two million used car sales at auction." },
+    { "speaker": "narrator", "text": "Each time the odometer rolled past another ten thousand miles, prices dropped." },
+    { "speaker": "narrator", "text": "That's about one hundred fifty to two hundred dollars, for a single mile." },
+    { "speaker": "narrator", "text": "So the nine isn't there for your wallet. It's there for your eyes." },
+    { "speaker": "narrator", "text": "Next door, a sign says nine ninety-nine, and you're already reaching for your card." }
+  ]
+}

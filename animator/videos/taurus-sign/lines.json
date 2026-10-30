@@ -1,0 +1,34 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": { "voice": "Serena", "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no long pauses.", "seed": 7, "tempo": 1.3 },
+    "priya": { "voice": "Vivian", "instruct": "Bubbly, breathless young woman bursting in with exciting news, fast and loud.", "seed": 5, "tempo": 1.25 },
+    "ella": { "voice": "Serena", "instruct": "Calm, slow, immovable young woman, low and stubborn, completely final.", "seed": 21, "tempo": 1.15 },
+    "zoe": { "voice": "Vivian", "instruct": "Pleading, cheerful friend trying to coax someone, quick and a little whiny.", "seed": 11, "tempo": 1.3 }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You just stole a fry from a Taurus." },
+    { "speaker": "narrator", "text": "That was the biggest mistake of your life." },
+    { "speaker": "narrator", "text": "Her name is Ella. Calm, loyal, and very comfortable." },
+    { "speaker": "narrator", "text": "Her couch is velvet. Her blanket weighs more than you." },
+    { "speaker": "narrator", "text": "She's worn the same perfume for twelve years." },
+    { "speaker": "narrator", "text": "Tonight is girls' night, and Ella planned it perfectly." },
+    { "speaker": "narrator", "text": "Her favorite table, her favorite pasta, her favorite chair." },
+    { "speaker": "narrator", "text": "Then Priya bursts through the door.", "pauseAfter": 0.4 },
+    { "speaker": "priya", "text": "Change of plans, girls! New sushi place!" },
+    { "speaker": "narrator", "text": "Ella's fork stops in midair, and the room goes cold." },
+    { "speaker": "ella", "text": "I already pictured the pasta. I'm not leaving." },
+    { "speaker": "zoe", "text": "Come on, Ella, it's right around the corner!" },
+    { "speaker": "narrator", "text": "Zoe tries to drag her chair, and falls right over." },
+    { "speaker": "narrator", "text": "So what's going on inside a Taurus?" },
+    { "speaker": "narrator", "text": "Picture a bank vault, sealed with a padlock marked PLANS." },
+    { "speaker": "narrator", "text": "Inside, a dial labelled COMFORT is stuck on maximum." },
+    { "speaker": "narrator", "text": "The floor is bolted down, with a sign that says NOT MOVING." },
+    { "speaker": "narrator", "text": "And in the corner, a counter labelled GRUDGES." },
+    { "speaker": "narrator", "text": "It's on thirty-one, and it never goes down." },
+    { "speaker": "narrator", "text": "Number thirty-one is you. You took a fry." },
+    { "speaker": "narrator", "text": "Priya goes to sushi alone. Ella orders dessert." },
+    { "speaker": "narrator", "text": "Then her cousin reaches for the bread basket." },
+    { "speaker": "narrator", "text": "The counter clicks to thirty-two." }
+  ]
+}

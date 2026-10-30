@@ -1,0 +1,39 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Serena",
+      "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no pauses between sentences.",
+      "seed": 7,
+      "tempo": 1.3
+    },
+    "sofia": {
+      "voice": "Vivian",
+      "instruct": "Loud, glamorous, theatrical young woman who loves attention, fast and dramatic.",
+      "seed": 5,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "Your Leo friend wore gold sequins to your wedding. Sofia is not the bride. You are." },
+    { "speaker": "narrator", "text": "That's Sofia. Generous, loud and always glowing." },
+    { "speaker": "narrator", "text": "She brought her own ring light to the ceremony." },
+    { "speaker": "narrator", "text": "During the vows she fixed her hair in a trumpet." },
+    { "speaker": "narrator", "text": "Then she gives the toast and it's mostly about her." },
+    { "speaker": "sofia", "text": "And that's how the bride met her best friend. Me!" },
+    { "speaker": "narrator", "text": "The crowd loves it. Sofia is winning." },
+    { "speaker": "narrator", "text": "Then the lights go down for the first dance." },
+    { "speaker": "narrator", "text": "One spotlight comes on. It lands on the bride." },
+    { "speaker": "narrator", "text": "Sofia stands in the dark for the first time ever." },
+    { "speaker": "sofia", "text": "Excuse me? Is this thing broken?" },
+    { "speaker": "narrator", "text": "So what's going on inside a Leo?" },
+    { "speaker": "narrator", "text": "Picture a theater with one switch marked SPOTLIGHT. It only points one way at her." },
+    { "speaker": "narrator", "text": "Backstage an applause meter must stay in the red." },
+    { "speaker": "narrator", "text": "There's a mirror labelled MAIN and one labelled BACKUP." },
+    { "speaker": "narrator", "text": "And a big heart with a sign that says GENEROUS." },
+    { "speaker": "narrator", "text": "Because Leos love big and they pay for everyone's drinks." },
+    { "speaker": "narrator", "text": "So Sofia walks into the light to dance with the bride." },
+    { "speaker": "narrator", "text": "She trips on the dress and lands in the cake." },
+    { "speaker": "narrator", "text": "Somehow it's the best photo of the night." }
+  ]
+}

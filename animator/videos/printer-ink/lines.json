@@ -1,0 +1,43 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "cashier": {
+      "voice": "Vivian",
+      "instruct": "Cheerful, slightly bored store cashier, bright and friendly.",
+      "seed": 2,
+      "tempo": 1.1
+    },
+    "boss": {
+      "voice": "Eric",
+      "instruct": "Confident, polished company executive on a TV interview, smooth and pleased with himself.",
+      "seed": 5,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You just bought a brand new printer for forty-nine dollars. What a steal." },
+    { "speaker": "narrator", "text": "It prints concert tickets, homework, and a giant poster of your cat." },
+    { "speaker": "narrator", "text": "Twelve days later, a little red low ink light starts blinking." },
+    { "speaker": "narrator", "text": "No problem. You drive to the store and grab two new cartridges." },
+    { "speaker": "cashier", "text": "That'll be sixty-eight dollars, please.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "The ink costs more than the whole printer did." },
+    { "speaker": "narrator", "text": "That cheap printer was never the product. It was the bait." },
+    { "speaker": "narrator", "text": "Even the cheapest ink runs about thirteen dollars an ounce." },
+    { "speaker": "narrator", "text": "Ounce for ounce, that's pricier than fine champagne." },
+    { "speaker": "narrator", "text": "And every cartridge hides a tiny chip that talks to the printer." },
+    { "speaker": "narrator", "text": "One update in twenty sixteen made printers reject cheaper cartridges overnight." },
+    { "speaker": "narrator", "text": "Then there's cleaning. Printers spray ink just to keep the heads from drying." },
+    { "speaker": "narrator", "text": "Testers found some burned half the ink or more without printing anything." },
+    { "speaker": "narrator", "text": "In a few, only twenty to thirty percent ever reached the paper." },
+    { "speaker": "narrator", "text": "One printer boss even said it on live TV." },
+    { "speaker": "boss", "text": "Every time a customer buys a printer, it's an investment for us." },
+    { "speaker": "narrator", "text": "So you're not really the customer. You're the investment." },
+    { "speaker": "narrator", "text": "Back home, the brand new cartridge is already blinking." }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.28
+    },
+    "agent": {
+      "voice": "Serena",
+      "instruct": "Polite but tired airport gate agent speaking over a PA microphone.",
+      "seed": 3,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "You booked seat fourteen C. Tonight, two people are holding that seat."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Across town, a guy on the same flight hits snooze again."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You race to the airport, check in early, and feel safe."
+    },
+    {
+      "speaker": "agent",
+      "text": "This flight is oversold. We need volunteers."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nobody moves. Then the gate agent calls your name.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You did nothing wrong. The airline sold your seat twice, on purpose."
+    },
+    {
+      "speaker": "narrator",
+      "text": "A seat is like fresh milk. After takeoff, it can never be sold."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And every day, some passengers just don't show up."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Airlines track exactly how many, route by route."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Estimates put no-shows between five and fifteen percent."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So on a hundred and sixty seat jet, the computer might sell sixteen extra tickets."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Most days, the sleepers cancel out the extras and every seat is full."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Some days, everyone shows up."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then the airline buys seats back, with vouchers, from volunteers first."
+    },
+    {
+      "speaker": "narrator",
+      "text": "If nobody bites, someone gets bumped, and the airline can owe up to four times the fare."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It's rare. In twenty sixteen, about nine in ten thousand passengers lost their seat."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Tonight, it happened to you."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You take the voucher. Seat fourteen C flies without you."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And the guy who hit snooze? He just booked tomorrow's flight."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Guess which seat he got."
+    }
+  ]
+}

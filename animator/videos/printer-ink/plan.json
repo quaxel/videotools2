@@ -1,0 +1,38 @@
+{
+  "title": "Why Printer Ink Costs More Than Champagne",
+  "topic": "Why printer ink costs more than champagne",
+  "mechanism": "The printer is cheap bait; the money is in ink priced above champagne, guarded by cartridge chips and drained by head cleaning.",
+  "beats": {
+    "hook": "You bought a brand new printer for forty-nine dollars",
+    "story": "It prints tickets, homework and a giant cat poster",
+    "rise": "What a steal; even the low-ink light is no problem",
+    "twist": "At the checkout the cashier scans two cartridges: sixty-eight dollars, more than the printer",
+    "mechanism": "Price tag $13 AN OUNCE next to a champagne bottle, ink poured into a champagne glass, cartridge chip with CHIP label, update screen REJECTED, cleaning spray, gauge ON PAPER 20-30%, TV studio with the boss",
+    "ending": "Back home the new cartridge already blinks LOW INK"
+  },
+  "seed": { "what": "The small STARTER INK cartridge sticker on the printer box", "first_line": 0 },
+  "locations": [
+    { "id": "home", "set": "Room warm + desk + printer + poster", "colour": "orange" },
+    { "id": "home-night", "set": "Room night re-light of home", "colour": "navy" },
+    { "id": "store-aisle", "set": "Room daylight + shelves of cartridges", "colour": "teal" },
+    { "id": "checkout", "set": "Room golden + counter + register screen", "colour": "yellow" },
+    { "id": "gala", "set": "Room dream + champagne table", "colour": "purple" },
+    { "id": "chip-macro", "set": "Room cold + giant cartridge and chip", "colour": "blue" },
+    { "id": "lab", "set": "Room office + test bench + gauge", "colour": "green" },
+    { "id": "tv-studio", "set": "Room neon + desk + ON AIR sign", "colour": "pink" },
+    { "id": "update-room", "set": "Room alarm + update screen", "colour": "red" }
+  ],
+  "characters": [
+    { "id": "you", "look": "blue hoodie" },
+    { "id": "cashier", "look": "red vest and cap" },
+    { "id": "boss", "look": "grey suit, slick hair" },
+    { "id": "waiter", "look": "black and white, bow tie" },
+    { "id": "tester", "look": "white coat, glasses" }
+  ],
+  "gags": [
+    { "line": 1, "what": "The cat poster shoots out so fast it smacks you in the face" },
+    { "line": 8, "what": "A waiter pours ink into a champagne glass, sips it and turns blue in the mouth" },
+    { "line": 11, "what": "The cleaning spray squirts ink all over the tester's coat" }
+  ],
+  "story_numbers": ["forty-nine", "twelve", "two", "sixty-eight"]
+}

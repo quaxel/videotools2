@@ -1,0 +1,38 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.22
+    },
+    "cashier": {
+      "voice": "Vivian",
+      "instruct": "Cheerful, slightly bored supermarket cashier, bright and friendly.",
+      "seed": 2,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You walked into the supermarket for one carton of milk." },
+    { "speaker": "narrator", "text": "Twenty minutes later, your cart is full and you can't remember why." },
+    { "speaker": "narrator", "text": "You feel calm. The music is soft. Nobody is rushing." },
+    { "speaker": "narrator", "text": "You even grabbed a bottle of French wine. You don't drink wine." },
+    { "speaker": "narrator", "text": "Then a door swings open in the back. The manager is turning a dial marked tempo.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "That soft music wasn't for you. It was for your feet." },
+    { "speaker": "narrator", "text": "In nineteen eighty-two, a researcher switched a supermarket between slow and fast songs." },
+    { "speaker": "narrator", "text": "With slow music, shoppers walked slower down every aisle." },
+    { "speaker": "narrator", "text": "And on slow days, sales were thirty-eight percent higher than on fast days." },
+    { "speaker": "narrator", "text": "Fast songs did the opposite and hurried people along." },
+    { "speaker": "narrator", "text": "Music can even pick what you buy." },
+    { "speaker": "narrator", "text": "A wine shop played French accordion music one day, German oompah the next." },
+    { "speaker": "narrator", "text": "On French days, seventy-seven percent of the wine sold was French." },
+    { "speaker": "narrator", "text": "On German days, seventy-three percent was German." },
+    { "speaker": "narrator", "text": "Out of forty-four shoppers asked, just one mentioned the music." },
+    { "speaker": "narrator", "text": "So the store isn't just playing songs. It's setting your speed." },
+    { "speaker": "narrator", "text": "You finally reach the checkout with forty things and no milk." },
+    { "speaker": "cashier", "text": "Find everything you needed?" },
+    { "speaker": "narrator", "text": "Back in aisle nine, the music gets even slower." }
+  ]
+}

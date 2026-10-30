@@ -1,0 +1,37 @@
+{
+  "title": "Why Movie Popcorn Costs So Much",
+  "topic": "Why movie theater popcorn is so expensive",
+  "mechanism": "Studios take about half or more of every ticket, but concessions are not shared and the food is cheap, so popcorn carries the theater's profit.",
+  "beats": {
+    "hook": "You pay nine dollars for a bucket of popcorn",
+    "story": "Your friend smuggles candy in his jacket to beat the theater",
+    "rise": "He thinks the theater still got paid from his ticket",
+    "twist": "A man in a suit walks into the box office and takes half the cash: the studio",
+    "mechanism": "Cash drawer with a STUDIO/THEATER divider, 70% deal stamp, rent bills, snack drawer 100% THEATER, popcorn price tag COST 17c, two jars MONEY 20% / PROFIT 40%, coin scale KEEPS 4c",
+    "ending": "Next week someone new buys popcorn and the marquee lights stay on"
+  },
+  "seed": { "what": "The man in the suit waiting by the box office with a briefcase", "first_line": 3 },
+  "locations": [
+    { "id": "lobby", "set": "Room warm + concession counter + popcorn machine", "colour": "red" },
+    { "id": "sidewalk", "set": "Room night + marquee 'NOW SHOWING'", "colour": "navy" },
+    { "id": "auditorium", "set": "Room dream + seat rows + glowing screen", "colour": "purple" },
+    { "id": "box-office", "set": "Room golden + ticket window + cash drawer", "colour": "yellow" },
+    { "id": "studio", "set": "Room cold + desk + board 'OPENING WEEK'", "colour": "blue" },
+    { "id": "stockroom", "set": "Room daylight + corn sacks + price tag", "colour": "teal" },
+    { "id": "manager-office", "set": "Room office + two jars MONEY / PROFIT", "colour": "green" },
+    { "id": "counting-room", "set": "Room neon + coin scale + bills", "colour": "pink" }
+  ],
+  "characters": [
+    { "id": "you", "look": "green hoodie, holds the popcorn bucket" },
+    { "id": "buddy", "look": "orange bomber jacket stuffed with candy, cap" },
+    { "id": "cashier", "look": "red vest, red cap, name lanyard" },
+    { "id": "studio", "look": "dark suit, glasses, gold chain, briefcase" },
+    { "id": "manager", "look": "grey hair, white shirt, blue lanyard" }
+  ],
+  "gags": [
+    { "line": 2, "what": "Candy bars spill out of the buddy's jacket when he sits down" },
+    { "line": 9, "what": "The popcorn machine erupts and buries the price tag" },
+    { "line": 4, "what": "The cashier's cash drawer is slammed shut by the studio man" }
+  ],
+  "story_numbers": ["nine", "next"]
+}

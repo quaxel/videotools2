@@ -1,0 +1,39 @@
+{
+  "title": "Your Gemini Friend Is Two People",
+  "topic": "Gemini zodiac satire: your Gemini friend is two people",
+  "mechanism": "Inside a Gemini head there is a car with two steering wheels, MOOD A and MOOD B, both driving with no map, a GROUP CHATS switchboard with twelve buzzing cables, and a DECISIONS coin that never stops spinning, so the same friend can hold two opposite opinions four minutes apart.",
+  "beats": {
+    "hook": "Brunch with Lily under a big GEMINI sign; she is so fast she seems to be in two places at once",
+    "story": "Lily, in a pink jacket, says she is obsessed with hiking at dawn; four languages at once, twelve group chats",
+    "rise": "Everyone calls her the best friend they ever had; the brunch plan for a dawn hike is set",
+    "twist": "Lily goes to the bathroom and a different Lily comes back: same face, blue jacket, she hates nature; the second Lily sits down and coffee spills into Hana's lap",
+    "mechanism": "Inside her head: a car with two steering wheels MOOD A and MOOD B fighting, no map; a GROUP CHATS switchboard with 12 buzzing cables; a DECISIONS coin spinning forever on the dashboard",
+    "ending": "Hana hikes alone listening to a 9-minute voice note on 6 topics, trips on the trail, and at the summit asks: Which Lily?"
+  },
+  "seed": {
+    "what": "Lily's pink jacket (and the blue jacket on the bathroom hook)",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "cafe", "set": "Room warm, brunch table, chairs, GEMINI sign", "colour": "pastel yellow" },
+    { "id": "chats", "set": "Room dream, phone screens and chat bubbles", "colour": "purple" },
+    { "id": "corridor", "set": "Room daylight, tile, two doors, coat hook with blue jacket", "colour": "teal" },
+    { "id": "cafe-cold", "set": "cafe relit cold blue (truth)", "colour": "blue" },
+    { "id": "car", "set": "Room neon, car with two steering wheels MOOD A / MOOD B", "colour": "pink" },
+    { "id": "switchboard", "set": "Room golden, switchboard GROUP CHATS, coin DECISIONS", "colour": "orange" },
+    { "id": "trail", "set": "Room daylight, trees, rock, trail sign", "colour": "forest green" },
+    { "id": "summit", "set": "Room golden sunset, peak, flag", "colour": "red sunset" }
+  ],
+  "characters": [
+    { "id": "lily", "look": "pink jacket, long dark hair; twist: blue jacket" },
+    { "id": "hana", "look": "mustard sweater, long black hair, hiking backpack" },
+    { "id": "grace", "look": "mint cardigan, long auburn hair, glasses" },
+    { "id": "waiter", "look": "white shirt, black apron, long blonde hair" }
+  ],
+  "gags": [
+    { "line": 9, "what": "The second Lily sits down hard and the coffee tips into Hana's lap" },
+    { "line": 21, "what": "Hana, listening to the voice note, trips on a rock on the trail and falls flat" },
+    { "line": 14, "what": "The two steering wheels yank the car left and right, the dice swing wildly" }
+  ],
+  "story_numbers": ["four", "4", "twelve", "12", "five", "5", "five a.m.", "a.m.", "a.m", "nine", "9", "six", "6", "two", "2", "one", "1", "a", "b"]
+}

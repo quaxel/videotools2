@@ -1,0 +1,47 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.16
+    },
+    "friend": {
+      "voice": "Vivian",
+      "instruct": "Excited, bubbly party guest shouting happily over music.",
+      "seed": 5,
+      "tempo": 1.12
+    },
+    "astronomer": {
+      "voice": "Serena",
+      "instruct": "Calm, dry, matter-of-fact scientist delivering awkward news.",
+      "seed": 3,
+      "tempo": 1.12
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "It's October first, and your horoscope just called you perfectly balanced." },
+    { "speaker": "narrator", "text": "You're a Libra. Charming, fair, the scales of the zodiac." },
+    { "speaker": "narrator", "text": "You buy the Libra mug and get the scales tattooed on your arm." },
+    { "speaker": "narrator", "text": "Your neighbor, the astronomer, waves from her telescope." },
+    { "speaker": "narrator", "text": "At your birthday party, everyone agrees with you." },
+    { "speaker": "friend", "text": "You are so Libra!" },
+    { "speaker": "narrator", "text": "Then the astronomer walks in, holding a star chart.", "pauseAfter": 0.4 },
+    { "speaker": "astronomer", "text": "On your birthday, the sun was in Virgo." },
+    { "speaker": "narrator", "text": "Your sign says the sun was in Libra. The sky says it wasn't." },
+    { "speaker": "narrator", "text": "Sign dates were fixed over two thousand years ago, by watching the sky." },
+    { "speaker": "narrator", "text": "But Earth wobbles like a spinning top." },
+    { "speaker": "narrator", "text": "One full wobble takes about twenty-six thousand years." },
+    { "speaker": "narrator", "text": "Every seventy-two years, the sky shifts one degree." },
+    { "speaker": "narrator", "text": "Today the sun sits in Virgo from about September sixteenth to October thirtieth." },
+    { "speaker": "narrator", "text": "It only reaches Libra around October thirty-first." },
+    { "speaker": "narrator", "text": "To the Greeks, Libra wasn't scales at all." },
+    { "speaker": "narrator", "text": "Those stars used to be the claws of the Scorpion." },
+    { "speaker": "narrator", "text": "The Romans cut the claws off and made them scales." },
+    { "speaker": "narrator", "text": "Its two brightest stars are still named Northern Claw and Southern Claw." },
+    { "speaker": "narrator", "text": "Your friend laughs. She's a Scorpio." },
+    { "speaker": "astronomer", "text": "Actually, you're probably a Libra." },
+    { "speaker": "narrator", "text": "She's already buying the mug." }
+  ]
+}

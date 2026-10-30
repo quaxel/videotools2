@@ -1,0 +1,101 @@
+{
+  "title": "Why Airlines Sell Your Seat Twice",
+  "topic": "Why airlines sell more tickets than seats",
+  "mechanism": "Seats perish at takeoff and a predictable share of passengers never show, so revenue systems sell extra tickets and buy seats back (or bump people) on the rare days everyone shows up.",
+  "beats": {
+    "hook": "You and a stranger both hold seat 14C",
+    "story": "A sleeper on the same flight hits snooze; you rush to the gate early",
+    "rise": "You feel safe; the agent asks for volunteers",
+    "twist": "The agent calls your name: you are the one bumped",
+    "mechanism": "Milk-carton seat that expires at takeoff, no-show board, SELL +16 button, seat-count screen, voucher desk, 4x fare label",
+    "ending": "You take the voucher; the sleeper books tomorrow's flight, seat 14C"
+  },
+  "seed": {
+    "what": "The sleeper hitting snooze in his bedroom",
+    "first_line": 1
+  },
+  "locations": [
+    {
+      "id": "gate",
+      "set": "Room warm + Counter + Screen 'GATE 14'",
+      "colour": "orange"
+    },
+    {
+      "id": "bedroom",
+      "set": "Room dream + bed + alarm clock",
+      "colour": "purple"
+    },
+    {
+      "id": "check-in",
+      "set": "Room daylight + Counter 'CHECK-IN'",
+      "colour": "teal"
+    },
+    {
+      "id": "fridge",
+      "set": "Room golden + fridge + milk carton 'SEAT 14C'",
+      "colour": "yellow"
+    },
+    {
+      "id": "office",
+      "set": "Room cold + Board + BigButton 'SELL +16' + Screen",
+      "colour": "blue"
+    },
+    {
+      "id": "voucher-desk",
+      "set": "Room neon + Counter + Screen 'VOLUNTEERS?'",
+      "colour": "pink"
+    },
+    {
+      "id": "cabin",
+      "set": "Room office (mint) + seat rows",
+      "colour": "green"
+    },
+    {
+      "id": "runway",
+      "set": "Room night + plane",
+      "colour": "navy"
+    }
+  ],
+  "characters": [
+    {
+      "id": "you",
+      "look": "green shirt, backpack-less traveller with a coffee"
+    },
+    {
+      "id": "agent",
+      "look": "navy uniform, gold lanyard, cap"
+    },
+    {
+      "id": "sleeper",
+      "look": "striped pyjamas, messy hair"
+    },
+    {
+      "id": "analyst",
+      "look": "glasses, white shirt, blue lanyard"
+    },
+    {
+      "id": "stranger",
+      "look": "red jacket, also holds seat 14C"
+    }
+  ],
+  "gags": [
+    {
+      "line": 1,
+      "what": "The sleeper slaps snooze so hard the alarm clock jumps off the nightstand"
+    },
+    {
+      "line": 4,
+      "what": "When your name is called you tip your coffee over"
+    },
+    {
+      "line": 10,
+      "what": "The analyst slams SELL +16 and a stream of tickets shoots out of the printer"
+    }
+  ],
+  "story_numbers": [
+    "fourteen",
+    "two",
+    "tonight",
+    "tomorrow's"
+  ]
+}

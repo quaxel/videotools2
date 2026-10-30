@@ -1,0 +1,37 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "firefighter": {
+      "voice": "Serena",
+      "instruct": "Calm, dry, slightly amused firefighter. Short and confident.",
+      "seed": 3,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You've hit the close door button six times, and the doors haven't moved." },
+    { "speaker": "narrator", "text": "You're late for a job interview on floor forty." },
+    { "speaker": "narrator", "text": "A firefighter strolls toward the lobby. You jab the button even harder." },
+    { "speaker": "narrator", "text": "The doors finally slide shut. You're sure your thumb did that." },
+    { "speaker": "narrator", "text": "Floor twelve. The doors open, and the firefighter steps in." },
+    { "speaker": "narrator", "text": "She turns a key, taps the same button, and the doors slam shut instantly.", "pauseAfter": 0.4 },
+    { "speaker": "firefighter", "text": "Oh, it works. Just not for you." },
+    { "speaker": "narrator", "text": "In nineteen ninety, America passed a big disability law." },
+    { "speaker": "narrator", "text": "Elevator doors must stay open long enough for wheelchairs and crutches." },
+    { "speaker": "narrator", "text": "That's at least three seconds, and your button can't cut it short." },
+    { "speaker": "narrator", "text": "So in many elevators, it's wired to basically nothing." },
+    { "speaker": "narrator", "text": "It only wakes up in fire mode, when firefighters need full control." },
+    { "speaker": "narrator", "text": "And crosswalks lie too. In two thousand four, New York checked its walk buttons." },
+    { "speaker": "narrator", "text": "Of three thousand two hundred fifty, over two thousand five hundred did nothing." },
+    { "speaker": "narrator", "text": "They were leftovers from the nineteen seventies, before computers ran the lights." },
+    { "speaker": "narrator", "text": "Ripping them out would cost a million dollars, so the city just left them." },
+    { "speaker": "narrator", "text": "You reach floor forty, two minutes late." },
+    { "speaker": "narrator", "text": "And down in the lobby, someone new is hitting that button." }
+  ]
+}

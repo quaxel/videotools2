@@ -1,0 +1,29 @@
+# Report: Your Gemini Friend Is Two People
+
+1 of 17 targets missed. Shots: 42.
+
+| Metric | Value | Target | |
+| --- | --- | --- | --- |
+| duration | 56.9s | 50 – 60 | ok |
+| words | 183 | 180 – 210 | ok |
+| wpm | 194 | 190 – 215 | ok |
+| long_pauses | 0 | 0 – 1 | ok |
+| speech_cover | 75% | 0.8 – 1.0 | **MISS** |
+| bed_vs_speech_db | -6.0 dB | ≤ -5.0 | ok |
+| lufs | -16.9 LUFS | -17 – -14 | ok |
+| avg_shot | 1.35s | 0 – 2.2 | ok |
+| longest_shot | 2.27s | 0 – 4.0 | ok |
+| locations | 8 | ≥ 8 | ok |
+| characters | 4 | ≥ 4 | ok |
+| gags | 3 | ≥ 2 | ok |
+| hue_families | 8 | 5 – 12 | ok |
+| top_hue_share | 29% | 0 – 0.4 | ok |
+| motion | 8.6 | ≥ 6.0 | ok |
+| still_share | 1% | 0 – 0.15 | ok |
+| seed_by | 0.0s | 0 – 20 | ok |
+
+Stillest shots: WhichLily 2.2, BoardWide 4.3, Hook 4.4, CarWide 4.4, SpillTop 4.7.
+
+## Fact check (0 sourced claims in research.md)
+
+Every spoken number appears in a sourced claim.

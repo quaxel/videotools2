@@ -1,0 +1,38 @@
+{
+  "title": "Why Airports Make You Walk Farther",
+  "topic": "Why airports make you walk farther",
+  "mechanism": "Idle waiting feels longer than busy time, so the airport hid the bag wait in a longer walk and complaints vanished.",
+  "beats": {
+    "hook": "You land in Houston and the hallway just keeps going",
+    "story": "You reach baggage claim just as your suitcase rolls out",
+    "rise": "Perfect timing: the luckiest traveler alive",
+    "twist": "A staff door opens: a manager drags your gate to the far end of the airport map",
+    "mechanism": "Complaint box overflowing, handler counter, stopwatch screens WALK 1 MIN / WAIT 7 MIN, map with the gate dragged away, gauge WALK x6, complaint counter falling to 0, 1985 rule board BUSY TIME FEELS SHORTER, hotel elevator mirrors",
+    "ending": "Next trip the farthest gate again, smiling the whole way"
+  },
+  "seed": { "what": "The STAFF ONLY door in the long hallway", "first_line": 0 },
+  "locations": [
+    { "id": "hallway", "set": "Room daylight + long corridor + gate signs + staff door", "colour": "teal" },
+    { "id": "baggage-claim", "set": "Room golden + carousel + suitcases", "colour": "yellow" },
+    { "id": "control-room", "set": "Room cold + airport map board + manager", "colour": "blue" },
+    { "id": "complaints-office", "set": "Room warm + complaint box + letters", "colour": "orange" },
+    { "id": "timing-room", "set": "Room night + stopwatch screens", "colour": "navy" },
+    { "id": "waiting-lab", "set": "Room office + rule board 1985", "colour": "green" },
+    { "id": "hotel-lobby", "set": "Room dream + elevators + mirrors", "colour": "purple" },
+    { "id": "baggage-claim-busy", "set": "Room neon re-light of baggage claim with crowd", "colour": "pink" }
+  ],
+  "characters": [
+    { "id": "you", "look": "orange hoodie, rolling backpack" },
+    { "id": "manager", "look": "navy blazer, long hair, glasses" },
+    { "id": "handler", "look": "yellow vest, cap" },
+    { "id": "complainer", "look": "red sweater, waving letter" },
+    { "id": "expert", "look": "white coat, grey hair, glasses" },
+    { "id": "hotel-guest", "look": "purple dress, long hair" }
+  ],
+  "gags": [
+    { "line": 5, "what": "The complaint box overflows and letters burst out over the clerk" },
+    { "line": 7, "what": "A bored passenger at the belt gets bonked by a suitcase sliding off the carousel" },
+    { "line": 14, "what": "A hotel guest fixes her hair in the mirror so long the elevator doors close on her" }
+  ],
+  "story_numbers": []
+}

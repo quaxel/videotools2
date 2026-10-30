@@ -1,0 +1,37 @@
+{
+  "title": "Why Supermarkets Play Slow Music",
+  "topic": "Why supermarkets play slow music",
+  "mechanism": "Slow background music slows shoppers down and fast music hurries them out, so stores pick tempo (and even style) to steer how long you stay and what you buy.",
+  "beats": {
+    "hook": "You came in for one carton of milk",
+    "story": "Twenty minutes later your cart is full",
+    "rise": "You feel calm; you even grabbed French wine",
+    "twist": "A back door swings open: the manager is turning a TEMPO dial",
+    "mechanism": "TEMPO dial SLOW/FAST, metronomes 72 BPM / 92 BPM, sales screen +38%, wine shelf with FRANCE/GERMANY speakers, signs 77% FRENCH / 73% GERMAN, clipboard 1 OF 44",
+    "ending": "Checkout with forty things and no milk; in aisle nine the dial turns slower"
+  },
+  "seed": { "what": "The ceiling speaker and the STAFF ONLY door at the back of the aisle", "first_line": 0 },
+  "locations": [
+    { "id": "entrance", "set": "Room daylight + sliding doors + carts", "colour": "teal" },
+    { "id": "produce", "set": "Room office + produce crates", "colour": "green" },
+    { "id": "cereal-aisle", "set": "Room golden + aisle shelves + ceiling speaker", "colour": "yellow" },
+    { "id": "wine-aisle", "set": "Room dream + wine rack", "colour": "purple" },
+    { "id": "back-room", "set": "Room cold + TEMPO dial + speaker", "colour": "blue" },
+    { "id": "lab-1982", "set": "Room night + metronomes + sales screen", "colour": "navy" },
+    { "id": "wine-shop", "set": "Room neon + wine shelves + flag speakers", "colour": "pink" },
+    { "id": "checkout", "set": "Room warm + checkout belt + register", "colour": "red" }
+  ],
+  "characters": [
+    { "id": "you", "look": "green shirt, pushes the cart" },
+    { "id": "manager", "look": "white shirt, tie colour lanyard, headphones" },
+    { "id": "cashier", "look": "red vest and cap" },
+    { "id": "researcher", "look": "glasses, white coat, 1982" },
+    { "id": "wine-shopper", "look": "yellow sweater" }
+  ],
+  "gags": [
+    { "line": 1, "what": "The overloaded cart tips and a cereal box avalanche follows" },
+    { "line": 9, "what": "With fast music, shoppers race past and one spins out on the floor" },
+    { "line": 16, "what": "Forty items roll down the checkout belt; the milk is not among them" }
+  ],
+  "story_numbers": ["one", "twenty", "forty", "nine"]
+}

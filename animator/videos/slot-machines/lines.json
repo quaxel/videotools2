@@ -1,0 +1,95 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "buddy": {
+      "voice": "Aiden",
+      "instruct": "Casual, cocky, excited friend at a casino. Fast and loud.",
+      "seed": 11,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "Two sevens. The third one stops one click short."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So close you can almost taste the jackpot."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You smack the machine in frustration. Unlucky? Not even close."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You switch machines, and it happens again."
+    },
+    {
+      "speaker": "buddy",
+      "text": "Bro, it's just warming up."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So you hit the ATM for another hundred."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Two minutes later, it's gone, and your cup is almost empty."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then the repair guy you walked past earlier unlocks your machine, and you finally see inside."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Each reel shows you twelve symbols, but the chip secretly picks from sixty-four hidden spots."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The jackpot seven gets exactly one."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The blanks hugging it get a whole dozen, each one landing one click short."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's no glitch. Slot makers map the reels this way on purpose."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Jackpot odds stay tiny, while near misses get cranked way up."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So the reels stop beside the seven far more often than pure chance ever would."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Your brain files it as almost winning. The machine files it as a loss."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So you pocket your last coin and walk out into the night."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Your buddy stays."
+    },
+    {
+      "speaker": "buddy",
+      "text": "Come on, come on, come on!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Two sevens. The third one stops one click short."
+    }
+  ]
+}

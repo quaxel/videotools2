@@ -1,0 +1,34 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": { "voice": "Serena", "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no long pauses.", "seed": 7, "tempo": 1.3 },
+    "mia": { "voice": "Vivian", "instruct": "Loud, fearless, overconfident young woman, fast and excited.", "seed": 5, "tempo": 1.18 },
+    "jess": { "voice": "Vivian", "instruct": "Worried best friend, half laughing, half panicking.", "seed": 11, "tempo": 1.35 },
+    "nora": { "voice": "Serena", "instruct": "Deadpan, unimpressed older sister, flat and sarcastic.", "seed": 3, "tempo": 1.2 }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "Your Aries friend quit her job at 7 a.m." },
+    { "speaker": "narrator", "text": "She decided in the shower and emailed from the towel." },
+    { "speaker": "narrator", "text": "That's Mia. First, fastest, and loudest." },
+    { "speaker": "narrator", "text": "By noon, she signed up for a marathon." },
+    { "speaker": "narrator", "text": "By dinner, she opened a bakery." },
+    { "speaker": "jess", "text": "Mia, you have never baked anything!" },
+    { "speaker": "mia", "text": "Then I'll learn on opening day!" },
+    { "speaker": "narrator", "text": "And somehow, it works. The line wraps around the block." },
+    { "speaker": "narrator", "text": "Then the oven door bursts open.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "Black smoke fills the shop, and the alarm starts singing." },
+    { "speaker": "narrator", "text": "Her big sister walks in holding the manual." },
+    { "speaker": "nora", "text": "You were supposed to preheat it, not launch it." },
+    { "speaker": "narrator", "text": "So what's going on inside an Aries head?" },
+    { "speaker": "narrator", "text": "Picture a control room with one giant red button." },
+    { "speaker": "narrator", "text": "It says GO, and it's worn completely smooth." },
+    { "speaker": "narrator", "text": "Next to it is a dial labelled PATIENCE." },
+    { "speaker": "narrator", "text": "It's still in the plastic wrap." },
+    { "speaker": "narrator", "text": "The switch marked THINK FIRST was never plugged in." },
+    { "speaker": "narrator", "text": "The good news? Her anger burns out in four seconds." },
+    { "speaker": "narrator", "text": "The bakery closes on Tuesday, and she's not even sad." },
+    { "speaker": "narrator", "text": "On Wednesday, Mia opens a kickboxing gym." },
+    { "speaker": "mia", "text": "How hard can punching be?" },
+    { "speaker": "narrator", "text": "Her first student is already on the floor." }
+  ]
+}

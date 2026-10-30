@@ -1,0 +1,37 @@
+{
+  "title": "Why Prices Always End in 9",
+  "topic": "Why prices always end in 9",
+  "mechanism": "We read prices left to right and weigh the first digit most, so a one-cent cut that changes it feels like a big discount and lifts sales.",
+  "beats": {
+    "hook": "You grabbed a jacket for forty-nine ninety-nine: basically forty bucks",
+    "story": "You skip the fifty-dollar one and pay, grinning",
+    "rise": "You walk out feeling smart",
+    "twist": "The back door swings open: the owner is re-tagging every price with a price gun, 50.00 to 49.99",
+    "mechanism": "Giant price 2.99 vs 3.00 with a spotlight on the left digit, an eye tracing left to right, three dresses tagged $44 $49 $54 with order stacks, odometer 49,999 to 50,000 with a price board dropping",
+    "ending": "Next door a 9.99 sign, and you're reaching for your card"
+  },
+  "seed": { "what": "The STAFF ONLY back door with the price gun hanging on a hook beside it", "first_line": 0 },
+  "locations": [
+    { "id": "shop", "set": "Room warm + clothes rack + mirror + staff door", "colour": "orange" },
+    { "id": "register", "set": "Room golden + counter + register", "colour": "yellow" },
+    { "id": "back-room", "set": "Room cold + tag table + price gun", "colour": "blue" },
+    { "id": "digit-lab", "set": "Room night + giant price digits + spotlight", "colour": "navy" },
+    { "id": "catalog", "set": "Room dream + three dresses on stands + order stacks", "colour": "purple" },
+    { "id": "auction", "set": "Room daylight + car + auction podium", "colour": "teal" },
+    { "id": "odometer", "set": "Room neon + giant odometer + price board", "colour": "pink" },
+    { "id": "next-door", "set": "Room alarm + shop window with 9.99 sign", "colour": "red" }
+  ],
+  "characters": [
+    { "id": "you", "look": "green hoodie" },
+    { "id": "owner", "look": "mustard cardigan, glasses" },
+    { "id": "cashier", "look": "red vest and cap" },
+    { "id": "researcher", "look": "white coat, glasses" },
+    { "id": "auctioneer", "look": "navy suit, gavel" }
+  ],
+  "gags": [
+    { "line": 4, "what": "The owner fires the price gun and a 49.99 sticker lands on your forehead" },
+    { "line": 11, "what": "Order boxes for the $49 dress pile up until the stack topples onto the catalog clerk" },
+    { "line": 14, "what": "The auctioneer slams the gavel and the podium sign drops a price" }
+  ],
+  "story_numbers": ["forty-nine", "ninety-nine", "forty", "fifty", "nine"]
+}

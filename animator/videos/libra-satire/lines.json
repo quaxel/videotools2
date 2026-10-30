@@ -1,0 +1,119 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Serena",
+      "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no pauses between sentences.",
+      "seed": 7,
+      "tempo": 1.3
+    },
+    "nina": {
+      "voice": "Vivian",
+      "instruct": "Sweet, charming, indecisive young woman, bright and eager to please, fast.",
+      "seed": 21,
+      "tempo": 1.3
+    },
+    "kate": {
+      "voice": "Vivian",
+      "instruct": "Hungry, impatient best friend at the end of her rope, fast and exasperated.",
+      "seed": 11,
+      "tempo": 1.3
+    },
+    "waitress": {
+      "voice": "Serena",
+      "instruct": "Calm, deadpan waitress with a sly smile, quick and matter of fact.",
+      "seed": 3,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "It's minute forty, and your Libra friend still can't choose."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's Nina."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Charming, fair and allergic to conflict."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She loves everyone's ideas equally and that's the problem."
+    },
+    {
+      "speaker": "kate",
+      "text": "Tacos or pizza Nina? Just pick one!"
+    },
+    {
+      "speaker": "nina",
+      "text": "I love both! What do you love?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "She makes a pros and cons list with three columns."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She polls the group chat and it's a perfect tie."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Finally they find a place with no menu at all."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nina relaxes with no choices and no fights."
+    },
+    {
+      "speaker": "narrator",
+      "text": "For the first time tonight she's winning."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then the waitress walks up with a tray."
+    },
+    {
+      "speaker": "waitress",
+      "text": "Tonight, you pick. Chicken or fish?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "The whole table freezes."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So what's really going on inside a Libra?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Picture a giant golden scale labelled DECISIONS with both sides always perfectly level."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Next to it a dial marked PLEASE EVERYONE is turned all the way up."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And a lucky coin with YES on both sides."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nina flips the coin and it lands on its edge."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The waitress waits and the kitchen closes."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nina goes home hungry and orders both with extra fries."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Next week is her birthday and Kate asks where she wants to go."
+    }
+  ]
+}

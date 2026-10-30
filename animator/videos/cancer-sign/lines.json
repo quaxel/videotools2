@@ -1,0 +1,118 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Serena",
+      "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no pauses between sentences.",
+      "seed": 7,
+      "tempo": 1.3
+    },
+    "rose": {
+      "voice": "Serena",
+      "instruct": "Sweet young woman forcing a bright, wobbly smile while clearly hurt, quick and high.",
+      "seed": 33,
+      "tempo": 1.2
+    },
+    "amy": {
+      "voice": "Vivian",
+      "instruct": "Warm, excited best friend, gushing and fast, then suddenly confused.",
+      "seed": 5,
+      "tempo": 1.3
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "You forgot your Cancer friend's birthday and she says it's fine."
+    },
+    {
+      "speaker": "rose",
+      "text": "It's totally fine!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "She is smiling and it is not fine."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her name is Rose and she's warm and protective and a little soggy."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She cries at weddings and cat videos and car insurance ads."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She remembers your birthday and your mom's and your dog's."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her home is the safest place in town."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Friends come over sad and leave with soup and a hug."
+    },
+    {
+      "speaker": "amy",
+      "text": "Rose, you're literally the best person alive!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Rose feels so loved and so needed."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then Amy opens the hallway closet.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "An avalanche of boxes buries her to the neck."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Every box has a date on it."
+    },
+    {
+      "speaker": "amy",
+      "text": "Is this my handwriting from ninth grade?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Rose dives for it and slips on her tissues."
+    },
+    {
+      "speaker": "narrator",
+      "text": "What's going on inside a Cancer?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Picture a crab shell with one tiny door that says safe people only."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Inside is a giant cabinet labelled FEELINGS."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Every drawer is full and none of them close."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Next to it, a tissue box with a counter."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Today it reads forty-one and it's only noon."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And the friend who forgot? Your drawer just opened."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Rose still makes you soup and salts it with tears."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "title": "Never Touch a Taurus's Fries",
+  "topic": "Taurus zodiac satire: never touch a Taurus's fries",
+  "mechanism": "Inside a Taurus head there is a bank vault: the door is padlocked with PLANS, a COMFORT dial is stuck on maximum, the floor is bolted down under a NOT MOVING sign and a GRUDGES counter only ever goes up.",
+  "beats": {
+    "hook": "Zoe snatches a fry from Ella's plate under a TAURUS sign; Ella's glare freezes her",
+    "story": "Ella at home: velvet couch, a huge blanket, the same perfume bottle for 12 years",
+    "rise": "Girls' night is planned perfectly: her table, her pasta, her chair",
+    "twist": "Priya bursts through the restaurant door: change of plans, new sushi place; Ella's fork freezes and the room goes cold",
+    "mechanism": "Bank vault inside her head: padlock PLANS on the vault door; dial COMFORT stuck on MAX; floor bolts and sign NOT MOVING; counter GRUDGES at 31 (the fry thief)",
+    "ending": "Priya eats sushi alone, Ella gets dessert; her cousin reaches for the bread basket and the GRUDGES counter clicks to 32"
+  },
+  "seed": {
+    "what": "Priya: her empty chair with a PRIYA name card at Ella's planned table, then Priya at the door",
+    "first_line": 6
+  },
+  "locations": [
+    { "id": "restaurant", "set": "Room warm, round table, chairs, fries, pasta, TAURUS badge", "colour": "red" },
+    { "id": "living-room", "set": "Room golden-green, velvet couch, giant blanket, lamp", "colour": "green" },
+    { "id": "bathroom", "set": "Room dream, cabinet, mirror, one perfume bottle, SINCE 12 YEARS label", "colour": "lilac" },
+    { "id": "planning", "set": "Room golden, corkboard plan TABLE / PASTA / CHAIR", "colour": "orange" },
+    { "id": "street", "set": "Room night, restaurant door, Priya running", "colour": "night blue" },
+    { "id": "cold-restaurant", "set": "restaurant relit cold blue truth", "colour": "cold blue" },
+    { "id": "vault", "set": "Room golden metal, vault door, padlock PLANS, dial COMFORT, bolts NOT MOVING, counter GRUDGES", "colour": "gold" },
+    { "id": "sushi", "set": "Room neon white, sushi counter, Priya alone", "colour": "white/cyan" },
+    { "id": "dessert", "set": "restaurant relit brown: bread basket, cake", "colour": "brown" }
+  ],
+  "characters": [
+    { "id": "ella", "look": "cream sweater, long chestnut hair" },
+    { "id": "zoe", "look": "teal jacket, long blonde hair" },
+    { "id": "priya", "look": "orange dress, long black hair" },
+    { "id": "waiter", "look": "black waistcoat, long red hair" },
+    { "id": "cousin", "look": "pink hoodie, long dark hair" }
+  ],
+  "gags": [
+    { "line": 12, "what": "Zoe yanks Ella's chair; it does not budge and Zoe falls flat on her back" },
+    { "line": 9, "what": "Ella's fork freezes in midair, then stabs down into the table with a thud" },
+    { "line": 14, "what": "The PLANS padlock slams shut on the vault door" }
+  ],
+  "story_numbers": ["twelve", "12", "thirty-one", "31", "thirty-two", "32", "one", "tonight", "first"]
+}

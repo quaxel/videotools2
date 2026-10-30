@@ -1,0 +1,37 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.14
+    },
+    "buddy": {
+      "voice": "Dylan",
+      "instruct": "Outraged young guy at the movies, loud and cocky, whispering-shouting.",
+      "seed": 5,
+      "tempo": 1.15
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You just paid nine dollars for a bucket of popcorn." },
+    { "speaker": "buddy", "text": "Nine bucks? That's robbery. I brought my own." },
+    { "speaker": "narrator", "text": "Your friend's jacket is stuffed with gas station candy. He feels like a genius." },
+    { "speaker": "narrator", "text": "He paid for his ticket, so the theater still got paid, right?" },
+    { "speaker": "narrator", "text": "Then a man in a suit walks into the box office and takes half the cash.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "That's the studio. About half of every ticket goes to whoever made the movie." },
+    { "speaker": "narrator", "text": "Some deals take upwards of seventy percent." },
+    { "speaker": "narrator", "text": "So the ticket barely pays for the building, the staff, or the giant screen." },
+    { "speaker": "narrator", "text": "But the snack counter? The studio gets none of that." },
+    { "speaker": "narrator", "text": "Out of every snack dollar, the food itself costs about seventeen cents." },
+    { "speaker": "narrator", "text": "Snacks bring in only a fifth of the money, but around forty percent of the profit." },
+    { "speaker": "narrator", "text": "And after all that, the whole theater keeps about four cents per dollar." },
+    { "speaker": "narrator", "text": "That's why theaters keep tickets low and popcorn high." },
+    { "speaker": "narrator", "text": "Every overpriced bucket is quietly paying for your seat." },
+    { "speaker": "narrator", "text": "Your friend didn't beat the studio. The studio already got paid." },
+    { "speaker": "narrator", "text": "He just skipped the only part that keeps the lights on." },
+    { "speaker": "narrator", "text": "Next week, someone new pays nine dollars for popcorn." },
+    { "speaker": "narrator", "text": "And the lights stay on." }
+  ]
+}

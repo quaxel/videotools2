@@ -1,0 +1,103 @@
+{
+  "title": "A Virgo Will Fix Your Life Uninvited",
+  "topic": "Virgo zodiac satire: a Virgo will fix your life uninvited",
+  "mechanism": "Inside a Virgo head there is an office: a giant red WRONG stamp that is never put down, a ruler on the wall marked TWO DEGREES, a FIX IT clipboard whose list never ends, and a tiny I'M TIRED note in a drawer nobody reads.",
+  "beats": {
+    "hook": "Anna arrives at the party door holding a label maker under a VIRGO sign",
+    "story": "Her alphabetical spice rack, her colour-coded closet, her to-do list's to-do list",
+    "rise": "In ten minutes every jar in Mel's kitchen is labelled; Mel calls it amazing and Anna glows",
+    "twist": "Anna sees the picture frame on the party wall, tilted two degrees; the music and guests fade away",
+    "mechanism": "Grey office in her head: stamp WRONG raised forever, ruler TWO DEGREES, clipboard FIX IT, drawer note I'M TIRED",
+    "ending": "Anna climbs the bookshelf, it topples, she lands on the couch; the frame is straight; she spots Ben and a MAYBE label lands on his forehead"
+  },
+  "seed": {
+    "what": "The slightly crooked picture frame high on the party wall, behind Mel when she calls the labels amazing",
+    "first_line": 5
+  },
+  "locations": [
+    {
+      "id": "door",
+      "set": "Room green front door, VIRGO badge, Anna with label maker",
+      "colour": "green"
+    },
+    {
+      "id": "spices",
+      "set": "Room terracotta, alphabetical spice rack",
+      "colour": "terracotta"
+    },
+    {
+      "id": "closet",
+      "set": "Room white, colour-coded rainbow closet",
+      "colour": "white"
+    },
+    {
+      "id": "kitchen",
+      "set": "Room yellow, Mel's kitchen with labelled jars",
+      "colour": "yellow"
+    },
+    {
+      "id": "party",
+      "set": "Room purple party hall, guests, crooked frame",
+      "colour": "purple"
+    },
+    {
+      "id": "frame",
+      "set": "party relit cold blue: frame macro, protractor",
+      "colour": "cold blue"
+    },
+    {
+      "id": "office",
+      "set": "Room grey office: WRONG stamp, TWO DEGREES ruler, FIX IT clipboard, drawer note",
+      "colour": "grey"
+    },
+    {
+      "id": "lounge",
+      "set": "Room burgundy, bookshelf, couch, the frame",
+      "colour": "burgundy"
+    }
+  ],
+  "characters": [
+    {
+      "id": "anna",
+      "look": "green blazer, long dark hair, glasses"
+    },
+    {
+      "id": "mel",
+      "look": "orange dress, long blonde hair"
+    },
+    {
+      "id": "ben",
+      "look": "red shirt, short hair, cap"
+    },
+    {
+      "id": "kim",
+      "look": "teal top, long black hair (guest)"
+    },
+    {
+      "id": "lou",
+      "look": "lilac top, long red hair (guest)"
+    }
+  ],
+  "gags": [
+    {
+      "line": 20,
+      "what": "The bookshelf topples and Anna lands flat on the couch"
+    },
+    {
+      "line": 22,
+      "what": "A MAYBE label slaps onto Ben's forehead"
+    },
+    {
+      "line": 13,
+      "what": "The giant WRONG stamp hovers, trembling, and never comes down"
+    }
+  ],
+  "story_numbers": [
+    "ten",
+    "10",
+    "two",
+    "2",
+    "once",
+    "one"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "title": "Why the Close Door Button Does Nothing",
+  "topic": "Why the close door button in elevators often does nothing",
+  "mechanism": "A 1990 disability law makes elevator doors stay open a minimum time the close button cannot cut, so in many lifts it is wired to nothing except the firefighters' key mode, and New York's crosswalk buttons were mostly dead too.",
+  "beats": {
+    "hook": "You've hit the close door button six times and the doors haven't moved",
+    "story": "You're late for a job interview on floor forty",
+    "rise": "The doors finally slide shut and you're sure your thumb did it",
+    "twist": "A firefighter steps in, turns a key in the FIRE SERVICE slot and taps the same button: the doors slam shut at once",
+    "mechanism": "Law book stamped 1990, door timer screen 3 SEC, panel opened: CLOSE wire runs only to the FIRE KEY switch, crosswalk pole PUSH BUTTON, city board 2,500 OF 3,250 DEAD, 1970s signal box, $1 MILLION price tag",
+    "ending": "Two minutes late on floor forty; back in the lobby a new rider jabs the close button"
+  },
+  "seed": { "what": "The FIRE SERVICE keyhole on the button panel and the firefighter waiting in the lobby", "first_line": 0 },
+  "locations": [
+    { "id": "lobby", "set": "Room warm + elevator doors + plant + call button", "colour": "orange" },
+    { "id": "car", "set": "Room golden + elevator car walls + button panel", "colour": "yellow" },
+    { "id": "car-fire", "set": "Room neon red re-light of the car", "colour": "red" },
+    { "id": "capitol", "set": "Room office + desk + law book + stamp", "colour": "green" },
+    { "id": "panel-inside", "set": "Room cold + opened button panel with wires and switch", "colour": "blue" },
+    { "id": "street", "set": "Room daylight + crosswalk pole + push button", "colour": "teal" },
+    { "id": "city-hall", "set": "Room dream + counting board + price tag", "colour": "purple" },
+    { "id": "signal-room", "set": "Room night + 1970s signal box + screens", "colour": "navy" },
+    { "id": "floor-forty", "set": "Room office + desk + interviewer", "colour": "white" }
+  ],
+  "characters": [
+    { "id": "you", "look": "white shirt, red tie lanyard, briefcase" },
+    { "id": "firefighter", "look": "red outfit, yellow cap, holds a key" },
+    { "id": "interviewer", "look": "glasses, grey hair, navy suit" },
+    { "id": "lawmaker", "look": "beige suit, glasses" },
+    { "id": "pedestrian", "look": "yellow hoodie, cap" },
+    { "id": "new-rider", "look": "green hoodie" }
+  ],
+  "gags": [
+    { "line": 2, "what": "You smash the close button so hard the button cap pops off and bounces on the floor" },
+    { "line": 5, "what": "The doors slam so fast they pinch the briefcase, papers burst out" },
+    { "line": 12, "what": "A pedestrian pounds the dead crosswalk button and the whole sign wobbles and falls on them" }
+  ],
+  "story_numbers": ["six", "forty", "twelve", "minutes"]
+}

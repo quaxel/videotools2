@@ -1,0 +1,37 @@
+{
+  "title": "Your Libra Sign Is Secretly Wrong",
+  "topic": "Why your Libra sign is secretly wrong",
+  "mechanism": "Sign dates were fixed over 2,000 years ago, but Earth's 26,000-year wobble slid the sky so the Sun now sits in Virgo during 'Libra season', and Libra itself was cut from the Scorpion's claws.",
+  "beats": {
+    "hook": "October first: your phone horoscope calls you perfectly balanced",
+    "story": "You buy the Libra mug and get a scales tattoo; the astronomer neighbour waves from her rooftop telescope",
+    "rise": "At your birthday party the friend shouts YOU ARE SO LIBRA",
+    "twist": "The astronomer walks into the party holding a star chart: the Sun was in Virgo",
+    "mechanism": "Calendar stamped LIBRA SEP 23-OCT 22; a spinning top labelled EARTH wobbling with a counter 26,000 YEARS; dial 1 DEGREE / 72 YEARS; sky wall with sun disc sliding onto VIRGO SEP 16-OCT 30 and LIBRA OCT 31; a giant scorpion whose claws a Roman snips off into scales, claw signs NORTHERN CLAW / SOUTHERN CLAW",
+    "ending": "Your Scorpio friend laughs; the astronomer says she is probably a Libra; she is already buying the mug"
+  },
+  "seed": { "what": "The astronomer neighbour with her telescope", "first_line": 3 },
+  "locations": [
+    { "id": "bedroom", "set": "Room warm + bed + lamp", "colour": "orange" },
+    { "id": "gift-shop", "set": "Room neon + shelves + mug counter", "colour": "pink" },
+    { "id": "tattoo", "set": "Room night + chair + flash board", "colour": "navy" },
+    { "id": "rooftop", "set": "Room dream + telescope + stars", "colour": "purple" },
+    { "id": "party", "set": "Room golden + cake + balloons", "colour": "yellow" },
+    { "id": "observatory", "set": "Room cold + spinning top EARTH + counter", "colour": "blue" },
+    { "id": "sky-wall", "set": "Room office + constellation wall + sun disc", "colour": "green" },
+    { "id": "museum", "set": "Room daylight + giant scorpion + Roman", "colour": "teal" }
+  ],
+  "characters": [
+    { "id": "you", "look": "lavender sweater, dark hair" },
+    { "id": "astronomer", "look": "white coat, glasses, grey hair, navy lanyard" },
+    { "id": "friend", "look": "red dress, curly brown hair, party cap" },
+    { "id": "roman", "look": "red tunic, gold cap (helmet), holding big scissors" },
+    { "id": "clerk", "look": "teal shirt, yellow lanyard" }
+  ],
+  "gags": [
+    { "line": 2, "what": "The tattoo needle buzzes and you jump off the chair" },
+    { "line": 7, "what": "The party cake gets smacked onto the floor when you spin round" },
+    { "line": 17, "what": "The Roman snips the scorpion's claws; they drop and bounce" }
+  ],
+  "story_numbers": ["first", "october first"]
+}

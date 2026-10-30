@@ -1,0 +1,118 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Serena",
+      "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.3
+    },
+    "lily": {
+      "voice": "Vivian",
+      "instruct": "Bubbly, dramatic young woman who changes her mind instantly, fast and theatrical.",
+      "seed": 21,
+      "tempo": 1.35
+    },
+    "hana": {
+      "voice": "Serena",
+      "instruct": "Exasperated best friend, high-pitched disbelief, talking fast.",
+      "seed": 13,
+      "tempo": 1.3
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "You have brunch with your Gemini friend. Both of her."
+    },
+    {
+      "speaker": "lily",
+      "text": "Hiking at dawn? I'm obsessed!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's Lily. Funny, curious and very fast."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She speaks four languages badly, all at the same time."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She has twelve group chats open, and she runs them all."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Everyone says she's the best friend they ever had."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then Lily goes to the bathroom."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And a different Lily comes back.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "Same face, new jacket and totally new opinions."
+    },
+    {
+      "speaker": "lily",
+      "text": "Hiking? Who agreed to hiking? I hate nature."
+    },
+    {
+      "speaker": "hana",
+      "text": "You said obsessed! Four minutes ago!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Grace quietly cancels her five a.m. alarm."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So what's going on inside a Gemini?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Picture a car with two steering wheels."
+    },
+    {
+      "speaker": "narrator",
+      "text": "One wheel says MOOD A, the other says MOOD B."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Both are driving, and neither one has a map."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Up front, a switchboard labelled GROUP CHATS."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Twelve cables, all plugged in, all buzzing."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And a coin marked DECISIONS spins forever on the dashboard."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Lily doesn't come hiking. She sends a voice note."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It's nine minutes long and covers six topics."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Hana is still listening at the top of the mountain."
+    },
+    {
+      "speaker": "hana",
+      "text": "Wait, she's coming tomorrow? Which Lily?"
+    }
+  ]
+}

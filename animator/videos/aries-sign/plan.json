@@ -1,0 +1,105 @@
+{
+  "title": "Your Aries Friend Has One Button",
+  "topic": "Aries zodiac satire: your Aries friend has one button",
+  "mechanism": "Inside an Aries head there is one worn-out GO button, a PATIENCE dial still in its plastic wrap and a THINK FIRST switch that was never plugged in, so every idea goes straight to action.",
+  "beats": {
+    "hook": "7 a.m.: Mia quits her job by email, wrapped in a towel",
+    "story": "She signs up for a marathon by noon and opens a bakery by dinner",
+    "rise": "Jess says she has never baked; Mia says she'll learn; the queue wraps around the block",
+    "twist": "The oven door bursts open, black smoke, and big sister Nora walks in holding the manual",
+    "mechanism": "Control room inside her head: giant red button GO worn smooth; dial PATIENCE in plastic wrap; switch THINK FIRST with its plug lying loose; anger meter that drops to zero in 4 seconds",
+    "ending": "Tuesday the bakery shuts with a CLOSED sign; Wednesday she opens a kickboxing gym and the first student is already on the floor"
+  },
+  "seed": {
+    "what": "The bakery oven",
+    "first_line": 4
+  },
+  "locations": [
+    {
+      "id": "bathroom",
+      "set": "Room daylight, tile, towel rail, phone",
+      "colour": "teal"
+    },
+    {
+      "id": "office",
+      "set": "Room office, desks, screen RESIGNED",
+      "colour": "grey-blue"
+    },
+    {
+      "id": "track",
+      "set": "Room golden, start banner MARATHON, sign-up desk",
+      "colour": "orange"
+    },
+    {
+      "id": "bakery",
+      "set": "Room warm, counter, cakes, oven, sign MIA'S BAKERY",
+      "colour": "pink"
+    },
+    {
+      "id": "street",
+      "set": "Room daylight, shop door, queue of customers",
+      "colour": "yellow"
+    },
+    {
+      "id": "smoke",
+      "set": "bakery relit night + smoke + alarm",
+      "colour": "grey"
+    },
+    {
+      "id": "control-room",
+      "set": "Room neon, BigButton GO, dial PATIENCE, switch THINK FIRST",
+      "colour": "red"
+    },
+    {
+      "id": "gym",
+      "set": "Room dream, punching bag, mats, sign MIA'S GYM",
+      "colour": "purple"
+    }
+  ],
+  "characters": [
+    {
+      "id": "mia",
+      "look": "red jumpsuit, short dark bob"
+    },
+    {
+      "id": "jess",
+      "look": "green cardigan, glasses, blonde"
+    },
+    {
+      "id": "nora",
+      "look": "navy apron over white shirt, long auburn hair"
+    },
+    {
+      "id": "customer",
+      "look": "yellow coat"
+    },
+    {
+      "id": "student",
+      "look": "purple tracksuit, ponytail"
+    }
+  ],
+  "gags": [
+    {
+      "line": 8,
+      "what": "The oven door bursts open and smacks Mia; her face comes up black with soot"
+    },
+    {
+      "line": 22,
+      "what": "The student falls flat on the mat after Mia's first punch"
+    },
+    {
+      "line": 14,
+      "what": "The GO button is slammed so hard it jumps out of its socket"
+    }
+  ],
+  "story_numbers": [
+    "7 a.m.",
+    "four seconds",
+    "first",
+    "noon",
+    "tuesday",
+    "wednesday",
+    "7",
+    "four"
+  ]
+}

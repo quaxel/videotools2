@@ -1,0 +1,36 @@
+{
+  "title": "Why Your Gym Wants You To Skip",
+  "topic": "Why gyms count on you not showing up",
+  "mechanism": "Gyms sell flat monthly fees to overconfident members who go far less than planned and cancel late, so most dues pay for visits that never happen.",
+  "beats": {
+    "hook": "January first: you sign up at seventy dollars a month",
+    "story": "You go three days in a row; your neighbour laughs from his couch",
+    "rise": "You feel unstoppable",
+    "twist": "By March the bag is in the car, and the salesman rings the AUTOPAY bell on his desk",
+    "mechanism": "Calendar board PLANNED 9 / WENT 4, price tags $17 PER VISIT vs $10 PASS, piggy bank $600, calendar pages flipping after LAST VISIT, member counter 7,000 at the turnstile",
+    "ending": "The neighbour signs up; the bell is already ringing"
+  },
+  "seed": { "what": "The AUTOPAY desk bell on the salesman's front desk", "first_line": 1 },
+  "locations": [
+    { "id": "front-desk", "set": "Room golden + desk + AUTOPAY bell", "colour": "yellow" },
+    { "id": "workout-floor", "set": "Room neon + treadmills + dumbbells", "colour": "pink" },
+    { "id": "living-room", "set": "Room warm + couch + TV", "colour": "orange-red" },
+    { "id": "driveway", "set": "Room night + car trunk + gym bag", "colour": "navy" },
+    { "id": "back-office", "set": "Room cold + autopay machine + calendar", "colour": "blue" },
+    { "id": "economist-lab", "set": "Room office + calendar board PLANNED/WENT", "colour": "green" },
+    { "id": "locker-room", "set": "Room daylight + lockers + price tags", "colour": "teal" },
+    { "id": "spin-studio", "set": "Room dream + bikes + piggy bank", "colour": "purple" }
+  ],
+  "characters": [
+    { "id": "you", "look": "purple tracksuit, headband colour cap" },
+    { "id": "coach", "look": "red tank top, cap, whistle lanyard" },
+    { "id": "neighbor", "look": "striped robe, messy hair" },
+    { "id": "economist", "look": "white coat, glasses, blue lanyard" }
+  ],
+  "gags": [
+    { "line": 2, "what": "You fall off the end of the treadmill" },
+    { "line": 4, "what": "The car trunk pops open and the dusty gym bag thumps out" },
+    { "line": 11, "what": "The piggy bank cracks open, empty" }
+  ],
+  "story_numbers": ["first", "january", "march", "monday", "tuesday", "wednesday"]
+}

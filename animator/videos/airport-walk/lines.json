@@ -1,0 +1,36 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "manager": {
+      "voice": "Serena",
+      "instruct": "Calm, sly airport manager sharing a trade secret, quick and pleased with herself.",
+      "seed": 3,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You land in Houston and start walking. The hallway just keeps going." },
+    { "speaker": "narrator", "text": "By the time you reach baggage claim, your suitcase is already rolling out." },
+    { "speaker": "narrator", "text": "Perfect timing. You feel so lucky." },
+    { "speaker": "narrator", "text": "Then a staff door swings open. A manager is dragging your gate to the far end of the map.", "pauseAfter": 0.4 },
+    { "speaker": "manager", "text": "Keep them walking. They never complain." },
+    { "speaker": "narrator", "text": "This airport used to drown in complaints about waiting for bags." },
+    { "speaker": "narrator", "text": "So they hired more baggage handlers, and the wait fell to eight minutes." },
+    { "speaker": "narrator", "text": "People kept complaining anyway." },
+    { "speaker": "narrator", "text": "Then someone timed it. One minute of walking, seven minutes standing at the belt." },
+    { "speaker": "narrator", "text": "The problem wasn't the wait. It was the standing." },
+    { "speaker": "narrator", "text": "So they moved the arrival gates away and sent the bags to the farthest belt." },
+    { "speaker": "narrator", "text": "Now passengers walked six times longer, and complaints dropped to almost zero." },
+    { "speaker": "narrator", "text": "In nineteen eighty-five, a waiting expert wrote the rule down. Busy time feels shorter than empty time." },
+    { "speaker": "narrator", "text": "It's why one hotel put mirrors next to its slow elevators." },
+    { "speaker": "narrator", "text": "Guests fixed their hair, and the complaints stopped." },
+    { "speaker": "narrator", "text": "Your wait never got shorter. It just got hidden in your legs." },
+    { "speaker": "narrator", "text": "Next trip, your gate is the farthest again. You smile the whole way." }
+  ]
+}

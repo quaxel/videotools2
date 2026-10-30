@@ -1,0 +1,33 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": { "voice": "Serena", "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no pauses between sentences.", "seed": 7, "tempo": 1.3 },
+    "anna": { "voice": "Serena", "instruct": "Tense, precise, high-strung young woman, quietly horrified, quick and clipped.", "seed": 41, "tempo": 1.2 },
+    "mel": { "voice": "Vivian", "instruct": "Warm, delighted party host, gushing and fast, then laughing it off.", "seed": 5, "tempo": 1.3 }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "Your Virgo friend brought a label maker to your party." },
+    { "speaker": "narrator", "text": "That's Anna and she's smart and helpful and terrifyingly organized." },
+    { "speaker": "narrator", "text": "Her spice rack is alphabetical and her closet is color-coded." },
+    { "speaker": "narrator", "text": "Even her to-do list has its own to-do list." },
+    { "speaker": "narrator", "text": "In ten minutes she has labelled your whole kitchen." },
+    { "speaker": "mel", "text": "Anna, this is actually amazing!" },
+    { "speaker": "narrator", "text": "Anna glows because someone finally appreciates the system." },
+    { "speaker": "narrator", "text": "Then she sees the picture frame on the wall.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "It's tilted two degrees to the left." },
+    { "speaker": "narrator", "text": "She can't hear the music or the guests anymore." },
+    { "speaker": "anna", "text": "Does nobody else see this?" },
+    { "speaker": "mel", "text": "See what? It's a party!" },
+    { "speaker": "narrator", "text": "What's going on inside a Virgo?" },
+    { "speaker": "narrator", "text": "Picture an office with a giant red stamp marked wrong." },
+    { "speaker": "narrator", "text": "It has never once been put down." },
+    { "speaker": "narrator", "text": "A ruler on the wall is labelled two degrees." },
+    { "speaker": "narrator", "text": "A clipboard says fix it and the list never ends." },
+    { "speaker": "narrator", "text": "And in a drawer a tiny note says I'm tired." },
+    { "speaker": "narrator", "text": "Nobody ever reads that one." },
+    { "speaker": "narrator", "text": "Anna climbs the bookshelf to straighten the frame." },
+    { "speaker": "narrator", "text": "The bookshelf goes over and she lands on the couch." },
+    { "speaker": "narrator", "text": "The frame is now perfectly straight and Anna is happy." },
+    { "speaker": "narrator", "text": "Then she spots Mel's boyfriend and reaches for the label maker." }
+  ]
+}

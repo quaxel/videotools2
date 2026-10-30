@@ -1,0 +1,100 @@
+{
+  "title": "A Cancer Remembers Everything",
+  "topic": "Cancer zodiac satire: a Cancer remembers everything",
+  "mechanism": "Inside a Cancer head there is a crab shell with one tiny door marked SAFE PEOPLE ONLY, a FEELINGS cabinet whose overfull drawers never close, and a tissue box with a counter that already reads 41 by noon.",
+  "beats": {
+    "hook": "Rose at her own birthday table under a CANCER sign, smiling too hard: 'It's fine!'",
+    "story": "Rose cries at the TV insurance ad, her wall calendar is full of everyone's birthdays",
+    "rise": "Her warm kitchen: sad friends leave with soup and a hug, Amy calls her the best person alive",
+    "twist": "Amy opens the hallway closet; an avalanche of dated boxes buries her to the neck, one is her ninth-grade note",
+    "mechanism": "Crab shell with a tiny door SAFE PEOPLE ONLY; cabinet FEELINGS with drawers that won't close; tissue box counter at 41",
+    "ending": "The drawer of the friend who forgot slides open; Rose serves soup and a tear drops in"
+  },
+  "seed": {
+    "what": "The hallway closet door bulging, a box corner poking out, in Rose's home shot",
+    "first_line": 6
+  },
+  "locations": [
+    {
+      "id": "birthday",
+      "set": "Room warm pink, birthday table, cake, balloons, CANCER badge",
+      "colour": "pink"
+    },
+    {
+      "id": "tv",
+      "set": "Room cool, couch, TV showing a car insurance ad",
+      "colour": "blue"
+    },
+    {
+      "id": "calendar",
+      "set": "Room golden, wall calendar full of birthday hearts",
+      "colour": "yellow"
+    },
+    {
+      "id": "kitchen",
+      "set": "Room warm orange, stove, soup pot, door",
+      "colour": "orange"
+    },
+    {
+      "id": "hallway",
+      "set": "Room brown, closet with door, box avalanche",
+      "colour": "brown"
+    },
+    {
+      "id": "shell",
+      "set": "Room coral, crab shell with tiny door, SAFE PEOPLE ONLY sign",
+      "colour": "coral"
+    },
+    {
+      "id": "cabinet",
+      "set": "Room navy, FEELINGS cabinet, tissue box with counter",
+      "colour": "navy"
+    },
+    {
+      "id": "soup",
+      "set": "Room green, soup bowl close-up, Rose serving",
+      "colour": "green"
+    }
+  ],
+  "characters": [
+    {
+      "id": "rose",
+      "look": "pink cardigan, long auburn hair"
+    },
+    {
+      "id": "amy",
+      "look": "yellow top, long black hair"
+    },
+    {
+      "id": "mia",
+      "look": "blue hoodie, long blonde hair (sad friend)"
+    },
+    {
+      "id": "jade",
+      "look": "green sweater, long brown hair (sad friend)"
+    }
+  ],
+  "gags": [
+    {
+      "line": 11,
+      "what": "A box avalanche pours out of the closet and buries Amy up to the neck"
+    },
+    {
+      "line": 14,
+      "what": "Rose dives for the box and slides on her back across a pile of tissues"
+    },
+    {
+      "line": 18,
+      "what": "The FEELINGS drawers spring back open every time they are pushed"
+    }
+  ],
+  "story_numbers": [
+    "forty-one",
+    "41",
+    "one",
+    "ninth",
+    "9",
+    "noon",
+    "today"
+  ]
+}
