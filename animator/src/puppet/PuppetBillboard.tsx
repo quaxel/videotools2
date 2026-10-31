@@ -13,7 +13,9 @@ export const PUPPET_HEIGHT = 1.3; // metres from feet to the top of the head (ca
 const K = PUPPET_HEIGHT / 1060; // metres per puppet unit
 export const HIP_HEIGHT = 280 * K; // stools are built to this height
 export const HEAD_Y = 800 * K; // centre of the head above the feet
-const VB = { x: -440, y: -1120, w: 880, h: 1160 }; // covers raised arms and caps
+const VB_STAND = { x: -440, y: -1120, w: 880, h: 1160 }; // covers raised arms and caps
+// A puppet lying down (or on its way down) stretches to the left of its feet, head first.
+const VB_LIE = { x: -1180, y: -1120, w: 1620, h: 1160 };
 // Texture density in pixels per puppet unit. It follows the puppet's size on screen (a close-up needs ~2,
 // a wide shot ~0.3), snapped to a few steps so the canvas is not reallocated every frame. Rasterising the
 // SVG and uploading it is the main render cost, so this is what keeps crowded shots fast.
@@ -172,6 +174,8 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   // Turn to face the camera around the vertical axis only, like a cardboard cut-out.
   const yaw = Math.atan2(camera.position.x - x, camera.position.z - z);
   const pose = turnToCamera(authored, yaw);
+  const lying = (pose.lie ?? 0) > 0;
+  const VB = lying ? VB_LIE : VB_STAND;
   const root = useRef<THREE.Group>(null);
   usePuppetAudit(root, () => root.current?.parent?.localToWorld(new THREE.Vector3(x, HEAD_Y, z)) ?? new THREE.Vector3(x, HEAD_Y, z), 205 * K, id, !!pose.sit);
   const advance = useThree((s) => s.advance);
@@ -196,7 +200,7 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
           <Puppet id={id} look={look} pose={pose} />
         </svg>,
       ),
-    [id, look, pose, density],
+    [id, look, pose, density, VB],
   );
 
   const canvas = useMemo(() => {
@@ -204,7 +208,7 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
     c.width = Math.round(VB.w * density);
     c.height = Math.round(VB.h * density);
     return c;
-  }, [density]);
+  }, [density, VB]);
   const texture = useMemo(() => {
     const t = new THREE.CanvasTexture(canvas);
     t.colorSpace = THREE.SRGBColorSpace;

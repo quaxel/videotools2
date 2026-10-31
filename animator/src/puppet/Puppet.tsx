@@ -78,6 +78,23 @@ export type PuppetPose = {
   handR?: HandShape;
   gesture?: Gesture; // a ready-made body pose from gestures.ts (animated by Stage); fields set here win over it
   fromGesture?: Gesture; // with blend < 1, the gesture being left (see moveChange in engine/anim.ts)
+  crouch?: number; // 0..1 knees bend and the hips sink (feet stay put); with `air` it tucks the legs in a jump
+  air?: number; // units the whole puppet is off the ground (jumps)
+  bend?: number; // 0..1 bend forward at the hips (toward the camera in front view, toward `facing` in profile)
+  seat?: number; // 0..1 legs between standing and seated (sitting down / getting up); `sit` is the same as 1
+  lie?: number; // 0..1 tip over onto the back, head to screen-left (sleeping, fainting); 1 = flat on the floor
+  sleep?: boolean; // eyes shut in sleep, a slack mouth and floating "z"s
+  crawl?: number; // on hands and knees in profile; the number is the crawl cycle phase (frames)
+  stride?: number; // walk cycle phase (frames; `walk` sets it): the swinging leg lifts its foot and bends its knee
+  bodyBlend?: number; // like blend, for the body during a moveChange; may dip below 0 and run past 1 (anticipation, overshoot)
+  squash?: number; // + squashes (landing, sitting down hard), - stretches (take-off); keeps the volume, feet stay put
+  hair?: { lift?: number; sway?: number }; // soft hair trailing the body: lift (units, + floats up), sway (degrees)
+};
+
+// How loose hair hangs for `hair`: it swings from the crown and its ends float up (or drop) with `lift`.
+const hairMove = (h: PuppetPose["hair"], k = 1) => {
+  const lift = Math.max(-60, Math.min(160, (h?.lift ?? 0) * k));
+  return `rotate(${(h?.sway ?? 0) * k} 0 -950) translate(0 -1000) scale(1 ${1 - lift / 500}) translate(0 1000)`;
 };
 
 export type HandShape = "open" | "point" | "fist";
@@ -154,6 +171,27 @@ const Foot: React.FC<{ x: number; y: number; scale?: number }> = ({ x, y, scale 
     <rect x={-38} y={-14} width={76} height={36} rx={18} fill={INK} />
   </g>
 );
+
+const THIGH = 133;
+const SHIN = 133;
+
+// Two-bone leg from hip to foot: the knee bends toward (kx, ky) (outward in front view, forward in profile).
+const knee = (hx: number, hy: number, fx: number, fy: number, kx: number, ky: number): [number, number] => {
+  const dx = fx - hx;
+  const dy = fy - hy;
+  const d = Math.min(THIGH + SHIN - 0.5, Math.max(1, Math.hypot(dx, dy)));
+  const base = Math.atan2(dy, dx);
+  const off = Math.acos(Math.min(1, (THIGH * THIGH + d * d - SHIN * SHIN) / (2 * THIGH * d)));
+  const cand = [base + off, base - off].map((a) => [hx + Math.cos(a) * THIGH, hy + Math.sin(a) * THIGH] as [number, number]);
+  return cand.sort((p, q) => (q[0] - hx) * kx + (q[1] - hy) * ky - ((p[0] - hx) * kx + (p[1] - hy) * ky))[0];
+};
+const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number }> = ({ pts, foot, footScale }) => (
+  <g>
+    <polyline points={pts.map((p) => p.join(",")).join(" ")} fill="none" stroke={INK} strokeWidth={LIMB} strokeLinecap="round" strokeLinejoin="round" />
+    <Foot x={foot[0]} y={foot[1]} scale={footScale} />
+  </g>
+);
+const lerp2 = (a: [number, number], b: [number, number], t: number): [number, number] => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 
 // Eyelid over a white eye: a skin-coloured lid with a line and a soft shadow under it. yl / yr are the lid line's height at the
 // left and right end of the eye, so a tilted lid reads as angry or sad.
@@ -391,8 +429,9 @@ const eyeShape = (e: Expression) => {
 };
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
-const Eyes: React.FC<{ expression: Expression; from?: Expression; blend: number; blink: boolean; lookX: number; skin: string; uid: string; micro: FaceMicro }> = ({
+const Eyes: React.FC<{ expression: Expression; from?: Expression; blend: number; blink: boolean; asleep?: boolean; lookX: number; skin: string; uid: string; micro: FaceMicro }> = ({
   expression,
+  asleep,
   from,
   blend,
   blink,
@@ -405,6 +444,16 @@ const Eyes: React.FC<{ expression: Expression; from?: Expression; blend: number;
   const y = -800;
   const px = lookX * 12;
   const lid = micro.lid ?? 0;
+  if (asleep) {
+    // Asleep: soft closed curves.
+    return (
+      <g fill="none" stroke={INK} strokeWidth={11} strokeLinecap="round">
+        {xs.map((x) => (
+          <path key={x} d={`M ${x - 30} ${y - 2} Q ${x} ${y + 16} ${x + 30} ${y - 2}`} />
+        ))}
+      </g>
+    );
+  }
   // Closed-eye expressions switch halfway through a change; open eyes mix their lids, pupils and size.
   const shown = from && blend < 0.5 ? from : expression;
   if (shown === "happy") {
@@ -670,14 +719,26 @@ const Extras: React.FC<{ expression: Expression; t: number }> = ({ expression, t
 
 const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> = ({ look, pose, id }) => {
   const bob = pose.bob ?? 0;
-  const armL = pose.armL ?? [12, 10];
-  const armR = pose.armR ?? [12, 10];
+  // Lying down, the arms settle along the body.
+  const lying = Math.max(0, Math.min(1, pose.lie ?? 0));
+  const rest = (a: [number, number] | undefined): [number, number] => {
+    const [x, y] = a ?? [12, 10];
+    return [x + (4 - x) * lying, y + (2 - y) * lying];
+  };
+  const armL = rest(pose.armL);
+  const armR = rest(pose.armR);
   const patternId = `leaf-${id}`;
   const micro = pose.face ?? {};
   const slump = pose.slump ?? 0;
-  const sh = -545 + slump * 22; // shoulder height
-  const headDrop = slump * 34;
-  const head = `translate(0 ${headDrop}) rotate(${pose.headTilt ?? 0} 0 -640)`;
+  const crouch = Math.max(0, Math.min(1, pose.crouch ?? 0));
+  const drop = crouch * 150; // hips sink this far
+  const bend = Math.max(0, Math.min(1, pose.bend ?? 0));
+  const k = 1 - 0.55 * bend; // bending toward the camera foreshortens the torso
+  const sh = -280 + (-265 + slump * 22) * k; // shoulder height
+  const headDrop = slump * 34 + 520 * (1 - k);
+  const head = `translate(0 ${headDrop}) rotate(${pose.headTilt ?? 0} 0 -640) translate(0 -800) scale(${1 + 0.18 * bend}) translate(0 800)`;
+  const torso = `translate(0 -280) scale(${1 + 0.06 * bend} ${k}) translate(0 280)`;
+  const seat = pose.sit ? 1 : Math.max(0, Math.min(1, pose.seat ?? 0));
   const arm = (side: "L" | "R") => {
     const s = side === "L" ? -1 : 1;
     const held = pose.hold?.hand === side;
@@ -687,7 +748,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         y={sh}
         side={s}
         angles={side === "L" ? armL : armR}
-        reach={side === "L" ? pose.reachL : pose.reachR}
+        reach={lying > 0.3 ? undefined : side === "L" ? pose.reachL : pose.reachR}
         hand={side === "L" ? pose.handL : pose.handR}
         item={held ? pose.hold!.item : undefined}
         tilt={held ? pose.itemTilt : undefined}
@@ -708,37 +769,26 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
     <g>
       <LeafPattern look={look} id={patternId} />
 
-      {/* Legs swing from the hips; seated legs bend at a foreshortened knee */}
-      {pose.sit &&
-        [-1, 1].map((side) => (
-          <g key={side}>
-            <polyline
-              points={`${side * 55},-280 ${side * 92},-236 ${side * 84},-18`}
-              fill="none"
-              stroke={INK}
-              strokeWidth={LIMB}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <Foot x={side * 96} y={-16} />
-          </g>
-        ))}
-      {!pose.sit && [-1, 1].map((side) => {
-        const a = ((pose.legSwing ?? 0) * side * Math.PI) / 180;
-        const fx = side * 55 + Math.sin(a) * 266 + side * 7;
-        const fy = -280 + Math.cos(a) * 266;
-        return (
-          <g key={side}>
-            <line x1={side * 55} y1={-280} x2={fx} y2={fy} stroke={INK} strokeWidth={LIMB} strokeLinecap="round" />
-            <Foot x={fx + side * 8} y={fy - 4} />
-          </g>
-        );
-      })}
+      {/* Legs: swing from the hips, bend at the knee when crouching, fold toward the camera when seated */}
+      <g transform={`translate(0 ${-(pose.air ?? 0)})`}>
+        {[-1, 1].map((side) => {
+          const hip: [number, number] = [side * 55, -280 + drop];
+          const a = ((pose.legSwing ?? 0) * side * Math.PI) / 180;
+          const lift = pose.stride !== undefined ? Math.max(0, Math.cos(pose.stride / 3) * side) * 30 : 0;
+          const standFoot: [number, number] = [side * 55 + Math.sin(a) * 266 + side * 7 + side * crouch * 24, -280 + Math.cos(a) * 266 - lift];
+          // Standing and seated outlines, mixed by `seat`.
+          const standKnee = crouch > 0 || lift > 0 ? knee(hip[0], hip[1], standFoot[0], standFoot[1], side, 0.2) : lerp2(hip, standFoot, 0.5);
+          const seated: [number, number][] = [[side * 55, -280], [side * 92, -236], [side * 84, -18]];
+          const pts = [hip, standKnee, standFoot].map((p, i) => lerp2(p, seated[i], seat));
+          const foot = lerp2([standFoot[0] + side * 8, standFoot[1] - 4], [side * 96, -16], seat);
+          return <Leg key={side} pts={pts} foot={foot} />;
+        })}
+      </g>
 
-      <g transform={`translate(0 ${bob}) rotate(${pose.lean ?? 0} 0 -280)`}>
+      <g transform={`translate(0 ${bob + drop - (pose.air ?? 0)}) rotate(${pose.lean ?? 0} 0 -280)`}>
         {/* Long hair hangs behind the body (and the arms), so none of it shows under the chin */}
         {look.long && (
-          <g transform={head}>
+          <g transform={`${head} ${hairMove(pose.hair)}`}>
             <path
               d={FRONT_LONG_D}
               fill={look.hair}
@@ -753,6 +803,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         {!inFront("L") && arm("L")}
         {!inFront("R") && arm("R")}
 
+        <g transform={torso}>
         {/* Bean body */}
         <path
           d={BODY_D}
@@ -788,6 +839,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           </g>
         )}
         </g>
+        </g>
         {/* A holding arm comes in front of the body so the item shows */}
         {pose.hold?.hand === "L" && arm("L")}
         {pose.hold?.hand === "R" && arm("R")}
@@ -803,6 +855,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             extra={<path d={BANGS_D} transform="translate(0 30)" fill={SHADE} opacity={0.22} filter={`url(#${patternId}-soft)`} />}
           />
           {/* Messy hair */}
+          <g transform={`translate(0 ${-Math.max(-20, Math.min(40, (pose.hair?.lift ?? 0) * 0.12))})`}>
           <path
             d={BANGS_D}
             fill={look.hair}
@@ -816,6 +869,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             d={BANGS_D}
             extra={<path d="M -150 -930 Q -60 -1000 40 -985" fill="none" stroke="#fff" strokeWidth={22} strokeLinecap="round" opacity={0.2} />}
           />
+          </g>
           {look.cap && (
             <g stroke={INK} strokeWidth={STROKE} strokeLinejoin="round">
               <path d="M -204 -850 Q -196 -1056 0 -1060 Q 196 -1056 204 -850 Q 0 -900 -204 -850 Z" fill={look.cap} />
@@ -824,8 +878,10 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             </g>
           )}
           <Brows expression={pose.expression} from={pose.from} blend={blend} micro={micro} />
-          <Eyes expression={pose.expression} from={pose.from} blend={blend} blink={pose.blink ?? false} lookX={pose.lookX ?? 0} skin={look.skin} uid={patternId} micro={micro} />
-          {changing ? (
+          <Eyes expression={pose.expression} from={pose.from} blend={blend} blink={pose.blink ?? false} asleep={pose.sleep} lookX={pose.lookX ?? 0} skin={look.skin} uid={patternId} micro={micro} />
+          {pose.sleep ? (
+            <ellipse cx={0} cy={-680} rx={16} ry={11 + Math.sin((micro.t ?? 0) / 14) * 3} fill={INK} />
+          ) : changing ? (
             <g>
               {/* The old face's extras fade out, the old mouth closes, then the new mouth opens */}
               <g opacity={1 - blend}>
@@ -904,7 +960,7 @@ const SideFace: React.FC<{ pose: PuppetPose; skin: string; uid: string }> = ({ p
   return (
     <g>
       <line x1={128} y1={-868 + browUp} x2={196} y2={-872 + browUp + (e === "skeptical" ? -10 : 0)} stroke={INK} strokeWidth={12} strokeLinecap="round" />
-      {pose.blink ? (
+      {pose.blink || pose.sleep ? (
         <line x1={ex - 20} y1={ey} x2={ex + 20} y2={ey} stroke={INK} strokeWidth={10} strokeLinecap="round" />
       ) : e === "happy" ? (
         line(`M ${ex - 26} ${ey + 6} Q ${ex} ${ey - 24 + lid * 0.6} ${ex + 26} ${ey + 6}`)
@@ -969,31 +1025,41 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   const swing = pose.legSwing ?? 0;
   const patternId = `leaf-side-${id}`;
   const sideHair = look.long ? SIDE_LONG_HAIR_D : SIDE_HAIR_D;
-  const nearArm: [number, number] = pose.armR ?? [-swing * 1.2, 14];
-  const farArm: [number, number] = pose.armL ?? [swing * 1.2, 14];
-  const leg = (a: number, key: string) => {
+  const crawling = pose.crawl !== undefined;
+  const cyc = crawling ? Math.sin((pose.crawl ?? 0) / 6) : 0;
+  // On all fours the torso tips nearly flat and the hips come down to knee-on-the-floor height.
+  const crouch = crawling ? 0 : Math.max(0, Math.min(1, pose.crouch ?? 0));
+  const drop = crawling ? 78 : crouch * 130;
+  const tip = crawling ? 72 : Math.max(0, Math.min(1, pose.bend ?? 0)) * 70 + crouch * 32;
+  const seat = pose.sit ? 1 : Math.max(0, Math.min(1, pose.seat ?? 0));
+  // Crouching (and halfway down to a seat) pushes the hips back so the knees come out in front of the body.
+  const back = crawling ? 0 : -(crouch * 120 + Math.sin(seat * Math.PI) * 70);
+  const nearArm: [number, number] = crawling ? [62 - cyc * 14, 26] : pose.armR ?? [-swing * 1.2, 14];
+  const farArm: [number, number] = crawling ? [62 + cyc * 14, 26] : pose.armL ?? [swing * 1.2, 14];
+  const leg = (a: number, key: string, phase: number) => {
+    const hip: [number, number] = [back, -280 + drop];
+    if (crawling) {
+      // Knee on the floor under the hip, shin trailing behind.
+      const kn: [number, number] = [phase * 30 - 10, -36];
+      const foot: [number, number] = [kn[0] - 128, -18];
+      return <Leg key={key} pts={[hip, kn, foot]} foot={[foot[0] - 8, foot[1] - 4]} footScale={1.1} />;
+    }
     const r = (a * Math.PI) / 180;
-    const fx = Math.sin(r) * 266;
-    const fy = -280 + Math.cos(r) * 266;
-    return (
-      <g key={key}>
-        <line x1={0} y1={-280} x2={fx} y2={fy} stroke={INK} strokeWidth={LIMB} strokeLinecap="round" />
-        <Foot x={fx + 14} y={fy - 4} />
-      </g>
-    );
+    // Walking: the leg swinging forward (the far leg while cos(stride / 3) > 0) lifts its foot, so its knee bends.
+    const lift = pose.stride !== undefined ? Math.max(0, Math.cos(pose.stride / 3) * (phase >= 0 ? 1 : -1)) * 46 : 0;
+    const standFoot: [number, number] = [Math.sin(r) * 266 + crouch * 70, -280 + Math.cos(r) * 266 - lift];
+    const standKnee = crouch > 0 || lift > 0 ? knee(hip[0], hip[1], standFoot[0], standFoot[1], 1, -0.6) : lerp2(hip, standFoot, 0.5);
+    const seated: [number, number][] = [[0, -280], [150, -282], [146, -20]];
+    const pts = [hip, standKnee, standFoot].map((p, i) => lerp2(p, seated[i], seat));
+    // Halfway between standing and seated the knee pokes forward instead of collapsing onto the hip.
+    if (seat > 0 && seat < 1) pts[1] = knee(pts[0][0], pts[0][1], pts[2][0], pts[2][1], 1, 0);
+    return <Leg key={key} pts={pts} foot={lerp2([standFoot[0] + 14, standFoot[1] - 4], [168, -18], seat)} />;
   };
   return (
     <g transform={`scale(${pose.facing ?? 1} 1)`}>
       <LeafPattern look={look} id={patternId} />
-      {pose.sit ? (
-        <g>
-          <polyline points="0,-280 150,-282 146,-20" fill="none" stroke={INK} strokeWidth={LIMB} strokeLinecap="round" strokeLinejoin="round" />
-          <Foot x={168} y={-18} />
-        </g>
-      ) : (
-        [leg(swing, "far"), leg(-swing, "near")]
-      )}
-      <g transform={`translate(0 ${bob})`}>
+      <g transform={`translate(0 ${-(pose.air ?? 0)})`}>{[leg(swing, "far", crawling ? -cyc : 1), leg(-swing, "near", crawling ? cyc : -1)]}</g>
+      <g transform={`translate(${back} ${bob + drop - (pose.air ?? 0)}) rotate(${tip + Math.sin(seat * Math.PI) * 18} 0 -280)`}>
         <Arm x={-6} y={-552} side={1} angles={farArm} />
         <path d={SIDE_BODY} fill={look.outfit} stroke={INK} strokeWidth={STROKE} />
         {look.pattern && <path d={SIDE_BODY} fill={`url(#${patternId})`} />}
@@ -1012,6 +1078,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <path d={SIDE_HEAD_D} fill={look.skin} stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
           <Cel uid={patternId} name="head" d={SIDE_HEAD_D} />
           {/* Long hair is one piece: over the top, the back of the head and the nape, down to the shoulders */}
+          <g transform={look.long ? hairMove(pose.hair, 0.6) : ""}>
           <path
             d={sideHair}
             fill={look.hair}
@@ -1020,6 +1087,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
             strokeLinejoin="round"
           />
           <Cel uid={patternId} name="hair" d={sideHair} />
+          </g>
           {look.cap && (
             <g stroke={INK} strokeWidth={STROKE} strokeLinejoin="round">
               <path d="M -182 -858 Q -150 -1062 60 -1062 Q 240 -1044 234 -880 Q 40 -930 -182 -858 Z" fill={look.cap} />
@@ -1090,8 +1158,38 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   );
 };
 
+// Floating "z"s over a sleeper's head at (x, y), rising and fading on a loop.
+const Zzz: React.FC<{ x: number; y: number; t: number }> = ({ x, y, t }) => (
+  <g fontFamily="Arial Black, Impact, sans-serif" fontWeight={900} fill="#ffffff" stroke={INK} strokeWidth={7} paintOrder="stroke">
+    {[0, 1, 2].map((i) => {
+      const p = (t / 45 + i / 3) % 1;
+      return (
+        <text key={i} x={x + p * 120} y={y - p * 260} fontSize={90 + i * 30} opacity={Math.min(1, (1 - p) * 3, p * 6)}>
+          z
+        </text>
+      );
+    })}
+  </g>
+);
+
 export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> = (props) => {
-  if (props.pose.view === "side") return <SidePuppet {...props} />;
-  if (props.pose.view === "back") return <BackPuppet {...props} />;
-  return <FrontPuppet {...props} />;
+  const { pose } = props;
+  const body = pose.view === "side" ? <SidePuppet {...props} /> : pose.view === "back" ? <BackPuppet {...props} /> : <FrontPuppet {...props} />;
+  // Squash and stretch about the contact point (the feet, or the middle of the body in the air); sy * sx^2 = 1.
+  const sq = Math.max(-0.45, Math.min(0.45, pose.squash ?? 0));
+  const sy = 1 - sq;
+  const sx = 1 / Math.sqrt(sy);
+  const py = (pose.air ?? 0) > 1 ? -(pose.air ?? 0) - 500 : 0;
+  const squashed = sq ? <g transform={`translate(0 ${py}) scale(${sx} ${sy}) translate(0 ${-py})`}>{body}</g> : body;
+  const lie = Math.max(0, Math.min(1, pose.lie ?? 0));
+  if (!lie && !pose.sleep) return squashed;
+  // Lying: tip over backwards around the feet onto the floor, head to screen-left, body resting on y = 0.
+  const a = (-90 * lie * Math.PI) / 180;
+  const head: [number, number] = [800 * Math.sin(a), -800 * Math.cos(a) - 155 * lie];
+  return (
+    <g>
+      <g transform={`translate(0 ${-155 * lie}) rotate(${-90 * lie})`}>{squashed}</g>
+      {pose.sleep && <Zzz x={head[0] + 60} y={head[1] - (lie > 0.5 ? 120 : 240)} t={pose.face?.t ?? 0} />}
+    </g>
+  );
 };
