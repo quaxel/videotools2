@@ -3,7 +3,7 @@ import type { PuppetLight } from "../puppet/PuppetBillboard";
 // Lighting moods: background, fog and light colours per location type. The kit's Room lights a set with one;
 // Stage tints puppets toward the mood's ambient colour so they sit in the same light as the set.
 
-export type Mood = "warm" | "daylight" | "cold" | "dream" | "night" | "neon" | "golden" | "office" | "alarm" | "dusk";
+export type Mood = "warm" | "daylight" | "cold" | "dream" | "night" | "neon" | "golden" | "office" | "alarm" | "dusk" | "space";
 
 export const MOODS: Record<Mood, { bg: string; ambient: [number, string]; key: [number, string]; fill: [number, string] }> = {
   warm: { bg: "#2a120a", ambient: [1.5, "#ffe2c4"], key: [2.6, "#fff1dc"], fill: [6, "#ffb070"] },
@@ -16,6 +16,7 @@ export const MOODS: Record<Mood, { bg: string; ambient: [number, string]; key: [
   office: { bg: "#dfe9e4", ambient: [1.9, "#f2fff8"], key: [2.2, "#ffffff"], fill: [3, "#d8fff0"] },
   alarm: { bg: "#2a0606", ambient: [1.3, "#ffc8c0"], key: [2.2, "#ffd6d0"], fill: [6, "#ff3b30"] },
   dusk: { bg: "#3b2a6b", ambient: [1.2, "#e8c0ff"], key: [2.4, "#ffc890"], fill: [5, "#ff8a5c"] },
+  space: { bg: "#05060f", ambient: [1.0, "#a8b8ff"], key: [1.6, "#dfe8ff"], fill: [5, "#4ff3ff"] },
 };
 
 export const moodBackground = (mood: Mood) => MOODS[mood].bg;

@@ -34,6 +34,14 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 | `FADE` | Location-change transition length (8 frames): the old shot whips out left, the new one in from the right. |
 | `sfx("stamp")`, `MUSIC_FILES.lounge / .mystery / .upbeat / .tension` | Sound file paths. |
 
+## New locations: research references first
+
+Before building a new set, look at 3-5 real references (photos on Wikimedia Commons, a travel or stock page) in the
+browser and write `guide/references/<set>.md`: the sources, 5-10 concrete details that make the place read as itself
+(objects, materials, signage, how things hang), its palette, and which of its lights are strong enough to light the
+puppets. Build from those notes in the kit's cel style: never copy an image, download nothing into the project, and
+leave out brand names and logos. Pick the 3-4 details that read in a narrow 9:16 frame.
+
 ## Set kit (`src/three/kit.tsx`, also exported from the engine)
 
 - `Room({ camera, mood, floor, wall, width?, depth?, sideWalls?, stripe?, wallPattern?, floorPattern?, sun?, children })` — floor, back wall at
@@ -72,6 +80,29 @@ Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `Interio
   each layer is carried sideways by its own share of the camera's x: sky and sun group at `camX`, far ridge
   `shift={camX * 0.55}`, middle ridge 0, near hills `shift={-camX * 1.1}` (camX = `camera.position[0]`). Give shots in
   front of a backdrop a sideways truck (0.8-1.4 m) so the layers slide apart.
+
+### Moon base (`src/three/SpaceBaseSet.tsx`)
+
+- `SpaceBaseSet({ camera, frame })` — control deck (mood `space`, floor y = 0, back wall z = -3) with a panoramic
+  window (x ±1.4) onto craters, a rover, a turning dish, a rocket venting steam, habitat domes, grey ridges, a ringed
+  planet and Earth (all with parallax). Inside: hologram table at `HOLO` (puppets at x ±0.62 round it), airlock with
+  a rotating red beacon at `AIRLOCK.x`, console, radar and an O2 screen on the left. Light puppets with
+  `light={spaceLight(f)}` (hologram cyan, beacon red flash as the beam passes, cool rim from the window).
+  Example shots: `src/scenes/SpacePreview.tsx` (composition `SpacePreview`); a shot close to a puppet at the window
+  uses `energy={0.4}` so the hand-held drift does not swing it out of frame.
+
+### Rainy night alley with a ramen stall (`src/three/AlleySet.tsx`)
+
+Built from photo references: `guide/references/rainy-alley.md`.
+- `AlleySet({ camera, frame, car? })` — narrow alley (x ±1.3, floor y = 0) running away along -z: izakaya fronts with
+  noren, warm interiors, red chochin and vertical signboards on the left; a plain wall with a row of paper lanterns,
+  a red pipe, a fern, AC units and a blue net on the right; overhead cables and a utility pole; neon buildings across
+  a wet street at the end; rain streaks, puddle ripples and every light mirrored on the wet ground.
+- The ramen stall (yatai) at `STALL`: customers sit at `SEATS` (`sit: true, view: "side", facing: 1`), the cook stands
+  at `COOK` (`view: "side", facing: -1`). `car` 0..1 drives a small car down the lane at `CAR_X` with its headlights on
+  (`carZ(p)` = its nose).
+- Light puppets with `light={alleyLight(f, car)}` (the stall's tube, its red lantern, or the car's headlights).
+  Example shots: `src/scenes/AlleyPreview.tsx` (composition `AlleyPreview`).
 
 ## Puppets
 
