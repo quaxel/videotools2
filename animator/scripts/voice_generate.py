@@ -33,7 +33,7 @@ def main(slug):
     os.makedirs(out_dir, exist_ok=True)
     model = None
     for i, line in enumerate(spec["lines"]):
-        v = spec["voices"][line["speaker"]]
+        v = {**spec["voices"][line["speaker"]], **line.get("voice", {})}  # a line may override instruct/seed/tempo
         # tempo is applied later by voice_assemble.py, so it does not invalidate a clip
         key = hashlib.sha1(json.dumps([line["text"], {k: x for k, x in v.items() if k != "tempo"}], sort_keys=True).encode()).hexdigest()[:12]
         wav = os.path.join(out_dir, f"{i:02d}.wav")

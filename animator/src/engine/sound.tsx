@@ -12,6 +12,8 @@ export const SFX_FILES = [
   "reel-spin", "reel-stop", "near-miss", "chime", "button", "bill-whirr", "credit-blip", "whoosh",
   "tape-stop", "hum", "stamp", "tick", "boom", "paper", "ambience",
   "pop", "drawer", "card", "door", "sting", "riser",
+  "wind", "plop", "crackle", "chew",
+  "crowd", "engine", "honk", "hiss", "steps",
 ] as const;
 export const sfx = (name: (typeof SFX_FILES)[number]) => `sfx/${name}.wav`;
 // lounge: light and cheeky; mystery: dark, curious; upbeat: bright hook energy; tension: pulsing build to a reveal.

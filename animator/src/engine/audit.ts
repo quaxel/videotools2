@@ -138,3 +138,19 @@ export const usePuppetAudit = (ref: RefObject<THREE.Object3D | null>, head: () =
     if (centreIn && hidden(c, scene, camera, obj, r)) say(`face of ${id} hidden behind the set`);
   });
 };
+
+// After a puppet's cut-out is rasterised: any drawn pixel on the canvas's top or side edge means the drawing ran
+// past the card and is cut off in a hard line (a lifted or stretched puppet whose card did not grow).
+export const auditCardEdges = (canvas: HTMLCanvasElement, id: string) => {
+  if (!auditing()) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const { width: w, height: h } = canvas;
+  const d = ctx.getImageData(0, 0, w, h).data; // one readback (several small ones make Chrome warn)
+  const solid = (x: number, y: number, cw: number, ch: number) => {
+    for (let yy = y; yy < y + ch; yy++) for (let xx = x; xx < x + cw; xx++) if (d[(yy * w + xx) * 4 + 3] > 40) return true;
+    return false;
+  };
+  if (solid(0, 0, w, 1)) say(`card of ${id} cuts the drawing at the top (head or hat sliced off)`);
+  if (solid(0, 0, 1, h - 2) || solid(w - 1, 0, 1, h - 2)) say(`card of ${id} cuts the drawing at the side`);
+};

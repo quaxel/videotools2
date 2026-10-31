@@ -6,6 +6,9 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 ## Story (six beats)
 
 1. **Hook, 0–3 s:** start mid-action at the strangest moment. First word "He", "It's" or "You". No intro, no channel name, no call to action.
+   The first 5 s are 3-4 quick, hard shots (0.8-1.2 s each), not one slow establishing move: the strange thing
+   coming at the lens, a face reacting, the thing hitting something (a splash, a smash) and an impact with a camera
+   jolt (`stamp` at low volume). Put the hero object close to the camera so it fills part of the frame.
 2. **Small story:** one character in one concrete situation, told as "you" or in third person.
 3. **Rise:** the character thinks they are winning.
 4. **Twist:** the win is a trap. It arrives as an **event** (someone walks in, a door opens, a costume changes), not as information.
@@ -19,6 +22,10 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 
 - **Word budget:** 180–210 words for 50–60 s. Target pace 190–215 words per minute.
 - Sentences of 4–10 words, plain spoken English, concrete numbers ("2 minutes", "3 years").
+- The narrator is excited and gripping, never a calm documentary read, even for history or mystery topics.
+  Keep `pauseAfter` short (≤ 0.3 s) except at the twist and before the last on-screen line.
+- Spell years out as words ("eighteen seventy-six") so Qwen reads them right, and put the spelled form in the
+  sourced claim too, or the report's fact check flags it.
 - **Never** use ellipses (...) or one-word repeated sentences ("Seven. Seven."): Qwen pauses 1–2 s on them.
 - At most one pause over 0.6 s, and only at the twist (use `pauseAfter` on that line).
 - Dialogue is a separate line with its own speaker (`buddy`, `boss`, ...), one short line each.
@@ -33,6 +40,18 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 - **Transitions:** hard cut inside a location; 8-frame whip pan (`true` in the shot list) when the location changes.
 - **Explanation shots:** one idea per shot, readable in one second, at most 6 words of readable text per frame.
 - **Characters touch the world:** they sit, hold, push, open, walk in profile. Not every shot is front-on.
+- **Key small objects must read on a phone:** a prop the story hangs on (a coin, a piece of meat, a pill) may be
+  drawn up to 2× its real size; say so in `plan.json` (`format_note`) when the real size is a sourced fact.
+- **Sky shots are never an empty flat colour:** a dome sky, something moving in it (birds, falling objects, smoke)
+  and a strong camera move (track the subject, tilt, zoom). Sky shots are the stillest in `motion`; fix them first.
+- **Effects must not show through props:** smoke from a fire under a pot, steam in front of a hero object; check
+  the macro stills for grey blobs over the subject.
+- **No half heads:** a head is either whole in the frame or wholly out. Stage enforces it (library.md → `keepHeads`);
+  the framing audit in `stills` should list only intended back-view crops. A head sliced off in a straight line inside
+  the picture is the puppet's card, not the camera (the audit says "card of X cuts the drawing").
+- **No camera jumps:** the camera never snaps between two frames of one shot except on an impact sound. Head framing
+  is smoothed per shot by the framing pre-pass; animate camera moves with eased ramps, not steps.
+- **Loop:** the last frame runs into the first (library.md → Seamless loop), so the Short replays without a jump.
 - **Characters never pass through the set:** no puppet stands inside or walks through a counter, desk or prop
   (`pipeline.py collide` finds them).
 - **Motion:** median frame-to-frame change ≥ 6 and fewer than 15 % near-still frame pairs (reference: 8.0 and 10 %).
@@ -49,3 +68,5 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 
 - Voice first: write `lines.json`, run `pipeline.py voice`, then cut shots to the printed line frames.
 - Do not render the full video after every change. Type-check, look at stills, fix, and render once at the end.
+- `pipeline.py` deletes the Remotion temp bundles each command leaves behind (~190 MB per still/render run). If you
+  call `npx remotion` directly, delete `$TMPDIR/remotion-*` from that run afterwards, or the disk fills up.

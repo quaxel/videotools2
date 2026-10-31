@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { useThree } from "@react-three/fiber";
 import { cancelRender, continueRender, delayRender } from "remotion";
 import * as THREE from "three";
-import { usePuppetAudit } from "../engine/audit";
+import { auditCardEdges, usePuppetAudit } from "../engine/audit";
 import { Puppet, PuppetLook, PuppetPose } from "./Puppet";
 
 // The SVG puppet rasterised onto a camera-facing plane inside the 3D set, so it can stand
@@ -13,7 +13,7 @@ export const PUPPET_HEIGHT = 1.3; // metres from feet to the top of the head (ca
 const K = PUPPET_HEIGHT / 1060; // metres per puppet unit
 export const HIP_HEIGHT = 280 * K; // stools are built to this height
 export const HEAD_Y = 800 * K; // centre of the head above the feet
-const VB_STAND = { x: -440, y: -1120, w: 880, h: 1160 }; // covers raised arms and caps
+const VB_STAND = { x: -540, y: -1120, w: 1080, h: 1160 }; // covers raised and outstretched arms, caps and hat brims
 // A puppet lying down (or on its way down) stretches to the left of its feet, head first.
 const VB_LIE = { x: -1180, y: -1120, w: 1620, h: 1160 };
 // Texture density in pixels per puppet unit. It follows the puppet's size on screen (a close-up needs ~2,
@@ -33,6 +33,7 @@ export type PuppetPlacement = {
   at: [number, number]; // feet position on the floor: x, z
   tint?: string; // multiplies the cut-out's colours, so it takes on the set's light (Stage sets it from the mood)
   light?: PuppetLight; // light the cut-out from the set's lights instead of the flat tint
+  crop?: boolean; // let the frame edge cut this puppet's head (Stage otherwise pans to keep every head whole)
 };
 
 // The set's light as the cut-out sees it. Only strong light sources change a puppet: point lights (a campfire,
@@ -168,6 +169,29 @@ export const turnToCamera = (pose: PuppetPose, yaw: number): PuppetPose => {
   return pose;
 };
 
+// Seen from high above, an upright card flattens to a sliver; past ~17° of elevation it leans its top away from
+// the camera, pivoting on the feet, so it stays square to the line of sight and the figure keeps its full body.
+// Radians the card leans back (applied as a rotation of -tilt about its own x axis).
+export const cardTilt = (cam: [number, number, number], at: [number, number]) => {
+  const elevation = Math.atan2(cam[1] - HEAD_Y * 0.7, Math.hypot(cam[0] - at[0], cam[2] - at[1]));
+  return Math.min(0.95, Math.max(0, elevation - 0.3) * 1.1);
+};
+
+// For held props (a paddle, a cup in a world-space prop): where a hand at `reach` lands in the scene.
+// Where a puppet's hand is in the world: `reach` (puppet units, as in reachR) on the card standing at `at`,
+// which turns to face the camera and, from high up, leans back (cardTilt).
+export const handWorld = (at: [number, number], reach: [number, number], camera: { position: [number, number, number] }): [number, number, number] => {
+  const dx = camera.position[0] - at[0];
+  const dz = camera.position[2] - at[1];
+  const l = Math.hypot(dx, dz) || 1;
+  const fwd: [number, number] = [dx / l, dz / l];
+  const right: [number, number] = [dz / l, -dx / l];
+  const t = cardTilt(camera.position, at);
+  const h = -reach[1] * K;
+  const back = -h * Math.sin(t);
+  return [at[0] + right[0] * reach[0] * K + fwd[0] * back, h * Math.cos(t), at[1] + right[1] * reach[0] * K + fwd[1] * back];
+};
+
 export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff", light }) => {
   const [x, z] = at;
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
@@ -175,9 +199,19 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   const yaw = Math.atan2(camera.position.x - x, camera.position.z - z);
   const pose = turnToCamera(authored, yaw);
   const lying = (pose.lie ?? 0) > 0;
-  const VB = lying ? VB_LIE : VB_STAND;
+  const tilt = lying ? 0 : cardTilt([camera.position.x, camera.position.y, camera.position.z], at);
+  // The card must grow with the puppet: a puppet lifted off the floor (`air`: a car seat, a jump), bobbed up or
+  // stretched (negative `squash`) rises above the standing box, and whatever leaves the box is cut off in a hard
+  // straight line (a "half head"). Extend the top by the lift, in steps so the canvas is not rebuilt every frame.
+  const lift = Math.max(0, pose.air ?? 0) + Math.max(0, -(pose.bob ?? 0)) + Math.max(0, -(pose.squash ?? 0)) * 1150;
+  const extra = Math.ceil(lift / 60) * 60;
+  const VB = useMemo(() => {
+    const base = lying ? VB_LIE : VB_STAND;
+    return extra ? { ...base, y: base.y - extra, h: base.h + extra } : base;
+  }, [lying, extra]);
   const root = useRef<THREE.Group>(null);
-  usePuppetAudit(root, () => root.current?.parent?.localToWorld(new THREE.Vector3(x, HEAD_Y, z)) ?? new THREE.Vector3(x, HEAD_Y, z), 205 * K, id, !!pose.sit);
+  const headY = HEAD_Y + (pose.air ?? 0) * K; // a puppet lifted onto a seat (a car bench) carries its head up too
+  usePuppetAudit(root, () => root.current?.parent?.localToWorld(new THREE.Vector3(x, headY, z)) ?? new THREE.Vector3(x, headY, z), 205 * K, id, !!pose.sit);
   const advance = useThree((s) => s.advance);
   const gl = useThree((s) => s.gl);
   const screenH = useThree((s) => s.size.height);
@@ -254,6 +288,7 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
       const ctx = canvas.getContext("2d")!;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
+      auditCardEdges(canvas, id);
       texture.needsUpdate = true;
       if (--pending.n === 0) advance(performance.now());
       continueRender(handle);
@@ -269,10 +304,12 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
         <meshBasicMaterial color="#000" transparent opacity={0.3} depthWrite={false} />
       </mesh>
       <group rotation={[0, yaw, 0]}>
-        <mesh position={[(VB.x + VB.w / 2) * K, -(VB.y + VB.h / 2) * K, 0]} castShadow customDepthMaterial={depthMaterial} material={litMaterial ?? undefined}>
-          <planeGeometry args={[VB.w * K, VB.h * K]} />
-          {!litMaterial && <meshBasicMaterial map={texture} color={tint} transparent alphaTest={0.02} toneMapped={false} fog={false} />}
-        </mesh>
+        <group rotation={[-tilt, 0, 0]}>
+          <mesh position={[(VB.x + VB.w / 2) * K, -(VB.y + VB.h / 2) * K, 0]} castShadow customDepthMaterial={depthMaterial} material={litMaterial ?? undefined}>
+            <planeGeometry args={[VB.w * K, VB.h * K]} />
+            {!litMaterial && <meshBasicMaterial map={texture} color={tint} transparent alphaTest={0.02} toneMapped={false} fog={false} />}
+          </mesh>
+        </group>
       </group>
     </group>
   );

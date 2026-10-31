@@ -17,6 +17,10 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 ```
 
 - Write each SHOTS entry on one line as `[123, 456, Name, false]` (numbers or `TIMING.totalFrames`); `pipeline.py check` parses it.
+- **Seamless loop** (Shorts replay): end the video on the opening shot just before its frame 0. Write the first shot
+  as a factory over a clock offset (`const shotAt = (offset) => () => { const f = useShotFrame() + offset; ... }`),
+  use `shotAt(0)` first and `shotAt(-N)` as the last N frames (whip `true` from the shot before), with `energy={0}`
+  in it so the hand-held drift matches, and repeat its sound under the last N frames. Example: `src/videos/olympic-car`.
 - Cut points come from `timing.json` → `lines[i].from / to` and `captions[k].from`.
 - Inside a shot: `const f = useShotFrame();` (0 at the cut; negative while the shot whips in). `useFinalFrame()` gives the video frame.
 - Mouth sync is automatic: a puppet in a `Stage` whose `id` equals a speaker in `lines.json` opens its mouth from the voice (`timing.json` → `mouth`) while that speaker talks, over any authored `mouthOpen`. So give the talking puppet the speaker's name as its id. `voice` writes the tracks; `voice_assemble.py <slug> --mouth` adds them to an older video.
@@ -28,6 +32,7 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 | Export | Use |
 | --- | --- |
 | `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy?, light? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. `light` = how the set's lights fall on the puppets (see Puppet lighting); default: a rig derived from the mood of `bg`. |
+| `keepHeads` (Stage, default on) | No half heads, ever: every frame Stage checks each puppet's head; one cut by a frame edge makes the camera pan just enough to bring it in, then widen (≤ 25 %), then step back (≤ 3×); if heads still cannot all fit, the outer ones are panned wholly out. Heads wholly off-screen, back-view (over-the-shoulder) puppets and placements with `crop: true` are left alone. So frame shots loosely and let it settle; for a macro on an object, leave the people out of `puppets` rather than half in. Solved frame by frame it would jump, so `pipeline.py framing` (run automatically by `stills`, `motion` and `render` when the scene changed) renders a tiny pass, logs the correction per frame, holds it ±24 frames and eases it per shot into `public/videos/<slug>/framing.json`, which the render applies: the camera starts drifting before a head reaches the edge instead of snapping. (`engine/framing.ts`, `scripts/framing.mjs`) |
 | `CameraShot = { position, target, fov }` | Every set must receive the camera and contain `<CameraRig>` (the kit's `Room` does this). |
 | `lerp3, ramp, clamp01, breathe, talk, walk` | Animation helpers. `ramp(f, a, b)` 0→1 between frames a and b. `...walk(f)` inside a pose while walking. |
 | `Easing, interpolate` | From `remotion`. |
@@ -69,7 +74,8 @@ Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `Interio
   to z `DOCK.end`), campfire at `FIRE`, pines, fireflies. Light its puppets with `light={lakeLight(f)}`.
   Example shots: `src/scenes/LakePreview.tsx` (composition `LakePreview`).
 - `Campfire({ position, frame })` — cartoon fire: layered licking flame tongues under one ink outline, licks that break
-  off and burn out, sparks, an ember bed, a light pool on the ground and a flickering point light. When puppets stand by
+  off and burn out, sparks, an ember bed, a light pool on the ground and a flickering point light. `smoke={false}` drops the dark smoke (a fire under a pot or kettle,
+  where the smoke would show through the pot). When puppets stand by
   it, add `firePoint(position, frame)` to the Stage `light`'s `points` so the side facing it glows and flickers with it.
 - `SmokePlume({ position, world, frame, size, rise, wind, period, puffs, dark? })` — inked cel smoke puffs that swell,
   drift downwind on a curve, turn and shrink away; `world` is the source's [x, z] (the puffs face the camera). Chimney:
@@ -117,12 +123,42 @@ Built from photo references: `guide/references/great-wall.md`.
 - Light puppets with `light={wallLight()}` (low golden sun behind-right: warm side light and rim).
   Example shots: `src/scenes/GreatWallPreview.tsx` (composition `GreatWallPreview`).
 
+### Kentucky farmyard, clear spring day, 1870s (`src/three/FarmyardSet.tsx`)
+
+Built from photo references: `guide/references/kentucky-farmyard-1876.md`. Used by `src/videos/meat-shower`.
+- `FarmyardSet({ camera, frame, steam?, children })` — grass yard (floor y = 0) with a trodden dirt patch, a hewn-log
+  house with chinking, shingle roof and stone chimney (front wall z = `HOUSE.front`), worm (zigzag rail) fences left,
+  back and right (`WormFence({ a, b })`), a woodpile, an ash hopper at `HOPPER` and the black soap kettle on legs over a
+  small fire at `KETTLE` (lip at `KETTLE_RIM`; `steam={false}` for a shot looking into the brew). Beyond: pasture,
+  bare trees and cedars, flat-topped knobs (`Hills`) with parallax. Children are drawn in the set (props, effects).
+- The ground is a 1024 px painted grass texture, a large-scale patch overlay so the tiling never shows, and ~2,600
+  instanced grass tufts (kept off the dirt and a clear spot for grass macros). Do the same for any new outdoor floor:
+  a flat tiled colour reads as plastic, especially in low and macro shots.
+- The sky is a dome that rides with the camera (painted bands from deep blue overhead to a pale horizon, a sun
+  glow in the key light's direction). Use a dome for any set with sky shots: sky planes show edges and flat colour
+  when the camera looks up. Keep the sun behind the camera's usual direction so look-up shots stay deep blue.
+- Light puppets with `farmLight(f)`, or `farmLight(f, true)` next to the kettle fire.
+
+### Birds, on-screen headlines
+
+- `Vultures({ frame, centre, radius?, count?, size?, fade? })` (`src/three/Birds.tsx`) — 3D inked turkey vultures
+  circling a thermal: V-held wings with fingered tips and a silver trailing half, red head, banking and teetering,
+  an occasional slow flap. `fade` 1→0 lifts them away and out of sight. Use real 3D birds, never flat sprites, and
+  put them close enough (10-20 m) to read in a 9:16 frame; track them with the camera.
+- `Headline({ f, text, at?, out?, y?, size? })` (`src/ui/Headline.tsx`, HTML over the shot) — a short title in heavy
+  newspaper type on a cream strip, high in the frame above the captions; drops in at `at`, fades at `out`. To keep
+  one headline across several shots, render it in each with `at` = minus the shot's offset (no re-pop). Use it for
+  the hook question and short on-screen facts ("NO CLOUDS. NO STORM."), at most 6 words.
+
 ## Puppets
 
 `PuppetPlacement = { id, look, pose, at: [x, z] }` — feet on the floor at (x, z); always faces the camera.
 Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HIP_HEIGHT` ≈ 0.34 m.
 
 - `PuppetLook`: `skin, hair, outfit, pattern?` (leaf print colour), `lanyard?`, `cap?`, `chain?`, `glasses?`, `long?` (long hair to the shoulders; use it for women).
+  Period dress (each a colour unless noted): `skirt?: true` (ankle-length, in the outfit colour), `apron?`, `kerchief?`,
+  `hat?` (wide-brimmed, low crown; hair is clipped under the brim), `beard?`, `vest?`, `suspenders?`. Never use `cap`
+  (a backwards baseball cap) for anyone before the 20th century. `CostumePreview` shows them in all three views.
 - `PuppetPose`:
   - `expression`: `neutral | excited | skeptical | smug | shocked | angry | sad | confused | worried | awkward | happy | thinking | disgusted | bored | determined` (each has its own eyelids, brows and mouth; neutral is a gentle smile; confused shows a "?", worried and awkward a sweat drop, awkward and happy blush, disgusted squeezes the eyes shut with the tongue out); `blink`, `lookX` (-1..1), `headTilt` (deg), `mouthOpen` (0..1)
   - Micro-expressions are automatic: in a `Stage` every held face keeps moving a little (brow flicks, lid droop, lip twitch, mouth width, searching eyes), tuned per expression in `engine/liven.ts`. `face` (`FaceMicro`) adds your own offsets on top; `energy: 0` turns it off. Preview all faces with the `FacePreview` composition.
@@ -139,6 +175,13 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   - Walk-ins: `const w = stroll(f, start, frames, from, to)`, then place at `w.at` and spread `...w.pose` last: it strides (in profile when crossing sideways) and stands once it arrives.
   - Mouth shapes (`viseme`), the lanyard/cap follow-through (`swing`) and beat gestures come from `Stage` automatically.
   - `hold: { item: cup | drink | phone | toolbox | key | popcorn | briefcase | candy | wine, hand: L | R }`, `itemTilt` (deg), `coinDrop` (units fallen)
+- The cut-out card grows with the puppet: `air` (a car seat, a jump), an upward `bob` and a stretch (negative
+  `squash`) extend its top, and it is wide enough for outstretched arms. The `stills` audit reads every card's edge
+  pixels and reports "card of X cuts the drawing" if anything still runs off it (the cause of heads sliced off in a
+  straight line, which no camera move can fix).
+- From high cameras the card leans back on its feet (`cardTilt`), so a puppet seen from above keeps its full body
+  instead of flattening to a sliver; nothing to do in the shot. For a world-space prop held in a hand (a paddle, a
+  rope), `handWorld(at, reach, camera)` gives the 3D point of a hand at `reachR`/`reachL` (it follows the tilt).
 - Vertical frame is narrow: at fov 40 the visible half-width is only about 0.23 × camera distance (1.5 m away → ±0.35 m).
   Keep props and puppets that must share a shot within that width, stack mechanism props vertically, and keep key
   text above the caption band (lower ~30 % of the frame). Puppets behind a counter need it ≤ 0.65 m tall to show their torso.
@@ -162,12 +205,21 @@ only: no glow wrapped round the whole outline). The far side keeps the puppet's 
   Lake: `lakeLight(f)`.
 - Preview an older video lit: `LIGHTING=1 node scripts/stills.mjs <slug> <out-dir>`.
 
+## Voice
+
+`lines.json`: each line may carry `"voice": { "instruct", "tempo", "seed" }` to override the speaker's
+settings for that line only (e.g. a punchier, faster hook). The default narrator should sound excited and
+gripping; a calm read makes the video feel slow.
+
 ## Sound
 
 Effects (`public/sfx/*.wav`, synthesised by `scripts/sfx_generate.py`): `reel-spin` (loop), `reel-stop`, `near-miss` (sad wah),
 `chime`, `button`, `bill-whirr`, `credit-blip`, `whoosh`, `tape-stop`, `hum` (loop), `stamp`, `tick`, `boom`, `paper`, `ambience` (loop),
 `pop` (a sign popping in), `drawer` (cash drawer out + stop), `card` (card slid or swiped), `door` (creak + shut), `sting` (twist hit:
-put it on the twist line), `riser` (1.6 s build; start it so it ends on the twist).
+put it on the twist line), `riser` (1.6 s build; start it so it ends on the twist), `wind` (outdoor breeze, loop), `plop`
+(a small soft lump landing on grass), `crackle` (small wood fire, loop), `chew` (two squishy chews),
+`crowd` (stadium cheering, loop), `engine` (early motor car chugging, loop), `honk` (bulb horn), `hiss` (steam burst),
+`steps` (running on dirt, loop).
 Music loops: `lounge` (112 BPM, light), `mystery` (84 BPM, dark), `upbeat` (124 BPM, bright: hooks), `tension` (100 BPM, pulsing:
 the numbers and the reveal). Use at least three beds across a video. New sounds: add a function at the end of `sfx_generate.py`
 (after the originals, so their files stay identical) and re-run it with `../tts/qwen/.venv/bin/python`.

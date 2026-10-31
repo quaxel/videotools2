@@ -403,6 +403,93 @@ def tension():
     return loop_fade(out[: int(length * SR)])
 
 
+def wind():
+    # Open-country breeze: soft low rush with slow gusts and a faint high whistle; 8 s loop.
+    sec = 8.0
+    t = t_axis(sec)
+    gust = 0.55 + 0.45 * np.sin(2 * np.pi * t / sec) ** 2 + 0.15 * np.sin(2 * np.pi * 3 * t / sec)
+    rush = low(noise(sec), 500, 4) * gust
+    whistle = band(noise(sec), 900, 1400, 4) * gust**2 * 0.25
+    return loop_fade(rush + whistle)
+
+
+def plop():
+    # A small soft lump landing on grass: a damp low thump with a short wet slap.
+    sec = 0.35
+    thump = sweep(150, 70, sec) * env(sec, 0.002, 0.05)
+    slap = band(noise(sec), 500, 2500) * env(sec, 0.001, 0.018) * 0.5
+    return thump + slap
+
+
+def crackle():
+    # A small wood fire under a kettle: soft roar and random pops; 6 s loop.
+    sec = 6.0
+    out = low(noise(sec), 300) * 0.25
+    for _ in range(60):
+        place(out, band(noise(0.02), 1500, 6000) * env(0.02, 0.0005, 0.004) * (0.3 + rng.random() * 0.7), rng.random() * (sec - 0.05))
+    return loop_fade(out)
+
+
+def chew():
+    # Two hesitant squishy chews.
+    out = np.zeros(int(0.9 * SR))
+    for at in (0.0, 0.42):
+        place(out, low(noise(0.16), 900) * env(0.16, 0.01, 0.05), at)
+    return out
+
+
+def crowd():
+    # A stadium crowd cheering: a broad roar that swells, scattered whoops and clapping; 4 s loop.
+    sec = 4.0
+    t = t_axis(sec)
+    roar = band(noise(sec), 300, 2500, 2) * (0.75 + 0.25 * np.sin(2 * np.pi * t / sec))
+    out = roar * 0.5
+    for _ in range(18):
+        at = rng.random() * (sec - 0.6)
+        f0 = 500 + rng.random() * 500
+        place(out, sweep(f0, f0 * 1.6, 0.35) * env(0.35, 0.03, 0.15) * 0.12, at)
+    for _ in range(260):
+        place(out, band(noise(0.012), 1200, 5000) * env(0.012, 0.0005, 0.003) * (0.15 + rng.random() * 0.25), rng.random() * (sec - 0.02))
+    return loop_fade(out)
+
+
+def engine():
+    # An early motor car chugging: low single-cylinder putts with a rattle; 2 s loop.
+    sec = 2.0
+    out = np.zeros(int(sec * SR))
+    for k in range(int(sec * 11)):
+        at = k / 11
+        place(out, low(noise(0.06), 220) * env(0.06, 0.002, 0.03) * 0.9, at)
+        place(out, band(noise(0.02), 1500, 4000) * env(0.02, 0.001, 0.006) * 0.15, at + 0.03)
+    return loop_fade(out)
+
+
+def honk():
+    # A rubber-bulb brass horn: a nasal two-note bray.
+    out = np.zeros(int(0.7 * SR))
+    for at, hz in ((0.0, 330), (0.32, 300)):
+        x = tone(hz, 0.28, (1.0, 0.8, 0.6, 0.45, 0.3)) * env(0.28, 0.01, 0.2)
+        place(out, x, at)
+    return out
+
+
+def hiss():
+    # Steam bursting out of a hot engine: a loud breathy rush that tails off.
+    sec = 1.4
+    return high(noise(sec), 2500) * env(sec, 0.01, 0.5)
+
+
+def steps():
+    # Running footsteps on a dirt road: soft crunchy thuds, about 3 a second; 2 s loop.
+    sec = 2.0
+    out = np.zeros(int(sec * SR))
+    for k in range(6):
+        at = k / 3 + 0.02
+        place(out, low(noise(0.08), 400) * env(0.08, 0.002, 0.025), at)
+        place(out, band(noise(0.05), 2000, 6000) * env(0.05, 0.001, 0.012) * 0.3, at)
+    return loop_fade(out)
+
+
 if __name__ == "__main__":
     for name, fn in [
         ("reel-spin", reel_spin),
@@ -428,3 +515,7 @@ if __name__ == "__main__":
         save(f"sfx/{name}.wav", fn())
     save("music/upbeat.wav", upbeat(), 0.8)
     save("music/tension.wav", tension(), 0.8)
+    for name, fn in [("wind", wind), ("plop", plop), ("crackle", crackle), ("chew", chew)]:
+        save(f"sfx/{name}.wav", fn())
+    for name, fn in [("crowd", crowd), ("engine", engine), ("honk", honk), ("hiss", hiss), ("steps", steps)]:
+        save(f"sfx/{name}.wav", fn())

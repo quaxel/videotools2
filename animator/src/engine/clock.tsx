@@ -11,6 +11,8 @@ const ShotClock = createContext({ from: 0, lead: 0, dur: 1 });
 export const useShotFrame = () => useCurrentFrame() - useContext(ShotClock).lead;
 // Length of the current shot in frames (without the dissolve lead).
 export const useShotDuration = () => useContext(ShotClock).dur;
+// The video frame this shot starts on (identifies the shot, e.g. for its framing table).
+export const useShotStart = () => useContext(ShotClock).from;
 // Frame on the whole video's timeline (the frames in timing.json).
 export const useFinalFrame = () => useCurrentFrame() - useContext(ShotClock).lead + useContext(ShotClock).from;
 

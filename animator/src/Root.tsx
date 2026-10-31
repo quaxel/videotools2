@@ -4,6 +4,8 @@ import { FACE_TOUR_STEP, FacePreview, FaceTour, GESTURE_TOUR_FRAMES, GestureTour
 import { MOVE_TOUR_FRAMES, MoveTour, SAD_WALK_FRAMES, SadWalk, WALK_TOWARD_FRAMES, WalkToward } from "./scenes/MovePreview";
 import { AlleyPreview } from "./scenes/AlleyPreview";
 import { GreatWallPreview } from "./scenes/GreatWallPreview";
+import { CostumePreview } from "./scenes/CostumePreview";
+import { MarathonPreview } from "./scenes/MarathonPreview";
 import { SlotHook } from "./scenes/SlotHook";
 import { SpacePreview } from "./scenes/SpacePreview";
 import { VIDEOS } from "./videos";
@@ -21,6 +23,8 @@ export const Root: React.FC = () => (
     <Composition id="SadWalk" component={SadWalk} durationInFrames={SAD_WALK_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="FacePreview" component={FacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SlotHook" component={SlotHook} durationInFrames={150} fps={30} width={1080} height={1920} />
+    <Composition id="MarathonPreview" component={MarathonPreview} durationInFrames={120} fps={30} width={1080} height={1920} />
+    <Composition id="CostumePreview" component={CostumePreview} durationInFrames={30} fps={30} width={1080} height={1920} />
     <Composition id="GreatWallPreview" component={GreatWallPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="AlleyPreview" component={AlleyPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SpacePreview" component={SpacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />

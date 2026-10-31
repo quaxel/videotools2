@@ -1,9 +1,10 @@
-import React, { createContext, useContext } from "react";
-import { AbsoluteFill, Audio, getInputProps, staticFile } from "remotion";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { AbsoluteFill, Audio, continueRender, delayRender, getInputProps, staticFile } from "remotion";
 import { CaptionChunk, Captions } from "../ui/Captions";
 import { Shot, ShotList, useFinalFrame } from "./clock";
 import { MusicCue, Sfx, SoundTrack } from "./sound";
 import type { Viseme } from "../puppet/Puppet";
+import type { FramingDelta } from "./framing";
 
 // The whole video: shots, the narration track, effects + ducked music, and word-synced captions.
 export type Timing = {
@@ -16,27 +17,60 @@ export type Timing = {
 };
 
 // What the shots can read about the whole video: the voice timing, the effect cues and whether puppets are lit.
-const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean } | null>(null);
+// `framing`: the smoothed head-framing corrections written by `pipeline.py framing` (public/videos/<slug>/framing.json),
+// per shot start, then per shot frame (from that shot's first logged frame `f0`).
+export type FramingTable = Record<string, { f0: number; d: FramingDelta[] }>;
+const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean; framing: FramingTable | null } | null>(null);
+
+// The framing table for this video, if the pipeline wrote one (null while loading or when there is none).
+const useFramingTable = (slug: string) => {
+  const [table, setTable] = useState<FramingTable | null>(null);
+  const [handle] = useState(() => delayRender(`framing table ${slug}`));
+  useEffect(() => {
+    if ((getInputProps() as { framingPass?: boolean }).framingPass) {
+      continueRender(handle);
+      return;
+    }
+    fetch(staticFile(`videos/${slug}/framing.json`))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((t) => setTable(t))
+      .catch(() => null)
+      .finally(() => continueRender(handle));
+  }, [slug, handle]);
+  return table;
+};
 
 // `lighting` (default on): puppets take the set's light (a rig derived from the mood, or a Stage's own `light`)
 // instead of the flat mood tint. Videos made before it existed pass `lighting={false}` to keep their look.
-export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean }> = ({
+// `voiceVolume` (default 1) lifts or lowers the narration when the mix lands outside the loudness target.
+export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; voiceVolume?: number }> = ({
   slug,
   timing,
   shots,
   sfx,
   music,
   lighting = true,
-}) => (
+  voiceVolume = 1,
+}) => {
+  const framing = useFramingTable(slug);
+  return (
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
-    <VideoContext.Provider value={{ timing, sfx, lighting }}>
+    <VideoContext.Provider value={{ timing, sfx, lighting, framing }}>
       <ShotList shots={shots} />
     </VideoContext.Provider>
-    <Audio src={staticFile(`videos/${slug}/voice.wav`)} />
+    <Audio src={staticFile(`videos/${slug}/voice.wav`)} volume={voiceVolume} />
     <SoundTrack sfx={sfx} music={music} captions={timing.captions} total={timing.totalFrames} />
     <Captions chunks={timing.captions} />
   </AbsoluteFill>
-);
+  );
+};
+
+// The smoothed framing correction for this shot frame, or undefined (no table, or not in it).
+export const useFramingFor = (start: number, f: number): FramingDelta | undefined => {
+  const t = useContext(VideoContext)?.framing?.[String(start)];
+  if (!t) return undefined;
+  return t.d[Math.max(0, Math.min(t.d.length - 1, f - t.f0))];
+};
 
 // Whether puppets are lit in this video. The `lighting` input prop overrides it, to preview an older video lit:
 //   npx remotion still <slug> out/x.png --frame=300 --props='{"lighting":true}'

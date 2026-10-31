@@ -308,9 +308,10 @@ export const SmokePlume: React.FC<{
   period: number;
   puffs: number;
   dark?: boolean;
-}> = ({ position, world, frame, size, rise, wind, period, puffs, dark }) => {
+  colors?: [string, string, string, string]; // [light, shade] when born, [light, shade] when old; e.g. road dust
+}> = ({ position, world, frame, size, rise, wind, period, puffs, dark, colors }) => {
   const yaw = useYaw(world[0], world[1]);
-  const [lightA, shadeA, lightB, shadeB] = (dark ? ["#6e6280", "#463c56", "#b4a6c6", "#857898"] : ["#a89ab8", "#71658a", "#f3eafa", "#bfb0d6"]).map((c) => new THREE.Color(c));
+  const [lightA, shadeA, lightB, shadeB] = (colors ?? (dark ? ["#6e6280", "#463c56", "#b4a6c6", "#857898"] : ["#a89ab8", "#71658a", "#f3eafa", "#bfb0d6"])).map((c) => new THREE.Color(c));
   return (
     <group position={position} rotation={[0, yaw, 0]} userData={{ ghost: true }}>
       {Array.from({ length: puffs }, (_, i) => {
@@ -337,7 +338,8 @@ export const SmokePlume: React.FC<{
   );
 };
 
-export const Campfire: React.FC<{ position: Vec3; frame: number }> = ({ position, frame }) => {
+// `smoke` false leaves out the dark smoke over the flames (a fire under a pot, where the pot catches it).
+export const Campfire: React.FC<{ position: Vec3; frame: number; smoke?: boolean }> = ({ position, frame, smoke = true }) => {
   // The light follows the main tongue's height, so the glow on faces pumps with the flames.
   const flick = 0.78 + 0.22 * wobble(frame * 0.45, 1);
   const yaw = useYaw(position[0], position[2]);
@@ -406,7 +408,7 @@ export const Campfire: React.FC<{ position: Vec3; frame: number }> = ({ position
           );
         })}
       </group>
-      <SmokePlume position={[0, 0.66, 0]} world={[position[0], position[2]]} frame={frame} size={0.045} rise={0.75} wind={0.18} period={40} puffs={4} dark />
+      {smoke && <SmokePlume position={[0, 0.66, 0]} world={[position[0], position[2]]} frame={frame} size={0.045} rise={0.75} wind={0.18} period={40} puffs={4} dark />}
       {/* Warm light pool on the grass and the glow around the flames */}
       <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[2, 2]} />

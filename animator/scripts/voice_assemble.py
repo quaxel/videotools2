@@ -118,7 +118,7 @@ def main(slug):
             "-i", src, "-af",
             "silenceremove=start_periods=1:start_threshold=-42dB:stop_periods=-1:stop_duration=0.18:stop_threshold=-42dB:stop_silence=0.12,"
             "areverse,silenceremove=start_periods=1:start_threshold=-42dB,areverse,"
-            f"atempo={spec['voices'][line['speaker']].get('tempo', 1.0)},aresample={RATE}",
+            f"atempo={line.get('voice', {}).get('tempo', spec['voices'][line['speaker']].get('tempo', 1.0))},aresample={RATE}",
             "-ac", "1", out,
         )
         start = t + GAP if i else 0.0

@@ -5,10 +5,12 @@ import { ThreeCanvas } from "@remotion/three";
 import * as THREE from "three";
 import { PuppetBillboard, PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";
 import { Vec3 } from "./anim";
-import { useShotDuration, useShotFrame } from "./clock";
+import { useShotDuration, useShotFrame, useShotStart } from "./clock";
 import { lightForBackground, puppetTint } from "../three/moods";
 import { livenCamera, livenPose } from "./liven";
-import { useImpact, useLighting, useSpeech } from "./Video";
+import { useFramingFor, useImpact, useLighting, useSpeech } from "./Video";
+import { applyFramingDelta, framingDelta, keepHeadsInFrame } from "./framing";
+import { getInputProps } from "remotion";
 
 export type CameraShot = { position: Vec3; target: Vec3; fov: number };
 
@@ -71,10 +73,25 @@ export const Stage: React.FC<{
   flash?: number;
   energy?: number;
   light?: PuppetLight; // the set's lights as puppets see them (fire, lamps, sun); default: derived from the mood
-}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1, light }) => {
+  keepHeads?: boolean; // default true: pan (or widen) so no puppet's head is cut by the frame edge (engine/framing.ts)
+}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1, light, keepHeads = true }) => {
   const { width, height } = useVideoConfig();
   const f = useShotFrame();
-  const camera = shake(livenCamera(authored, f, useShotDuration(), energy), useImpact(), f);
+  const moved = shake(livenCamera(authored, f, useShotDuration(), energy), useImpact(), f);
+  // Whole heads, without jumps: the pipeline's framing pass logs the raw correction every frame, smooths it over each
+  // shot (it eases in before a head reaches the edge and holds) and the render applies the smoothed table. With no
+  // table yet the raw correction is used directly.
+  const start = useShotStart();
+  const smoothed = useFramingFor(start, f);
+  const pass = (getInputProps() as { framingPass?: boolean }).framingPass === true;
+  let camera = moved;
+  if (keepHeads) {
+    if (smoothed && !pass) camera = applyFramingDelta(moved, smoothed);
+    else {
+      camera = keepHeadsInFrame(moved, width / height, puppets);
+      if (pass) console.log(`[framefix] ${JSON.stringify({ s: start, f, d: framingDelta(moved, camera).map((v) => Math.round(v * 1e4) / 1e4) })}`);
+    }
+  }
   const speech = useSpeech();
   const tint = puppetTint(bg);
   // Lit videos light puppets from the Stage's own rig, or one derived from the mood its background belongs to.

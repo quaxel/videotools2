@@ -8,6 +8,8 @@
 #   .venv/bin/python scripts/pipeline.py stills <slug> [frames] one still per second (or given frames) + contact sheet
 #   .venv/bin/python scripts/pipeline.py collide <slug>         every 5th frame: puppets walking/standing inside set objects
 #   .venv/bin/python scripts/pipeline.py motion <slug>          fast 30 % draft render + motion per shot (stillest first)
+#   .venv/bin/python scripts/pipeline.py framing <slug>         head-framing pre-pass -> public/videos/<slug>/framing.json
+#                                                              (run by stills/motion/render when the scene changed)
 #   .venv/bin/python scripts/pipeline.py render <slug>          full MP4 -> out/<slug>.mp4
 #   .venv/bin/python scripts/pipeline.py report <slug>          measure the MP4, check facts, write videos/<slug>/report.md
 #
@@ -15,8 +17,11 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+import time
 from collections import Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -189,8 +194,28 @@ def cmd_check(slug):
 
 # ---------- stills / render ----------
 
+def framing_stale(slug):
+    """The framing table is missing or older than the scene, its timing, the shared engine, puppets or sets."""
+    out = os.path.join(ROOT, "public", "videos", slug, "framing.json")
+    if not os.path.exists(out):
+        return True
+    newest = 0.0
+    for d in (sdir(slug), os.path.join(ROOT, "src", "engine"), os.path.join(ROOT, "src", "puppet"), os.path.join(ROOT, "src", "three")):
+        for dirpath, _, files in os.walk(d):
+            for f in files:
+                newest = max(newest, os.path.getmtime(os.path.join(dirpath, f)))
+    return os.path.getmtime(out) < newest
+
+
+def cmd_framing(slug, force=True):
+    if force or framing_stale(slug):
+        cmd_register()
+        run("node", "scripts/framing.mjs", slug)
+
+
 def cmd_stills(slug, frames=None):
     cmd_register()
+    cmd_framing(slug, force=False)
     run("node", "scripts/stills.mjs", slug, vdir(slug, "build", "stills"), *([frames] if frames else []))
 
 
@@ -227,6 +252,7 @@ def cmd_motion(slug):
     import numpy as np
 
     cmd_register()
+    cmd_framing(slug, force=False)
     draft = os.path.join(ROOT, "out", "drafts", f"{slug}.mp4")
     os.makedirs(os.path.dirname(draft), exist_ok=True)
     run("npx", "remotion", "render", slug, draft, "--scale=0.3", "--muted", "--log=error")
@@ -241,6 +267,7 @@ def cmd_motion(slug):
 
 def cmd_render(slug):
     cmd_register()
+    cmd_framing(slug, force=False)
     os.makedirs(os.path.join(ROOT, "out"), exist_ok=True)
     run("npx", "remotion", "render", slug, f"out/{slug}.mp4", "--log=error")
 
@@ -373,19 +400,38 @@ def cmd_report(slug):
     print("\n".join(out))
 
 
+def clean_remotion_temp(since):
+    """Remotion leaves a ~190 MB bundle (and asset folders) in the temp dir on every still and render; over a few
+    videos that fills the disk (renders then die with ENOSPC). Remove the ones this command created."""
+    tmp = tempfile.gettempdir()
+    for name in os.listdir(tmp):
+        path = os.path.join(tmp, name)
+        try:
+            if name.startswith("remotion-") and os.path.getmtime(path) >= since - 5:
+                shutil.rmtree(path, ignore_errors=True)
+        except OSError:
+            pass
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(__doc__ or open(__file__).read().split("\n\n")[0])
         sys.exit(2)
     cmd, args = sys.argv[1], sys.argv[2:]
-    {
-        "new": lambda: cmd_new(args[0], args[1]),
-        "voice": lambda: cmd_voice(args[0]),
-        "register": cmd_register,
-        "check": lambda: cmd_check(args[0]),
-        "stills": lambda: cmd_stills(args[0], args[1] if len(args) > 1 else None),
-        "collide": lambda: cmd_collide(args[0]),
-        "motion": lambda: cmd_motion(args[0]),
-        "render": lambda: cmd_render(args[0]),
-        "report": lambda: cmd_report(args[0]),
-    }[cmd]()
+    started = time.time()
+    try:
+        {
+            "new": lambda: cmd_new(args[0], args[1]),
+            "voice": lambda: cmd_voice(args[0]),
+            "register": cmd_register,
+            "check": lambda: cmd_check(args[0]),
+            "stills": lambda: cmd_stills(args[0], args[1] if len(args) > 1 else None),
+            "collide": lambda: cmd_collide(args[0]),
+            "motion": lambda: cmd_motion(args[0]),
+            "framing": lambda: cmd_framing(args[0]),
+            "render": lambda: cmd_render(args[0]),
+            "report": lambda: cmd_report(args[0]),
+        }[cmd]()
+    finally:
+        clean_remotion_temp(started)
+

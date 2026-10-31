@@ -53,6 +53,10 @@ For a location the kit does not already have, research it first (library.md → 
 first): look at 3-5 photo references in the browser, write `guide/references/<set>.md`, then build the set from it.
 Reuse existing sets where they fit (`LakeSet`, `SpaceBaseSet`, `AlleySet`, `GreatWallSet`).
 
+Open with 3-4 hard, quick shots in the first 5 s (guide/rules.md → Hook): the strange thing coming at the lens, a
+reaction, an impact. On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters use
+the costume options (library.md → Puppets), never `cap`.
+
 Write the shot list against the printed frames: cut on line and caption boundaries, average ≤ 2.2 s, none
 over 4 s, whip (`true`) on location changes. Use `Room` + kit props for new locations, and a different mood per
 location. Put the seed on screen by its line. Add SFX for every mechanical action and MUSIC cues.
@@ -95,6 +99,7 @@ Then check motion without a full render (30 % draft, ~2 min):
 ```
 
 If motion < 6 or still frames > 15 %, give the listed stillest shots a bigger camera move or puppet action.
+Every shot keeps the camera moving (orbit, crane, truck, push); sky shots need the biggest moves.
 
 ## 7. Render once, then report
 
