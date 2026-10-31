@@ -1,4 +1,4 @@
-import type { PuppetPose } from "../puppet/Puppet";
+import type { Expression, PuppetPose } from "../puppet/Puppet";
 
 // Small animation helpers shared by every scene. Frames are shot-local unless a name says otherwise.
 
@@ -33,4 +33,15 @@ export const stroll = (f: number, start: number, frames: number, from: [number, 
   const sideways = Math.abs(dx) > Math.abs(to[1] - from[1]);
   const pose: Partial<PuppetPose> = { ...walk(f), armL: undefined, armR: undefined, ...(sideways ? { view: "side", facing: dx > 0 ? 1 : -1 } : {}) };
   return { at, pose };
+};
+
+// Expression changes that ease instead of popping. `steps` lists [start frame, expression] in order; for `len`
+// frames after each start the face blends from the previous one. Spread the result into a pose.
+export const faceChange = (steps: [number, Expression][], f: number, len = 10): Pick<PuppetPose, "expression" | "from" | "blend"> => {
+  let i = 0;
+  while (i + 1 < steps.length && steps[i + 1][0] <= f) i++;
+  const [start, expression] = steps[i];
+  if (i === 0 || f - start >= len) return { expression };
+  const p = clamp01((f - start) / len);
+  return { expression, from: steps[i - 1][1], blend: p * p * (3 - 2 * p) };
 };

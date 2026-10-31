@@ -80,7 +80,9 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
 
 - `PuppetLook`: `skin, hair, outfit, pattern?` (leaf print colour), `lanyard?`, `cap?`, `chain?`, `glasses?`, `long?` (long hair to the shoulders; use it for women).
 - `PuppetPose`:
-  - `expression`: `neutral | excited | skeptical | smug | shocked`; `blink`, `lookX` (-1..1), `headTilt` (deg), `mouthOpen` (0..1)
+  - `expression`: `neutral | excited | skeptical | smug | shocked | angry | sad | confused | worried | awkward | happy | thinking | disgusted | bored | determined` (each has its own eyelids, brows and mouth; neutral is a gentle smile; confused shows a "?", worried and awkward a sweat drop, awkward and happy blush, disgusted squeezes the eyes shut with the tongue out); `blink`, `lookX` (-1..1), `headTilt` (deg), `mouthOpen` (0..1)
+  - Micro-expressions are automatic: in a `Stage` every held face keeps moving a little (brow flicks, lid droop, lip twitch, mouth width, searching eyes), tuned per expression in `engine/liven.ts`. `face` (`FaceMicro`) adds your own offsets on top; `energy: 0` turns it off. Preview all faces with the `FacePreview` composition.
+  - Expression changes ease instead of popping: spread `faceChange([[0, "neutral"], [40, "shocked"], ...], f)` into the pose (it sets `expression`, `from`, `blend`). Brows, lids and pupils glide, the old mouth closes and the new one opens over ~10 frames. `FaceTour` shows one puppet going through every expression this way.
   - `armL / armR: [shoulder, elbow]` degrees, 0 = hanging; `[150, -25]` arms up, `[10, -78]` holding in front, `[8, 62]` carry in profile
   - `bob`, `legSwing`, `sit`
   - `view: front | side | back`, `facing: 1 | -1` (side view). Leave both unset and the cut-out turns itself: profile when the camera is 60° or more off the set's front (+z), its back past 125° (not when sitting). Set `view: "front"` to keep it facing the camera.
@@ -121,3 +123,5 @@ the numbers and the reveal). Use at least three beds across a video. New sounds:
 (after the originals, so their files stay identical) and re-run it with `../tts/qwen/.venv/bin/python`.
 
 `Sfx = { at, src, volume, until? }` (`until` loops to that frame). `MusicCue = { src, from, to, volume }`; music ducks under the voice automatically.
+
+Look (all views, every puppet): cel shading (flat, slightly soft shadow on the right and below, bangs shadow on the forehead), eyelids on white eyes, 30-unit arms and legs, short thick mitten hands with a thumb, simple rounded feet; excited is an open laugh with upper teeth and a tongue; in profile an egg-shaped head with the eye near the front of the face and, for `long` hair, one piece of hair over the back of the head and the nape. These live in `src/puppet/Puppet.tsx`; change them there so every character follows.

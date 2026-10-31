@@ -1,4 +1,4 @@
-import { PuppetPose } from "../puppet/Puppet";
+import { FaceMicro, PuppetPose } from "../puppet/Puppet";
 import { CameraShot } from "./stage";
 import { Vec3 } from "./anim";
 
@@ -47,6 +47,113 @@ const glance = (id: string, f: number) => {
   return spot(k - 1) + (spot(k) - spot(k - 1)) * easeOut(((f + len * 4) % len) / 5);
 };
 
+// A soft 0..1..0 bump that comes back every `period` frames at the puppet's own offset (a brow flick, a lip twitch).
+const pulse = (id: string, f: number, period: number, len: number) => {
+  const t = (f + Math.floor(hash(id + period) * period)) % period;
+  return t < len ? Math.sin((t / len) * Math.PI) : 0;
+};
+
+// Micro-expressions: small, constant movement inside the held expression so the face never freezes. Every face
+// breathes a little (brows, lids, mouth width); each expression adds its own tic on top. Amplitudes are in puppet units.
+const microFace = (pose: PuppetPose, id: string, f: number, energy: number): FaceMicro => {
+  const ph = hash(id) * Math.PI * 2;
+  const s = (period: number, k = 0) => Math.sin(f / period + ph + k);
+  const m: FaceMicro = {
+    brow: s(37) * 2.5,
+    lid: s(29, 1.3) * 2,
+    mouthW: 1 + s(41) * 0.03,
+    mouthX: 0,
+    mouthY: 0,
+    lookY: 0,
+    browL: 0,
+    browR: 0,
+  };
+  switch (pose.expression) {
+    case "excited": // bouncy brows, a laugh that keeps opening
+      m.brow! += -3 + s(11) * 3;
+      m.mouthW! += s(13) * 0.05;
+      break;
+    case "happy":
+      m.mouthW! += s(23) * 0.06;
+      m.lid! += s(17) * 3;
+      break;
+    case "smug": // the raised brow flicks up now and then
+      m.browR! -= pulse(id, f, 70, 18) * 8;
+      m.mouthW! += s(29) * 0.05;
+      break;
+    case "skeptical":
+      m.browR! -= pulse(id, f, 60, 16) * 10;
+      m.mouthX! += s(33) * 4;
+      break;
+    case "confused": // the high brow keeps lifting, the mouth wanders, the eyes search
+      m.browR! -= pulse(id, f, 50, 20) * 10;
+      m.mouthX! += s(31) * 6;
+      m.lookY! += -4 + s(19) * 3;
+      break;
+    case "thinking": // eyes drift around up there, the mouth slides to the side and back
+      m.lookY! += s(27) * 4;
+      m.mouthX! += s(35) * 8;
+      m.brow! += s(43) * 2;
+      break;
+    case "worried": // a nervous tremble in the eyes and the lips
+      m.lookY! += Math.sin(f * 1.7) * 1.5;
+      m.mouthX! += Math.sin(f * 0.9) * 2;
+      m.brow! += s(9) * 3;
+      break;
+    case "shocked":
+      m.lookY! += Math.sin(f * 2.1) * 1.5;
+      m.mouthW! += s(9) * 0.06;
+      break;
+    case "awkward": // eyes keep sliding away, the grin strains
+      m.mouthW! += s(17) * 0.05;
+      m.lookY! += 3;
+      break;
+    case "angry": // a brow twitch and a clenched jaw
+      m.brow! += s(7) * 2.5 + pulse(id, f, 45, 10) * 5;
+      m.mouthW! += s(11) * 0.04;
+      break;
+    case "determined":
+      m.brow! += 2 + s(50) * 2;
+      m.mouthW! -= pulse(id, f, 55, 14) * 0.06;
+      break;
+    case "sad": // brows lift and sag, the lip quivers
+      m.brow! -= s(33) * 3;
+      m.mouthY! += s(21) * 2;
+      m.mouthX! += Math.sin(f * 1.3) * 1;
+      break;
+    case "disgusted": // the face scrunches again and again
+      m.brow! += pulse(id, f, 40, 14) * 6;
+      m.lid! += pulse(id, f, 40, 14) * 8;
+      m.mouthW! += s(9) * 0.05;
+      break;
+    case "bored": // the lids sink slowly, then catch themselves
+      m.lid! += 5 + Math.max(0, s(45)) * 8;
+      m.mouthY! += s(53) * 2;
+      break;
+  }
+  const k = energy * 1.5; // overall strength of the micro-expressions
+  const a = pose.face ?? {};
+  const add = (v: number | undefined, w: number | undefined) => (w ?? 0) + (v ?? 0) * k;
+  return {
+    brow: add(m.brow, a.brow),
+    browL: add(m.browL, a.browL),
+    browR: add(m.browR, a.browR),
+    lid: add(m.lid, a.lid),
+    lookY: add(m.lookY, a.lookY),
+    mouthX: add(m.mouthX, a.mouthX),
+    mouthY: add(m.mouthY, a.mouthY),
+    mouthW: (a.mouthW ?? 1) * (1 + ((m.mouthW ?? 1) - 1) * k),
+    t: a.t ?? f,
+  };
+};
+
+// Awkward eyes slide away from whoever they face; thinking eyes look up and off to the side.
+const moodLook = (pose: PuppetPose, id: string, f: number) => {
+  if (pose.expression === "awkward") return -0.6 + Math.sin(f / 21 + hash(id) * 6) * 0.25;
+  if (pose.expression === "thinking") return -0.5 + Math.sin(f / 40 + hash(id) * 6) * 0.35;
+  return undefined;
+};
+
 // Idle acting: slow breathing, a weight shift, glances that hold, blinks at the puppet's own rhythm. While the
 // puppet talks, `speech` adds a beat gesture on each stressed syllable (a nod, an arm, or a lean) instead of
 // constant flapping; the elbow trails the shoulder, and the lanyard and cap brim lag the head (`swing`).
@@ -65,7 +172,7 @@ export const livenPose = (
   const now: Beats = speech ?? { nod: 0, arm: 0, lean: 0 };
   const before: Beats = speech?.prev ?? now;
   const walking = pose.legSwing !== undefined;
-  const look = (g: number) => (pose.lookX !== undefined ? pose.lookX : glance(id, g) * energy);
+  const look = (g: number) => (pose.lookX !== undefined ? pose.lookX : moodLook(pose, id, g) ?? glance(id, g) * energy);
   // Head roll and sideways weight shift at frame g, for this frame and the follow-through 3 frames back.
   const tilt = (g: number, b: Beats) => (pose.headTilt ?? 0) + look(g) * 4 + Math.sin(g / 19 + ph) * 1.5 * energy + b.nod * 6 + b.lean * 7;
   const shift = (g: number, b: Beats) => (pose.sit || walking ? 0 : Math.sin(g / 23 + ph) * 0.02 * energy + b.lean * 0.03);
@@ -91,6 +198,7 @@ export const livenPose = (
     blink: pose.blink ?? (t < 3 || (noise(id, Math.floor((f + Math.floor(ph * 40)) / period)) < 0.25 && t >= 6 && t < 9)),
     armL: pose.hold?.hand === "L" || walking ? pose.armL : arm(pose.armL, "L"),
     armR: pose.hold?.hand === "R" || walking ? pose.armR : arm(pose.armR, "R"),
+    face: microFace(pose, id, f, energy),
   };
   return { pose: live, at: [at[0] + shift(f, now), at[1]] };
 };
