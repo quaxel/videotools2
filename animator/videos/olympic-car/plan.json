@@ -1,0 +1,108 @@
+{
+  "title": "The Olympic Marathon Runner Who Took a Car | 1904 St. Louis",
+  "topic": "The Olympic Marathon Runner Who Took a Car",
+  "format_note": "User-specified ~35 s historical Short (75 words, 33.3 s). Overrides the 50-60 s explainer targets on purpose.",
+  "mechanism": "In the 1904 St. Louis marathon Fred Lorz quit, rode in a car, ran the last stretch when it broke down and crossed first; he was disqualified once the ride came out, and exhausted Thomas Hicks, held up by his trainers, was the real winner.",
+  "beats": {
+    "hook": "Running shoes cut to a spinning car wheel: Lorz riding in a car. A CAR?!",
+    "story": "Lorz labours on the hot dusty road, stops, doubled over",
+    "rise": "A car pulls up, he hops in, cruises smugly; it breaks down and he runs into the stadium and breaks the tape to cheers",
+    "twist": "The cheering stops dead; an official marches in pointing; DISQUALIFIED is chalked on the board",
+    "mechanism": "The real winner Thomas Hicks staggers in held up by two men",
+    "ending": "Hicks held up at the line, Lorz alone; FIRST ACROSS ≠ WINNER"
+  },
+  "seed": {
+    "what": "The car (and its driver) that Lorz rides in",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "road-macro",
+      "set": "RoadSet macro: shoes, wheel",
+      "colour": "tan dust"
+    },
+    {
+      "id": "road-wide",
+      "set": "RoadSet wide with heat haze",
+      "colour": "pale blue sky"
+    },
+    {
+      "id": "car",
+      "set": "Automobile on RoadSet",
+      "colour": "deep red / brass"
+    },
+    {
+      "id": "breakdown",
+      "set": "RoadSet, steaming car",
+      "colour": "white steam"
+    },
+    {
+      "id": "stadium-finish",
+      "set": "StadiumSet finish line",
+      "colour": "cinder red"
+    },
+    {
+      "id": "grandstand",
+      "set": "StadiumSet grandstand, cheering",
+      "colour": "brown / bunting"
+    },
+    {
+      "id": "board",
+      "set": "StadiumSet chalk results board",
+      "colour": "dark green"
+    },
+    {
+      "id": "stadium-end",
+      "set": "StadiumSet wide from above",
+      "colour": "green infield"
+    }
+  ],
+  "characters": [
+    {
+      "id": "lorz",
+      "look": "Runner: white singlet, bib 31, navy shorts, dark hair"
+    },
+    {
+      "id": "hicks",
+      "look": "Runner: white singlet, bib 20, white shorts"
+    },
+    {
+      "id": "driver",
+      "look": "Bearded driver in a duster coat and bowler"
+    },
+    {
+      "id": "official",
+      "look": "Official in a dark suit and bowler, beard"
+    },
+    {
+      "id": "trainers",
+      "look": "Two trainers in white shirts, a boater and a bowler"
+    },
+    {
+      "id": "fans",
+      "look": "Spectators in boaters, bowlers and wide hats"
+    }
+  ],
+  "gags": [
+    {
+      "line": 1,
+      "what": "Lorz hops into the passing car and waves smugly as it drives off"
+    },
+    {
+      "line": 2,
+      "what": "The engine bursts in steam, the car lurches and Lorz is thrown forward"
+    },
+    {
+      "line": 2,
+      "what": "He bursts through the tape and the crowd's hats go flying"
+    },
+    {
+      "line": 5,
+      "what": "Hicks's knees buckle and the two trainers haul him up"
+    }
+  ],
+  "story_numbers": [
+    "31",
+    "20"
+  ]
+}

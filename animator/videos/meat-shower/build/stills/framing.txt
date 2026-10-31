@@ -1,0 +1,2 @@
+  195  face of crouch cut by the frame edge (83% outside)
+  225  face of crouch cut by the frame edge (95% outside)

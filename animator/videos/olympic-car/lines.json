@@ -1,0 +1,52 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic sports-history storyteller. Excited and punchy, vivid emphasis on the surprising turns, a hint of amused disbelief. No long pauses.",
+      "seed": 7,
+      "tempo": 0.94
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "This Olympic runner took a car.",
+      "pauseAfter": 0.35,
+      "voice": {
+        "instruct": "Dramatic, excited opening hook, punchy, amazed, hitting 'took a car' hard.",
+        "tempo": 1.0
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "In the nineteen-oh-four St. Louis marathon, Fred Lorz stopped on a hot, dusty road and got a ride.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "When the car broke down, he ran the final stretch and crossed the finish line first.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "The crowd thought he had won.",
+      "pauseAfter": 0.5
+    },
+    {
+      "speaker": "narrator",
+      "text": "But officials learned about the ride and disqualified him.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "The real winner, Thomas Hicks, was so exhausted he could barely stand.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "The man who crossed first wasn't the winner.",
+      "pauseAfter": 2.2
+    }
+  ]
+}

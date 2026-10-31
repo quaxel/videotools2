@@ -1,0 +1,57 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic true-mystery storyteller. Urgent and excited, punchy rhythm, rising curiosity, vivid emphasis on the strange details. No long pauses.",
+      "seed": 7,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "Kentucky, eighteen seventy-six. Meat fell from the sky.",
+      "pauseAfter": 0.3,
+      "voice": {
+        "instruct": "Dramatic, excited opening hook, punchy and fast, hitting 'Meat fell from the sky' hard, no pause between phrases.",
+        "tempo": 1.15
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "The sky was clear.",
+      "pauseAfter": 0.2
+    },
+    {
+      "speaker": "narrator",
+      "text": "Mrs. Crouch was making soap outside when pieces started landing around her.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "Two men later tasted some and said it was meat.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "How did it get up there?",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "One theory says vultures threw up food while flying overhead.",
+      "pauseAfter": 0.2
+    },
+    {
+      "speaker": "narrator",
+      "text": "But the eighteen seventy-six reports never mention any birds.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "To this day, nobody can prove exactly what happened on that Kentucky farm.",
+      "pauseAfter": 1.4
+    }
+  ]
+}

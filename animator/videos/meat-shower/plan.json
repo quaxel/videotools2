@@ -1,0 +1,36 @@
+{
+  "title": "The Day Meat Fell From the Sky in Kentucky",
+  "topic": "The Day Meat Fell From the Sky in Kentucky",
+  "format_note": "Historical-mystery Short, 28 s by the user's choice (72 words, one farmyard, three people). Overrides the 50-60 s explainer targets on purpose.",
+  "mechanism": "Under a clear sky on 3 March 1876, flakes of animal tissue fell on the Crouch farm in Bath County; the most cited explanation (Kastenbine, 1876) is vultures disgorging food overhead, but no witness mentions birds and it was never proven.",
+  "beats": {
+    "hook": "Clear blue sky; one small pink flake drops through frame onto the grass. MEAT FROM THE SKY?",
+    "story": "Mrs. Crouch stirs her soap kettle in the yard; a flake lands by her hand; she looks up",
+    "rise": "Wide shot: a few more flakes fall on the yard and stick to the worm fence under a cloudless sky. NO CLOUDS. NO STORM.",
+    "twist": "LATER: two neighbours arrive, inspect a piece; one hesitantly tastes it, startled face",
+    "mechanism": "Camera rises to the sky: tiny vulture silhouettes circle far away. ONE THEORY: VULTURES. (a theory, not proven)",
+    "ending": "The birds fade out, camera settles back on the quiet yard and kettle. WHAT REALLY HAPPENED? Music cuts."
+  },
+  "seed": {
+    "what": "The empty clear sky above the farm (where the theory's vultures would be)",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "sky", "set": "FarmyardSet looking up: clear sky gradient, fence top", "colour": "sky blue" },
+    { "id": "kettle", "set": "FarmyardSet soap station: black kettle, fire, ash hopper", "colour": "warm orange / black" },
+    { "id": "yard-wide", "set": "FarmyardSet wide: worm fence, log house, knobs", "colour": "green / tan" },
+    { "id": "yard-later", "set": "FarmyardSet afternoon light, fence close-up", "colour": "golden" },
+    { "id": "sky-birds", "set": "FarmyardSet sky with distant vulture silhouettes", "colour": "pale blue" },
+    { "id": "yard-end", "set": "FarmyardSet quiet yard, slightly cooler", "colour": "cool green" }
+  ],
+  "characters": [
+    { "id": "crouch", "look": "Mrs. Crouch: long brown hair under a cream kerchief, blue calico dress, long white apron (historical re-enactment)" },
+    { "id": "man1", "look": "Bearded neighbour, brimmed felt hat, butternut shirt, brown vest" },
+    { "id": "man2", "look": "Younger neighbour, straw hat, grey shirt, suspenders; the taster" }
+  ],
+  "gags": [
+    { "line": 2, "what": "A flake plops right next to Mrs. Crouch's hand on the kettle rim; she freezes mid-stir and looks up" },
+    { "line": 3, "what": "The second man nibbles a piece, chews, eyes go wide, then a pause and a shrug" }
+  ],
+  "story_numbers": ["two (men)"]
+}
