@@ -254,15 +254,14 @@ const walkMood = (pose: PuppetPose): PuppetPose => {
   if (pose.legSwing === undefined || pose.stride === undefined) return pose;
   const th = pose.stride / 3;
   const e = pose.expression;
-  const arms = (k: number, extra = 0): Partial<PuppetPose> =>
-    pose.armL || pose.armR ? {} : { armL: [6 + (pose.legSwing ?? 0) * 0.8 * k + extra, 12 + extra], armR: [6 - (pose.legSwing ?? 0) * 0.8 * k + extra, 12 + extra] };
+  const arms = (k: number): Partial<PuppetPose> => ({ armSwing: k });
   if (e === "happy" || e === "excited")
-    return { ...pose, bob: (pose.bob ?? 0) * 1.5 - Math.abs(Math.sin(2 * th)) * 8, slump: -0.3, ...arms(1.5, 6) };
+    return { ...pose, bob: (pose.bob ?? 0) * 1.5 - Math.abs(Math.sin(2 * th)) * 8, slump: -0.3, ...arms(1.5) };
   if (e === "sad" || e === "bored" || e === "worried")
     return { ...pose, bob: (pose.bob ?? 0) * 0.5, slump: 0.7, headTilt: (pose.headTilt ?? 0) - 3, ...arms(0.5) };
   if (e === "angry" || e === "determined")
     return { ...pose, bend: (pose.bend ?? 0) + 0.1, handL: "fist", handR: "fist", ...arms(1.4) };
-  return pose;
+  return { ...pose, ...arms(1) };
 };
 
 // Idle acting: slow breathing, a weight shift, glances that hold, blinks at the puppet's own rhythm. While the
@@ -310,9 +309,8 @@ export const livenPose = (
     swing: (pose.swing ?? 0) + swing - (pose.legSwing ?? 0) * 0.3,
     // A blink, and now and then a double blink.
     blink: pose.blink ?? (t < 3 || (noise(id, Math.floor((f + Math.floor(ph * 40)) / period)) < 0.25 && t >= 6 && t < 9)),
-    // Walking arms swing against the legs (these angles read as forward and back in profile).
-    armL: pose.hold?.hand === "L" ? pose.armL : walking ? pose.armL ?? [6 + (pose.legSwing ?? 0) * 0.8, 12] : arm(pose.armL, "L"),
-    armR: pose.hold?.hand === "R" ? pose.armR : walking ? pose.armR ?? [6 - (pose.legSwing ?? 0) * 0.8, 12] : arm(pose.armR, "R"),
+    armL: pose.hold?.hand === "L" || walking ? pose.armL : arm(pose.armL, "L"),
+    armR: pose.hold?.hand === "R" || walking ? pose.armR : arm(pose.armR, "R"),
     face: microFace(pose, id, f, energy),
     // Soft hair trails the head and the breathing: it swings after a head turn and floats against the bob.
     hair: {

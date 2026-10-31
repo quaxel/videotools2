@@ -73,3 +73,37 @@ export const MoveTour: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+// A puppet walking from far away straight toward the camera, in simple perspective (front view the whole way).
+export const WALK_TOWARD_FRAMES = 170;
+export const WalkToward: React.FC = () => {
+  const f = useCurrentFrame();
+  // Camera 1.2 m up, looking level; the floor is drawn in perspective with the horizon at y = 640.
+  const F = 1100;
+  const camH = 1.2;
+  const horizon = 640;
+  const s = stroll(f, 12, 120, [0, 9], [0, 1.8]);
+  const depth = s.at[1];
+  const { pose: live } = livenPose({ expression: "happy", view: "front", ...s.pose }, [0, 0], "toward", f, 1);
+  const groundY = horizon + (F * camH) / depth;
+  const scale = (F * 1.3) / depth / 1060;
+  const lines = [-3, -2, -1, 0, 1, 2, 3];
+  const rows = Array.from({ length: 24 }, (_, i) => 1 + i * 0.6);
+  return (
+    <AbsoluteFill style={{ background: "#fdf3e3" }}>
+      <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
+        <rect x={0} y={horizon} width={1080} height={1920 - horizon} fill="#eadbb8" />
+        {lines.map((x) => (
+          <line key={x} x1={540 + (x * F) / 60} y1={horizon} x2={540 + x * F * 1.2} y2={horizon + (F * camH) / 0.5} stroke="#d4bf94" strokeWidth={3} />
+        ))}
+        {rows.map((z) => (
+          <line key={z} x1={0} y1={horizon + (F * camH) / z} x2={1080} y2={horizon + (F * camH) / z} stroke="#d4bf94" strokeWidth={2} />
+        ))}
+        <ellipse cx={540} cy={groundY} rx={260 * scale} ry={60 * scale} fill="#000" opacity={0.18} />
+        <g transform={`translate(540 ${groundY}) scale(${scale})`}>
+          <Puppet look={LOOK} pose={live} id="toward" />
+        </g>
+      </svg>
+    </AbsoluteFill>
+  );
+};

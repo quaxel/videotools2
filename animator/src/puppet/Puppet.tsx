@@ -87,6 +87,7 @@ export type PuppetPose = {
   crawl?: number; // on hands and knees in profile; the number is the crawl cycle phase (frames)
   stride?: number; // walk cycle phase (frames; `walk` sets it): the swinging leg lifts its foot and bends its knee
   bodyBlend?: number; // like blend, for the body during a moveChange; may dip below 0 and run past 1 (anticipation, overshoot)
+  armSwing?: number; // walking arms swing against the legs this much (1 = normal); arms you set yourself are kept
   squash?: number; // + squashes (landing, sitting down hard), - stretches (take-off); keeps the volume, feet stay put
   hair?: { lift?: number; sway?: number }; // soft hair trailing the body: lift (units, + floats up), sway (degrees)
 };
@@ -725,8 +726,15 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
     const [x, y] = a ?? [12, 10];
     return [x + (4 - x) * lying, y + (2 - y) * lying];
   };
-  const armL = rest(pose.armL);
-  const armR = rest(pose.armR);
+  // Walking arms seen from the front swing toward and away from the camera: the forward arm bends at the elbow and
+  // its hand comes up, the back arm hangs straight. They swing against the legs (right leg forward = left arm forward).
+  const swingArm = (side: -1 | 1): [number, number] | undefined => {
+    if (!pose.armSwing) return undefined;
+    const fwd = -((pose.legSwing ?? 0) / 20) * side * pose.armSwing;
+    return [10 - Math.max(0, -fwd) * 4, 12 + Math.max(0, fwd) * 46];
+  };
+  const armL = rest(pose.armL ?? swingArm(-1));
+  const armR = rest(pose.armR ?? swingArm(1));
   const patternId = `leaf-${id}`;
   const micro = pose.face ?? {};
   const slump = pose.slump ?? 0;
@@ -772,9 +780,20 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
       {/* Legs: swing from the hips, bend at the knee when crouching, fold toward the camera when seated */}
       <g transform={`translate(0 ${-(pose.air ?? 0)})`}>
         {[-1, 1].map((side) => {
+          if (pose.stride !== undefined && seat === 0) {
+            // Walking toward (or away from) the camera: the legs step forward and back, not out to the sides. The
+            // forward foot lands lower on the screen and a little bigger, the back foot higher and smaller; the
+            // swinging leg lifts its foot and its knee comes forward. depth +1 = right leg fully forward.
+            const depth = ((pose.legSwing ?? 0) / 20) * side;
+            const lift = Math.max(0, Math.cos(pose.stride / 3) * side) ** 1.5 * 54;
+            const hip: [number, number] = [side * 55, -280 + drop - depth * 6];
+            const foot: [number, number] = [side * 60, -14 + depth * 26 - lift];
+            const kn = lift > 1 ? knee(hip[0], hip[1], foot[0], foot[1], side * 0.5, 0.4) : lerp2(hip, foot, 0.5);
+            return <Leg key={side} pts={[hip, kn, foot]} foot={[foot[0] + side * 6, foot[1] - 4]} footScale={1.3 * (1 + 0.12 * depth)} />;
+          }
           const hip: [number, number] = [side * 55, -280 + drop];
           const a = ((pose.legSwing ?? 0) * side * Math.PI) / 180;
-          const lift = pose.stride !== undefined ? Math.max(0, Math.cos(pose.stride / 3) * side) * 30 : 0;
+          const lift = 0;
           const standFoot: [number, number] = [side * 55 + Math.sin(a) * 266 + side * 7 + side * crouch * 24, -280 + Math.cos(a) * 266 - lift];
           // Standing and seated outlines, mixed by `seat`.
           const standKnee = crouch > 0 || lift > 0 ? knee(hip[0], hip[1], standFoot[0], standFoot[1], side, 0.2) : lerp2(hip, standFoot, 0.5);
@@ -1034,8 +1053,9 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   const seat = pose.sit ? 1 : Math.max(0, Math.min(1, pose.seat ?? 0));
   // Crouching (and halfway down to a seat) pushes the hips back so the knees come out in front of the body.
   const back = crawling ? 0 : -(crouch * 120 + Math.sin(seat * Math.PI) * 70);
-  const nearArm: [number, number] = crawling ? [62 - cyc * 14, 26] : pose.armR ?? [-swing * 1.2, 14];
-  const farArm: [number, number] = crawling ? [62 + cyc * 14, 26] : pose.armL ?? [swing * 1.2, 14];
+  const sw = pose.armSwing ?? 1;
+  const nearArm: [number, number] = crawling ? [62 - cyc * 14, 26] : pose.armR ?? [-swing * 1.2 * sw, 14 + Math.max(0, -swing) * sw];
+  const farArm: [number, number] = crawling ? [62 + cyc * 14, 26] : pose.armL ?? [swing * 1.2 * sw, 14 + Math.max(0, swing) * sw];
   const leg = (a: number, key: string, phase: number) => {
     const hip: [number, number] = [back, -280 + drop];
     if (crawling) {
