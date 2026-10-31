@@ -1,6 +1,6 @@
 import { Composition } from "remotion";
 import { LakeLitStill, LakePreview } from "./scenes/LakePreview";
-import { FACE_TOUR_STEP, FacePreview, FaceTour } from "./scenes/FacePreview";
+import { FACE_TOUR_STEP, FacePreview, FaceTour, GESTURE_TOUR_FRAMES, GestureTour } from "./scenes/FacePreview";
 import { SlotHook } from "./scenes/SlotHook";
 import { VIDEOS } from "./videos";
 
@@ -11,6 +11,7 @@ export const Root: React.FC = () => (
       <Composition key={v.slug} id={v.slug} component={v.Scene} durationInFrames={v.frames} fps={30} width={1080} height={1920} />
     ))}
     <Composition id="FaceTour" component={FaceTour} durationInFrames={FACE_TOUR_STEP * 15} fps={30} width={1080} height={1920} />
+    <Composition id="GestureTour" component={GestureTour} durationInFrames={GESTURE_TOUR_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="FacePreview" component={FacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SlotHook" component={SlotHook} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="LakePreview" component={LakePreview} durationInFrames={150} fps={30} width={1080} height={1920} />

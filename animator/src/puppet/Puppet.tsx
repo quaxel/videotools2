@@ -1,4 +1,5 @@
 import React from "react";
+import type { Gesture } from "./gestures";
 
 // A flat 2D cartoon puppet: round head, dot eyes, bean body, stick limbs.
 // Origin is between the feet; the figure is ~1060 units tall (head top at y = -1060).
@@ -67,7 +68,19 @@ export type PuppetPose = {
   face?: FaceMicro; // micro-expression offsets (Stage adds them automatically)
   from?: Expression; // the expression being left; with blend < 1 the face eases from it to `expression`
   blend?: number; // 0 = still showing `from`, 1 = fully `expression` (see faceChange in engine/anim.ts)
+  lean?: number; // degrees the upper body tips from the hips, + toward screen right
+  slump?: number; // 1 = shoulders and head sink (sad, bored), -1 = chest up and shoulders raised (proud, shrug)
+  reachL?: [number, number]; // put the screen-left hand at this point (puppet units); overrides armL
+  reachR?: [number, number];
+  frontL?: boolean; // draw the arm over the body and head (crossed arms, hand on chin, facepalm)
+  frontR?: boolean;
+  handL?: HandShape;
+  handR?: HandShape;
+  gesture?: Gesture; // a ready-made body pose from gestures.ts (animated by Stage); fields set here win over it
+  fromGesture?: Gesture; // with blend < 1, the gesture being left (see moveChange in engine/anim.ts)
 };
+
+export type HandShape = "open" | "point" | "fist";
 
 // Mouth shapes: closed lips (m, b, p), rounded (o, u, w), wide (e, i), open (a), lip under teeth (f, v).
 export type Viseme = "mbp" | "o" | "e" | "a" | "fv";
@@ -111,7 +124,21 @@ const Cel: React.FC<{ uid: string; name: string; d: string; dx?: number; dy?: nu
 };
 
 // Mitten hand: a palm, one block for the four fingers and a thumb. Drawn around the wrist point, fingers along the forearm.
-const Hand: React.FC<{ x: number; y: number; side: 1 | -1; angle: number }> = ({ x, y, side, angle }) => (
+const Hand: React.FC<{ x: number; y: number; side: 1 | -1; angle: number; shape?: HandShape }> = ({ x, y, side, angle, shape = "open" }) =>
+  shape === "fist" ? (
+    <g transform={`translate(${x} ${y}) rotate(${-side * angle}) scale(1.17)`}>
+      <ellipse cx={0} cy={8} rx={30} ry={30} fill={INK} />
+    </g>
+  ) : shape === "point" ? (
+    // Index finger straight out along the forearm, the thumb tucked up.
+    <g transform={`translate(${x} ${y}) rotate(${-side * angle}) scale(1.17)`}>
+      <g stroke={INK} strokeLinecap="round" fill="none">
+        <line x1={0} y1={10} x2={0} y2={60} strokeWidth={20} />
+        <line x1={side * 14} y1={-4} x2={side * 30} y2={6} strokeWidth={20} />
+      </g>
+      <ellipse cx={0} cy={4} rx={27} ry={26} fill={INK} />
+    </g>
+  ) : (
   <g transform={`translate(${x} ${y}) rotate(${-side * angle}) scale(1.17)`}>
     <g stroke={INK} strokeLinecap="round" fill="none">
       <line x1={0} y1={12} x2={0} y2={22} strokeWidth={52} />
@@ -119,7 +146,7 @@ const Hand: React.FC<{ x: number; y: number; side: 1 | -1; angle: number }> = ({
     </g>
     <ellipse cx={0} cy={0} rx={27} ry={26} fill={INK} />
   </g>
-);
+  );
 
 // Simple rounded foot.
 const Foot: React.FC<{ x: number; y: number; scale?: number }> = ({ x, y, scale = 1.3 }) => (
@@ -283,25 +310,48 @@ const Item: React.FC<{ item: HeldItem }> = ({ item }) => {
   );
 };
 
-const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, number]; item?: HeldItem; tilt?: number; drop?: number }> = ({
+const UPPER = 130;
+const LOWER = 120;
+
+// Two-bone reach: the elbow and hand for a hand placed at (tx, ty), the elbow bending outward and down.
+const reachArm = (x: number, y: number, side: 1 | -1, tx: number, ty: number) => {
+  const dx = tx - x;
+  const dy = ty - y;
+  const d = Math.min(UPPER + LOWER - 1, Math.max(Math.abs(UPPER - LOWER) + 1, Math.hypot(dx, dy)));
+  const base = Math.atan2(dy, dx);
+  const off = Math.acos((UPPER * UPPER + d * d - LOWER * LOWER) / (2 * UPPER * d));
+  // Of the two elbow positions, take the one further out to this arm's side (then lower).
+  const cand = [base + off, base - off].map((a) => [x + Math.cos(a) * UPPER, y + Math.sin(a) * UPPER] as [number, number]);
+  const [ex, ey] = cand.sort((p, q) => side * (q[0] - p[0]) + (q[1] - p[1]) * 0.3)[0];
+  const hx = ex + ((tx - ex) / Math.hypot(tx - ex, ty - ey)) * LOWER;
+  const hy = ey + ((ty - ey) / Math.hypot(tx - ex, ty - ey)) * LOWER;
+  return { ex, ey, hx, hy };
+};
+
+const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, number]; reach?: [number, number]; hand?: HandShape; item?: HeldItem; tilt?: number; drop?: number }> = ({
   x,
   y,
   side,
   angles,
+  reach,
+  hand,
   item,
   tilt = 0,
   drop,
 }) => {
   const [shoulder, elbow] = angles;
-  const upper = 130;
-  const lower = 120;
   // Angles open outward, away from the body.
   const a1 = (shoulder * Math.PI) / 180;
-  const ex = x + side * Math.sin(a1) * upper;
-  const ey = y + Math.cos(a1) * upper;
   const a2 = ((shoulder + elbow) * Math.PI) / 180;
-  const hx = ex + side * Math.sin(a2) * lower;
-  const hy = ey + Math.cos(a2) * lower;
+  const { ex, ey, hx, hy } = reach
+    ? reachArm(x, y, side, reach[0], reach[1])
+    : (() => {
+        const ex = x + side * Math.sin(a1) * UPPER;
+        const ey = y + Math.cos(a1) * UPPER;
+        return { ex, ey, hx: ex + side * Math.sin(a2) * LOWER, hy: ey + Math.cos(a2) * LOWER };
+      })();
+  // Forearm direction as an angle from straight down, outward positive (what Hand expects).
+  const fore = (Math.atan2(side * (hx - ex), hy - ey) * 180) / Math.PI;
   return (
     <g>
       <polyline
@@ -320,7 +370,7 @@ const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, numbe
       {drop !== undefined && (
         <ellipse cx={hx} cy={hy + 60 + drop} rx={22} ry={22 * Math.abs(Math.cos(drop / 40))} fill="#ffcc33" stroke={INK} strokeWidth={7} />
       )}
-      <Hand x={hx} y={hy} side={side} angle={shoulder + elbow} />
+      <Hand x={hx} y={hy} side={side} angle={fore} shape={hand} />
     </g>
   );
 };
@@ -624,6 +674,29 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
   const armR = pose.armR ?? [12, 10];
   const patternId = `leaf-${id}`;
   const micro = pose.face ?? {};
+  const slump = pose.slump ?? 0;
+  const sh = -545 + slump * 22; // shoulder height
+  const headDrop = slump * 34;
+  const head = `translate(0 ${headDrop}) rotate(${pose.headTilt ?? 0} 0 -640)`;
+  const arm = (side: "L" | "R") => {
+    const s = side === "L" ? -1 : 1;
+    const held = pose.hold?.hand === side;
+    return (
+      <Arm
+        x={s * 130}
+        y={sh}
+        side={s}
+        angles={side === "L" ? armL : armR}
+        reach={side === "L" ? pose.reachL : pose.reachR}
+        hand={side === "L" ? pose.handL : pose.handR}
+        item={held ? pose.hold!.item : undefined}
+        tilt={held ? pose.itemTilt : undefined}
+        drop={held ? pose.coinDrop : undefined}
+      />
+    );
+  };
+  // Holding arms and front arms come over the body; the rest hang behind it.
+  const inFront = (side: "L" | "R") => pose.hold?.hand === side || (side === "L" ? pose.frontL : pose.frontR);
   // A held (not talking) mouth breathes in width; any mouth can drift a little.
   const held = !pose.viseme && (pose.mouthOpen ?? 0) <= 0.05;
   const blend = pose.from ? Math.min(1, Math.max(0, pose.blend ?? 1)) : 1;
@@ -662,10 +735,10 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         );
       })}
 
-      <g transform={`translate(0 ${bob})`}>
+      <g transform={`translate(0 ${bob}) rotate(${pose.lean ?? 0} 0 -280)`}>
         {/* Long hair hangs behind the body (and the arms), so none of it shows under the chin */}
         {look.long && (
-          <g transform={`rotate(${pose.headTilt ?? 0} 0 -640)`}>
+          <g transform={head}>
             <path
               d={FRONT_LONG_D}
               fill={look.hair}
@@ -677,8 +750,8 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           </g>
         )}
         {/* Arms behind the body */}
-        {pose.hold?.hand !== "L" && <Arm x={-130} y={-545} side={-1} angles={armL} />}
-        {pose.hold?.hand !== "R" && <Arm x={130} y={-545} side={1} angles={armR} />}
+        {!inFront("L") && arm("L")}
+        {!inFront("R") && arm("R")}
 
         {/* Bean body */}
         <path
@@ -716,11 +789,11 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         )}
         </g>
         {/* A holding arm comes in front of the body so the item shows */}
-        {pose.hold?.hand === "L" && <Arm x={-130} y={-545} side={-1} angles={armL} item={pose.hold.item} tilt={pose.itemTilt} drop={pose.coinDrop} />}
-        {pose.hold?.hand === "R" && <Arm x={130} y={-545} side={1} angles={armR} item={pose.hold.item} tilt={pose.itemTilt} drop={pose.coinDrop} />}
+        {pose.hold?.hand === "L" && arm("L")}
+        {pose.hold?.hand === "R" && arm("R")}
 
         {/* Head */}
-        <g transform={`rotate(${pose.headTilt ?? 0} 0 -640)`}>
+        <g transform={head}>
           <circle cx={0} cy={-800} r={205} fill={look.skin} stroke={INK} strokeWidth={STROKE} />
           {/* The bangs cast a shadow on the forehead */}
           <Cel
@@ -788,6 +861,9 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             </g>
           )}
         </g>
+        {/* Arms that cross the body or touch the face */}
+        {pose.frontL && pose.hold?.hand !== "L" && arm("L")}
+        {pose.frontR && pose.hold?.hand !== "R" && arm("R")}
       </g>
     </g>
   );

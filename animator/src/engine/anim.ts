@@ -1,3 +1,4 @@
+import type { Gesture } from "../puppet/gestures";
 import type { Expression, PuppetPose } from "../puppet/Puppet";
 
 // Small animation helpers shared by every scene. Frames are shot-local unless a name says otherwise.
@@ -44,4 +45,20 @@ export const faceChange = (steps: [number, Expression][], f: number, len = 10): 
   if (i === 0 || f - start >= len) return { expression };
   const p = clamp01((f - start) / len);
   return { expression, from: steps[i - 1][1], blend: p * p * (3 - 2 * p) };
+};
+
+// Like faceChange, for the whole body: each step names an expression and, optionally, a gesture. Over `len`
+// frames after each start, the face and the body (gesture or the expression's posture) ease from the previous step.
+export const moveChange = (
+  steps: [number, Expression, Gesture?][],
+  f: number,
+  len = 12,
+): Pick<PuppetPose, "expression" | "from" | "blend" | "gesture" | "fromGesture"> => {
+  let i = 0;
+  while (i + 1 < steps.length && steps[i + 1][0] <= f) i++;
+  const [start, expression, gesture] = steps[i];
+  if (i === 0 || f - start >= len) return { expression, gesture };
+  const p = clamp01((f - start) / len);
+  const [, from, fromGesture] = steps[i - 1];
+  return { expression, gesture, from, fromGesture, blend: p * p * (3 - 2 * p) };
 };

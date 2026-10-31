@@ -1,4 +1,5 @@
-import { FaceMicro, PuppetPose } from "../puppet/Puppet";
+import { Expression, FaceMicro, PuppetPose } from "../puppet/Puppet";
+import { Gesture, GESTURES, POSTURE } from "../puppet/gestures";
 import { CameraShot } from "./stage";
 import { Vec3 } from "./anim";
 
@@ -154,6 +155,82 @@ const moodLook = (pose: PuppetPose, id: string, f: number) => {
   return undefined;
 };
 
+// Body language. A pose with a `gesture` takes that gesture; a pose that authors no arms takes its expression's
+// posture (eased between the two expressions during a faceChange); any other pose only borrows the posture's slump
+// and lean. Fields the pose sets itself always win. This runs even at energy 0, since it is what the shot asked for.
+const ARM: [number, number] = [12, 10];
+const mixN = (a: number | undefined, b: number | undefined, t: number) => (a ?? 0) + ((b ?? 0) - (a ?? 0)) * t;
+const mixPair = (a: [number, number] | undefined, b: [number, number] | undefined, t: number, rest: [number, number]): [number, number] => {
+  const [x, y] = a ?? rest;
+  const [u, v] = b ?? rest;
+  return [x + (u - x) * t, y + (v - y) * t];
+};
+// Where a hand hangs for shoulder / elbow angles (the same sums Puppet's Arm does), so an angled arm can glide to a reach.
+const handAt = (side: -1 | 1, [sh, el]: [number, number]): [number, number] => {
+  const a1 = (sh * Math.PI) / 180;
+  const a2 = ((sh + el) * Math.PI) / 180;
+  return [side * (130 + Math.sin(a1) * 130 + Math.sin(a2) * 120), -545 + Math.cos(a1) * 130 + Math.cos(a2) * 120];
+};
+
+// Ease one body pose into another: numbers glide, a hanging arm and a reaching one meet as reach points,
+// and things that cannot be in between (front or behind, hand shape) switch halfway.
+const mixBody = (a: Partial<PuppetPose>, b: Partial<PuppetPose>, t: number): Partial<PuppetPose> => {
+  const pick = <T,>(x: T, y: T) => (t < 0.5 ? x : y);
+  const arm = (side: -1 | 1) => {
+    const [rk, ak] = side < 0 ? (["reachL", "armL"] as const) : (["reachR", "armR"] as const);
+    if (!a[rk] && !b[rk]) return { [ak]: mixPair(a[ak], b[ak], t, ARM) };
+    const from = a[rk] ?? handAt(side, a[ak] ?? ARM);
+    const to = b[rk] ?? handAt(side, b[ak] ?? ARM);
+    return { [rk]: mixPair(from, to, t, ARM) };
+  };
+  return {
+    slump: mixN(a.slump, b.slump, t),
+    lean: mixN(a.lean, b.lean, t),
+    headTilt: mixN(a.headTilt, b.headTilt, t),
+    bob: mixN(a.bob, b.bob, t),
+    ...arm(-1),
+    ...arm(1),
+    frontL: pick(a.frontL, b.frontL),
+    frontR: pick(a.frontR, b.frontR),
+    handL: pick(a.handL, b.handL),
+    handR: pick(a.handR, b.handR),
+  };
+};
+
+// The moving part of a gesture: the wave swings, the clap claps, the cheer pumps, the point jabs.
+const gestureMotion = (g: Gesture | undefined, pose: Partial<PuppetPose>, f: number): Partial<PuppetPose> => {
+  if (g === "wave" && pose.armR) return { armR: [pose.armR[0], pose.armR[1] + Math.sin(f / 3) * 22] };
+  if (g === "clap" && pose.reachL && pose.reachR) {
+    const open = Math.abs(Math.sin(f / 4)) * 46;
+    return { reachL: [pose.reachL[0] - open, pose.reachL[1]], reachR: [pose.reachR[0] + open, pose.reachR[1]] };
+  }
+  if (g === "cheer" && pose.armR) {
+    const pump = Math.abs(Math.sin(f / 5));
+    return { armR: [pose.armR[0] - pump * 18, pose.armR[1] + pump * 14], bob: (pose.bob ?? 0) - pump * 14 };
+  }
+  if (g === "point" && pose.armR) return { armR: [pose.armR[0] + Math.max(0, Math.sin(f / 6)) * 6, pose.armR[1]] };
+  if (g === "shrug") return { slump: (pose.slump ?? 0) - Math.max(0, Math.sin(f / 10)) * 0.3 };
+  return {};
+};
+
+// The body a gesture or an expression asks for, with the gesture's motion at frame f.
+const bodyFor = (g: Gesture | undefined, e: Expression, f: number): Partial<PuppetPose> => {
+  if (!g) return POSTURE[e];
+  const p = GESTURES[g];
+  return { ...p, ...gestureMotion(g, p, f) };
+};
+
+export const bodyPose = (pose: PuppetPose, f: number): PuppetPose => {
+  if (pose.sit || pose.legSwing !== undefined || pose.hold) return pose;
+  const t = pose.blend;
+  const changing = t !== undefined && t < 1 && (pose.from !== undefined || pose.fromGesture !== undefined);
+  const target = bodyFor(pose.gesture, pose.expression, f);
+  const body = changing ? mixBody(bodyFor(pose.fromGesture, pose.from ?? pose.expression, f), target, t!) : target;
+  const authored = pose.armL || pose.armR || pose.reachL || pose.reachR;
+  if (authored && !pose.gesture) return { ...pose, slump: pose.slump ?? body.slump, lean: pose.lean ?? body.lean };
+  return { ...body, ...pose, headTilt: (body.headTilt ?? 0) + (pose.headTilt ?? 0), bob: (body.bob ?? 0) + (pose.bob ?? 0) };
+};
+
 // Idle acting: slow breathing, a weight shift, glances that hold, blinks at the puppet's own rhythm. While the
 // puppet talks, `speech` adds a beat gesture on each stressed syllable (a nod, an arm, or a lean) instead of
 // constant flapping; the elbow trails the shoulder, and the lanyard and cap brim lag the head (`swing`).
@@ -167,6 +244,7 @@ export const livenPose = (
   energy: number,
   speech?: (Beats & { prev: Beats }) | null,
 ): { pose: PuppetPose; at: [number, number] } => {
+  pose = bodyPose(pose, f);
   if (energy <= 0) return { pose, at };
   const ph = hash(id) * Math.PI * 2;
   const now: Beats = speech ?? { nod: 0, arm: 0, lean: 0 };
@@ -199,6 +277,9 @@ export const livenPose = (
     armL: pose.hold?.hand === "L" || walking ? pose.armL : arm(pose.armL, "L"),
     armR: pose.hold?.hand === "R" || walking ? pose.armR : arm(pose.armR, "R"),
     face: microFace(pose, id, f, energy),
+    // Reaching hands drift a little and dip on a beat, like hanging ones.
+    reachL: pose.reachL && [pose.reachL[0] + Math.sin(f / 17 + ph) * 3 * energy, pose.reachL[1] + Math.sin(f / 13 + ph) * 3 * energy + now.arm * 8],
+    reachR: pose.reachR && [pose.reachR[0] + Math.sin(f / 15 + ph + 1) * 3 * energy, pose.reachR[1] + Math.sin(f / 11 + ph + 1) * 3 * energy + now.arm * 14],
   };
   return { pose: live, at: [at[0] + shift(f, now), at[1]] };
 };
