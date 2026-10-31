@@ -248,8 +248,9 @@ export const bodyPose = (pose: PuppetPose, f: number): PuppetPose => {
   return { ...body, ...pose, headTilt: (body.headTilt ?? 0) + (pose.headTilt ?? 0), bob: (body.bob ?? 0) + (pose.bob ?? 0) };
 };
 
-// A walk carries the mood (personality lives in the bob and the passing pose): happy bounces, sad drags low with
-// the head down, angry and determined lean in and pump the arms.
+// A walk carries the mood (personality lives in the bob and the passing pose). Every expression has its own gait,
+// applied automatically to any walking puppet: happy bounces, sad drags low, angry leans in and pumps the arms,
+// smug swaggers, confused hesitates, awkward goes stiff…
 const walkMood = (pose: PuppetPose): PuppetPose => {
   if (pose.legSwing === undefined || pose.stride === undefined) return pose;
   const th = pose.stride / 3;
@@ -257,10 +258,44 @@ const walkMood = (pose: PuppetPose): PuppetPose => {
   const arms = (k: number): Partial<PuppetPose> => ({ armSwing: k });
   if (e === "happy" || e === "excited")
     return { ...pose, bob: (pose.bob ?? 0) * 1.5 - Math.abs(Math.sin(2 * th)) * 8, slump: -0.3, ...arms(1.5) };
-  if (e === "sad" || e === "bored" || e === "worried")
-    return { ...pose, bob: (pose.bob ?? 0) * 0.5, slump: 0.7, headTilt: (pose.headTilt ?? 0) - 3, ...arms(0.5) };
+  if (e === "sad" || e === "bored")
+    // A heavy, dragging walk: the feet barely leave the floor, the body sinks on every step (reversed bob) and
+    // rolls from side to side, the head hangs and lolls a beat behind, the arms dangle.
+    return {
+      ...pose,
+      bob: Math.abs(Math.sin(2 * th)) * 9 - 4,
+      slump: 0.9,
+      lean: (pose.lean ?? 0) * 2.4,
+      headTilt: (pose.headTilt ?? 0) * 1.8 - 5 + Math.sin(th - 1.2) * 3,
+      stepLift: 0.3,
+      hair: { lift: (pose.hair?.lift ?? 0) * 0.4, sway: (pose.hair?.sway ?? 0) * 1.6 },
+      ...arms(0.3),
+    };
+  if (e === "worried")
+    return { ...pose, bob: (pose.bob ?? 0) * 0.5, slump: 0.6, headTilt: (pose.headTilt ?? 0) - 3, stepLift: 0.6, ...arms(0.5) };
   if (e === "angry" || e === "determined")
     return { ...pose, bend: (pose.bend ?? 0) + 0.1, handL: "fist", handR: "fist", ...arms(1.4) };
+  if (e === "smug")
+    // A swagger: chest out, chin up, the hips and shoulders roll wide, arms loose and easy.
+    return { ...pose, slump: -0.3, lean: (pose.lean ?? 0) * 2.2, headTilt: (pose.headTilt ?? 0) * 1.5 + 3, bob: (pose.bob ?? 0) * 1.2, ...arms(1.2) };
+  if (e === "skeptical")
+    // Unhurried and guarded: small arm swing, head cocked to one side.
+    return { ...pose, headTilt: (pose.headTilt ?? 0) + 5, ...arms(0.6) };
+  if (e === "confused")
+    // Hesitant: unsure steps, the head wobbling as if looking for the way.
+    return { ...pose, stepLift: 0.7, headTilt: (pose.headTilt ?? 0) + Math.sin(th * 0.5) * 6, ...arms(0.6) };
+  if (e === "thinking")
+    // Lost in thought: slow, the head down a little, arms barely moving.
+    return { ...pose, slump: 0.2, headTilt: (pose.headTilt ?? 0) - 2, stepLift: 0.8, ...arms(0.35) };
+  if (e === "awkward")
+    // Stiff and self-conscious: little bounce, arms held close, almost no sway.
+    return { ...pose, bob: (pose.bob ?? 0) * 0.6, lean: (pose.lean ?? 0) * 0.4, slump: 0.25, ...arms(0.2) };
+  if (e === "shocked")
+    // Jumpy: a bigger bob, arms flapping wider.
+    return { ...pose, bob: (pose.bob ?? 0) * 1.3, slump: -0.2, ...arms(1.6) };
+  if (e === "disgusted")
+    // Shrinking back from something: shoulders up, head turned down and away.
+    return { ...pose, slump: -0.2, headTilt: (pose.headTilt ?? 0) - 6, ...arms(0.5) };
   return { ...pose, ...arms(1) };
 };
 

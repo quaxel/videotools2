@@ -87,6 +87,7 @@ export type PuppetPose = {
   crawl?: number; // on hands and knees in profile; the number is the crawl cycle phase (frames)
   stride?: number; // walk cycle phase (frames; `walk` sets it): the swinging leg lifts its foot and bends its knee
   bodyBlend?: number; // like blend, for the body during a moveChange; may dip below 0 and run past 1 (anticipation, overshoot)
+  stepLift?: number; // how high a walking foot lifts (1 = normal, 0.3 = a dragging shuffle)
   armSwing?: number; // walking arms swing against the legs this much (1 = normal); arms you set yourself are kept
   squash?: number; // + squashes (landing, sitting down hard), - stretches (take-off); keeps the volume, feet stay put
   hair?: { lift?: number; sway?: number }; // soft hair trailing the body: lift (units, + floats up), sway (degrees)
@@ -785,7 +786,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             // forward foot lands lower on the screen and a little bigger, the back foot higher and smaller; the
             // swinging leg lifts its foot and its knee comes forward. depth +1 = right leg fully forward.
             const depth = ((pose.legSwing ?? 0) / 20) * side;
-            const lift = Math.max(0, Math.cos(pose.stride / 3) * side) ** 1.5 * 54;
+            const lift = Math.max(0, Math.cos(pose.stride / 3) * side) ** 1.5 * 54 * (pose.stepLift ?? 1);
             const hip: [number, number] = [side * 55, -280 + drop - depth * 6];
             const foot: [number, number] = [side * 60, -14 + depth * 26 - lift];
             const kn = lift > 1 ? knee(hip[0], hip[1], foot[0], foot[1], side * 0.5, 0.4) : lerp2(hip, foot, 0.5);
@@ -1066,7 +1067,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
     }
     const r = (a * Math.PI) / 180;
     // Walking: the leg swinging forward (the far leg while cos(stride / 3) > 0) lifts its foot, so its knee bends.
-    const lift = pose.stride !== undefined ? Math.max(0, Math.cos(pose.stride / 3) * (phase >= 0 ? 1 : -1)) * 46 : 0;
+    const lift = pose.stride !== undefined ? Math.max(0, Math.cos(pose.stride / 3) * (phase >= 0 ? 1 : -1)) * 46 * (pose.stepLift ?? 1) : 0;
     const standFoot: [number, number] = [Math.sin(r) * 266 + crouch * 70, -280 + Math.cos(r) * 266 - lift];
     const standKnee = crouch > 0 || lift > 0 ? knee(hip[0], hip[1], standFoot[0], standFoot[1], 1, -0.6) : lerp2(hip, standFoot, 0.5);
     const seated: [number, number][] = [[0, -280], [150, -282], [146, -20]];
