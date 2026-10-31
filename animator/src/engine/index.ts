@@ -14,4 +14,5 @@ export { Campfire, DOCK, FIRE, firePoint, Haze, LakeSet, lakeLight, Pine, Ridge,
 export { moodLight } from "../three/moods";
 export { AIRLOCK, HOLO, SpaceBaseSet, spaceLight } from "../three/SpaceBaseSet";
 export { ALLEY, AlleySet, alleyLight, CAR_X, carZ, COOK, SEATS, STALL } from "../three/AlleySet";
+export { GreatWallSet, WALL, wallLight } from "../three/GreatWallSet";
 export * from "./liven";

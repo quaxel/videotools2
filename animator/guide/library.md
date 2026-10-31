@@ -104,6 +104,19 @@ Built from photo references: `guide/references/rainy-alley.md`.
 - Light puppets with `light={alleyLight(f, car)}` (the stall's tube, its red lantern, or the car's headlights).
   Example shots: `src/scenes/AlleyPreview.tsx` (composition `AlleyPreview`).
 
+### The Great Wall at golden hour (`src/three/GreatWallSet.tsx`)
+
+Built from photo references: `guide/references/great-wall.md`.
+- `GreatWallSet({ camera, frame })` — the walkway (x ±`WALL.half`, floor y = 0) runs along -z between a crenellated
+  outer parapet (left, merlons with loopholes) and a low inner parapet (right); at z = `WALL.stairs` it bends right and
+  climbs in steps to a brick watchtower with an arched doorway and a tiled pavilion. Green slopes with shrubs drop away
+  on both sides; beyond, ranges fade into haze with the wall snaking along every crest and a tower on each peak
+  (parallax shares of the camera's x). Swallows cross the valley.
+- Puppets walk on the flat part (z between `WALL.stairs` and 4.5); walk them toward the camera with `stroll`. For the
+  view, put the camera high enough to see over the outer parapet (y ≈ 1.8) and look out to the left.
+- Light puppets with `light={wallLight()}` (low golden sun behind-right: warm side light and rim).
+  Example shots: `src/scenes/GreatWallPreview.tsx` (composition `GreatWallPreview`).
+
 ## Puppets
 
 `PuppetPlacement = { id, look, pose, at: [x, z] }` — feet on the floor at (x, z); always faces the camera.

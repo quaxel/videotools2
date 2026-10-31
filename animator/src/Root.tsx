@@ -3,6 +3,7 @@ import { LakeLitStill, LakePreview } from "./scenes/LakePreview";
 import { FACE_TOUR_STEP, FacePreview, FaceTour, GESTURE_TOUR_FRAMES, GestureTour } from "./scenes/FacePreview";
 import { MOVE_TOUR_FRAMES, MoveTour, WALK_TOWARD_FRAMES, WalkToward } from "./scenes/MovePreview";
 import { AlleyPreview } from "./scenes/AlleyPreview";
+import { GreatWallPreview } from "./scenes/GreatWallPreview";
 import { SlotHook } from "./scenes/SlotHook";
 import { SpacePreview } from "./scenes/SpacePreview";
 import { VIDEOS } from "./videos";
@@ -19,6 +20,7 @@ export const Root: React.FC = () => (
     <Composition id="WalkToward" component={WalkToward} durationInFrames={WALK_TOWARD_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="FacePreview" component={FacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SlotHook" component={SlotHook} durationInFrames={150} fps={30} width={1080} height={1920} />
+    <Composition id="GreatWallPreview" component={GreatWallPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="AlleyPreview" component={AlleyPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SpacePreview" component={SpacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="LakePreview" component={LakePreview} durationInFrames={150} fps={30} width={1080} height={1920} />

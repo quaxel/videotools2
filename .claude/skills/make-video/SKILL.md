@@ -51,7 +51,7 @@ message and continue unless they object.
 
 For a location the kit does not already have, research it first (library.md → New locations: research references
 first): look at 3-5 photo references in the browser, write `guide/references/<set>.md`, then build the set from it.
-Reuse existing sets where they fit (`LakeSet`, `SpaceBaseSet`, `AlleySet`).
+Reuse existing sets where they fit (`LakeSet`, `SpaceBaseSet`, `AlleySet`, `GreatWallSet`).
 
 Write the shot list against the printed frames: cut on line and caption boundaries, average ≤ 2.2 s, none
 over 4 s, whip (`true`) on location changes. Use `Room` + kit props for new locations, and a different mood per
