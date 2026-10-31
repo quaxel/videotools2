@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react";
-import { AbsoluteFill, Audio, staticFile } from "remotion";
+import { AbsoluteFill, Audio, getInputProps, staticFile } from "remotion";
 import { CaptionChunk, Captions } from "../ui/Captions";
 import { Shot, ShotList, useFinalFrame } from "./clock";
 import { MusicCue, Sfx, SoundTrack } from "./sound";
@@ -15,12 +15,21 @@ export type Timing = {
   mouth?: Record<string, string>; // per speaker: one digit 0-9 per frame, how open the mouth is (from the voice)
 };
 
-// What the shots can read about the whole video: the voice timing and the effect cues.
-const VideoContext = createContext<{ timing: Timing; sfx: Sfx[] } | null>(null);
+// What the shots can read about the whole video: the voice timing, the effect cues and whether puppets are lit.
+const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean } | null>(null);
 
-export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[] }> = ({ slug, timing, shots, sfx, music }) => (
+// `lighting` (default on): puppets take the set's light (a rig derived from the mood, or a Stage's own `light`)
+// instead of the flat mood tint. Videos made before it existed pass `lighting={false}` to keep their look.
+export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean }> = ({
+  slug,
+  timing,
+  shots,
+  sfx,
+  music,
+  lighting = true,
+}) => (
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
-    <VideoContext.Provider value={{ timing, sfx }}>
+    <VideoContext.Provider value={{ timing, sfx, lighting }}>
       <ShotList shots={shots} />
     </VideoContext.Provider>
     <Audio src={staticFile(`videos/${slug}/voice.wav`)} />
@@ -28,6 +37,14 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
     <Captions chunks={timing.captions} />
   </AbsoluteFill>
 );
+
+// Whether puppets are lit in this video. The `lighting` input prop overrides it, to preview an older video lit:
+//   npx remotion still <slug> out/x.png --frame=300 --props='{"lighting":true}'
+export const useLighting = () => {
+  const override = (getInputProps() as { lighting?: boolean }).lighting;
+  const video = useContext(VideoContext);
+  return override ?? video?.lighting ?? false;
+};
 
 // True while `speaker` is saying a word at this final frame (drives mouthOpen).
 export const speaking = (timing: Timing, speaker: string, finalFrame: number) =>

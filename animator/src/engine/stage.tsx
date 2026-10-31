@@ -3,12 +3,12 @@ import { AbsoluteFill, useVideoConfig } from "remotion";
 import { useThree } from "@react-three/fiber";
 import { ThreeCanvas } from "@remotion/three";
 import * as THREE from "three";
-import { PuppetBillboard, PuppetPlacement } from "../puppet/PuppetBillboard";
+import { PuppetBillboard, PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";
 import { Vec3 } from "./anim";
 import { useShotDuration, useShotFrame } from "./clock";
-import { puppetTint } from "../three/moods";
+import { lightForBackground, puppetTint } from "../three/moods";
 import { livenCamera, livenPose } from "./liven";
-import { useImpact, useSpeech } from "./Video";
+import { useImpact, useLighting, useSpeech } from "./Video";
 
 export type CameraShot = { position: Vec3; target: Vec3; fov: number };
 
@@ -70,18 +70,21 @@ export const Stage: React.FC<{
   truth?: number;
   flash?: number;
   energy?: number;
-}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1 }) => {
+  light?: PuppetLight; // the set's lights as puppets see them (fire, lamps, sun); default: derived from the mood
+}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1, light }) => {
   const { width, height } = useVideoConfig();
   const f = useShotFrame();
   const camera = shake(livenCamera(authored, f, useShotDuration(), energy), useImpact(), f);
   const speech = useSpeech();
   const tint = puppetTint(bg);
+  // Lit videos light puppets from the Stage's own rig, or one derived from the mood its background belongs to.
+  const lit = light ?? (useLighting() ? lightForBackground(bg) : undefined);
   const cast = puppets.map((p) => {
     // A speaking puppet's mouth follows its voice, over whatever the shot authored.
     const said = speech(p.id);
     const pose = said === null ? p.pose : { ...p.pose, mouthOpen: said.mouth, viseme: said.viseme };
     const live = livenPose(pose, p.at, p.id, f, energy, said);
-    return <PuppetBillboard key={p.id} {...p} pose={live.pose} at={live.at} tint={tint} />;
+    return <PuppetBillboard key={p.id} {...p} pose={live.pose} at={live.at} tint={tint} light={p.light ?? lit} />;
   });
   // Rendered after the set, this rig wins over the set's own and applies the livened camera.
   const rig = <CameraRig {...camera} />;

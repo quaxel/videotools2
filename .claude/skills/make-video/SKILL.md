@@ -52,6 +52,9 @@ message and continue unless they object.
 Write the shot list against the printed frames: cut on line and caption boundaries, average ≤ 2.2 s, none
 over 4 s, whip (`true`) on location changes. Use `Room` + kit props for new locations, and a different mood per
 location. Put the seed on screen by its line. Add SFX for every mechanical action and MUSIC cues.
+Puppets are lit by the set (library.md → Puppet lighting): leave `lighting` on. Ambient room colour does not
+change them; where a shot has a strong source (fire, lamp, headlights) pass a Stage `light` with that point or distant light. Outdoors, reuse `LakeSet` or its pieces (`Campfire`,
+`SmokePlume`, `Pine`, `Ridge` + `Haze` with parallax) and truck the camera sideways in front of distant backdrops.
 
 ```bash
 .venv/bin/python scripts/pipeline.py check <slug>

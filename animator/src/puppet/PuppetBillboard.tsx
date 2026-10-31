@@ -30,6 +30,127 @@ export type PuppetPlacement = {
   pose: PuppetPose;
   at: [number, number]; // feet position on the floor: x, z
   tint?: string; // multiplies the cut-out's colours, so it takes on the set's light (Stage sets it from the mood)
+  light?: PuppetLight; // light the cut-out from the set's lights instead of the flat tint
+};
+
+// The set's light as the cut-out sees it. Only strong light sources change a puppet: point lights (a campfire,
+// a bare bulb) and distant ones (car headlights, a low sun) brighten and colour the side facing them and draw a
+// soft rim along the silhouette edges that face them; the far side keeps the puppet's own colours, dimmed by
+// `shadow` (default 0.12 when there are lights). The room's ambient colour barely touches it: `tint` mixed in
+// by `tintAmount` (default 0.06). At most two point and two distant lights.
+export type PuppetLight = {
+  tint?: string;
+  tintAmount?: number;
+  shadow?: number;
+  points?: { position: [number, number, number]; color: string; strength: number; range: number }[];
+  distant?: { direction: [number, number, number]; color: string; strength: number }[]; // direction toward the light
+};
+
+// How far in from the silhouette (puppet units) the rim light fades out: past the ink stroke into the fill.
+const RIM = 40;
+// Half-width (m) of the cylinder the flat card is shaded as, so a light beside it lights one side and leaves a terminator.
+const BODY_HALF = 0.2;
+
+const LIT_VERTEX = /* glsl */ `
+varying vec2 vUv;
+varying vec3 vWorld;
+varying vec3 vRight;
+varying vec3 vFwd;
+void main() {
+  vUv = uv;
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  vWorld = w.xyz;
+  vRight = normalize(mat3(modelMatrix) * vec3(1.0, 0.0, 0.0));
+  vFwd = normalize(mat3(modelMatrix) * vec3(0.0, 0.0, 1.0));
+  gl_Position = projectionMatrix * viewMatrix * w;
+}`;
+
+// Cel lighting for a flat card: the front band comes from how squarely a light faces the card, the rim from
+// how close the silhouette ends toward the light (so only edges facing it catch a soft glow).
+const LIT_FRAGMENT = /* glsl */ `
+uniform sampler2D map;
+uniform vec3 tint;
+uniform float tintAmount;
+uniform float shadow;
+uniform vec3 pPos[2];
+uniform vec3 pCol[2];
+uniform float pRange[2];
+uniform vec3 dDir[2];
+uniform vec3 dCol[2];
+uniform vec2 rimUv;
+uniform vec3 axis;
+uniform float bodyHalf;
+uniform float headY;
+uniform float headR;
+varying vec2 vUv;
+varying vec3 vWorld;
+varying vec3 vRight;
+varying vec3 vFwd;
+
+void shade(vec3 L, vec3 col, inout vec3 diffuse, inout vec3 rim) {
+  float d = dot(L, vFwd);
+  // Shade the card as a sphere round the head and a cylinder round the body, so the terminator curves across
+  // the face. Three cel bands with slightly soft steps, like the puppet's own shading.
+  vec3 off = vWorld - axis - vec3(0.0, headY, 0.0);
+  float hx = dot(off, vRight) / headR;
+  float hy = off.y / headR;
+  vec3 N;
+  if (hx * hx + hy * hy < 1.0) {
+    N = vRight * hx + vec3(0.0, hy, 0.0) + vFwd * sqrt(1.0 - hx * hx - hy * hy);
+  } else {
+    float nx = clamp(dot(vWorld - axis, vRight) / bodyHalf, -1.0, 1.0);
+    N = vRight * nx + vFwd * sqrt(1.0 - nx * nx);
+  }
+  float n = dot(L, N);
+  diffuse += col * (0.45 * smoothstep(-0.04, 0.04, n) + 0.55 * smoothstep(0.36, 0.44, n));
+  vec2 s = vec2(dot(L, vRight), L.y);
+  float side = length(s);
+  if (side > 0.05) {
+    // March toward the light: the nearer the silhouette ends, the brighter, fading smoothly inward.
+    float edge = 0.0;
+    for (int k = 1; k <= 8; k++) {
+      float t = float(k) / 8.0;
+      float outside = 1.0 - texture2D(map, vUv + (s / side) * rimUv * t).a;
+      edge = max(edge, outside * pow(1.0 - t, 1.6));
+    }
+    // Lights beside or behind the card rim it hardest.
+    rim += col * edge * smoothstep(0.05, 0.6, side) * (0.4 + 0.6 * max(0.0, -d));
+  }
+}
+
+void main() {
+  vec4 tex = texture2D(map, vUv);
+  if (tex.a < 0.02) discard;
+  vec3 diffuse = vec3(0.0);
+  vec3 rim = vec3(0.0);
+  for (int i = 0; i < 2; i++) {
+    vec3 toL = pPos[i] - vWorld;
+    float dist = length(toL);
+    float att = pRange[i] > 0.0 ? 1.0 / (1.0 + (dist / pRange[i]) * (dist / pRange[i])) : 0.0;
+    shade(toL / max(dist, 0.001), pCol[i] * att, diffuse, rim);
+    shade(normalize(dDir[i] + vec3(0.0, 0.0001, 0.0)), dCol[i], diffuse, rim);
+  }
+  // The puppet keeps its own colours; strong lights add on top of them, the side away from them dims slightly.
+  vec3 base = tex.rgb * mix(vec3(1.0), tint, tintAmount);
+  gl_FragColor = vec4(base * (1.0 - shadow + diffuse * 0.55) + rim * mix(tex.rgb, vec3(1.0), 0.6), tex.a);
+  #include <colorspace_fragment>
+}`;
+
+const litUniforms = (light: PuppetLight) => {
+  const pts = [...(light.points ?? []), null, null].slice(0, 2);
+  const dirs = [...(light.distant ?? []), null, null].slice(0, 2);
+  const c = (hex: string, k = 1) => new THREE.Color(hex).multiplyScalar(k);
+  const lit = (light.points?.length ?? 0) + (light.distant?.length ?? 0) > 0;
+  return {
+    tint: c(light.tint ?? "#ffffff"),
+    tintAmount: light.tintAmount ?? 0.06,
+    shadow: light.shadow ?? (lit ? 0.12 : 0),
+    pPos: pts.map((p) => new THREE.Vector3(...(p?.position ?? [0, 0, 0]))),
+    pCol: pts.map((p) => (p ? c(p.color, p.strength) : new THREE.Color(0, 0, 0))),
+    pRange: pts.map((p) => p?.range ?? 0),
+    dDir: dirs.map((d) => new THREE.Vector3(...(d?.direction ?? [0, 1, 0])).normalize()),
+    dCol: dirs.map((d) => (d ? c(d.color, d.strength) : new THREE.Color(0, 0, 0))),
+  };
 };
 
 // Puppets face the front of the set (+z). When the camera has swung round to the side the cut-out turns to
@@ -45,7 +166,7 @@ export const turnToCamera = (pose: PuppetPose, yaw: number): PuppetPose => {
   return pose;
 };
 
-export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff" }) => {
+export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff", light }) => {
   const [x, z] = at;
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   // Turn to face the camera around the vertical axis only, like a cardboard cut-out.
@@ -93,6 +214,25 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
     return t;
   }, [canvas]);
   useEffect(() => () => texture.dispose(), [texture]);
+  const litMaterial = useMemo(
+    () =>
+      light
+        ? new THREE.ShaderMaterial({
+            vertexShader: LIT_VERTEX,
+            fragmentShader: LIT_FRAGMENT,
+            uniforms: { map: { value: texture }, rimUv: { value: new THREE.Vector2(RIM / VB.w, RIM / VB.h) }, axis: { value: new THREE.Vector3() }, bodyHalf: { value: BODY_HALF }, headY: { value: HEAD_Y }, headR: { value: 0.27 }, ...Object.fromEntries(Object.entries(litUniforms(light)).map(([k, v]) => [k, { value: v }])) },
+            transparent: true,
+          })
+        : null,
+    [texture, !!light],
+  );
+  // Lights flicker per frame: refresh the uniforms without rebuilding the material.
+  if (litMaterial && light) {
+    for (const [k, v] of Object.entries(litUniforms(light))) litMaterial.uniforms[k].value = v;
+    litMaterial.uniforms.axis.value.set(x, 0, z);
+    litMaterial.uniforms.headY.value = pose.sit ? HEAD_Y - HIP_HEIGHT * 0.55 : HEAD_Y;
+  }
+  useEffect(() => () => litMaterial?.dispose(), [litMaterial]);
   // Shadow caster that keeps the puppet's silhouette instead of its whole rectangle.
   const depthMaterial = useMemo(
     () => new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: texture, alphaTest: 0.5 }),
@@ -125,9 +265,9 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
         <meshBasicMaterial color="#000" transparent opacity={0.3} depthWrite={false} />
       </mesh>
       <group rotation={[0, yaw, 0]}>
-        <mesh position={[(VB.x + VB.w / 2) * K, -(VB.y + VB.h / 2) * K, 0]} castShadow customDepthMaterial={depthMaterial}>
+        <mesh position={[(VB.x + VB.w / 2) * K, -(VB.y + VB.h / 2) * K, 0]} castShadow customDepthMaterial={depthMaterial} material={litMaterial ?? undefined}>
           <planeGeometry args={[VB.w * K, VB.h * K]} />
-          <meshBasicMaterial map={texture} color={tint} transparent alphaTest={0.02} toneMapped={false} fog={false} />
+          {!litMaterial && <meshBasicMaterial map={texture} color={tint} transparent alphaTest={0.02} toneMapped={false} fog={false} />}
         </mesh>
       </group>
     </group>

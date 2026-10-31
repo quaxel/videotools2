@@ -27,7 +27,7 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 
 | Export | Use |
 | --- | --- |
-| `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. |
+| `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy?, light? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. `light` = how the set's lights fall on the puppets (see Puppet lighting); default: a rig derived from the mood of `bg`. |
 | `CameraShot = { position, target, fov }` | Every set must receive the camera and contain `<CameraRig>` (the kit's `Room` does this). |
 | `lerp3, ramp, clamp01, breathe, talk, walk` | Animation helpers. `ramp(f, a, b)` 0→1 between frames a and b. `...walk(f)` inside a pose while walking. |
 | `Easing, interpolate` | From `remotion`. |
@@ -41,7 +41,7 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
   `wallPattern`: plaster (default), brick, panel, wallpaper, tile, plain. `floorPattern`: wood (default), tile, carpet, concrete, plain.
   `sun: { x, color?, bars? }` lays window light (soft bars) on the floor and wall. Give every location its own pattern pair.
 - `LightPool`, `Halo({ position, size, color })` — extra window light and additive glow (screens and lamps already have halos).
-  Moods: `warm`, `daylight`, `cold`, `dream`, `night`, `neon`, `golden`, `office`; `moodBackground(mood)` gives the Stage `bg`.
+  Moods: `warm`, `daylight`, `cold`, `dream`, `night`, `neon`, `golden`, `office`, `alarm`, `dusk`; `moodBackground(mood)` gives the Stage `bg`.
 - Props (positions in metres, y = 0 floor): `Door({position, open, sign, glow})`, `Window`, `Desk`, `Counter`, `Chair`, `Shelf`,
   `Lamp`, `Plant`, `Crates`, `Board({cards})` corkboard, `Screen({text, appear?, count?})` (glowing text; `appear`/`count` as on Label, for a figure that comes up on a monitor), `BigButton({label, press})`, `Switch({label, on})`,
   `Label({text, position, width, appear?, count?})` readable UPPERCASE card (use "\n" for two lines). `appear` = frames since it came on: pops in past full size with a white flash (pass `f - at` from the shot; negative hides it). `count` 0..1 counts its numbers up from zero (`countText(text, p)` does the same for any string). Add a `pop` sound on the frame it appears. Never count years or IDs (1982, FLIGHT 214).
@@ -53,6 +53,25 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 - Write a new prop as a small component in `src/videos/<slug>/props.tsx` from these pieces; move it to the kit if it is reusable.
 
 Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `InteriorStrip`, `XrayWheel`, `AtmSet`, `ExteriorSet`, `LabSet`.
+
+### Outdoor set, fire, smoke and distant mountains (`src/three/LakeSet.tsx`)
+
+- `LakeSet({ camera, frame, fire? })` — mountain lake at dusk (mood `dusk`): grass bank (floor y = 0, z > -1.5), water
+  below it, cabin with chimney smoke at x -2.6, dock into the lake at `DOCK.x` (deck y = 0, so puppets can stand on it,
+  to z `DOCK.end`), campfire at `FIRE`, pines, fireflies. Light its puppets with `light={lakeLight(f)}`.
+  Example shots: `src/scenes/LakePreview.tsx` (composition `LakePreview`).
+- `Campfire({ position, frame })` — cartoon fire: layered licking flame tongues under one ink outline, licks that break
+  off and burn out, sparks, an ember bed, a light pool on the ground and a flickering point light. When puppets stand by
+  it, add `firePoint(position, frame)` to the Stage `light`'s `points` so the side facing it glows and flickers with it.
+- `SmokePlume({ position, world, frame, size, rise, wind, period, puffs, dark? })` — inked cel smoke puffs that swell,
+  drift downwind on a curve, turn and shrink away; `world` is the source's [x, z] (the puffs face the camera). Chimney:
+  size 0.13, rise 1.9, wind 0.75, period 72, puffs 7. Over a fire: size 0.045, rise 0.75, `dark`.
+- `Pine`, `Rock` — faceted inked pine (cone stack) and rock.
+- **Distant mountains with parallax:** `Ridge({ z, shift, width, low, high, peaks, color, seed, snow? })` flat ridge
+  silhouettes and `Haze({ z, color })` mist bands between them. Real perspective barely moves anything 15-20 m away, so
+  each layer is carried sideways by its own share of the camera's x: sky and sun group at `camX`, far ridge
+  `shift={camX * 0.55}`, middle ridge 0, near hills `shift={-camX * 1.1}` (camX = `camera.position[0]`). Give shots in
+  front of a backdrop a sideways truck (0.8-1.4 m) so the layers slide apart.
 
 ## Puppets
 
@@ -73,6 +92,23 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   text above the caption band (lower ~30 % of the frame). Puppets behind a counter need it ≤ 0.65 m tall to show their torso.
 - Framing references (puppet at z ≈ 1): medium `position [x-0.9, 1.25, 4.2] target [x-0.1, 1.0, 0.4] fov 36`;
   close-up `position [x-0.55, 1.05, 2.95] target [x-0.28, 0.9, 1.1] fov 36` with `blur 7`.
+
+## Puppet lighting
+
+New videos light the puppets from the set (`Video` `lighting`, default on; videos made before it pass
+`lighting={false}` and keep the flat mood tint). Only strong light sources change a puppet: the room's ambient colour
+barely touches it (a 6 % hint), so skin stays skin in blue or neon rooms. A strong light (campfire, bare bulb, car
+headlights, low sun) brightens and colours the side facing it, with a curved cel edge (a sphere round the head, a
+cylinder round the body), and a soft rim glows along the silhouette edges that face it, fading inward (directional
+only: no glow wrapped round the whole outline). The far side keeps the puppet's colours, dimmed slightly.
+
+- With no `light`, Stage uses `moodLight(mood)`: no lights, just the faint ambient hint, so puppets look as drawn.
+- Give a shot its own `light` when it has a strong source: `PuppetLight = { tint?, tintAmount?, shadow?,
+  points?: [{ position, color, strength, range }], distant?: [{ direction, color, strength }] }` (at most two of each;
+  `direction` points toward the light; `shadow` dims the far side, default 0.12). Fire: `firePoint(...)` (strength
+  ~2.8). Headlights from the left: a `distant` light with `direction: [-1, 0.2, 0.3]`, a pale colour, strength ~2.
+  Lake: `lakeLight(f)`.
+- Preview an older video lit: `LIGHTING=1 node scripts/stills.mjs <slug> <out-dir>`.
 
 ## Sound
 

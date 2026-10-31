@@ -5,6 +5,7 @@
 // Renders with the `audit` input prop, so puppets, labels and screens report framing problems (faces or signs cut
 // by the edge, under the captions, hidden behind the set); those go to <out-dir>/framing.txt and the console.
 // STILL_SCALE=1 renders full-size stills (default 0.4). COLLIDE=1 only checks puppets walking through the set.
+// LIGHTING=1 renders with puppet lighting on (LIGHTING=0 off), whatever the video sets.
 import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 import { execFileSync } from "node:child_process";
@@ -21,7 +22,8 @@ if (!slug || !outDir) {
 
 const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
 const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
-const inputProps = { audit: true };
+// LIGHTING=1 / LIGHTING=0 forces puppet lighting on or off (to preview an older video lit).
+const inputProps = { audit: true, ...(process.env.LIGHTING ? { lighting: process.env.LIGHTING === "1" } : {}) };
 const composition = await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps });
 // COLLIDE=1: a fast pass every 5 frames at tiny scale that only reports puppets inside set objects.
 const collide = process.env.COLLIDE === "1";

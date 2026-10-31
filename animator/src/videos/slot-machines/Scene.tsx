@@ -677,4 +677,4 @@ const MUSIC: MusicCue[] = [
   { src: "music/lounge.wav", from: 1378, to: TIMING.totalFrames, volume: 0.2 },
 ];
 
-export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} />;
+export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} lighting={false} />;
