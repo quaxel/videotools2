@@ -24,3 +24,4 @@ __pycache__/
 # YouTube uploader OAuth client and token
 animator/uploader/secrets/
 animator/uploader/client_secret*.json
+animator/uploader/uploader.db*

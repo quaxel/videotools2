@@ -97,6 +97,7 @@
       <button data-f="all" aria-pressed="true">Tümü</button>
       <button data-f="ready" aria-pressed="false">Yüklenecek</button>
       <button data-f="done" aria-pressed="false">Yüklenen</button>
+      <button data-f="archived" aria-pressed="false">Arşiv</button>
     </div>
     <div id="list"></div>
   </aside>
@@ -149,18 +150,20 @@ function statusChip(v) {
     if (u.publishAt) return `<span class="pill ok">Zamanlandı · ${esc(fmt(u.publishAt))}</span>`;
     return `<span class="pill ok">Yüklendi${u.dryRun ? " (deneme)" : ""}</span>`;
   }
+  if (v.fileMissing) return `<span class="pill err">Video dosyası yok</span>`;
   if (!v.hasMd && !v.edited) return `<span class="pill warn">Otomatik taslak</span>`;
   return `<span class="pill">Hazır</span>`;
 }
 
 function renderList() {
-  const vs = DATA.videos.filter(v => filter === "all" || (filter === "done") === !!uploadOf(v));
+  const vs = DATA.videos.filter(v => filter === "archived" ? v.archived
+    : !v.archived && (filter === "all" || (filter === "done") === !!uploadOf(v)));
   $("#list").innerHTML = vs.map(v => `
     <button class="item" data-slug="${esc(v.slug)}" aria-current="${v.slug === current}">
       <span class="slug">${esc(v.slug)}</span>
       <span class="t">${esc(v.meta.title || "— başlık yok —")}</span>
       ${statusChip(v)}
-    </button>`).join("") || `<div class="empty">${DATA.videos.length ? "Bu filtrede video yok." : "Henüz yeni video yok. Render edilen yeni videolar (out/&lt;slug&gt;.mp4) burada görünür."}</div>`;
+    </button>`).join("") || `<div class="empty">${DATA.videos.length ? "Bu filtrede video yok." : "Henüz video yok. Render edilen yeni videolar (out/&lt;slug&gt;.mp4) burada görünür."}</div>`;
 }
 
 function defaultWhen() {
@@ -187,11 +190,13 @@ function renderEditor() {
   $("#editor").innerHTML = `
     <div class="top">
       <div>
-        <video src="/media/${esc(v.slug)}.mp4" controls preload="metadata" playsinline></video>
-        <div class="meta-line">${esc(v.slug)}.mp4 · ${v.sizeMB} MB<br>Render: ${esc(fmt(v.rendered))}</div>
+        ${v.fileMissing ? `<div class="notice err" style="margin-top:0">${esc(v.videoPath)} bulunamadı. Video dosyası geri gelene kadar yüklenemez.</div>`
+          : `<video src="/media/${esc(v.slug)}.mp4" controls preload="metadata" playsinline></video>
+        <div class="meta-line">${esc(v.videoPath)} · ${v.sizeMB} MB<br>Render: ${esc(fmt(v.rendered))}</div>`}
+        <div class="meta-line">Eklendi: ${esc(fmt(v.addedAt))}</div>
       </div>
       <div>
-        ${!v.hasMd ? `<div class="notice warn" style="margin-top:0">videos/${esc(v.slug)}/youtube.md yok: başlık ve açıklama plan ve senaryodan otomatik çıkarıldı, etiketleri ekleyin ve kontrol edin.</div>` : ""}
+        ${!v.hasMd && !v.edited ? `<div class="notice warn" style="margin-top:0">youtube.md yoktu: başlık ve açıklama plan ve senaryodan otomatik çıkarıldı, etiketleri ekleyin ve kontrol edin.</div>` : ""}
         <div class="labelrow" style="margin-top:0"><label for="title">Başlık</label>${opts}<span class="count" id="cTitle"></span></div>
         <input type="text" id="title" value="${esc(m.title)}" ${locked ? "disabled" : ""}>
         <div class="labelrow"><label for="desc">Açıklama</label><span class="count" id="cDesc"></span></div>
@@ -236,9 +241,13 @@ function renderEditor() {
       </div>
       <div id="errs"></div>
       <div class="actions">
-        <button class="primary" id="upload" ${locked || !auth.connected ? "disabled" : ""}>YouTube'a yükle</button>
-        ${v.edited && !locked ? `<button id="reset">youtube.md'ye geri dön</button>` : ""}
+        <button class="primary" id="upload" ${locked || !auth.connected || v.fileMissing ? "disabled" : ""}>YouTube'a yükle</button>
+        ${v.edited && !locked ? `<button id="reset">İlk haline dön</button>` : ""}
         <span class="saved" id="saved">${v.edited ? "Değişiklikler kaydedildi" : ""}</span>
+      </div>
+      <div class="actions">
+        <button id="archive">${v.archived ? "Arşivden çıkar" : "Arşivle"}</button>
+        ${v.folderAvailable && !locked ? `<button id="reimport" title="videos/${esc(v.slug)}/ klasöründen başlık, açıklama ve etiketleri yeniden okur">Klasörden yeniden al</button>` : ""}
       </div>
       ${!auth.connected ? `<div class="hint">Yüklemek için önce sağ üstten YouTube'a bağlanın.</div>` : ""}
       <div id="progressBox"></div>
@@ -263,7 +272,16 @@ function currentMeta() {
 
 function bindEditor(v, locked) {
   const m = v.meta, L = local[v.slug];
+  $("#archive").onclick = async () => {
+    replaceVideo(await api("/api/archive", { slug: v.slug, archived: !v.archived }));
+    renderList(); renderEditor();
+  };
   if (locked) return;
+  if ($("#reimport")) $("#reimport").onclick = async () => {
+    if (v.edited && !confirm("Yaptığınız düzenlemeler silinip klasördeki metin yeniden alınsın mı?")) return;
+    try { replaceVideo(await api("/api/reimport", { slug: v.slug })); local[v.slug].kidsChosen = false; renderList(); renderEditor(); }
+    catch (e) { $("#errs").innerHTML = `<div class="notice err">${esc(e.message)}</div>`; }
+  };
   $("#title").oninput = e => { m.title = e.target.value; changed(); };
   $("#desc").oninput = e => { m.description = e.target.value; changed(); };
   $("#cat").onchange = e => { m.categoryId = e.target.value; changed(); };
@@ -336,7 +354,7 @@ function updateCounts() {
   if (uploadOf(v) || (v.job && v.job.state === "uploading")) { $("#errs").innerHTML = ""; return; }
   const p = problems();
   $("#errs").innerHTML = p.length ? `<div class="notice warn">${p.map(esc).join("<br>")}</div>` : "";
-  $("#upload").disabled = !!p.length || !auth.connected;
+  $("#upload").disabled = !!p.length || !auth.connected || v.fileMissing;
 }
 
 function changed() {
@@ -460,7 +478,7 @@ document.querySelectorAll(".filters button").forEach(b => b.onclick = () => {
 (async () => {
   DATA = await api("/api/videos");
   const want = decodeURIComponent(location.hash.slice(1));
-  current = DATA.videos.some(v => v.slug === want) ? want : (DATA.videos.find(v => !uploadOf(v)) || DATA.videos[0] || {}).slug || null;
+  current = DATA.videos.some(v => v.slug === want) ? want : (DATA.videos.find(v => !v.archived && !uploadOf(v)) || DATA.videos.find(v => !v.archived) || {}).slug || null;
   renderList(); renderEditor();
   await loadAuth();
   if (DATA.videos.some(x => x.job && x.job.state === "uploading")) poll();

@@ -1,22 +1,29 @@
-# Local YouTube uploader: a small web page that lists the rendered videos, fills title / description / tags from
-# videos/<slug>/youtube.md, and uploads with one click — scheduled to go public at a chosen time (YouTube publishes it,
-# this server doesn't need to stay running).
+# Local YouTube uploader: a small web page that lists the rendered videos, fills title / description / tags, and
+# uploads with one click — scheduled to go public at a chosen time (YouTube publishes it, this server doesn't need to
+# stay running).
 #
-#   .venv/bin/python uploader/server.py             http://127.0.0.1:8765
-#   .venv/bin/python uploader/server.py --dry-run   whole flow without calling YouTube (nothing is saved as uploaded)
+#   .venv/bin/python uploader/server.py                 http://127.0.0.1:8765
+#   .venv/bin/python uploader/server.py --dry-run       whole flow without calling YouTube (nothing is saved as uploaded)
+#   .venv/bin/python uploader/server.py --import <slug> add (or refresh) one video in the database and exit
+#   --db PATH, --port N                                 another database file / port (tests)
+#
+# Everything lives in uploader/uploader.db (SQLite, gitignored). A video is imported once: when out/<slug>.mp4 and
+# videos/<slug>/ both exist, its title / description / tags are read from videos/<slug>/youtube.md (or drafted from
+# plan.json, lines.json and research.md) and stored. After that only the MP4 is needed; videos/<slug>/ can go.
 #
 # Credentials (gitignored): uploader/secrets/client_secret.json (OAuth "Desktop app" client from Google Cloud Console)
 # and uploader/secrets/token.json (written after "YouTube'a bağlan"). Setup steps: uploader/README.md.
-# Edits and upload records live in videos/<slug>/youtube.json; youtube.md stays the source the pipeline writes.
 import json
 import mimetypes
 import os
 import re
+import sqlite3
 import sys
 import threading
 import time
 import uuid
 import webbrowser
+from contextlib import closing
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
@@ -27,8 +34,9 @@ SECRETS = os.path.join(HERE, "secrets")
 CLIENT_SECRET = os.path.join(SECRETS, "client_secret.json")
 TOKEN = os.path.join(SECRETS, "token.json")
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.readonly"]
-HOST, PORT = "127.0.0.1", 8765
+HOST, PORT = "127.0.0.1", int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 8765
 DRY_RUN = "--dry-run" in sys.argv
+DB_PATH = sys.argv[sys.argv.index("--db") + 1] if "--db" in sys.argv else os.path.join(HERE, "uploader.db")
 
 LIMITS = {"title": 100, "description_bytes": 5000, "tags_chars": 500}
 CATEGORIES = {"27": "Education", "24": "Entertainment", "22": "People & Blogs", "28": "Science & Technology", "1": "Film & Animation"}
@@ -38,28 +46,83 @@ jobs_lock = threading.Lock()
 auth_state = {"connecting": False, "error": None}
 
 
-# ---------- videos and metadata ----------
+# ---------- database ----------
 
-def mp4_path(slug):
-    return os.path.join(ROOT, "out", slug + ".mp4")
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS videos (
+    slug       TEXT PRIMARY KEY,
+    video_path TEXT NOT NULL,             -- relative to animator/
+    source     TEXT NOT NULL,             -- 'md' (youtube.md) or 'auto' (drafted from plan / lines / research)
+    imported   TEXT NOT NULL,             -- JSON {title, description, tags, titleOptions} as imported
+    draft      TEXT,                      -- JSON of the user's edits, NULL = unedited
+    upload     TEXT,                      -- JSON {videoId, privacy, publishAt, uploadedAt, youtubeStatus, checkedAt}
+    archived   INTEGER NOT NULL DEFAULT 0,
+    added_at   TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
+"""
 
 
-def hidden():
-    """Slugs listed in uploader/hidden.txt (one per line, # comments): videos handled before this page existed."""
-    try:
-        lines = open(os.path.join(HERE, "hidden.txt"), encoding="utf-8").read().splitlines()
-    except OSError:
-        return set()
-    return {l.split("#")[0].strip() for l in lines} - {""}
+def db():
+    """One connection per operation (the upload thread and the request threads never share one)."""
+    con = sqlite3.connect(DB_PATH, timeout=10)
+    con.row_factory = sqlite3.Row
+    con.execute("PRAGMA journal_mode=WAL")
+    return con
 
 
-def slugs():
-    """Videos worth uploading: a videos/<slug>/ folder plus its rendered out/<slug>.mp4 (skips previews and tours),
-    minus the hidden ones."""
+def now():
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def init_db():
+    with closing(db()) as con, con:
+        con.executescript(SCHEMA)
+        done = con.execute("SELECT value FROM settings WHERE key = 'migrated_hidden_txt'").fetchone()
+    if not done:
+        # One-time: the videos listed in the old hidden.txt come in archived, with their metadata read while the
+        # folders still exist. Nothing is deleted here.
+        try:
+            lines = open(os.path.join(HERE, "hidden.txt"), encoding="utf-8").read().splitlines()
+        except OSError:
+            lines = []
+        for slug in {l.split("#")[0].strip() for l in lines} - {""}:
+            if os.path.isdir(vdir(slug)) and not get_row(slug):
+                import_video(slug, archived=True)
+        with closing(db()) as con, con:
+            con.execute("INSERT OR REPLACE INTO settings VALUES ('migrated_hidden_txt', ?)", (now(),))
+    scan()
+
+
+def get_row(slug):
+    with closing(db()) as con:
+        return con.execute("SELECT * FROM videos WHERE slug = ?", (slug,)).fetchone()
+
+
+def update_row(slug, **cols):
+    with closing(db()) as con, con:
+        con.execute(f"UPDATE videos SET {', '.join(c + ' = ?' for c in cols)} WHERE slug = ?", (*cols.values(), slug))
+
+
+def loads(s):
+    return json.loads(s) if s else None
+
+
+def dumps(o):
+    return None if o is None else json.dumps(o, ensure_ascii=False)
+
+
+# ---------- importing from the render folders ----------
+
+def vdir(slug, *p):
+    return os.path.join(ROOT, "videos", slug, *p)
+
+
+def rendered_slugs():
+    """Videos worth importing: a videos/<slug>/ folder plus its rendered out/<slug>.mp4 (skips previews and tours)."""
     vroot = os.path.join(ROOT, "videos")
-    skip = hidden()
     return sorted(s for s in os.listdir(vroot)
-                  if s not in skip and os.path.isdir(os.path.join(vroot, s)) and os.path.isfile(mp4_path(s)))
+                  if os.path.isdir(os.path.join(vroot, s)) and os.path.isfile(os.path.join(ROOT, "out", s + ".mp4")))
 
 
 def parse_youtube_md(path):
@@ -95,13 +158,13 @@ def auto_meta(slug):
     research.md. Tags stay empty."""
     def load(name):
         try:
-            return json.load(open(os.path.join(ROOT, "videos", slug, name), encoding="utf-8"))
+            return json.load(open(vdir(slug, name), encoding="utf-8"))
         except (OSError, ValueError):
             return {}
     title = load("plan.json").get("title", "").strip()
     narration = " ".join(l.get("text", "").strip() for l in load("lines.json").get("lines", []))
     try:
-        research = open(os.path.join(ROOT, "videos", slug, "research.md"), encoding="utf-8").read()
+        research = open(vdir(slug, "research.md"), encoding="utf-8").read()
     except OSError:
         research = ""
     urls = list(dict.fromkeys(re.findall(r"https?://[^\s)>\]]+", research)))
@@ -113,46 +176,85 @@ def auto_meta(slug):
             "titleOptions": [title] if title else []}
 
 
-def state_path(slug):
-    return os.path.join(ROOT, "videos", slug, "youtube.json")
+def read_folder(slug):
+    md = parse_youtube_md(vdir(slug, "youtube.md"))
+    if md["title"] or md["description"]:
+        return "md", md
+    return "auto", auto_meta(slug)
 
 
-def load_state(slug):
-    try:
-        return json.load(open(state_path(slug), encoding="utf-8"))
+def import_video(slug, archived=False):
+    """Add a video, or refresh what was imported for one already in the database (the user's edits stay)."""
+    source, meta = read_folder(slug)
+    row = get_row(slug)
+    if row:
+        update_row(slug, source=source, imported=dumps(meta))
+        return "updated", source
+    draft = upload = None
+    try:  # carry over the edits / upload record the earlier file-based version kept in youtube.json
+        old = json.load(open(vdir(slug, "youtube.json"), encoding="utf-8"))
+        draft, upload = old.get("draft"), old.get("upload")
     except (OSError, ValueError):
-        return {}
+        pass
+    with closing(db()) as con, con:
+        con.execute("INSERT INTO videos VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (slug, os.path.join("out", slug + ".mp4"), source, dumps(meta), dumps(draft), dumps(upload),
+                     int(archived), now()))
+    return "added", source
 
 
-def save_state(slug, state):
-    tmp = state_path(slug) + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, state_path(slug))
+def scan():
+    """Import newly rendered videos. An auto draft nobody edited is replaced once youtube.md appears (the render is
+    finished before make-video writes youtube.md)."""
+    with closing(db()) as con:
+        rows = {r["slug"]: r for r in con.execute("SELECT slug, source, draft FROM videos")}
+    for slug in rendered_slugs():
+        r = rows.get(slug)
+        if not r:
+            import_video(slug)
+        elif r["source"] == "auto" and r["draft"] is None and os.path.isfile(vdir(slug, "youtube.md")):
+            import_video(slug)
 
 
-def video_info(slug):
-    md = parse_youtube_md(os.path.join(ROOT, "videos", slug, "youtube.md"))
-    has_md = bool(md["title"] or md["description"])
-    if not has_md:
-        md = auto_meta(slug)
-    state = load_state(slug)
-    meta = {"title": md["title"], "description": md["description"], "tags": md["tags"], "categoryId": "27",
-            "madeForKids": False, "syntheticMedia": False}
-    meta.update(state.get("draft", {}))
+# ---------- videos and metadata ----------
+
+def mp4_path(row):
+    return os.path.join(ROOT, row["video_path"])
+
+
+def video_info(row):
+    slug, imported = row["slug"], loads(row["imported"])
+    meta = {"title": imported["title"], "description": imported["description"], "tags": imported["tags"],
+            "categoryId": "27", "madeForKids": False, "syntheticMedia": False}
+    meta.update(loads(row["draft"]) or {})
     with jobs_lock:
         job = dict(jobs.get(slug, {}))
+    path = mp4_path(row)
+    exists = os.path.isfile(path)
     return {
         "slug": slug,
-        "hasMd": has_md,
-        "titleOptions": md["titleOptions"],
+        "hasMd": row["source"] == "md",
+        "titleOptions": imported.get("titleOptions", []),
         "meta": meta,
-        "edited": "draft" in state,
-        "upload": state.get("upload"),
+        "edited": row["draft"] is not None,
+        "upload": loads(row["upload"]),
+        "archived": bool(row["archived"]),
+        "addedAt": row["added_at"],
         "job": job or None,
-        "sizeMB": round(os.path.getsize(mp4_path(slug)) / 1e6, 1),
-        "rendered": datetime.fromtimestamp(os.path.getmtime(mp4_path(slug))).isoformat(timespec="minutes"),
+        "videoPath": row["video_path"],
+        "fileMissing": not exists,
+        "folderAvailable": os.path.isdir(vdir(slug)),
+        "sizeMB": round(os.path.getsize(path) / 1e6, 1) if exists else None,
+        "rendered": datetime.fromtimestamp(os.path.getmtime(path)).isoformat(timespec="minutes") if exists else None,
     }
+
+
+def all_videos():
+    with closing(db()) as con:
+        rows = con.execute("SELECT * FROM videos ORDER BY added_at DESC, slug").fetchall()
+    return [video_info(r) for r in rows]
+
+
 
 
 def tags_length(tags):
@@ -203,7 +305,10 @@ def credentials(interactive=False):
         from google_auth_oauthlib.flow import InstalledAppFlow
 
         flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET, SCOPES)
-        creds = flow.run_local_server(port=0, prompt="consent", open_browser=True)
+        try:  # an abandoned Google sign-in gives up after 5 minutes instead of blocking "YouTube'a bağlan" forever
+            creds = flow.run_local_server(port=0, prompt="consent", open_browser=True, timeout_seconds=300)
+        except AttributeError:
+            raise RuntimeError("Google izni 5 dakika içinde verilmedi; yeniden deneyin.")
         os.makedirs(SECRETS, exist_ok=True)
         open(TOKEN, "w").write(creds.to_json())
     return creds if creds and creds.valid else None
@@ -267,7 +372,7 @@ def upload(slug, meta, privacy, publish_at):
         else:
             from googleapiclient.http import MediaFileUpload
 
-            media = MediaFileUpload(mp4_path(slug), mimetype="video/mp4", chunksize=8 * 1024 * 1024, resumable=True)
+            media = MediaFileUpload(mp4_path(get_row(slug)), mimetype="video/mp4", chunksize=8 * 1024 * 1024, resumable=True)
             req = youtube().videos().insert(part="snippet,status", body=body, media_body=media)
             resp = None
             while resp is None:
@@ -275,12 +380,9 @@ def upload(slug, meta, privacy, publish_at):
                 if chunk:
                     set_job(slug, state="uploading", progress=chunk.progress())
             video_id = resp["id"]
-            state = load_state(slug)
-            state["draft"] = meta
-            state["upload"] = {"videoId": video_id, "privacy": privacy, "publishAt": publish_at if privacy == "schedule" else None,
-                               "uploadedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                               "youtubeStatus": resp.get("status", {})}
-            save_state(slug, state)
+            update_row(slug, draft=dumps(meta), upload=dumps({
+                "videoId": video_id, "privacy": privacy, "publishAt": publish_at if privacy == "schedule" else None,
+                "uploadedAt": now(), "youtubeStatus": resp.get("status", {})}))
         set_job(slug, state="done", progress=1.0, videoId=video_id, dryRun=DRY_RUN, privacy=privacy,
                 publishAt=publish_at if privacy == "schedule" else None)
     except Exception as e:
@@ -289,15 +391,13 @@ def upload(slug, meta, privacy, publish_at):
 
 def refresh_status(slug):
     """Ask YouTube what happened to an uploaded video (processing, scheduled, public, locked, rejected)."""
-    state = load_state(slug)
-    vid = (state.get("upload") or {}).get("videoId")
-    if not vid:
+    up = loads(get_row(slug)["upload"]) or {}
+    if not up.get("videoId"):
         raise RuntimeError("Bu video henüz yüklenmedi.")
-    items = youtube().videos().list(part="status", id=vid).execute().get("items", [])
-    state["upload"]["youtubeStatus"] = items[0]["status"] if items else {"removed": True}
-    state["upload"]["checkedAt"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    save_state(slug, state)
-    return state["upload"]
+    items = youtube().videos().list(part="status", id=up["videoId"]).execute().get("items", [])
+    up.update(youtubeStatus=items[0]["status"] if items else {"removed": True}, checkedAt=now())
+    update_row(slug, upload=dumps(up))
+    return up
 
 
 # ---------- HTTP ----------
@@ -317,11 +417,11 @@ class Handler(BaseHTTPRequestHandler):
     def body(self):
         return json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)) or b"{}")
 
-    def known_slug(self, slug):
-        if slug not in slugs():  # the page only ever names a slug; paths are resolved here
+    def known_row(self, slug):
+        row = get_row(slug)  # the page only ever names a slug; paths come from the database
+        if not row:
             self.send_json({"error": "Bilinmeyen video."}, 404)
-            return False
-        return True
+        return row
 
     def do_GET(self):
         path = urlparse(self.path).path
@@ -333,13 +433,16 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(data)
         elif path == "/api/videos":
-            self.send_json({"videos": [video_info(s) for s in slugs()], "limits": LIMITS, "categories": CATEGORIES,
-                            "dryRun": DRY_RUN})
+            scan()
+            self.send_json({"videos": all_videos(), "limits": LIMITS, "categories": CATEGORIES, "dryRun": DRY_RUN})
         elif path == "/api/auth":
             self.send_json(auth_status())
         elif m := re.fullmatch(r"/media/([\w-]+)\.mp4", path):
-            if self.known_slug(m.group(1)):
-                self.stream(mp4_path(m.group(1)))
+            if (row := self.known_row(m.group(1))):
+                if os.path.isfile(mp4_path(row)):
+                    self.stream(mp4_path(row))
+                else:
+                    self.send_json({"error": "Video dosyası yok."}, 404)
         else:
             self.send_json({"error": "Bulunamadı."}, 404)
 
@@ -356,23 +459,31 @@ class Handler(BaseHTTPRequestHandler):
                 threading.Thread(target=connect, daemon=True).start()
             return self.send_json({"ok": True})
         slug = data.get("slug", "")
-        if not self.known_slug(slug):
+        row = self.known_row(slug)
+        if not row:
             return
         if path == "/api/save":
-            state = load_state(slug)
-            state["draft"] = clean_meta(data.get("meta", {}))
-            save_state(slug, state)
-            self.send_json(video_info(slug))
+            update_row(slug, draft=dumps(clean_meta(data.get("meta", {}))))
+            self.send_json(video_info(get_row(slug)))
         elif path == "/api/reset":
-            state = load_state(slug)
-            state.pop("draft", None)
-            save_state(slug, state)
-            self.send_json(video_info(slug))
+            update_row(slug, draft=None)
+            self.send_json(video_info(get_row(slug)))
+        elif path == "/api/archive":
+            update_row(slug, archived=int(bool(data.get("archived"))))
+            self.send_json(video_info(get_row(slug)))
+        elif path == "/api/reimport":
+            if not os.path.isdir(vdir(slug)):
+                return self.send_json({"error": f"videos/{slug}/ klasörü artık yok."}, 400)
+            import_video(slug)
+            update_row(slug, draft=None)
+            self.send_json(video_info(get_row(slug)))
         elif path == "/api/upload":
             meta = clean_meta(data.get("meta", {}))
             privacy, publish_at = data.get("privacy"), data.get("publishAt")
-            if load_state(slug).get("upload"):
+            if row["upload"]:
                 return self.send_json({"error": "Bu video zaten yüklendi."}, 409)
+            if not os.path.isfile(mp4_path(row)):
+                return self.send_json({"error": f"{row['video_path']} bulunamadı."}, 400)
             with jobs_lock:
                 if jobs.get(slug, {}).get("state") in ("uploading", "done"):
                     return self.send_json({"error": "Bu video zaten yüklendi ya da yükleniyor."}, 409)
@@ -438,6 +549,16 @@ def clean_meta(meta):
 
 
 if __name__ == "__main__":
+    init_db()
+    if "--import" in sys.argv:
+        slug = sys.argv[sys.argv.index("--import") + 1]
+        if slug not in rendered_slugs():
+            sys.exit(f"{slug}: out/{slug}.mp4 ve videos/{slug}/ ikisi de olmalı.")
+        import_video(slug)  # refreshes the imported text from the folder; the user's edits stay
+        info = video_info(get_row(slug))
+        print(f"{slug}: veritabanında ({'youtube.md' if info['hasMd'] else 'otomatik taslak'}), başlık: {info['meta']['title']!r}"
+              + (" — kendi düzenlemeleriniz korunuyor" if info["edited"] else ""))
+        sys.exit(0)
     url = f"http://{HOST}:{PORT}"
     try:
         server = ThreadingHTTPServer((HOST, PORT), Handler)

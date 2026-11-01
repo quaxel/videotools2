@@ -22,29 +22,37 @@ if (!slug) {
 }
 
 const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
-const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
 const inputProps = { framingPass: true };
-const composition = await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps });
 const shots = {}; // shot start -> { f -> delta }
-const tmp = path.join(os.tmpdir(), `framing-${slug}-${process.pid}.mp4`);
-await renderMedia({
-  serveUrl,
-  composition,
-  codec: "h264",
-  outputLocation: tmp,
-  inputProps,
-  scale: 0.1,
-  muted: true,
-  puppeteerInstance: browser,
-  chromiumOptions: { gl: "angle" },
-  onBrowserLog: ({ text }) => {
-    if (!text.startsWith("[framefix] ")) return;
-    const { s, f, d } = JSON.parse(text.slice(11));
-    (shots[s] ??= {})[f] = d;
-  },
-});
-await browser.close({ silent: true });
-fs.rmSync(tmp, { force: true });
+// Rendered in segments, each in a fresh browser: a render tab keeps every finished shot's WebGL context alive, so a
+// long video with heavy sets runs the GPU out of memory in one pass ("Error creating WebGL context").
+const SEGMENT = Number(process.env.FRAMING_SEGMENT ?? 400);
+let total = null;
+for (let start = 0; total === null || start < total; start += SEGMENT) {
+  const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
+  const composition = await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps });
+  total = composition.durationInFrames;
+  const tmp = path.join(os.tmpdir(), `framing-${slug}-${process.pid}-${start}.mp4`);
+  await renderMedia({
+    serveUrl,
+    composition,
+    codec: "h264",
+    outputLocation: tmp,
+    inputProps,
+    scale: 0.1,
+    muted: true,
+    frameRange: [start, Math.min(total, start + SEGMENT) - 1],
+    puppeteerInstance: browser,
+    chromiumOptions: { gl: "angle" },
+    onBrowserLog: ({ text }) => {
+      if (!text.startsWith("[framefix] ")) return;
+      const { s, f, d } = JSON.parse(text.slice(11));
+      (shots[s] ??= {})[f] = d;
+    },
+  });
+  await browser.close({ silent: true });
+  fs.rmSync(tmp, { force: true });
+}
 
 const ID = [0, 0, 0, 0, 0, 0, 1];
 const size = (d) => Math.hypot(d[0], d[1], d[2], d[3], d[4], d[5], (d[6] - 1) * 10);

@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "kind": "planned-import-inventory",
+  "createdOn": "2026-10-31",
+  "note": "İçe aktarma envanteri; uygulama veritabanı veya tamamlanmış import değildir. Kaynakların varlığı, iddiaların doğrulandığı anlamına gelmez.",
+  "documents": [
+    {
+      "id": "research-batch-01",
+      "repoRelativePath": "animator/videos/video-fikirleri-arastirma-ve-degerlendirme.md",
+      "sha256": "c613d53132ca4954fa235ea565649b78d67925f9c469b1cc38826299a2d522d2",
+      "format": "markdown"
+    },
+    {
+      "id": "research-batch-02",
+      "repoRelativePath": "animator/videos/video-fikirleri-arastirma-ve-degerlendirme-02.md",
+      "sha256": "cdeb2869b990aeaef9d696a172f4e9d5e293b4996b9d3662db5c615fbba084a7",
+      "format": "markdown"
+    }
+  ],
+  "ideas": [
+    {
+      "externalId": "idea-001",
+      "originalNumber": 1,
+      "title": "Pembe olmadığı için satılması yasaklanan margarin",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "1. Pembe olmadığı için satılması yasaklanan margarin",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-002",
+      "originalNumber": 2,
+      "title": "Kodak'ın film kutularında bulunan nükleer iz",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "2. Kodak'ın film kutularında bulunan nükleer iz",
+      "scopeStatus": "excluded",
+      "scopeReason": "Marka merkezli Kodak hikâyesi",
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-003",
+      "originalNumber": 3,
+      "title": "Avrupa'daki bazı saatleri altı dakika geri bırakan anlaşmazlık",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "3. Avrupa'daki bazı saatleri altı dakika geri bırakan anlaşmazlık",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-004",
+      "originalNumber": 4,
+      "title": "Yazıcının sayfaya eklediği gizli sarı noktalar",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "4. Yazıcının sayfaya eklediği gizli sarı noktalar",
+      "scopeStatus": "rewrite_required",
+      "scopeReason": "Markasız teknoloji anlatısı için yeniden yazım gerekli",
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-005",
+      "originalNumber": 5,
+      "title": "Önünde engel olmadan oluşan trafik sıkışıklığı",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "5. Önünde engel olmadan oluşan trafik sıkışıklığı",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-006",
+      "originalNumber": 6,
+      "title": "Su deposuna dökülen 96 milyon siyah top",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "6. Su deposuna dökülen 96 milyon siyah top",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-007",
+      "originalNumber": 7,
+      "title": "İlk webcam'in izlediği kahve sürahisi",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "7. İlk webcam'in izlediği kahve sürahisi",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-008",
+      "originalNumber": 8,
+      "title": "Verimli trafik lambalarının kışın görünmez olması",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "8. Verimli trafik lambalarının kışın görünmez olması",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-009",
+      "originalNumber": 9,
+      "title": "Şifreleme sistemine rastgelelik sağlayan lav lambaları",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "9. Şifreleme sistemine rastgelelik sağlayan lav lambaları",
+      "scopeStatus": "excluded",
+      "scopeReason": "Cloudflare şirket uygulaması merkezli",
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-010",
+      "originalNumber": 10,
+      "title": "Metal kokusu sandığımız şeyin ciltte oluşması",
+      "sourceDocumentId": "research-batch-01",
+      "sourceHeading": "10. Metal kokusu sandığımız şeyin ciltte oluşması",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-011",
+      "originalNumber": 11,
+      "title": "İsviçre peynirinde kaybolan delikler",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "11. İsviçre peynirinde kaybolan delikler",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-012",
+      "originalNumber": 12,
+      "title": "IKEA'nın saç kurutma makinesiyle şişirilen mobilyaları",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "12. IKEA'nın saç kurutma makinesiyle şişirilen mobilyaları",
+      "scopeStatus": "excluded",
+      "scopeReason": "IKEA marka hikâyesi",
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-013",
+      "originalNumber": 13,
+      "title": "Saklanmak için çözülen, sonra yeniden yapılan Nobel madalyaları",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "13. Saklanmak için çözülen, sonra yeniden yapılan Nobel madalyaları",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-014",
+      "originalNumber": 14,
+      "title": "İnsanlar geçince sallanmaya başlayan yeni köprü",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "14. İnsanlar geçince sallanmaya başlayan yeni köprü",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-015",
+      "originalNumber": 15,
+      "title": "Hızlı trenin burnuna ilham veren yalıçapkını",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "15. Hızlı trenin burnuna ilham veren yalıçapkını",
+      "scopeStatus": "excluded",
+      "scopeReason": "Belirli markalı tren modeli merkezli",
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-016",
+      "originalNumber": 16,
+      "title": "Kapağında arsenik bulunan güzel yeşil kitaplar",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "16. Kapağında arsenik bulunan güzel yeşil kitaplar",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-017",
+      "originalNumber": 17,
+      "title": "Bugünkü folyo metalinin gümüş kadar pahalı olduğu dönem",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "17. Bugünkü folyo metalinin gümüş kadar pahalı olduğu dönem",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-018",
+      "originalNumber": 18,
+      "title": "Hollywood tabelası bir emlak reklamıydı",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "18. Hollywood tabelası bir emlak reklamıydı",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-019",
+      "originalNumber": 19,
+      "title": "Eyfel Kulesi'nin kalmasına yardım eden radyo",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "19. Eyfel Kulesi'nin kalmasına yardım eden radyo",
+      "scopeStatus": "eligible",
+      "scopeReason": null,
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    },
+    {
+      "externalId": "idea-020",
+      "originalNumber": 20,
+      "title": "Concorde uçarken uzuyordu",
+      "sourceDocumentId": "research-batch-02",
+      "sourceHeading": "20. Concorde uçarken uzuyordu",
+      "scopeStatus": "excluded",
+      "scopeReason": "Belirli uçak modeli merkezli",
+      "initialWorkflowStatus": "inbox",
+      "initialClaimReviewStatus": "unreviewed"
+    }
+  ]
+}

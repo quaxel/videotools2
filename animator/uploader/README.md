@@ -1,20 +1,43 @@
 # YouTube Yükleyici
 
-A local page that lists every rendered video (`out/<slug>.mp4`). It fills in the title, description and tags from
-`videos/<slug>/youtube.md` and uploads with one button. When you schedule a video, it is uploaded as **private** with
-`publishAt`. YouTube itself makes it public at that time, so this page doesn't need to stay open.
+A local page that lists every rendered video (`out/<slug>.mp4`) and uploads it with one button, with the title,
+description and tags already filled in. When you schedule a video, it is uploaded as **private** with `publishAt`.
+YouTube itself makes it public at that time, so this page doesn't need to stay open.
 
 ```bash
-.venv/bin/python uploader/server.py             # http://127.0.0.1:8765 opens
-.venv/bin/python uploader/server.py --dry-run   # whole flow without sending anything to YouTube
+.venv/bin/python uploader/server.py                 # http://127.0.0.1:8765 opens
+.venv/bin/python uploader/server.py --dry-run       # whole flow without sending anything to YouTube
+.venv/bin/python uploader/server.py --import <slug> # add one video to the database now (make-video step 8 runs it)
 ```
 
-The videos made before this page existed are listed in `uploader/hidden.txt` and don't appear on the page. To show
-one again, delete its line. Any video rendered later shows up automatically.
+## Where the data lives: `uploader/uploader.db`
 
-Your edits save automatically to `videos/<slug>/youtube.json`. "youtube.md'ye geri dön" (back to youtube.md) throws
-them away. After an upload, the video ID and the schedule are written to the same file, and that video can't be
-uploaded a second time.
+Everything is stored in one SQLite file, `uploader/uploader.db`:
+
+- each video's imported title, description and tags
+- your edits
+- the archive flag
+- the upload record: video ID, schedule, and the last status YouTube reported
+
+**A video is imported once.** That happens when both `out/<slug>.mp4` and `videos/<slug>/` exist, either when you
+open the page or when you run `--import`:
+
+- The text comes from `videos/<slug>/youtube.md`.
+- If that file is missing, the page drafts it from `plan.json`, `lines.json` and `research.md` and marks it
+  "Otomatik taslak" (automatic draft). If `youtube.md` appears later and you haven't edited the draft, it replaces
+  the draft automatically.
+- **After import, only the MP4 is needed.** You can delete `videos/<slug>/`. The page shows a warning if the MP4 is
+  missing.
+
+Buttons:
+
+- **"İlk haline dön"** (back to original) throws away your edits.
+- **"Klasörden yeniden al"** (re-read from folder) re-reads the text from the folder, while the folder still exists.
+- **"Arşivle"** (archive) hides a video from the list. The videos made before this page existed start out in the
+  "Arşiv" (archive) tab.
+
+**Back up the database file:** `uploader.db` is gitignored, and it is the **only** copy of your edits and upload
+records. If it's deleted, the protection against uploading the same video twice is gone too.
 
 ## One-time setup
 

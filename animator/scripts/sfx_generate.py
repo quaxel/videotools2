@@ -490,6 +490,156 @@ def steps():
     return loop_fade(out)
 
 
+def rumble():
+    # An earthquake: a deep shuddering roar with irregular surges and a rattle of loose things; 3 s loop.
+    sec = 3.0
+    t = t_axis(sec)
+    surge = 0.6 + 0.4 * np.abs(np.sin(2 * np.pi * t * 1.0 / sec * 3 + np.sin(2 * np.pi * t / sec) * 2))
+    out = low(noise(sec), 90, 4) * 3.0 * surge
+    out += band(noise(sec), 90, 300) * 0.5 * surge
+    for _ in range(40):
+        place(out, band(noise(0.03), 1200, 4000) * env(0.03, 0.001, 0.008) * (0.05 + rng.random() * 0.1), rng.random() * (sec - 0.05))
+    return loop_fade(out)
+
+
+def river():
+    # A big river rushing: broad hissing water with a low churn that rises and falls; 3 s loop.
+    sec = 3.0
+    t = t_axis(sec)
+    out = band(noise(sec), 300, 5000, 2) * (0.8 + 0.2 * np.sin(2 * np.pi * t * 2 / sec))
+    out += low(noise(sec), 250) * 1.2 * (0.8 + 0.2 * np.sin(2 * np.pi * t / sec + 1))
+    for _ in range(80):
+        place(out, band(noise(0.05), 600, 3000) * env(0.05, 0.005, 0.02) * (0.1 + rng.random() * 0.2), rng.random() * (sec - 0.06))
+    return loop_fade(out)
+
+
+def falls():
+    # A waterfall: a dense, deep roar; 3 s loop.
+    sec = 3.0
+    out = low(noise(sec), 400, 2) * 1.6 + band(noise(sec), 400, 3000) * 0.6
+    return loop_fade(out)
+
+
+def splash():
+    # Something huge hitting the water: a thump, a tearing slosh, then droplets raining back down.
+    sec = 1.8
+    out = low(noise(0.3), 160) * env(0.3, 0.002, 0.08) * 3
+    out = mix(out, band(noise(sec), 300, 4000) * env(sec, 0.01, 0.35))
+    for _ in range(70):
+        at = 0.25 + rng.random() * 1.3
+        f0 = 900 + rng.random() * 1500
+        place(out, sweep(f0, f0 * 1.8, 0.03) * env(0.03, 0.001, 0.01) * 0.12, at)
+    return out
+
+
+def crack():
+    # A tree trunk snapping: a sharp splintering crack and a creaking groan as it goes over.
+    sec = 1.6
+    out = band(noise(0.08), 800, 6000) * env(0.08, 0.0005, 0.02) * 2
+    for k in range(6):
+        place(out, band(noise(0.03), 1500, 7000) * env(0.03, 0.0005, 0.008), 0.02 + k * 0.025 + rng.random() * 0.02)
+    t = t_axis(1.3)
+    groan = np.sin(2 * np.pi * np.cumsum(140 + 40 * np.sin(2 * np.pi * t * 2.5)) / SR)
+    groan = band(groan * (1 + 0.5 * np.sign(np.sin(2 * np.pi * t * 30))), 100, 1200) * env(1.3, 0.1, 0.6) * 0.5
+    return mix(out, np.concatenate([np.zeros(int(0.15 * SR)), groan]))
+
+
+def creak():
+    # Wooden boat planks and timbers creaking under strain.
+    sec = 1.0
+    t = t_axis(sec)
+    f = 220 + 60 * np.sin(2 * np.pi * t * 1.3)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * (1 + 0.8 * np.sign(np.sin(2 * np.pi * t * 45)))
+    return band(x, 150, 2000) * env(sec, 0.15, 0.5)
+
+
+
+def tank():
+    # A tank idling and creeping: a deep lumpy diesel throb with the clank and squeal of track links; 3 s loop.
+    sec = 3.0
+    t = t_axis(sec)
+    throb = np.sign(np.sin(2 * np.pi * 26 * t)) * 0.5 + np.sin(2 * np.pi * 13 * t)
+    out = low(throb + noise(sec) * 0.6, 180, 4) * 2.2 * (0.85 + 0.15 * np.sin(2 * np.pi * t * 2 / sec))
+    out += band(noise(sec), 200, 700) * 0.35
+    for k in range(int(sec * 7)):
+        at = k / 7 + rng.random() * 0.02
+        place(out, band(noise(0.04), 1500, 5000) * env(0.04, 0.0005, 0.012) * (0.25 + rng.random() * 0.2), at)
+        if k % 5 == 0:
+            place(out, sweep(2200, 1800, 0.12) * env(0.12, 0.01, 0.05) * 0.06, at)
+    return loop_fade(out)
+
+
+def compressor():
+    # A small gas-engine air compressor: a fast two-stroke putter with a pumping wheeze each stroke; 2 s loop.
+    sec = 2.0
+    t = t_axis(sec)
+    out = low(np.sign(np.sin(2 * np.pi * 22 * t)) + noise(sec) * 0.4, 400, 3) * 0.9
+    pump = (0.5 + 0.5 * np.sin(2 * np.pi * 4 * t)) ** 3
+    out += band(noise(sec), 1800, 6000) * pump * 0.5
+    return loop_fade(out)
+
+
+def squeak():
+    # Rubber squeaking under a slapping hand, then a wobbly boing as the inflated hull jiggles.
+    sec = 0.9
+    t = t_axis(sec)
+    rub = np.sin(2 * np.pi * np.cumsum(900 + 500 * np.sin(2 * np.pi * t * 9)) / SR) * env(sec, 0.005, 0.12)
+    slap = band(noise(0.06), 400, 3000) * env(0.06, 0.0005, 0.015) * 1.5
+    boing = np.sin(2 * np.pi * np.cumsum(140 + 60 * np.exp(-t * 5) * np.sin(2 * np.pi * t * 11)) / SR) * env(sec, 0.01, 0.35)
+    return mix(slap, rub * 0.5, boing * 0.9)
+
+
+def morse():
+    # Spoof radio: crackling static with a run of Morse beeps; 3 s loop.
+    sec = 3.0
+    out = band(noise(sec), 500, 4000) * 0.12
+    code = "-.-. --.- -.. . .-. ...-- -.-. "
+    at = 0.1
+    for ch in code:
+        if ch == " ":
+            at += 0.18
+            continue
+        d = 0.06 if ch == "." else 0.18
+        if at + d > sec - 0.05:
+            break
+        place(out, tone(780, d) * env(d, 0.004, 10) * 0.6, at)
+        at += d + 0.06
+    return loop_fade(out)
+
+
+def battle():
+    # Recorded battle sounds blasting from a loudspeaker: tinny, band-limited engines, clanks and distant thuds; 3 s loop.
+    sec = 3.0
+    t = t_axis(sec)
+    eng = np.sign(np.sin(2 * np.pi * 31 * t)) + noise(sec) * 0.5
+    out = band(eng, 250, 2600) * 0.5
+    for k in range(5):
+        place(out, band(noise(0.4), 120, 1800) * env(0.4, 0.002, 0.12) * 1.4, 0.2 + k * 0.58 + rng.random() * 0.1)
+    for k in range(18):
+        place(out, band(noise(0.03), 1800, 4500) * env(0.03, 0.0005, 0.01) * 0.4, rng.random() * (sec - 0.05))
+    out = np.tanh(out * 2.5) * 0.7  # overdriven horn speaker
+    return loop_fade(out)
+
+
+def deflate():
+    # Air rushing out of a rubber valve: a squealing, wavering hiss that sags in pitch.
+    sec = 1.6
+    t = t_axis(sec)
+    squeal = np.sin(2 * np.pi * np.cumsum(700 * np.exp(-t * 0.9) + 90 * np.sin(2 * np.pi * t * 7)) / SR)
+    return band(noise(sec), 1500, 7000) * env(sec, 0.02, 0.7) * 0.6 + squeal * env(sec, 0.02, 0.6) * 0.35
+
+
+def hooves():
+    # A horse trotting on bare rock: two-beat clip-clops (diagonal pairs) with a hard click on each; 2 s loop.
+    sec = 2.0
+    out = np.zeros(int(sec * SR))
+    for k in range(8):
+        at = k * 0.25 + 0.01
+        for d, g in ((0.0, 1.0), (0.045, 0.7)):
+            place(out, band(noise(0.06), 600, 2400) * env(0.06, 0.0005, 0.012) * g, at + d)
+            place(out, sweep(260, 140, 0.07) * env(0.07, 0.001, 0.02) * 0.5 * g, at + d)
+    return loop_fade(out)
+
 if __name__ == "__main__":
     for name, fn in [
         ("reel-spin", reel_spin),
@@ -519,3 +669,8 @@ if __name__ == "__main__":
         save(f"sfx/{name}.wav", fn())
     for name, fn in [("crowd", crowd), ("engine", engine), ("honk", honk), ("hiss", hiss), ("steps", steps)]:
         save(f"sfx/{name}.wav", fn())
+    for name, fn in [("rumble", rumble), ("river", river), ("falls", falls), ("splash", splash), ("crack", crack), ("creak", creak)]:
+        save(f"sfx/{name}.wav", fn())
+    for name, fn in [("tank", tank), ("compressor", compressor), ("squeak", squeak), ("morse", morse), ("battle", battle), ("deflate", deflate)]:
+        save(f"sfx/{name}.wav", fn())
+    save("sfx/hooves.wav", hooves())

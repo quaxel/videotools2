@@ -3,6 +3,7 @@ import { LakeLitStill, LakePreview } from "./scenes/LakePreview";
 import { FACE_TOUR_STEP, FacePreview, FaceTour, GESTURE_TOUR_FRAMES, GestureTour } from "./scenes/FacePreview";
 import { MOVE_TOUR_FRAMES, MoveTour, SAD_WALK_FRAMES, SadWalk, WALK_TOWARD_FRAMES, WalkToward } from "./scenes/MovePreview";
 import { AlleyPreview } from "./scenes/AlleyPreview";
+import { BalloonPreview } from "./scenes/BalloonPreview";
 import { GreatWallPreview } from "./scenes/GreatWallPreview";
 import { CostumePreview } from "./scenes/CostumePreview";
 import { MarathonPreview } from "./scenes/MarathonPreview";
@@ -28,6 +29,7 @@ export const Root: React.FC = () => (
     <Composition id="GreatWallPreview" component={GreatWallPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="AlleyPreview" component={AlleyPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SpacePreview" component={SpacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
+    <Composition id="BalloonPreview" component={BalloonPreview} durationInFrames={240} fps={30} width={1080} height={1920} />
     <Composition id="LakePreview" component={LakePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="LakeLitStill" component={LakeLitStill} defaultProps={{ lit: true }} durationInFrames={1} fps={30} width={1080} height={1920} />
   </>

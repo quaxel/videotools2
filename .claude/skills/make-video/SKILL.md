@@ -143,7 +143,12 @@ Sources:
 <15-25 comma-separated search phrases, ≤ 500 characters in total>
 ```
 
-Only facts from research.md's claims; no `<` or `>` anywhere in title or description.
+Only facts from research.md's claims; no `<` or `>` anywhere in title or description. Then add the video to the
+uploader's database (after this, only `out/<slug>.mp4` is needed; `videos/<slug>/` can be removed):
+
+```bash
+.venv/bin/python uploader/server.py --import <slug>
+```
 
 ## Deliver
 

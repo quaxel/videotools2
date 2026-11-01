@@ -139,6 +139,51 @@ Built from photo references: `guide/references/kentucky-farmyard-1876.md`. Used 
   when the camera looks up. Keep the sun behind the camera's usual direction so look-up shots stay deep blue.
 - Light puppets with `farmLight(f)`, or `farmLight(f, true)` next to the kettle fire.
 
+### WWII balloon bomb: launch beach, sky, snow fields, pine forest (`src/three/BalloonSets.tsx`)
+
+Built from photo references: `guide/references/balloon-bomb.md`. Used by `src/videos/balloon-bombs`.
+- `PaperBalloon({ frame, bags? })` — the 10 m washi envelope with gores, load band, shroud lines and the
+  `Chandelier` (aluminium ring, sandbags, bombs) at its origin. `InflatingEnvelope({ frame, fill })` swells on the
+  sand held by guide ropes; `GroundedBalloon` is a collapsed heap with the ring tipped over; `DrapedPaper` hangs it
+  over a branch.
+- `BeachLaunchSet({ camera, frame, balloon })` — Japanese launch beach at a winter dawn (sun rising out of the sea,
+  breakers, black pines, hydrogen cylinders, stake ring); `balloon` = ring height or null. Light with `dawnLight()`.
+- `SkySet({ camera, frame, mode, speed })` — above the cloud deck: `day` (jet stream streaks), `night` (moon, stars),
+  `coast` (dawn, gaps showing the forested coast). The deck scrolls past the balloon kept at the origin.
+- `SnowFieldSet({ camera, frame, variant })` — `alaska` (overcast, spruce, falling snow), `montana` (sun, wire
+  fence, Rockies), `michigan` (dusk, red barn, bare trees).
+- `PineForestSet({ camera, frame, balloon?, scorch? })` — Oregon ponderosa forest; the balloon hangs in the hero pine
+  (`HERO`), its ring dangles at `DANGLE`; `scorch` blackens the clearing and lets smoke rise.
+- `useOwned(make)` makes a texture or geometry for one mount and frees it when the shot ends; use it for every
+  canvas texture in a set (see Rendering below).
+
+### The Mississippi at New Madrid, 1811-1812 (`src/three/RiverSets.tsx`)
+
+Built from references: `guide/references/mississippi-1812.md`. Used by `src/videos/mississippi-backward`.
+- `RiverSet({ camera, frame, mode, water?, debris?, post?, clear? })` — the river runs along z, downstream (south) toward
+  -z, surface at `RIVER.water`, a clay cut bank left (top y = 1), a sand bar and low bank right, cottonwood forest,
+  dome sky. Modes `night` (moon, stars), `predawn`, `dawn`, `day`. `water` (`WaterState`): `drift` metres the water has
+  moved toward +z (negative = flowing south, positive = upstream) carries ripples, foam and logs; `bore`/`boreH` send a
+  foam-crested wall of water up the river; `uplift` 0..1 raises bed, banks and forest at `RIVER.step` with a waterfall
+  pouring back toward +z; `swell` rolls big waves (`surfaceY` gives the height for riding a boat on it). A NEW ORLEANS
+  fingerpost at `POST` points downstream: debris moving away from it reads as the river running backward.
+- `Flatboat({ frame, lantern?, sweep?, pitch?, roll?, heave? })` — deck at y = 0 (puppets stand on it, open stern deck
+  z 0..2.4), plank cabin forward, steering sweep, lantern at `BOAT.lantern`; give the crew `air = heave * 1060/1.3`.
+- Effects: `Splash`, `FallingTree({ fall, dir })`, `BankSlab({ crack, fall })`, `GroundCrack`, `SandBlow`, `Chimney({ fall })`.
+- `VillageSet` (New Madrid at night: the farmyard's `House`, now exported with `chimney?`), `RiverSliceSet({ rise })`
+  (cake-slice of the river with the block under the bed rising, `sliceWaterY`), `CypressLakeSet({ flood?, canoe? })`
+  (Reelfoot Lake at sunrise; the canoe's thwart is at seat height, so a puppet with `seat: 1` sits in it).
+- Light puppets with `riverLight(mode, f, lantern?)`.
+
+### Rendering long or heavy videos
+
+A render tab keeps every finished shot's WebGL context (and its GPU memory) alive, so a long video with heavy sets
+used to die mid-render with "Error creating WebGL context". `pipeline.py` now renders the picture in 400-frame
+segments, each in a fresh browser (`render_video`), joins them without re-encoding and muxes the soundtrack from
+`scripts/sound.mjs` (the `soundOnly` input prop skips the shots); `framing.mjs` segments the same way. In a scene:
+free what you create (`useOwned`, dispose instanced meshes on unmount), instance repeated small meshes (a forest's
+limbs and tufts), and put several cuts in one place on one Stage with a `multi` shot (`src/videos/balloon-bombs`).
+
 ### Birds, on-screen headlines
 
 - `Vultures({ frame, centre, radius?, count?, size?, fade? })` (`src/three/Birds.tsx`) — 3D inked turkey vultures
@@ -219,7 +264,8 @@ Effects (`public/sfx/*.wav`, synthesised by `scripts/sfx_generate.py`): `reel-sp
 put it on the twist line), `riser` (1.6 s build; start it so it ends on the twist), `wind` (outdoor breeze, loop), `plop`
 (a small soft lump landing on grass), `crackle` (small wood fire, loop), `chew` (two squishy chews),
 `crowd` (stadium cheering, loop), `engine` (early motor car chugging, loop), `honk` (bulb horn), `hiss` (steam burst),
-`steps` (running on dirt, loop).
+`steps` (running on dirt, loop), `rumble` (earthquake roar, loop), `river` (rushing water, loop), `falls` (waterfall roar,
+loop), `splash` (something big hitting water), `crack` (tree trunk snapping and groaning over), `creak` (boat timbers).
 Music loops: `lounge` (112 BPM, light), `mystery` (84 BPM, dark), `upbeat` (124 BPM, bright: hooks), `tension` (100 BPM, pulsing:
 the numbers and the reveal). Use at least three beds across a video. New sounds: add a function at the end of `sfx_generate.py`
 (after the originals, so their files stay identical) and re-run it with `../tts/qwen/.venv/bin/python`.

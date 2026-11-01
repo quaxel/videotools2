@@ -53,7 +53,7 @@ export type PuppetLook = {
   beard?: string; // full short beard round the jaw (the mouth shows over it)
   vest?: string; // waistcoat over the shirt (the outfit colour shows down the front)
   suspenders?: string; // braces over the shoulders
-  hatStyle?: "wide" | "bowler" | "boater"; // shape of `hat`: wide felt brim (default), round bowler, flat straw boater
+  hatStyle?: "wide" | "bowler" | "boater" | "helmet" | "stahl"; // shape of `hat`: wide felt brim (default), round bowler, flat straw boater, WWII M1 steel helmet, flared coal-scuttle helmet
   shorts?: string; // athletic shorts to mid-thigh (runners)
   bib?: string; // race number on a white cloth bib, front and back (e.g. "31")
 };
@@ -170,7 +170,23 @@ const ApronFront: React.FC<{ color: string; hem: number; uid: string }> = ({ col
 const BOWLER_CROWN_D = "M -150 -930 C -164 -1040 -96 -1088 0 -1088 C 96 -1088 164 -1040 150 -930 Z";
 const BOATER_CROWN_D = "M -168 -932 L -166 -1018 Q 0 -1034 166 -1018 L 168 -932 Z";
 
+// WWII steel helmets: a round M1 dome with a rolled rim, and the flared coal-scuttle shape (skirt over the ears).
+const M1_FRONT_D = "M -238 -878 C -244 -1012 -152 -1090 0 -1092 C 152 -1090 244 -1012 238 -878 Q 0 -912 -238 -878 Z";
+const STAHL_FRONT_D = "M -262 -806 L -226 -890 C -232 -1014 -150 -1086 0 -1088 C 150 -1086 232 -1014 226 -890 L 262 -806 Q 220 -836 190 -872 Q 0 -914 -190 -872 Q -220 -836 -262 -806 Z";
+const M1_SIDE_D = "M -214 -868 C -218 -1030 -116 -1096 30 -1096 C 186 -1094 252 -1012 248 -878 Q 20 -912 -214 -868 Z";
+const STAHL_SIDE_D = "M -250 -770 L -214 -884 C -210 -1032 -112 -1092 30 -1092 C 186 -1090 246 -1012 240 -900 L 266 -876 Q 40 -916 -150 -872 L -250 -770 Z";
+
+const Helmet: React.FC<{ color: string; uid: string; d: string; rim: string }> = ({ color, uid, d, rim }) => (
+  <g>
+    <Inked d={d} fill={color} uid={uid} name="helmet" />
+    <path d={rim} fill="none" stroke={INK} strokeWidth={9} opacity={0.45} strokeLinecap="round" />
+    <path d="M -110 -1040 Q -40 -1074 40 -1070" fill="none" stroke="#fff" strokeWidth={20} strokeLinecap="round" opacity={0.22} />
+  </g>
+);
+
 const HatFront: React.FC<{ color: string; uid: string; style?: PuppetLook["hatStyle"] }> = ({ color, uid, style = "wide" }) => {
+  if (style === "helmet") return <Helmet color={color} uid={uid} d={M1_FRONT_D} rim="M -226 -900 Q 0 -932 226 -900" />;
+  if (style === "stahl") return <Helmet color={color} uid={uid} d={STAHL_FRONT_D} rim="M -214 -902 Q 0 -936 214 -902" />;
   const crown = style === "bowler" ? BOWLER_CROWN_D : style === "boater" ? BOATER_CROWN_D : HAT_CROWN_D;
   const brim = style === "bowler" ? 222 : style === "boater" ? 262 : 292;
   return (
@@ -1263,7 +1279,15 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
               <path d="M -186 -840 L -262 -800 L -214 -770 Z M -186 -840 L -246 -730 L -196 -740 Z" fill={look.kerchief} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
             </g>
           )}
-          {look.hat && (
+          {look.hat && (look.hatStyle === "helmet" || look.hatStyle === "stahl") && (
+            <Helmet
+              color={look.hat}
+              uid={patternId}
+              d={look.hatStyle === "helmet" ? M1_SIDE_D : STAHL_SIDE_D}
+              rim={look.hatStyle === "helmet" ? "M -200 -892 Q 20 -930 236 -900" : "M -200 -900 Q 20 -934 230 -916"}
+            />
+          )}
+          {look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl" && (
             <g>
               <Inked d={look.hatStyle === "bowler" ? BOWLER_CROWN_D : look.hatStyle === "boater" ? BOATER_CROWN_D : SIDE_HAT_CROWN_D} fill={look.hat} uid={patternId} name="hat" />
               <path d="M -152 -968 Q 26 -984 202 -968 L 200 -932 Q 26 -948 -150 -932 Z" fill={INK} opacity={0.55} />
@@ -1336,7 +1360,8 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <circle cx={-204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
           <circle cx={204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
           <circle cx={0} cy={-800} r={205} fill={look.skin} stroke={INK} strokeWidth={STROKE} />
-          <UnderHat id={patternId} on={!!look.hat}>
+          {/* a steel helmet sits high at the back: the hair shows below it, so it is not clipped */}
+          <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl"}>
             <path d={backHair} fill={look.hair} stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
             <Cel uid={patternId} name="hair" d={backHair} />
           </UnderHat>

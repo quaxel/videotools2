@@ -197,7 +197,7 @@ const shingleCanvas = () =>
     }
   });
 
-const stoneCanvas = () =>
+export const stoneCanvas = () =>
   canvasTexture(256, 256, (ctx) => {
     ctx.fillStyle = "#6a645c";
     ctx.fillRect(0, 0, 256, 256);
@@ -349,8 +349,9 @@ export const WormFence: React.FC<{ a: [number, number]; b: [number, number]; pan
 };
 
 // The log house: hewn logs with chinking, log ends sticking out at the corners, a plank door, one small
-// six-pane window, a shingle gable roof and a fieldstone chimney on the right end with a thin line of smoke.
-const House: React.FC<{ frame: number }> = ({ frame }) => {
+// six-pane window, a shingle gable roof and a fieldstone chimney on the right end with a thin line of smoke
+// (`chimney` false leaves it off, for a shot that topples its own).
+export const House: React.FC<{ frame: number; chimney?: boolean }> = ({ frame, chimney = true }) => {
   const logs = useMemo(() => {
     const t = logCanvas(8);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -435,9 +436,13 @@ const House: React.FC<{ frame: number }> = ({ frame }) => {
         )),
       )}
       {/* Stone chimney on the right end */}
-      <InkBox size={[0.75, ridgeY + 0.7, 0.8]} position={[HOUSE.right + 0.38, (ridgeY + 0.7) / 2, cz]} color="#ffffff" map={stone} ink={0.02} />
-      <InkBox size={[0.55, 0.12, 0.6]} position={[HOUSE.right + 0.38, ridgeY + 0.76, cz]} color="#6a645c" ink={0.01} />
-      <SmokePlume position={[HOUSE.right + 0.38, ridgeY + 0.85, cz]} world={[HOUSE.right + 0.38, cz]} frame={frame} size={0.1} rise={1.6} wind={-0.9} period={80} puffs={6} />
+      {chimney && (
+        <>
+          <InkBox size={[0.75, ridgeY + 0.7, 0.8]} position={[HOUSE.right + 0.38, (ridgeY + 0.7) / 2, cz]} color="#ffffff" map={stone} ink={0.02} />
+          <InkBox size={[0.55, 0.12, 0.6]} position={[HOUSE.right + 0.38, ridgeY + 0.76, cz]} color="#6a645c" ink={0.01} />
+          <SmokePlume position={[HOUSE.right + 0.38, ridgeY + 0.85, cz]} world={[HOUSE.right + 0.38, cz]} frame={frame} size={0.1} rise={1.6} wind={-0.9} period={80} puffs={6} />
+        </>
+      )}
     </group>
   );
 };

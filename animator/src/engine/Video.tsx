@@ -53,11 +53,15 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   voiceVolume = 1,
 }) => {
   const framing = useFramingTable(slug);
+  // `soundOnly` (input prop, scripts/sound.mjs): the soundtrack alone, without mounting a single 3D shot.
+  const soundOnly = (getInputProps() as { soundOnly?: boolean }).soundOnly === true;
   return (
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
-    <VideoContext.Provider value={{ timing, sfx, lighting, framing }}>
-      <ShotList shots={shots} />
-    </VideoContext.Provider>
+    {!soundOnly && (
+      <VideoContext.Provider value={{ timing, sfx, lighting, framing }}>
+        <ShotList shots={shots} />
+      </VideoContext.Provider>
+    )}
     <Audio src={staticFile(`videos/${slug}/voice.wav`)} volume={voiceVolume} />
     <SoundTrack sfx={sfx} music={music} captions={timing.captions} total={timing.totalFrames} />
     <Captions chunks={timing.captions} />

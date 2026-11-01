@@ -27,19 +27,25 @@ const whip = (p: number) => {
 
 // Moves its shot during the whip that starts at sequence frame `start`: "in" slides from the right edge to
 // rest, "out" from rest off the left edge.
+// The tree keeps one shape before, during and after the whip (the shot first, the filter after it): when the shot
+// moved in the tree it remounted at both ends of every whip, and each remount opened a fresh WebGL context, until
+// headless Chrome refused to create more in a long render.
 const Whip: React.FC<{ side: "in" | "out"; start: number; id: string; children: React.ReactNode }> = ({ side, start, id, children }) => {
   const p = (useCurrentFrame() - start) / FADE;
-  if (p < 0 || p >= 1) return <AbsoluteFill>{children}</AbsoluteFill>;
-  const { e, smear } = whip(p);
+  const moving = p >= 0 && p < 1;
+  const { e, smear } = whip(moving ? p : 0);
   const x = side === "in" ? (1 - e) * 100 : -e * 100;
+  const blur = moving && smear > 0.5;
   return (
-    <AbsoluteFill style={{ transform: `translateX(${x}%)`, filter: smear > 0.5 ? `url(#${id})` : undefined }}>
-      <svg width={0} height={0} style={{ position: "absolute" }}>
-        <filter id={id} x="-20%" y="0" width="140%" height="100%">
-          <feGaussianBlur stdDeviation={`${smear} 0`} edgeMode="duplicate" />
-        </filter>
-      </svg>
+    <AbsoluteFill style={moving ? { transform: `translateX(${x}%)`, filter: blur ? `url(#${id})` : undefined } : undefined}>
       {children}
+      {blur && (
+        <svg width={0} height={0} style={{ position: "absolute" }}>
+          <filter id={id} x="-20%" y="0" width="140%" height="100%">
+            <feGaussianBlur stdDeviation={`${smear} 0`} edgeMode="duplicate" />
+          </filter>
+        </svg>
+      )}
     </AbsoluteFill>
   );
 };

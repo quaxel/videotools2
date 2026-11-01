@@ -248,6 +248,29 @@ def motion_by_shot(slug, diffs):
     return sorted(rows)
 
 
+# Frames per render pass. A render tab keeps every finished shot's WebGL context alive, so a long video with heavy
+# sets runs the GPU out of memory in one pass ("Error creating WebGL context"); each segment gets a fresh browser.
+RENDER_SEGMENT = 400
+
+
+def render_video(slug, out, *args):
+    """Render the picture of `slug` to `out` (muted) in segments and join them without re-encoding."""
+    total = json.load(open(os.path.join(ROOT, "src", "videos", slug, "timing.json")))["totalFrames"]
+    parts = []
+    began = time.time()
+    for start in range(0, total, RENDER_SEGMENT):
+        part = f"{out}.part{start}.mp4"
+        run("npx", "remotion", "render", slug, part, f"--frames={start}-{min(total, start + RENDER_SEGMENT) - 1}", "--muted", *args)
+        parts.append(part)
+        clean_remotion_temp(began)
+    listing = f"{out}.parts.txt"
+    with open(listing, "w") as fh:
+        fh.writelines(f"file '{p}'\n" for p in parts)
+    run("ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", listing, "-c", "copy", out)
+    for p in parts + [listing]:
+        os.remove(p)
+
+
 def cmd_motion(slug):
     import numpy as np
 
@@ -255,7 +278,7 @@ def cmd_motion(slug):
     cmd_framing(slug, force=False)
     draft = os.path.join(ROOT, "out", "drafts", f"{slug}.mp4")
     os.makedirs(os.path.dirname(draft), exist_ok=True)
-    run("npx", "remotion", "render", slug, draft, "--scale=0.3", "--muted", "--log=error")
+    render_video(slug, draft, "--scale=0.3", "--log=error")
     _, d = frame_diffs(draft)
     med, still = float(np.median(d)), float((d < 2).mean())
     for key, val in (("motion", med), ("still_share", still)):
@@ -269,7 +292,13 @@ def cmd_render(slug):
     cmd_register()
     cmd_framing(slug, force=False)
     os.makedirs(os.path.join(ROOT, "out"), exist_ok=True)
-    run("npx", "remotion", "render", slug, f"out/{slug}.mp4", "--log=error")
+    out = os.path.join(ROOT, "out", f"{slug}.mp4")
+    picture, sound = f"{out}.picture.mp4", f"{out}.sound.wav"
+    render_video(slug, picture, "--log=error")
+    run("node", "scripts/sound.mjs", slug, sound)
+    run("ffmpeg", "-v", "error", "-y", "-i", picture, "-i", sound, "-c:v", "copy", "-c:a", "aac", "-b:a", "320k", "-shortest", out)
+    os.remove(picture)
+    os.remove(sound)
 
 
 # ---------- report ----------
