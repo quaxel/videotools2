@@ -1,0 +1,72 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast, gripping, high-energy history storyteller. Excited and urgent, punchy emphasis on the surprising facts, brisk pace, no long pauses.",
+      "seed": 7,
+      "tempo": 1.42
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "It's eighteen ninety-seven, and three men are flying a balloon to the North Pole.",
+      "pauseAfter": 0.12,
+      "voice": {
+        "instruct": "Dramatic, excited opening hook, urgent and amazed, hitting 'North Pole' hard.",
+        "tempo": 1.34
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "No engine. Just silk, hydrogen and wind.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Right after takeoff, their steering ropes fall off.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then fog freezes on the balloon, and it sinks onto the ice.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "After sixty-five hours, they're stranded, far short of the pole.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "For three months, they drag heavy sleds across the broken ice.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then they vanish. No bodies, no answers.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Thirty-three years later, Norwegian seal hunters land on White Island.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Under the snow, they find a boat, the men, and their diaries.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "And their film still works. Ninety-three photos come back from the ice.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "The last pictures of three men who never came home.",
+      "pauseAfter": 0.1
+    }
+  ]
+}

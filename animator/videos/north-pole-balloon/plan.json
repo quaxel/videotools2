@@ -1,0 +1,42 @@
+{
+  "title": "The North Pole Expedition Lost for 33 Years",
+  "topic": "Andrée's 1897 North Pole balloon expedition, lost for 33 years",
+  "format_note": "User-specified ~35 s historical Short (115 words, 34.7 s, fast narrator). Overrides the 50-60 s explainer targets on purpose. Strindberg's camera, the film tin and the diary are drawn larger than scale so they read on a phone.",
+  "mechanism": "A steerless hydrogen balloon lost its drag ropes at takeoff and iced up in fog, dropping three men on the pack ice far short of the pole; they died on White Island and their camp, diaries and still-developable film were found 33 years later by seal hunters.",
+  "beats": {
+    "hook": "The silk balloon rushes at the lens over the pack ice; the three men in the basket; Strindberg's camera flash; the basket slams into an ice ridge",
+    "story": "Andrée, Strindberg and Frænkel lift off from the plank hangar on Danes Island",
+    "rise": "No engine, just wind: the Eagle sails north over the ice",
+    "twist": "33 years later a sealing ship's crew walks up White Island and digs a boat out of the snow (event)",
+    "mechanism": "Labelled physical props: DRAG ROPES snapping off, ice crust on the envelope, sled with the men, the film tin in the darkroom developing a photo, a 93 counter on the print rack",
+    "ending": "The developed photo of the balloon on the ice turns into the opening shot; loops back to the balloon over the ice"
+  },
+  "seed": { "what": "Strindberg's camera (the film the ending depends on)", "first_line": 0 },
+  "locations": [
+    { "id": "sky-ice", "set": "ArcticSkySet (balloon over pack ice, low gold sun)", "colour": "gold / deep blue" },
+    { "id": "hangar", "set": "HangarSet, Danes Island plank hangar, grey sea", "colour": "brown wood / slate" },
+    { "id": "basket", "set": "Basket close-up in the sky", "colour": "wicker tan / sky blue" },
+    { "id": "fog", "set": "ArcticSkySet fog mode, iced envelope", "colour": "grey-white" },
+    { "id": "crash", "set": "PackIceSet, balloon down on the floe", "colour": "pale cyan" },
+    { "id": "trek", "set": "PackIceSet dusk, pressure ridges", "colour": "violet / navy" },
+    { "id": "empty", "set": "PackIceSet night storm, snow buries the tracks", "colour": "black-navy" },
+    { "id": "kvitoya", "set": "KvitoyaSet, sealing ship at the shore", "colour": "steel grey / red hull" },
+    { "id": "camp", "set": "KvitoyaSet camp under the snow", "colour": "white / brown" },
+    { "id": "darkroom", "set": "Room night, red safelight", "colour": "red" }
+  ],
+  "characters": [
+    { "id": "andree", "look": "S. A. Andrée, 42, moustache, dark wool coat, hat" },
+    { "id": "strindberg", "look": "Nils Strindberg, 24, slim, light coat, camera" },
+    { "id": "fraenkel", "look": "Knut Frænkel, 27, big, beard, grey sweater" },
+    { "id": "sealer", "look": "Norwegian sealer, 1930, oilskin, beard" },
+    { "id": "horn", "look": "Gunnar Horn, geologist, 1930, cap-less, glasses" },
+    { "id": "developer", "look": "Photo developer in a darkroom, apron, glasses" }
+  ],
+  "gags": [
+    { "line": 0, "what": "The basket slams into an ice ridge, snow bursts" },
+    { "line": 2, "what": "The drag ropes snap and whip down onto the ice" },
+    { "line": 3, "what": "A slab of ice slides off the envelope onto Frænkel's head" },
+    { "line": 5, "what": "A sled tips over and Andrée falls face-first into the snow" }
+  ],
+  "story_numbers": []
+}
