@@ -114,6 +114,37 @@ Every shot keeps the camera moving (orbit, crane, truck, push); sky shots need t
 The report (`videos/<slug>/report.md`) lists every target with ok/MISS and any spoken number without a
 sourced claim. Fix cheap misses (one more render at most); report the rest to the user honestly.
 
+## 8. YouTube metadata → `videos/<slug>/youtube.md`
+
+Every rendered video gets one: the uploader page (`uploader/server.py`) fills title, description and tags from it.
+Write it in English, in this exact shape (see `videos/ghost-army/youtube.md`):
+
+```markdown
+# YouTube metadata — <slug>
+
+## Title
+<hook-style title, ≤ 100 characters incl. emoji and " #Shorts">
+
+## Description
+<one-line hook>
+
+<one paragraph telling the story with the key sourced numbers>
+
+<a question to the viewer> 👇
+
+Sources:
+• <publisher, what it supports>: <url from research.md>
+
+<for history: "Animated historical re-enactment; characters' looks are illustrative.">
+
+#Shorts #<5-6 topic hashtags>
+
+## Tags
+<15-25 comma-separated search phrases, ≤ 500 characters in total>
+```
+
+Only facts from research.md's claims; no `<` or `>` anywhere in title or description.
+
 ## Deliver
 
 Send `out/<slug>.mp4` to the user, with the report's misses and any unverified numbers. Do not say a check

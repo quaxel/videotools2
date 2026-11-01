@@ -90,6 +90,29 @@ def parse_youtube_md(path):
     return {"title": title, "description": description, "tags": tags, "titleOptions": options}
 
 
+def auto_meta(slug):
+    """Draft for a video without youtube.md: title from plan.json, the narration as description, sources from
+    research.md. Tags stay empty."""
+    def load(name):
+        try:
+            return json.load(open(os.path.join(ROOT, "videos", slug, name), encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+    title = load("plan.json").get("title", "").strip()
+    narration = " ".join(l.get("text", "").strip() for l in load("lines.json").get("lines", []))
+    try:
+        research = open(os.path.join(ROOT, "videos", slug, "research.md"), encoding="utf-8").read()
+    except OSError:
+        research = ""
+    urls = list(dict.fromkeys(re.findall(r"https?://[^\s)>\]]+", research)))
+    parts = [narration] if narration else []
+    if urls:
+        parts.append("Sources:\n" + "\n".join("• " + u for u in urls))
+    parts.append("#Shorts")
+    return {"title": (title + " #Shorts") if title else "", "description": "\n\n".join(parts), "tags": [],
+            "titleOptions": [title] if title else []}
+
+
 def state_path(slug):
     return os.path.join(ROOT, "videos", slug, "youtube.json")
 
@@ -110,6 +133,9 @@ def save_state(slug, state):
 
 def video_info(slug):
     md = parse_youtube_md(os.path.join(ROOT, "videos", slug, "youtube.md"))
+    has_md = bool(md["title"] or md["description"])
+    if not has_md:
+        md = auto_meta(slug)
     state = load_state(slug)
     meta = {"title": md["title"], "description": md["description"], "tags": md["tags"], "categoryId": "27",
             "madeForKids": False, "syntheticMedia": False}
@@ -118,7 +144,7 @@ def video_info(slug):
         job = dict(jobs.get(slug, {}))
     return {
         "slug": slug,
-        "hasMd": bool(md["title"] or md["description"]),
+        "hasMd": has_md,
         "titleOptions": md["titleOptions"],
         "meta": meta,
         "edited": "draft" in state,

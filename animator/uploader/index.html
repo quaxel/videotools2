@@ -149,7 +149,7 @@ function statusChip(v) {
     if (u.publishAt) return `<span class="pill ok">Zamanlandı · ${esc(fmt(u.publishAt))}</span>`;
     return `<span class="pill ok">Yüklendi${u.dryRun ? " (deneme)" : ""}</span>`;
   }
-  if (!v.hasMd && !v.edited) return `<span class="pill warn">Meta veri yok</span>`;
+  if (!v.hasMd && !v.edited) return `<span class="pill warn">Otomatik taslak</span>`;
   return `<span class="pill">Hazır</span>`;
 }
 
@@ -191,7 +191,7 @@ function renderEditor() {
         <div class="meta-line">${esc(v.slug)}.mp4 · ${v.sizeMB} MB<br>Render: ${esc(fmt(v.rendered))}</div>
       </div>
       <div>
-        ${!v.hasMd ? `<div class="notice warn" style="margin-top:0">videos/${esc(v.slug)}/youtube.md yok, alanları elle doldurun.</div>` : ""}
+        ${!v.hasMd ? `<div class="notice warn" style="margin-top:0">videos/${esc(v.slug)}/youtube.md yok: başlık ve açıklama plan ve senaryodan otomatik çıkarıldı, etiketleri ekleyin ve kontrol edin.</div>` : ""}
         <div class="labelrow" style="margin-top:0"><label for="title">Başlık</label>${opts}<span class="count" id="cTitle"></span></div>
         <input type="text" id="title" value="${esc(m.title)}" ${locked ? "disabled" : ""}>
         <div class="labelrow"><label for="desc">Açıklama</label><span class="count" id="cDesc"></span></div>
