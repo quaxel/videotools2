@@ -9,6 +9,9 @@ A local page that lists every rendered video (`out/<slug>.mp4`). It fills in the
 .venv/bin/python uploader/server.py --dry-run   # whole flow without sending anything to YouTube
 ```
 
+The videos made before this page existed are listed in `uploader/hidden.txt` and don't appear on the page. To show
+one again, delete its line. Any video rendered later shows up automatically.
+
 Your edits save automatically to `videos/<slug>/youtube.json`. "youtube.md'ye geri dön" (back to youtube.md) throws
 them away. After an upload, the video ID and the schedule are written to the same file, and that video can't be
 uploaded a second time.

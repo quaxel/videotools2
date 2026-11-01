@@ -44,10 +44,22 @@ def mp4_path(slug):
     return os.path.join(ROOT, "out", slug + ".mp4")
 
 
+def hidden():
+    """Slugs listed in uploader/hidden.txt (one per line, # comments): videos handled before this page existed."""
+    try:
+        lines = open(os.path.join(HERE, "hidden.txt"), encoding="utf-8").read().splitlines()
+    except OSError:
+        return set()
+    return {l.split("#")[0].strip() for l in lines} - {""}
+
+
 def slugs():
-    """Videos worth uploading: a videos/<slug>/ folder plus its rendered out/<slug>.mp4 (skips previews and tours)."""
+    """Videos worth uploading: a videos/<slug>/ folder plus its rendered out/<slug>.mp4 (skips previews and tours),
+    minus the hidden ones."""
     vroot = os.path.join(ROOT, "videos")
-    return sorted(s for s in os.listdir(vroot) if os.path.isdir(os.path.join(vroot, s)) and os.path.isfile(mp4_path(s)))
+    skip = hidden()
+    return sorted(s for s in os.listdir(vroot)
+                  if s not in skip and os.path.isdir(os.path.join(vroot, s)) and os.path.isfile(mp4_path(s)))
 
 
 def parse_youtube_md(path):
@@ -400,8 +412,14 @@ def clean_meta(meta):
 
 
 if __name__ == "__main__":
-    server = ThreadingHTTPServer((HOST, PORT), Handler)
     url = f"http://{HOST}:{PORT}"
+    try:
+        server = ThreadingHTTPServer((HOST, PORT), Handler)
+    except OSError:  # already running (e.g. in another terminal): reuse it
+        print(f"Yükleyici zaten çalışıyor: {url} (durdurmak için o terminalde Ctrl+C)", flush=True)
+        if "--no-browser" not in sys.argv:
+            webbrowser.open(url)
+        sys.exit(0)
     print(f"YouTube yükleyici: {url}" + ("  (deneme modu)" if DRY_RUN else ""), flush=True)
     if "--no-browser" not in sys.argv:
         webbrowser.open(url)
