@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouTube Yükleyici</title>
+<style>
+  :root {
+    --bg: #f6f6f4; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #e3e3e0;
+    --accent: #d92d20; --accent-ink: #fff; --ok: #1a7f4b; --ok-bg: #e5f4ec; --warn: #9a5b00; --warn-bg: #fdf1dc;
+    --info: #2456b3; --info-bg: #e7eefb; --err: #b42318; --err-bg: #fdecea; --chip: #efefec; --focus: #2456b3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416; --panel: #1d1d20; --ink: #ececee; --muted: #9a9aa2; --line: #2e2e33;
+      --accent: #f04438; --chip: #2a2a2f; --ok: #4ccb8a; --ok-bg: #16301f; --warn: #f0b252; --warn-bg: #33270f;
+      --info: #7aa7ff; --info-bg: #16223a; --err: #ff7b72; --err-bg: #3a1714; --focus: #7aa7ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 16px; margin: 0; flex: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); } .pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .pill.info { background: var(--info-bg); color: var(--info); } .pill.err { background: var(--err-bg); color: var(--err); }
+  button { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--muted); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.link { border: none; background: none; color: var(--info); padding: 0; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  main { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 53px); }
+  aside { border-right: 1px solid var(--line); background: var(--panel); overflow-y: auto; max-height: calc(100vh - 53px); position: sticky; top: 53px; }
+  .filters { display: flex; gap: 4px; padding: 10px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); }
+  .filters button { padding: 4px 10px; font-size: 12px; border-radius: 999px; }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .item { display: block; width: 100%; text-align: left; border: none; border-bottom: 1px solid var(--line); border-radius: 0; padding: 10px 14px; background: none; }
+  .item[aria-current="true"] { background: var(--chip); }
+  .item .slug { font-size: 12px; color: var(--muted); }
+  .item .t { display: block; margin: 2px 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  section.editor { padding: 20px 24px 60px; max-width: 1100px; }
+  .top { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start; }
+  video { width: 220px; aspect-ratio: 9/16; background: #000; border-radius: 10px; display: block; }
+  .meta-line { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  label.f { display: block; font-weight: 600; margin: 16px 0 6px; }
+  label.f:first-child { margin-top: 0; }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .count { font-size: 12px; color: var(--muted); font-weight: 400; margin-left: auto; }
+  .count.over { color: var(--err); font-weight: 600; }
+  .labelrow { display: flex; align-items: baseline; gap: 8px; margin: 16px 0 6px; }
+  .labelrow label { font-weight: 600; }
+  input[type=text], input[type=datetime-local], textarea, select { font: inherit; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
+  textarea { min-height: 260px; resize: vertical; }
+  select.opts { width: auto; max-width: 100%; font-size: 12px; padding: 4px 8px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+  .tag { display: inline-flex; align-items: center; gap: 4px; background: var(--chip); border-radius: 6px; padding: 2px 4px 2px 8px; font-size: 13px; }
+  .tag button { border: none; background: none; padding: 0 4px; color: var(--muted); line-height: 1; }
+  .tags input { border: none; flex: 1; min-width: 160px; padding: 4px; background: none; color: var(--ink); font: inherit; outline: none; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .radios { display: flex; gap: 14px; flex-wrap: wrap; }
+  .radios label, .check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { border: none; border-radius: 0; border-right: 1px solid var(--line); }
+  .seg button:last-child { border-right: none; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .card { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 16px; margin-top: 20px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .notice { padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px; }
+  .notice.warn { background: var(--warn-bg); color: var(--warn); } .notice.err { background: var(--err-bg); color: var(--err); }
+  .notice.ok { background: var(--ok-bg); color: var(--ok); } .notice.info { background: var(--info-bg); color: var(--info); }
+  .actions { display: flex; gap: 8px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+  .saved { font-size: 12px; color: var(--muted); }
+  progress { width: 100%; height: 10px; margin-top: 12px; accent-color: var(--accent); }
+  dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); max-width: 520px; width: calc(100% - 32px); }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  dialog dl { display: grid; grid-template-columns: 110px 1fr; gap: 6px 10px; margin: 12px 0; }
+  dialog dt { color: var(--muted); } dialog dd { margin: 0; overflow-wrap: anywhere; }
+  .empty { padding: 60px 24px; color: var(--muted); }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+    aside { position: static; max-height: 260px; border-right: none; border-bottom: 1px solid var(--line); }
+    .top { grid-template-columns: 1fr; } video { width: 160px; }
+    section.editor { padding: 16px; } .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>YouTube Yükleyici</h1>
+  <span id="auth" class="pill">Bağlantı kontrol ediliyor…</span>
+  <button id="connect" hidden>YouTube'a bağlan</button>
+</header>
+<main>
+  <aside>
+    <div class="filters" role="group" aria-label="Filtre">
+      <button data-f="all" aria-pressed="true">Tümü</button>
+      <button data-f="ready" aria-pressed="false">Yüklenecek</button>
+      <button data-f="done" aria-pressed="false">Yüklenen</button>
+    </div>
+    <div id="list"></div>
+  </aside>
+  <section class="editor" id="editor"><div class="empty">Soldan bir video seçin.</div></section>
+</main>
+
+<dialog id="confirm">
+  <form method="dialog">
+    <h3 style="margin:0">YouTube'a yüklensin mi?</h3>
+    <dl id="summary"></dl>
+    <div class="actions" style="justify-content:flex-end">
+      <button value="cancel">Vazgeç</button>
+      <button value="ok" class="primary">Yükle</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+let DATA = { videos: [], limits: {}, categories: {} }, current = null, filter = "all", auth = {};
+const local = {}; // per slug: { privacy, when, kidsChosen }
+let saveTimer = null, pollTimer = null;
+
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+  const j = await r.json().catch(() => ({ error: "Sunucu yanıt vermedi." }));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+
+const fmt = iso => iso ? new Date(iso).toLocaleString("tr-TR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+const tagsLen = tags => tags.reduce((n, t) => n + t.length + (t.includes(" ") ? 2 : 0), 0) + Math.max(tags.length - 1, 0);
+const bytes = s => new TextEncoder().encode(s).length;
+
+function uploadOf(v) {
+  if (v.upload) return v.upload;
+  if (v.job && v.job.state === "done") return { videoId: v.job.videoId, dryRun: v.job.dryRun, publishAt: v.job.publishAt, privacy: v.job.privacy };
+  return null;
+}
+
+function statusChip(v) {
+  const u = uploadOf(v);
+  if (v.job && v.job.state === "uploading") return `<span class="pill info">Yükleniyor %${Math.round((v.job.progress || 0) * 100)}</span>`;
+  if (v.job && v.job.state === "error") return `<span class="pill err">Hata</span>`;
+  if (u) {
+    const ys = u.youtubeStatus || {};
+    if (ys.uploadStatus === "rejected" || ys.uploadStatus === "failed") return `<span class="pill err">Reddedildi</span>`;
+    if (ys.privacyStatus === "public") return `<span class="pill ok">Yayında</span>`;
+    if (u.publishAt) return `<span class="pill ok">Zamanlandı · ${esc(fmt(u.publishAt))}</span>`;
+    return `<span class="pill ok">Yüklendi${u.dryRun ? " (deneme)" : ""}</span>`;
+  }
+  if (!v.hasMd && !v.edited) return `<span class="pill warn">Meta veri yok</span>`;
+  return `<span class="pill">Hazır</span>`;
+}
+
+function renderList() {
+  const vs = DATA.videos.filter(v => filter === "all" || (filter === "done") === !!uploadOf(v));
+  $("#list").innerHTML = vs.map(v => `
+    <button class="item" data-slug="${esc(v.slug)}" aria-current="${v.slug === current}">
+      <span class="slug">${esc(v.slug)}</span>
+      <span class="t">${esc(v.meta.title || "— başlık yok —")}</span>
+      ${statusChip(v)}
+    </button>`).join("") || `<div class="empty">Bu filtrede video yok.</div>`;
+}
+
+function defaultWhen() {
+  const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(18, 0, 0, 0);
+  return toLocalInput(d);
+}
+function toLocalInput(d) {
+  const p = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function tzLabel() {
+  const off = -new Date().getTimezoneOffset() / 60;
+  return `${Intl.DateTimeFormat().resolvedOptions().timeZone} (UTC${off >= 0 ? "+" : ""}${off})`;
+}
+
+function renderEditor() {
+  const v = DATA.videos.find(x => x.slug === current);
+  if (!v) { $("#editor").innerHTML = `<div class="empty">Soldan bir video seçin.</div>`; return; }
+  const L = local[v.slug] ||= { privacy: "schedule", when: defaultWhen(), kidsChosen: v.edited };
+  const m = v.meta, u = uploadOf(v), locked = !!u || (v.job && v.job.state === "uploading");
+  const cats = Object.entries(DATA.categories).map(([id, n]) => `<option value="${id}" ${id === m.categoryId ? "selected" : ""}>${esc(n)}</option>`).join("");
+  const opts = v.titleOptions.length > 1 ? `<select class="opts" id="titleOpts" aria-label="Önerilen başlıklar"><option value="">Önerilen başlıklar (${v.titleOptions.length})</option>${v.titleOptions.map(t => `<option>${esc(t)}</option>`).join("")}</select>` : "";
+
+  $("#editor").innerHTML = `
+    <div class="top">
+      <div>
+        <video src="/media/${esc(v.slug)}.mp4" controls preload="metadata" playsinline></video>
+        <div class="meta-line">${esc(v.slug)}.mp4 · ${v.sizeMB} MB<br>Render: ${esc(fmt(v.rendered))}</div>
+      </div>
+      <div>
+        ${!v.hasMd ? `<div class="notice warn" style="margin-top:0">videos/${esc(v.slug)}/youtube.md yok, alanları elle doldurun.</div>` : ""}
+        <div class="labelrow" style="margin-top:0"><label for="title">Başlık</label>${opts}<span class="count" id="cTitle"></span></div>
+        <input type="text" id="title" value="${esc(m.title)}" ${locked ? "disabled" : ""}>
+        <div class="labelrow"><label for="desc">Açıklama</label><span class="count" id="cDesc"></span></div>
+        <textarea id="desc" ${locked ? "disabled" : ""}>${esc(m.description)}</textarea>
+        <div class="labelrow"><label for="tagIn">Etiketler</label><span class="count" id="cTags"></span></div>
+        <div class="tags" id="tags"></div>
+        <div class="hint">Enter ya da virgülle ekleyin; virgüllü bir liste yapıştırabilirsiniz.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid2">
+        <div>
+          <label class="f" for="cat">Kategori</label>
+          <select id="cat" ${locked ? "disabled" : ""}>${cats}</select>
+        </div>
+        <div>
+          <span class="f" style="display:block;font-weight:600;margin:0 0 6px">Çocuklara özel mi?</span>
+          <div class="radios">
+            <label><input type="radio" name="kids" value="no" ${L.kidsChosen && !m.madeForKids ? "checked" : ""} ${locked ? "disabled" : ""}> Hayır, çocuklara özel değil</label>
+            <label><input type="radio" name="kids" value="yes" ${L.kidsChosen && m.madeForKids ? "checked" : ""} ${locked ? "disabled" : ""}> Evet</label>
+          </div>
+        </div>
+      </div>
+      <label class="check" style="margin-top:14px"><input type="checkbox" id="synth" ${m.syntheticMedia ? "checked" : ""} ${locked ? "disabled" : ""}> Gerçekçi görünen yapay/değiştirilmiş içerik var (YouTube'un “altered or synthetic content” beyanı)</label>
+    </div>
+
+    <div class="card">
+      <span style="font-weight:600;display:block;margin-bottom:8px">Yayın</span>
+      <div class="seg" role="group" aria-label="Yayın şekli">
+        ${[["schedule", "Zamanla"], ["public", "Hemen herkese açık"], ["unlisted", "Liste dışı"], ["private", "Gizli"]].map(([k, n]) =>
+          `<button data-p="${k}" aria-pressed="${L.privacy === k}" ${locked ? "disabled" : ""}>${n}</button>`).join("")}
+      </div>
+      <div id="whenBox" ${L.privacy === "schedule" ? "" : "hidden"} style="margin-top:12px">
+        <div class="row">
+          <input type="datetime-local" id="when" value="${esc(L.when)}" style="width:auto" ${locked ? "disabled" : ""}>
+          <button data-q="1" ${locked ? "disabled" : ""}>Yarın 18:00</button>
+          <button data-q="2" ${locked ? "disabled" : ""}>2 gün sonra 18:00</button>
+          <button data-q="7" ${locked ? "disabled" : ""}>1 hafta sonra 18:00</button>
+        </div>
+        <div class="hint">Saat dilimi: ${esc(tzLabel())}. Video gizli olarak yüklenir, YouTube bu saatte kendisi herkese açık yapar; bu sayfanın açık kalması gerekmez.</div>
+      </div>
+      <div id="errs"></div>
+      <div class="actions">
+        <button class="primary" id="upload" ${locked || !auth.connected ? "disabled" : ""}>YouTube'a yükle</button>
+        ${v.edited && !locked ? `<button id="reset">youtube.md'ye geri dön</button>` : ""}
+        <span class="saved" id="saved">${v.edited ? "Değişiklikler kaydedildi" : ""}</span>
+      </div>
+      ${!auth.connected ? `<div class="hint">Yüklemek için önce sağ üstten YouTube'a bağlanın.</div>` : ""}
+      <div id="progressBox"></div>
+    </div>`;
+
+  renderTags(m.tags, locked);
+  bindEditor(v, locked);
+  renderProgress(v);
+  updateCounts();
+}
+
+function renderTags(tags, locked) {
+  const box = $("#tags");
+  box.innerHTML = tags.map((t, i) => `<span class="tag">${esc(t)}${locked ? "" : `<button aria-label="${esc(t)} etiketini sil" data-i="${i}">×</button>`}</span>`).join("")
+    + (locked ? "" : `<input id="tagIn" placeholder="${tags.length ? "Etiket ekle…" : "Etiket ekleyin"}">`);
+}
+
+function currentMeta() {
+  const v = DATA.videos.find(x => x.slug === current);
+  return v.meta;
+}
+
+function bindEditor(v, locked) {
+  const m = v.meta, L = local[v.slug];
+  if (locked) return;
+  $("#title").oninput = e => { m.title = e.target.value; changed(); };
+  $("#desc").oninput = e => { m.description = e.target.value; changed(); };
+  $("#cat").onchange = e => { m.categoryId = e.target.value; changed(); };
+  $("#synth").onchange = e => { m.syntheticMedia = e.target.checked; changed(); };
+  document.querySelectorAll("input[name=kids]").forEach(r => r.onchange = () => { m.madeForKids = r.value === "yes"; L.kidsChosen = true; changed(); });
+  if ($("#titleOpts")) $("#titleOpts").onchange = e => { if (e.target.value) { m.title = e.target.value; $("#title").value = m.title; e.target.value = ""; changed(); } };
+  $("#tags").onclick = e => {
+    const b = e.target.closest("button[data-i]");
+    if (b) { m.tags.splice(+b.dataset.i, 1); renderTags(m.tags, false); bindTagInput(); changed(); $("#tagIn").focus(); }
+    else $("#tagIn")?.focus();
+  };
+  bindTagInput();
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => {
+    L.privacy = b.dataset.p;
+    document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    $("#whenBox").hidden = L.privacy !== "schedule";
+    updateCounts();
+  });
+  $("#when").oninput = e => { L.when = e.target.value; updateCounts(); };
+  document.querySelectorAll("button[data-q]").forEach(b => b.onclick = () => {
+    const d = new Date(); d.setDate(d.getDate() + +b.dataset.q); d.setHours(18, 0, 0, 0);
+    L.when = toLocalInput(d); $("#when").value = L.when; updateCounts();
+  });
+  $("#upload").onclick = () => confirmUpload(v);
+  if ($("#reset")) $("#reset").onclick = async () => {
+    const r = await api("/api/reset", { slug: v.slug });
+    replaceVideo(r); local[v.slug].kidsChosen = false; renderEditor(); renderList();
+  };
+}
+
+function bindTagInput() {
+  const inp = $("#tagIn"); if (!inp) return;
+  const m = currentMeta();
+  const add = text => {
+    const parts = text.split(",").map(s => s.trim()).filter(Boolean).filter(t => !m.tags.includes(t));
+    if (!parts.length) return;
+    m.tags.push(...parts); renderTags(m.tags, false); bindTagInput(); changed(); $("#tagIn").focus();
+  };
+  inp.onkeydown = e => {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(inp.value); }
+    else if (e.key === "Backspace" && !inp.value && m.tags.length) { m.tags.pop(); renderTags(m.tags, false); bindTagInput(); changed(); $("#tagIn").focus(); }
+  };
+  inp.onpaste = e => { const t = e.clipboardData.getData("text"); if (t.includes(",")) { e.preventDefault(); add(t); } };
+  inp.onblur = () => add(inp.value);
+}
+
+function problems() {
+  const v = DATA.videos.find(x => x.slug === current), m = v.meta, L = local[v.slug], lim = DATA.limits, out = [];
+  if (!m.title.trim()) out.push("Başlık boş.");
+  if (m.title.length > lim.title) out.push(`Başlık en fazla ${lim.title} karakter olabilir.`);
+  if (bytes(m.description) > lim.description_bytes) out.push(`Açıklama en fazla ${lim.description_bytes} bayt olabilir.`);
+  if (/[<>]/.test(m.title + m.description)) out.push("Başlık ve açıklamada < veya > kullanılamaz.");
+  if (tagsLen(m.tags) > lim.tags_chars) out.push(`Etiketler toplamda en fazla ${lim.tags_chars} karakter olabilir.`);
+  if (!L.kidsChosen) out.push("“Çocuklara özel mi?” sorusunu yanıtlayın.");
+  if (L.privacy === "schedule") {
+    if (!L.when) out.push("Yayın tarihi ve saati seçin.");
+    else if (new Date(L.when) <= new Date(Date.now() + 60_000)) out.push("Yayın zamanı gelecekte olmalı.");
+  }
+  return out;
+}
+
+function updateCounts() {
+  const v = DATA.videos.find(x => x.slug === current); if (!v) return;
+  const m = v.meta, lim = DATA.limits, set = (id, n, max, unit) => {
+    const el = $(id); el.textContent = `${n} / ${max} ${unit}`; el.classList.toggle("over", n > max);
+  };
+  set("#cTitle", m.title.length, lim.title, "karakter");
+  set("#cDesc", bytes(m.description), lim.description_bytes, "bayt");
+  set("#cTags", tagsLen(m.tags), lim.tags_chars, "karakter");
+  if (uploadOf(v) || (v.job && v.job.state === "uploading")) { $("#errs").innerHTML = ""; return; }
+  const p = problems();
+  $("#errs").innerHTML = p.length ? `<div class="notice warn">${p.map(esc).join("<br>")}</div>` : "";
+  $("#upload").disabled = !!p.length || !auth.connected;
+}
+
+function changed() {
+  updateCounts();
+  $("#saved").textContent = "Kaydediliyor…";
+  clearTimeout(saveTimer);
+  const slug = current, meta = currentMeta();
+  saveTimer = setTimeout(async () => {
+    try {
+      const r = await api("/api/save", { slug, meta });
+      const v = DATA.videos.find(x => x.slug === slug); v.edited = true;
+      if (slug === current) $("#saved").textContent = "Değişiklikler kaydedildi";
+      renderList();
+    } catch (e) { if (slug === current) $("#saved").textContent = "Kaydedilemedi: " + e.message; }
+  }, 500);
+}
+
+function confirmUpload(v) {
+  const L = local[v.slug], m = v.meta;
+  const how = { schedule: `Zamanlanmış: ${fmt(new Date(L.when).toISOString())}`, public: "Hemen herkese açık", unlisted: "Liste dışı", private: "Gizli" }[L.privacy];
+  $("#summary").innerHTML = `
+    <dt>Video</dt><dd>${esc(v.slug)}.mp4 (${v.sizeMB} MB)</dd>
+    <dt>Başlık</dt><dd>${esc(m.title)}</dd>
+    <dt>Etiket</dt><dd>${m.tags.length} adet</dd>
+    <dt>Kategori</dt><dd>${esc(DATA.categories[m.categoryId])}</dd>
+    <dt>Çocuklara özel</dt><dd>${m.madeForKids ? "Evet" : "Hayır"}</dd>
+    <dt>Yayın</dt><dd>${esc(how)}</dd>
+    ${DATA.dryRun ? `<dt>Mod</dt><dd>Deneme: YouTube'a gönderilmez</dd>` : ""}`;
+  const dlg = $("#confirm");
+  dlg.returnValue = "";
+  dlg.onclose = async () => {
+    if (dlg.returnValue !== "ok") return;
+    try {
+      clearTimeout(saveTimer);
+      await api("/api/upload", { slug: v.slug, meta: m, privacy: L.privacy, publishAt: L.privacy === "schedule" ? new Date(L.when).toISOString() : null });
+      v.job = { state: "uploading", progress: 0 };
+      renderEditor(); renderList(); poll();
+    } catch (e) { $("#errs").innerHTML = `<div class="notice err">${esc(e.message)}</div>`; }
+  };
+  dlg.showModal();
+}
+
+function renderProgress(v) {
+  const box = $("#progressBox"); if (!box) return;
+  const j = v.job, u = uploadOf(v);
+  if (j && j.state === "uploading") {
+    box.innerHTML = `<progress value="${j.progress || 0}" max="1"></progress><div class="hint">Yükleniyor… %${Math.round((j.progress || 0) * 100)}. Bu sayfayı kapatmayın.</div>`;
+  } else if (j && j.state === "error") {
+    box.innerHTML = `<div class="notice err">Yükleme başarısız: ${esc(j.error)}</div>`;
+    $("#upload").disabled = false;
+  } else if (u) {
+    const ys = u.youtubeStatus || {};
+    const link = u.dryRun ? "" : `<a href="https://studio.youtube.com/video/${esc(u.videoId)}/edit" target="_blank" rel="noopener">YouTube Studio'da aç</a> · <a href="https://youtu.be/${esc(u.videoId)}" target="_blank" rel="noopener">youtu.be/${esc(u.videoId)}</a>`;
+    let lockWarn = "";
+    if (u.publishAt && ys.privacyStatus === "private" && !ys.publishAt && u.checkedAt)
+      lockWarn = `<div class="notice err">YouTube zamanlamayı kaldırmış görünüyor. API projesi henüz denetimden geçmediyse video “gizli” olarak kilitlenir (README'ye bakın).</div>`;
+    box.innerHTML = `
+      <div class="notice ok">${u.dryRun ? "Deneme yüklemesi tamamlandı (YouTube'a gönderilmedi)." : "Yüklendi."}
+        ${u.publishAt ? `Yayın zamanı: <b>${esc(fmt(u.publishAt))}</b>.` : ""} ${link}</div>
+      ${ys.privacyStatus ? `<div class="hint">YouTube durumu: ${esc(ys.uploadStatus || "?")}, ${esc(ys.privacyStatus)}${ys.publishAt ? ", yayın " + esc(fmt(ys.publishAt)) : ""}${ys.rejectionReason ? ", red: " + esc(ys.rejectionReason) : ""}${ys.failureReason ? ", hata: " + esc(ys.failureReason) : ""}${u.checkedAt ? " · kontrol: " + esc(fmt(u.checkedAt)) : ""}</div>` : ""}
+      ${lockWarn}
+      ${u.dryRun ? "" : `<div class="actions"><button id="check">Durumu YouTube'dan kontrol et</button></div>`}`;
+    if ($("#check")) $("#check").onclick = async () => {
+      $("#check").disabled = true;
+      try { const r = await api("/api/status", { slug: v.slug }); v.upload = r.upload; renderEditor(); renderList(); }
+      catch (e) { box.insertAdjacentHTML("beforeend", `<div class="notice err">${esc(e.message)}</div>`); $("#check").disabled = false; }
+    };
+  } else box.innerHTML = "";
+}
+
+function replaceVideo(nv) {
+  const i = DATA.videos.findIndex(x => x.slug === nv.slug);
+  if (i >= 0) DATA.videos[i] = nv;
+}
+
+async function poll() {
+  clearTimeout(pollTimer);
+  const fresh = await api("/api/videos");
+  for (const nv of fresh.videos) {
+    const ov = DATA.videos.find(x => x.slug === nv.slug);
+    if (ov) { ov.job = nv.job; ov.upload = nv.upload; }
+  }
+  const v = DATA.videos.find(x => x.slug === current);
+  renderList();
+  if (v && v.job) {
+    if (v.job.state === "uploading") renderProgress(v);
+    else renderEditor();
+  }
+  if (DATA.videos.some(x => x.job && x.job.state === "uploading")) pollTimer = setTimeout(poll, 800);
+}
+
+async function loadAuth() {
+  auth = await api("/api/auth");
+  const el = $("#auth"), btn = $("#connect");
+  if (auth.connected) { el.className = "pill " + (auth.dryRun ? "warn" : "ok"); el.textContent = auth.dryRun ? auth.channel : "Bağlı: " + auth.channel; btn.hidden = true; }
+  else if (auth.connecting) { el.className = "pill info"; el.textContent = "Tarayıcıda Google izni bekleniyor…"; btn.hidden = true; setTimeout(loadAuth, 1500); }
+  else {
+    el.className = "pill " + (auth.error ? "err" : "warn");
+    el.textContent = !auth.hasClientSecret ? "client_secret.json eksik" : auth.error ? "Bağlantı hatası" : "YouTube'a bağlı değil";
+    el.title = auth.error || "";
+    btn.hidden = !auth.hasClientSecret; btn.textContent = auth.error ? "Yeniden bağlan" : "YouTube'a bağlan";
+  }
+  if (current) renderEditor();
+}
+
+$("#connect").onclick = async () => {
+  try { await api("/api/auth/connect", {}); setTimeout(loadAuth, 800); }
+  catch (e) { $("#auth").className = "pill err"; $("#auth").textContent = e.message; }
+};
+$("#list").onclick = e => {
+  const b = e.target.closest(".item"); if (!b) return;
+  current = b.dataset.slug; history.replaceState(null, "", "#" + current);
+  renderList(); renderEditor();
+};
+document.querySelectorAll(".filters button").forEach(b => b.onclick = () => {
+  filter = b.dataset.f;
+  document.querySelectorAll(".filters button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderList();
+});
+
+(async () => {
+  DATA = await api("/api/videos");
+  const want = decodeURIComponent(location.hash.slice(1));
+  current = DATA.videos.some(v => v.slug === want) ? want : (DATA.videos.find(v => !uploadOf(v)) || DATA.videos[0] || {}).slug || null;
+  renderList(); renderEditor();
+  await loadAuth();
+  if (DATA.videos.some(x => x.job && x.job.state === "uploading")) poll();
+})();
+</script>
+</body>
+</html>

@@ -20,3 +20,6 @@ __pycache__/
 .idea/
 .vscode/
 .claude/settings.local.json
+
+# YouTube uploader OAuth client and token
+animator/uploader/secrets/
