@@ -1044,7 +1044,8 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             <ellipse cx={0} cy={-680} rx={16} ry={11 + Math.sin((micro.t ?? 0) / 14) * 3} fill={INK} />
           ) : changing ? (
             <g>
-              {/* The old face's extras fade out, the old mouth closes, then the new mouth opens */}
+              {/* The old face's extras fade out, the old mouth closes, then the new mouth opens. The squash never reaches 0:
+                  a zero scale is a non-invertible transform, which crashes Chrome's GPU raster and takes the WebGL canvas with it */}
               <g opacity={1 - blend}>
                 <Extras expression={pose.from!} t={micro.t ?? 0} />
               </g>
@@ -1052,12 +1053,12 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
                 <Extras expression={pose.expression} t={micro.t ?? 0} />
               </g>
               {blend < 0.5 && (
-                <g transform={`${mouthMove} translate(0 -690) scale(${0.6 + 0.4 * (1 - blend * 2)} ${1 - blend * 2}) translate(0 690)`}>
+                <g transform={`${mouthMove} translate(0 -690) scale(${0.6 + 0.4 * (1 - blend * 2)} ${Math.max(0.02, 1 - blend * 2)}) translate(0 690)`}>
                   <Mouth expression={pose.from!} open={0} uid={patternId} />
                 </g>
               )}
               {blend >= 0.5 && (
-                <g transform={`${mouthMove} translate(0 -690) scale(${0.6 + 0.4 * (blend * 2 - 1)} ${blend * 2 - 1}) translate(0 690)`}>
+                <g transform={`${mouthMove} translate(0 -690) scale(${0.6 + 0.4 * (blend * 2 - 1)} ${Math.max(0.02, blend * 2 - 1)}) translate(0 690)`}>
                   <Mouth expression={pose.expression} open={0} uid={patternId} />
                 </g>
               )}

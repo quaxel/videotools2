@@ -131,7 +131,7 @@ export const riverLight = (mode: RiverMode, frame: number, lantern?: Vec3): Pupp
   return { tint: "#fff6e8", shadow: 0.14, points, distant: [{ direction: [-0.55, 0.75, 0.45], color: "#fff0d0", strength: 1.1 }] };
 };
 
-export const Lights: React.FC<{ m: Mood; reach?: number }> = ({ m, reach = 14 }) => (
+export const Lights: React.FC<{ m: Mood; reach?: number; map?: number }> = ({ m, reach = 14, map = 4096 }) => (
   <>
     <ambientLight intensity={m.ambient[0]} color={m.ambient[1]} />
     <hemisphereLight args={[m.hemi[0], m.hemi[1], m.hemi[2]]} />
@@ -140,7 +140,7 @@ export const Lights: React.FC<{ m: Mood; reach?: number }> = ({ m, reach = 14 })
       intensity={m.key[0]}
       color={m.key[1]}
       castShadow
-      shadow-mapSize={[4096, 4096]}
+      shadow-mapSize={[map, map]}
       shadow-bias={-0.0004}
       shadow-normalBias={0.02}
       shadow-camera-left={-reach}

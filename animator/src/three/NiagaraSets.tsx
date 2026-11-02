@@ -45,7 +45,7 @@ export type FallsMode = "day" | "night" | "dawn" | "dusk" | "sunset" | "gale";
 const FMOODS: Record<FallsMode, Mood> = {
   day: { ...MOODS.day, sun: [-4, 7, 9], water: "#3a8a80", foam: "#ffffff", far: ["#9fb4c8", "#7f98a6", "#4f6a50"] },
   night: { ...MOODS.night, water: "#2a3e5e", foam: "#a8bce0" },
-  dawn: { ...MOODS.dawn, sun: [-6, 0.6, -10], water: "#4a7a72", foam: "#fff4dc" },
+  dawn: { ...MOODS.dawn, sun: [-6, 0.6, -10], water: "#2e5a7a", foam: "#fff4dc" },
   dusk: {
     stops: [[-0.1, "#f0a0a8"], [0.0, "#e090a8"], [0.06, "#a07ac0"], [0.2, "#6a5ab0"], [0.45, "#3e3a8a"], [1.0, "#1e1e5a"]],
     sun: [5, 0.3, -10],
@@ -275,7 +275,7 @@ export const bedWaterY = (x: number, z: number, frame: number, w: FallsWater) =>
   if (w.surge !== undefined) {
     const d = z - w.surge;
     const behind = 1 - smooth(-0.6, 0.4, d);
-    level = dry + (full + 0.25 - dry) * behind + 1.15 * Math.exp(-(d * d) / 0.9) * smooth(-30, -0, w.surge + 40);
+    level = dry + (full + 0.25 - dry) * behind + 1.9 * Math.exp(-(d * d) / 1.6) * smooth(-30, -0, w.surge + 40);
   }
   const wet = level > 0 ? 1 : 0;
   return level + wet * (0.05 * Math.sin(z * 1.3 - frame * 0.35 + x * 0.6) + 0.03 * Math.sin(x * 2.1 + z * 0.7 - frame * 0.5));
@@ -301,12 +301,13 @@ const BedWater: React.FC<{ frame: number; m: Mood; w: FallsWater }> = ({ frame, 
     const z = pos.getZ(i);
     const cz = Math.abs(x) < NIAGARA.half ? crestZ(x) : 0;
     let y = bedWaterY(x, Math.min(z, cz), frame, w);
-    // past the crest the sheet bends over the lip and down
-    if (z > cz) y -= (z - cz) * 6;
+    // past the crest the sheet bends over the lip and down; with no water at the lip it is tucked away under the pool
+    if (z > cz) y = y > 0.02 ? y - (z - cz) * 6 : -NIAGARA.drop - 2;
     pos.setY(i, Math.max(y, -NIAGARA.drop));
     c.copy(base);
     // whiter toward the crest (the rapids speed up) and at the surge front
-    c.lerp(foam, Math.min(0.75, smooth(cz - 10, cz, z) * 0.55 + (w.surge !== undefined ? Math.exp(-((z - w.surge) ** 2) / 2) * 0.8 : 0)));
+    c.lerp(foam, Math.min(0.75, smooth(cz - 10, cz, z) * 0.55 + (w.surge !== undefined ? Math.exp(-((z - w.surge + 0.8) ** 2) / 1.5) * 0.7 : 0)));
+    if (w.surge !== undefined && z > w.surge && z < w.surge + 1.6) c.multiplyScalar(0.7);
     col.setXYZ(i, c.r, c.g, c.b);
   }
   pos.needsUpdate = true;
@@ -336,6 +337,14 @@ const Whitewater: React.FC<{ frame: number; w: FallsWater; m: Mood }> = ({ frame
     const s = (0.18 + rand(i + 3) * 0.25) * (near ? 2.2 : 1) * (0.85 + 0.15 * Math.sin(frame * 0.6 + i));
     items.push(<Blob key={i} position={[x, wet + 0.02, z + Math.sin(frame * 0.3 + i) * 0.1]} rotation={[0, i, frame * 0.1 + i]} scale={[s * 1.4, s * 0.45, s * 0.8]} color={m.foam} ink={0.04} detail={0} />);
   }
+  // the rolling white crest of a surge: a row of tumbling foam lumps right across the bed
+  if (w.surge !== undefined)
+    for (let i = 0; i < 34; i++) {
+      const x = -NIAGARA.bank + 0.3 + (i / 33) * (NIAGARA.bank * 2 - 0.6) + (rand(i + 60) - 0.5) * 0.4;
+      const top = bedWaterY(x, w.surge, frame, w);
+      const s = (0.45 + rand(i + 61) * 0.3) * (0.85 + 0.15 * Math.sin(frame * 0.5 + i * 2.3));
+      items.push(<Blob key={`c${i}`} position={[x, top - 0.05, w.surge + 0.25 + (rand(i + 62) - 0.5) * 0.4]} rotation={[frame * 0.2 + i, i, 0]} scale={[s * 1.3, s * 0.75, s]} color="#f6f4ff" ink={0.05} detail={1} />);
+    }
   // spray flung ahead of a surge front
   if (w.surge !== undefined)
     for (let i = 0; i < 40; i++) {
@@ -344,7 +353,7 @@ const Whitewater: React.FC<{ frame: number; w: FallsWater; m: Mood }> = ({ frame
       const x = (rand(i + 6) - 0.5) * NIAGARA.bank * 1.8;
       const y = 0.9 + age * 0.09 - age * age * 0.006;
       const s = 0.08 + rand(i + 7) * 0.1;
-      items.push(<Blob key={`s${i}`} position={[x, y, w.surge + 0.4 + age * 0.12]} scale={[s, s, s]} color="#ffffff" ink={0.1} detail={0} />);
+      items.push(<Blob key={`s${i}`} position={[x, y, w.surge + 0.4 + age * 0.12]} scale={[s, s, s]} color="#ffffff" ink={0.1} detail={1} />);
     }
   return <group userData={{ ghost: true }}>{items}</group>;
 };
@@ -448,14 +457,14 @@ const Gorge: React.FC<{ frame: number; flow: number; m: Mood; mist: number }> = 
           })}
         {/* the mist cloud boiling up out of the plunge pool */}
         {mist > 0.02 &&
-          Array.from({ length: 30 }, (_, i) => {
+          Array.from({ length: 16 }, (_, i) => {
             const t = (frame * 0.008 + rand(i + 20)) % 1;
             const x = (rand(i + 21) - 0.5) * half * 1.8;
-            const r = (1.2 + t * 3.2) * (0.7 + rand(i + 22) * 0.6);
+            const r = (0.9 + t * 2.2) * (0.7 + rand(i + 22) * 0.6);
             return (
-              <mesh key={`m${i}`} position={[x + Math.sin(t * 3 + i) * 1.5, poolY + 0.5 + t * (drop + 4), crestZ(x) + 3 + t * 7]}>
+              <mesh key={`m${i}`} position={[x + Math.sin(t * 3 + i) * 1.5, poolY + 0.5 + t * (drop + 2), crestZ(x) + 2.2 + t * 3.5]}>
                 <sphereGeometry args={[r, 16, 12]} />
-                <meshToonMaterial color="#ffffff" gradientMap={toonRamp} transparent opacity={0.3 * Math.sin(t * Math.PI) * mist} depthWrite={false} />
+                <meshBasicMaterial color="#ffffff" transparent opacity={0.16 * Math.sin(t * Math.PI) * Math.min(1, mist)} depthWrite={false} />
               </mesh>
             );
           })}
@@ -615,7 +624,7 @@ export const NiagaraSet: React.FC<{
       <CameraRig {...camera} />
       <color attach="background" args={[m.bg]} />
       <fog attach="fog" args={m.fog} />
-      <Lights m={m} reach={18} />
+      <Lights m={m} reach={18} map={2048} />
       <Sky camera={camera} m={m} />
       <group position={[0, -lift, 0]}>
         <Hills z={-160} shift={camX * 0.8} width={420} low={3} high={8} color={m.far[0]} seed={4} />
@@ -778,7 +787,7 @@ export const ErieSet: React.FC<{
       <CameraRig {...camera} />
       <color attach="background" args={[m.bg]} />
       <fog attach="fog" args={m.fog} />
-      <Lights m={m} reach={20} />
+      <Lights m={m} reach={20} map={2048} />
       <Sky camera={camera} m={m} />
       <Hills z={-160} shift={camX * 0.8} width={420} low={0.5} high={2.5} color={m.far[0]} seed={21} />
       <group userData={{ ghost: true }}>

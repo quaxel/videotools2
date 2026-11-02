@@ -153,8 +153,8 @@ const MillerOut = (f: number) => {
 
 // Over his shoulder: the river below him is bare rock under the moon, the wheel dead still. Push in.
 const OverShoulder = (f: number) => {
-  const at: [number, number] = [NIAGARA.bank + 0.75, MILL.z + 1.2];
-  const camera: CameraShot = { position: lerp3([at[0] + 0.9, 1.55, at[1] + 1.7], [at[0] + 0.6, 1.45, at[1] + 1.2], ease(f, 0, 48)), target: [4, -1.6, -9], fov: 46 };
+  const at: [number, number] = [NIAGARA.bank + 0.6, MILL.z + 3.8];
+  const camera: CameraShot = { position: lerp3([at[0] + 2.9, 2.05, at[1] + 2.2], [at[0] + 2.5, 1.9, at[1] + 1.9], ease(f, 0, 48)), target: [at[0] - 9, -1.6, at[1] - 4], fov: 46 };
   return (
     <Stage
       set={<NiagaraSet camera={camera} frame={f + 580} mode="night" water={{ flow: 0 }} lift={LIFT} />}
@@ -234,12 +234,12 @@ const Ear = (f: number) => {
 
 // Low over Lake Erie in the night gale: ice sheets slide at the lens past the LAKE ERIE post.
 const Gale = (f: number) => {
-  const camera: CameraShot = { position: lerp3([-2.5, 1.5, -3.5], [-2.0, 1.2, -5.0], ease(f, 0, 41)), target: [0.5, 0.2, -16], fov: 52 };
+  const camera: CameraShot = { position: lerp3([-6.6, 1.6, 2.4], [-6.2, 1.3, 1.2], ease(f, 0, 41)), target: [-7.2, 0.8, -12], fov: 52 };
   return (
     <Stage
       set={
         <ErieSet camera={camera} frame={f + 800} mode="gale" push={f * 0.12}>
-          <Fingerpost position={[-erieHalf(-7) + 1.2, 0.35, -7]} text="LAKE ERIE" appear={f - 6} />
+          <Fingerpost position={[-erieHalf(-4.5) - 0.35, 0.35, -4.5]} text="LAKE ERIE" appear={f - 6} />
         </ErieSet>
       }
       camera={camera}
@@ -263,7 +263,7 @@ const Cork = (f: number) => {
     <Stage
       set={
         <ErieSet camera={camera} frame={f + 900} mode="dawn" push={9 + f * 0.1} jam={0.35 + ease(f, 0, 30) * 0.65} gale={0.5}>
-          <Label text="ICE JAM" position={[0, 2.6, 2.6]} rotation={[-Math.PI / 2, 0, 0]} width={3.6} appear={f - 30} />
+          <Label text="ICE JAM" position={[0, 3, -7.5]} rotation={[-Math.PI / 2, 0, 0]} width={6.5} appear={f - 30} />
         </ErieSet>
       }
       camera={camera}
@@ -277,7 +277,7 @@ const STOP = 14;
 const Stopping = (f: number) => {
   const flow = 1 - ease(f, STOP - 4, STOP + 34);
   const camera: CameraShot = { position: lerp3([4, -6.2, 21], [3, -5.4, 17], ease(f, 0, 69)), target: [0, -3.6, 0], fov: 54 };
-  return <Stage set={<NiagaraSet camera={camera} frame={f + 960} mode="night" water={{ flow }} mill={false} />} camera={camera} bg={fallsBg("night")} />;
+  return <Stage set={<NiagaraSet camera={camera} frame={f + 960} mode="dawn" water={{ flow }} mill={false} />} camera={camera} bg={fallsBg("dawn")} />;
 };
 
 // ---------- 17-22 s: thirty hours on the riverbed ----------
@@ -295,7 +295,7 @@ const Watch = (f: number) => {
             <meshToonMaterial color="#8a867c" />
           </mesh>
           <PocketWatch position={WATCH} hours={ease(f, 2, 40) * 30} scale={1.2} rotation={[0, 0.3, 0]} />
-          <Label text="30 HOURS" position={[WATCH[0] - 0.05, WATCH[1] + 0.42, WATCH[2] - 0.15]} rotation={[-0.35, 0.45, 0]} width={0.5} appear={f - 8} count={ease(f, 8, 40)} />
+          <Label text="30 HOURS" position={[WATCH[0] + 0.03, WATCH[1] + 0.27, WATCH[2] + 0.02]} rotation={[-0.55, 0.45, 0]} width={0.2} appear={f - 8} count={ease(f, 8, 40)} />
         </NiagaraSet>
       }
       camera={camera}
@@ -310,7 +310,7 @@ const BED_CLEAR: [number, number, number][] = [
   [3, -10, 2.2],
 ];
 const Walkers = (f: number) => {
-  const camera: CameraShot = { position: lerp3([1.5, 3.6, -17], [1.0, 1.9, -15.5], ease(f, 0, 54)), target: [0, 0.6, -6], fov: 50 };
+  const camera: CameraShot = { position: lerp3([1.0, 2.4, -13.4], [0.6, 1.5, -12.2], ease(f, 0, 54)), target: [0, 0.8, -6], fov: 50 };
   const a = stroll(f, 0, 60, [-1.4, -3.4], [-1.2, -8.6]);
   const b = stroll(f, 4, 56, [0.6, -3.0], [0.9, -8.0]);
   const c = stroll(f, 0, 50, [2.2, -4.2], [2.6, -9.6]);
@@ -364,18 +364,20 @@ const Ride = (f: number) => {
 const TOM_AT: [number, number] = [3, -10];
 const MUSKET_SPOT: [number, number, number] = [3.55, 0.12, -10];
 const Tug = (f: number) => {
-  const camera: CameraShot = { position: lerp3([TOM_AT[0] + 0.4, 0.8, TOM_AT[1] + 2.6], [TOM_AT[0] + 0.5, 0.7, TOM_AT[1] + 2.1], ease(f, 0, 41)), target: [TOM_AT[0] + 0.3, 0.45, TOM_AT[1]], fov: 44 };
+  const camera: CameraShot = { position: lerp3([TOM_AT[0] + 0.6, 0.95, TOM_AT[1] + 3.5], [TOM_AT[0] + 0.7, 0.85, TOM_AT[1] + 3.0], ease(f, 0, 41)), target: [TOM_AT[0] + 0.35, 0.45, TOM_AT[1]], fov: 44 };
   const tug = Math.sin(f * 0.6) * 0.5 + 0.5;
   return (
     <Stage
       set={
         <NiagaraSet camera={camera} frame={f + 1200} mode="day" water={{ flow: 0 }} mill={false} clear={BED_CLEAR}>
-          <Musket position={MUSKET_SPOT} rotation={[0, 0.25, 0.35 - tug * 0.06]} />
+          <group userData={{ ghost: true }}>
+            <Musket position={MUSKET_SPOT} rotation={[0, 0.25, 0.35 - tug * 0.06]} />
+          </group>
         </NiagaraSet>
       }
       camera={camera}
       bg={fallsBg("day")}
-      puppets={[{ id: "tom", look: TOM, pose: { ...faceChange([[0, "determined"], [20, "excited"]], f), view: "side", facing: 1, bend: 0.45 + tug * 0.1, lean: -tug * 8, reachR: [250, -330], reachL: [210, -320], frontR: true } as PuppetPose, at: TOM_AT }]}
+      puppets={[{ id: "tom", look: TOM, pose: { ...faceChange([[0, "determined"], [20, "excited"]], f), view: "side", facing: 1, bend: 0.45 + tug * 0.1, lean: -tug * 8, reachR: [150, -380], reachL: [130, -370] } as PuppetPose, at: TOM_AT }]}
       light={fallsLight("day", f)}
     />
   );
@@ -421,10 +423,10 @@ const Burst = (f: number) => {
 
 // On the bed looking upstream: a foaming wall of water comes round the bend at the lens; the walkers spin and run.
 const Wall = (f: number) => {
-  const surge = -34 + f * 0.6;
-  const camera: CameraShot = { position: lerp3([0.8, 1.15, -2.2], [0.6, 1.5, -1.6], ease(f, 0, 32)), target: [0, 1.0, -20], fov: 52 };
-  const a = stroll(f, 10, 22, [-0.8, -6.5], [-0.5, -3.6]);
-  const b = stroll(f, 6, 24, [1.0, -7.2], [1.2, -4.0]);
+  const surge = -30 + f * 0.7;
+  const camera: CameraShot = { position: lerp3([0.8, 0.75, -1.4], [0.6, 0.9, -0.6], ease(f, 0, 32)), target: [0, 1.2, -20], fov: 54 };
+  const a = stroll(f, 10, 22, [-0.9, -9.0], [-0.7, -6.0]);
+  const b = stroll(f, 6, 24, [1.0, -9.6], [1.2, -6.4]);
   return (
     <Stage
       set={<NiagaraSet camera={camera} frame={f + 1340} mode="dusk" water={{ flow: 0, surge }} mill={false} clear={BED_CLEAR} />}
@@ -442,10 +444,10 @@ const Wall = (f: number) => {
 // Gag: side on, the horse rears at the water, spins and bolts; the rider's hat flies off into the foam.
 const REAR = 4;
 const Bolt = (f: number) => {
-  const surge = -14 + f * 0.42;
-  const z = -6 + Math.max(0, f - 14) ** 1.6 * 0.05;
+  const surge = -17 + f * 0.33;
+  const z = -6 + Math.max(0, f - 14) ** 1.6 * 0.03;
   const hx = 0;
-  const camera: CameraShot = { position: lerp3([6.2, 1.35, -5.5], [6.6, 1.25, -4.4], ease(f, 0, 31)), target: [0, 0.95, -5.5 + Math.max(0, f - 14) * 0.08], fov: 50 };
+  const camera: CameraShot = { position: [8.6, 2.1, z + 0.8 - f * 0.01], target: [0, 0.9, z - 0.8], fov: 54 };
   const rear = Math.sin(ramp(f, REAR, REAR + 12) * Math.PI) * 0.8;
   const turned = f > REAR + 8;
   const hatT = f - (REAR + 4);
@@ -477,18 +479,18 @@ const Bolt = (f: number) => {
 // ---------- 28-33 s: Niagara roars back ----------
 
 // Over the family's shoulders on the bank at sunset: the falls thunder again, a rainbow over the mist.
-const FAM: [number, number] = [NIAGARA.bank + 1.2, 2.4];
+const FAM: [number, number] = [NIAGARA.bank + 1.3, 2.5];
 const Family = (f: number) => {
-  const camera: CameraShot = { position: lerp3([FAM[0] + 2.2, 1.55, FAM[1] + 5.2], [FAM[0] + 1.6, 1.75, FAM[1] + 4.2], ease(f, 0, 47)), target: [-1, -5.0, -1], fov: 50 };
+  const camera: CameraShot = { position: lerp3([FAM[0] + 6.4, 2.3, FAM[1] + 1.6], [FAM[0] + 5.4, 2.4, FAM[1] + 1.3], ease(f, 0, 47)), target: [-1, -4.6, -1], fov: 50 };
   return (
     <Stage
       set={<NiagaraSet camera={camera} frame={f + 1440} mode="sunset" water={{ flow: 1 }} lift={LIFT} rainbow={ease(f, 6, 30)} wheel={-f * 0.06} />}
       camera={camera}
       bg={fallsBg("sunset")}
       puppets={[
-        { id: "miller", look: MILLER, pose: { ...faceChange([[0, "shocked"], [16, "happy"]], f), view: "back" }, at: [FAM[0] - 0.1, FAM[1] + 0.5] },
-        { id: "martha", look: MARTHA, pose: { expression: "happy", view: "back", gesture: f > 14 ? "cheer" : undefined }, at: [FAM[0] + 0.55, FAM[1] + 0.1] },
-        { id: "tom", look: TOM, pose: { expression: "excited", view: "back", armL: [150, -20], armR: [150, -20] }, at: [FAM[0] + 1.1, FAM[1] + 0.6] },
+        { id: "miller", look: MILLER, pose: { ...faceChange([[0, "shocked"], [16, "happy"]], f), view: "back" }, at: [FAM[0], FAM[1] - 0.55] },
+        { id: "martha", look: MARTHA, pose: { expression: "happy", view: "back", gesture: f > 14 ? "cheer" : undefined }, at: [FAM[0] + 0.1, FAM[1]] },
+        { id: "tom", look: TOM, pose: { expression: "excited", view: "back", armL: [150, -20], armR: [150, -20] }, at: [FAM[0] + 0.25, FAM[1] + 0.55] },
       ]}
       light={fallsLight("sunset", f)}
     />
@@ -499,7 +501,7 @@ const Family = (f: number) => {
 const Refill = (f: number) => {
   const flow = ease(f, 0, 18);
   const camera: CameraShot = { position: lerp3([2.5, -7.2, 19], [3.5, -2.0, 24], ease(f, 0, 50)), target: lerp3([0, -4.5, crestZ(0)], [0, -2.4, crestZ(0)], ease(f, 0, 50)), fov: 54 };
-  return <Stage set={<NiagaraSet camera={camera} frame={f + 1500} mode="sunset" water={{ flow }} mist={Math.min(1.3, flow * 1.3)} rainbow={ease(f, 20, 45)} mill={false} />} camera={camera} bg={fallsBg("sunset")} />;
+  return <Stage set={<NiagaraSet camera={camera} frame={f + 1500} mode="sunset" water={{ flow }} mist={flow} rainbow={ease(f, 20, 45)} mill={false} />} camera={camera} bg={fallsBg("sunset")} />;
 };
 
 // ---------- shot list ----------
@@ -541,7 +543,7 @@ const SHOTS: Shot[] = [
   [566, 620, WalkShot, false],
   [620, 681, RideShot, false],
   [681, 758, MusketShot, false],
-  [758, 790, BurstShot, true],
+  [758, 790, BurstShot, false],
   [790, 822, WallShot, true],
   [822, 853, BoltShot, false],
   [853, 900, FamilyShot, true],
@@ -552,7 +554,6 @@ const SHOTS: Shot[] = [
 const SFX: Sfx[] = [
   // hook: the roar, then dead silence on "silent"
   { at: 0, src: sfx("falls"), volume: 0.6, until: 34 },
-  { at: 0, src: sfx("whoosh"), volume: 0.4 },
   { at: 20, src: sfx("splash"), volume: 0.5 },
   { at: 33, src: sfx("tape-stop"), volume: 0.45 },
   { at: 34, src: sfx("stamp"), volume: 0.25 },

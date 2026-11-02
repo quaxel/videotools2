@@ -702,14 +702,14 @@ const SFX: Sfx[] = [
   ...[0, 1, 2, 3, 4, 5].map((i) => ({ at: 226 + i * 5 + 2, src: sfx("pop"), volume: 0.35 })),
   { at: 261, src: sfx("whoosh"), volume: 0.4 },
   // sounds and radio
-  { at: 268, src: sfx("battle"), volume: 0.75, until: 318 },
+  { at: 268, src: sfx("battle"), volume: 0.38, until: 318 },
   { at: 270, src: sfx("boom"), volume: 0.35 },
   { at: 290, src: sfx("boom"), volume: 0.25 },
   { at: 312, src: sfx("whoosh"), volume: 0.4 },
   { at: 316, src: sfx("morse"), volume: 0.55, until: 364 },
   { at: 360, src: sfx("whoosh"), volume: 0.4 },
   // the enemy watches
-  { at: 364, src: sfx("battle"), volume: 0.25, until: 439 },
+  { at: 364, src: sfx("battle"), volume: 0.12, until: 439 },
   { at: 364, src: sfx("wind"), volume: 0.3, until: 439 },
   { at: 402, src: sfx("tick"), volume: 0.4 },
   { at: 435, src: sfx("whoosh"), volume: 0.4 },
@@ -748,5 +748,5 @@ const MUSIC: MusicCue[] = [
   { src: "music/upbeat.wav", from: 650, to: TIMING.totalFrames, volume: 0.3 },
 ];
 
-export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} />;
+export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} post />;
 
