@@ -182,7 +182,6 @@ const HookSlap: React.FC = () => {
           at: [2.3, 0.55],
           pose: pose({
             ...faceChange([[0, "determined"], [SLAP + 3, "excited"]], f),
-            view: "side",
             facing: -1,
             reachL: hit ? [-330, -640] : [-250, -860],
             handL: "open",
@@ -412,6 +411,10 @@ const Radio = (f: number) => {
 
 // ---------- 12-14.5 s: the enemy sees an army ----------
 
+// The dusk sun sits behind the decoy park, so from the enemy's hill the rubber tanks face the camera in shadow (and the
+// post grade crushes them to a purple murk): a warm fill from the viewer's side keeps them readable.
+const DecoyFill: React.FC = () => <directionalLight position={[3, 5, 12]} intensity={2.4} color="#ffc8a8" />;
+
 // Over the observer's shoulder on the ridge: below, a whole field of tanks and the speaker truck booming.
 const ObserverOTS = (f: number) => {
   const camera: CameraShot = { position: lerp3([2.05, 1.15, 8.45], [1.8, 1.2, 8.1], ease(f, 0, 36)), target: [-0.4, 0.9, -4], fov: 44 };
@@ -419,6 +422,7 @@ const ObserverOTS = (f: number) => {
     <Stage
       set={
         <GhostFieldSet camera={camera} frame={f + 360} mode="dusk">
+          <DecoyFill />
           <DecoyPark frame={f} />
           <SoundTruck frame={f} position={[4.6, 0, -0.6]} rotationY={-0.6} blast={1} label={false} />
         </GhostFieldSet>
@@ -440,6 +444,7 @@ const BinocPOV = (f: number) => {
       <Stage
         set={
           <GhostFieldSet camera={camera} frame={f + 400} mode="dusk">
+            <DecoyFill />
             <DecoyPark frame={f} />
             <SoundTruck frame={f} position={[4.6, 0, -0.6]} rotationY={-0.6} blast={1} label={false} />
           </GhostFieldSet>
