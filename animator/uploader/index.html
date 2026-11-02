@@ -416,6 +416,8 @@ function renderProgress(v) {
         ${u.publishAt ? `Yayın zamanı: <b>${esc(fmt(u.publishAt))}</b>.` : ""} ${link}</div>
       ${ys.privacyStatus ? `<div class="hint">YouTube durumu: ${esc(ys.uploadStatus || "?")}, ${esc(ys.privacyStatus)}${ys.publishAt ? ", yayın " + esc(fmt(ys.publishAt)) : ""}${ys.rejectionReason ? ", red: " + esc(ys.rejectionReason) : ""}${ys.failureReason ? ", hata: " + esc(ys.failureReason) : ""}${u.checkedAt ? " · kontrol: " + esc(fmt(u.checkedAt)) : ""}</div>` : ""}
       ${lockWarn}
+      ${u.playlist ? `<div class="hint">Oynatma listesi: ${esc(u.playlist)}</div>` : ""}
+      ${u.playlistError ? `<div class="notice err">${esc(u.playlistError)} “Durumu YouTube'dan kontrol et” yeniden dener.</div>` : ""}
       ${u.dryRun ? "" : `<div class="actions"><button id="check">Durumu YouTube'dan kontrol et</button></div>`}`;
     if ($("#check")) $("#check").onclick = async () => {
       $("#check").disabled = true;

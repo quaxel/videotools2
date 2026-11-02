@@ -33,7 +33,9 @@ ROOT = os.path.dirname(HERE)
 SECRETS = os.path.join(HERE, "secrets")
 CLIENT_SECRET = os.path.join(SECRETS, "client_secret.json")
 TOKEN = os.path.join(SECRETS, "token.json")
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.readonly"]
+# "youtube" (manage) is needed to add the video to the playlist; youtube.upload alone cannot.
+SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
+PLAYLIST = "Explained"  # every upload is added to this playlist of the channel
 HOST, PORT = "127.0.0.1", int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 8765
 DRY_RUN = "--dry-run" in sys.argv
 DB_PATH = sys.argv[sys.argv.index("--db") + 1] if "--db" in sys.argv else os.path.join(HERE, "uploader.db")
@@ -294,7 +296,11 @@ def credentials(interactive=False):
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
 
-    creds = Credentials.from_authorized_user_file(TOKEN, SCOPES) if os.path.isfile(TOKEN) else None
+    creds = None
+    if os.path.isfile(TOKEN):
+        info = json.load(open(TOKEN, encoding="utf-8"))
+        if set(SCOPES) <= set(info.get("scopes") or []):  # a token from before a scope was added must connect again
+            creds = Credentials.from_authorized_user_info(info, SCOPES)
     if creds and not creds.valid and creds.refresh_token:
         try:
             creds.refresh(Request())
@@ -351,6 +357,25 @@ def set_job(slug, **kw):
         jobs.setdefault(slug, {}).update(kw)
 
 
+def add_to_playlist(video_id):
+    """Add the video to the PLAYLIST playlist. Returns an error message, or None when it worked."""
+    try:
+        yt, page, playlist_id = youtube(), None, None
+        while not playlist_id:
+            r = yt.playlists().list(part="snippet", mine=True, maxResults=50, pageToken=page).execute()
+            playlist_id = next((p["id"] for p in r.get("items", []) if p["snippet"]["title"].strip() == PLAYLIST), None)
+            page = r.get("nextPageToken")
+            if not page:
+                break
+        if not playlist_id:
+            return f"Kanalda “{PLAYLIST}” adında bir oynatma listesi bulunamadı."
+        yt.playlistItems().insert(part="snippet", body={"snippet": {
+            "playlistId": playlist_id, "resourceId": {"kind": "youtube#video", "videoId": video_id}}}).execute()
+        return None
+    except Exception as e:
+        return f"Oynatma listesine eklenemedi: {e}"
+
+
 def upload(slug, meta, privacy, publish_at):
     status = {"selfDeclaredMadeForKids": bool(meta.get("madeForKids")),
               "containsSyntheticMedia": bool(meta.get("syntheticMedia"))}
@@ -362,6 +387,7 @@ def upload(slug, meta, privacy, publish_at):
         "snippet": {"title": meta["title"], "description": meta["description"], "tags": meta["tags"],
                     "categoryId": meta.get("categoryId", "27"), "defaultLanguage": "en", "defaultAudioLanguage": "en"},
         "status": status,
+        "paidProductPlacementDetails": {"hasPaidProductPlacement": False},  # always "no paid promotion"
     }
     try:
         if DRY_RUN:
@@ -373,16 +399,19 @@ def upload(slug, meta, privacy, publish_at):
             from googleapiclient.http import MediaFileUpload
 
             media = MediaFileUpload(mp4_path(get_row(slug)), mimetype="video/mp4", chunksize=8 * 1024 * 1024, resumable=True)
-            req = youtube().videos().insert(part="snippet,status", body=body, media_body=media)
+            req = youtube().videos().insert(part="snippet,status,paidProductPlacementDetails", body=body, media_body=media)
             resp = None
             while resp is None:
                 chunk, resp = req.next_chunk(num_retries=5)
                 if chunk:
                     set_job(slug, state="uploading", progress=chunk.progress())
             video_id = resp["id"]
-            update_row(slug, draft=dumps(meta), upload=dumps({
-                "videoId": video_id, "privacy": privacy, "publishAt": publish_at if privacy == "schedule" else None,
-                "uploadedAt": now(), "youtubeStatus": resp.get("status", {})}))
+            record = {"videoId": video_id, "privacy": privacy, "publishAt": publish_at if privacy == "schedule" else None,
+                      "uploadedAt": now(), "youtubeStatus": resp.get("status", {})}
+            update_row(slug, draft=dumps(meta), upload=dumps(record))  # saved before the playlist step can fail
+            err = add_to_playlist(video_id)
+            record.update(playlist=None if err else PLAYLIST, playlistError=err)
+            update_row(slug, upload=dumps(record))
         set_job(slug, state="done", progress=1.0, videoId=video_id, dryRun=DRY_RUN, privacy=privacy,
                 publishAt=publish_at if privacy == "schedule" else None)
     except Exception as e:
@@ -396,6 +425,9 @@ def refresh_status(slug):
         raise RuntimeError("Bu video henüz yüklenmedi.")
     items = youtube().videos().list(part="status", id=up["videoId"]).execute().get("items", [])
     up.update(youtubeStatus=items[0]["status"] if items else {"removed": True}, checkedAt=now())
+    if items and not up.get("playlist"):  # the playlist step failed at upload time: try again
+        err = add_to_playlist(up["videoId"])
+        up.update(playlist=None if err else PLAYLIST, playlistError=err)
     update_row(slug, upload=dumps(up))
     return up
 
