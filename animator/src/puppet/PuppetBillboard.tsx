@@ -135,7 +135,10 @@ void main() {
   }
   // The puppet keeps its own colours; strong lights add on top of them, the side away from them dims slightly.
   vec3 base = tex.rgb * mix(vec3(1.0), tint, tintAmount);
-  gl_FragColor = vec4(base * (1.0 - shadow + diffuse * 0.55) + rim * mix(tex.rgb, vec3(1.0), 0.6), tex.a);
+  // Capped at white: the canvas clips there anyway, and in the post chain's half-float buffer anything brighter
+  // passes the bloom threshold (1.0), which washed lit faces and eye whites out in a glow.
+  vec3 lit = base * (1.0 - shadow + diffuse * 0.55) + rim * mix(tex.rgb, vec3(1.0), 0.6);
+  gl_FragColor = vec4(min(lit, vec3(1.0)), tex.a);
   #include <colorspace_fragment>
 }`;
 

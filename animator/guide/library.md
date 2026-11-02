@@ -13,8 +13,10 @@ export const timing = TIMING;
 const SHOTS: Shot[] = [ [from, to, ShotComponent, dissolveIn], ... ]; // final frames, contiguous, first from 0, last to TIMING.totalFrames
 const SFX: Sfx[] = [...];
 const MUSIC: MusicCue[] = [...];
-export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} />;
+export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} post />;
 ```
+
+- New videos pass `post` (the post chain, below); older ones leave it off and keep their look.
 
 - Write each SHOTS entry on one line as `[123, 456, Name, false]` (numbers or `TIMING.totalFrames`); `pipeline.py check` parses it.
 - **Seamless loop** (Shorts replay): end the video on the opening shot just before its frame 0. Write the first shot
@@ -175,6 +177,24 @@ Built from references: `guide/references/mississippi-1812.md`. Used by `src/vide
   (Reelfoot Lake at sunrise; the canoe's thwart is at seat height, so a puppet with `seat: 1` sits in it).
 - Light puppets with `riverLight(mode, f, lantern?)`.
 
+### Niagara Falls and Lake Erie, March 1848 (`src/three/NiagaraSets.tsx`)
+
+Built from photo references: `guide/references/niagara-1848.md`. Used by `src/videos/niagara-silent`.
+- `NiagaraSet({ camera, frame, mode, water, mist?, rainbow?, lift?, clear?, mill?, wheel? })` — the upper river runs
+  toward +z over a bed of grey dolomite ledges (y = 0) and falls over a gently curved crest (`crestZ(x)`, |x| <
+  `NIAGARA.half`) into the gorge `NIAGARA.drop` below. `water.flow` 0..1: full falls with curtain, rapids and mist down
+  to a dry bed with pools and three trickles (the curtain breaks into strands as it drops). `water.surge` (a z) sends a
+  foaming wall of water down the dry bed. `lift = NIAGARA.bankH` lowers the set so the bank is the floor; the mill with
+  its water wheel (`wheel` = angle) stands on the right bank at `MILL`. `clear` keeps ledges off puppet spots.
+  Modes `day`, `night`, `dawn`, `dusk`, `sunset`, `gale`; light puppets with `fallsLight(mode, f, lantern?)`.
+- `ErieSet({ camera, frame, mode, push, jam, burst, gale })` — Lake Erie narrowing into the river mouth at z = 0
+  (`erieHalf(z)`): ice sheets slide in the gale, pile into a jam across the neck, and burst downstream.
+- `Rainbow`, `GaleStreaks`. Props in `src/videos/niagara-silent/props.tsx`: `Horse` (trot `phase`, `rear`; seat a rider
+  with `sit: true, air: (HORSE.saddle - 0.34) * units`), `PocketWatch`, `Musket`, `Fish`, `Lantern`, `FlyingHat`.
+- One whip (the musket shot, NiagaraSet day, into the ice-burst shot, ErieSet dusk, at frame 758) failed with "Error
+  creating WebGL context" at concurrency ≥ 2 while other NiagaraSet → ErieSet whips rendered fine; root cause not
+  found, so that cut is hard. `RENDER_SEGMENT` / `FRAMING_SEGMENT` env vars shrink the render segments.
+
 ### Rendering long or heavy videos
 
 A render tab keeps every finished shot's WebGL context (and its GPU memory) alive, so a long video with heavy sets
@@ -183,6 +203,25 @@ segments, each in a fresh browser (`render_video`), joins them without re-encodi
 `scripts/sound.mjs` (the `soundOnly` input prop skips the shots); `framing.mjs` segments the same way. In a scene:
 free what you create (`useOwned`, dispose instanced meshes on unmount), instance repeated small meshes (a forest's
 limbs and tufts), and put several cuts in one place on one Stage with a `multi` shot (`src/videos/balloon-bombs`).
+
+### Post chain (`src/engine/post/`, `Video` prop `post`)
+
+Ported from animated-short's bridge short. With `post` on, every `Stage` draws on one canvas through
+render → lens blur → bloom + colour grade (postprocessing 6, half-float buffers, no MSAA: the canvas is
+already 2× supersampled). The sets keep only their own hull outlines:
+- **Ink** (`ink.ts`), off: screen-space lines on depth jumps and creases of the set. Tried at 3.2-6 px and dropped
+  (2026-11-02). `POST='{"ink":true}'` still shows it; it skips puppets, sky, smoke, see-through and additive
+  materials, hull outlines, instanced scatter and meshes marked `userData={{ noInk: true }}`.
+- **Lens blur** (`lens.ts`): a thin-lens depth of field. A Stage's `blur` becomes its strength (blur-disc radius at
+  infinity = `blur` × 3 px), focused on the nearest puppet's head (else the camera target); no `blur`, no lens.
+- **Bloom**: only on emissives brighter than white (threshold 1.0, so white labels never glow). Lit puppets are
+  capped at white in `PuppetBillboard.tsx`'s shader, so faces never bloom; fire, lamps and headlights do.
+- **Grade** (`grade.ts`): a strong S-curve, rich mids and highlights, cool shadows against warm highlights and the oval vignette,
+  at `GRADE_STRENGTH` 1.6 (×1.6 the base preset's distance from neutral; the vignette is not scaled); it replaces
+  Stage's CSS `saturate/contrast` filter and radial vignette. Paper grain, `truth` and `flash` stay as they were.
+- Off in the framing pre-pass, `collide` and the soundtrack render. Renders are ~2-3× slower with it on.
+- A/B stills: `POST=0 pipeline.py stills <slug>` (or `POST=1` for an older video), `POST='{"lens":false}'` to switch
+  one part off (or `{"ink":true}` on), `INK_DEBUG=1` with ink on to see its mask.
 
 ### Birds, on-screen headlines
 
@@ -265,7 +304,8 @@ put it on the twist line), `riser` (1.6 s build; start it so it ends on the twis
 (a small soft lump landing on grass), `crackle` (small wood fire, loop), `chew` (two squishy chews),
 `crowd` (stadium cheering, loop), `engine` (early motor car chugging, loop), `honk` (bulb horn), `hiss` (steam burst),
 `steps` (running on dirt, loop), `rumble` (earthquake roar, loop), `river` (rushing water, loop), `falls` (waterfall roar,
-loop), `splash` (something big hitting water), `crack` (tree trunk snapping and groaning over), `creak` (boat timbers).
+loop), `splash` (something big hitting water), `crack` (tree trunk snapping and groaning over), `creak` (boat timbers),
+`hooves` (a horse trotting on rock, loop).
 Music loops: `lounge` (112 BPM, light), `mystery` (84 BPM, dark), `upbeat` (124 BPM, bright: hooks), `tension` (100 BPM, pulsing:
 the numbers and the reveal). Use at least three beds across a video. New sounds: add a function at the end of `sfx_generate.py`
 (after the originals, so their files stay identical) and re-run it with `../tts/qwen/.venv/bin/python`.

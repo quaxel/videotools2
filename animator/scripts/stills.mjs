@@ -5,7 +5,8 @@
 // Renders with the `audit` input prop, so puppets, labels and screens report framing problems (faces or signs cut
 // by the edge, under the captions, hidden behind the set); those go to <out-dir>/framing.txt and the console.
 // STILL_SCALE=1 renders full-size stills (default 0.4). COLLIDE=1 only checks puppets walking through the set.
-// LIGHTING=1 renders with puppet lighting on (LIGHTING=0 off), whatever the video sets.
+// LIGHTING=1 renders with puppet lighting on (LIGHTING=0 off), whatever the video sets. POST works the same for the
+// post chain (engine/post), INK_DEBUG=1 shows its ink mask.
 import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 import { execFileSync } from "node:child_process";
@@ -22,11 +23,20 @@ if (!slug || !outDir) {
 
 const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
 const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
-// LIGHTING=1 / LIGHTING=0 forces puppet lighting on or off (to preview an older video lit).
-const inputProps = { audit: true, ...(process.env.LIGHTING ? { lighting: process.env.LIGHTING === "1" } : {}) };
-const composition = await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps });
-// COLLIDE=1: a fast pass every 5 frames at tiny scale that only reports puppets inside set objects.
+// COLLIDE=1: a fast pass every 5 frames at tiny scale that only reports puppets inside set objects (no post chain).
 const collide = process.env.COLLIDE === "1";
+// LIGHTING=1 / LIGHTING=0 forces puppet lighting on or off (to preview an older video lit).
+// POST=1 / POST=0 forces the post chain on or off; POST='{"ink":false}' switches single parts (A/B stills).
+// INK_DEBUG=1 shows the set ink mask instead of the picture (with the ink part on: POST='{"ink":true}').
+const post = process.env.POST === undefined ? {} : { post: process.env.POST === "1" ? true : process.env.POST === "0" ? false : JSON.parse(process.env.POST) };
+const inputProps = {
+  audit: true,
+  ...(process.env.LIGHTING ? { lighting: process.env.LIGHTING === "1" } : {}),
+  ...post,
+  ...(process.env.INK_DEBUG === "1" ? { inkDebug: true } : {}),
+  ...(collide ? { collide: true } : {}),
+};
+const composition = await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps });
 const frames = list
   ? list.split(",").map(Number)
   : collide

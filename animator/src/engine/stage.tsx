@@ -3,12 +3,13 @@ import { AbsoluteFill, useVideoConfig } from "remotion";
 import { useThree } from "@react-three/fiber";
 import { ThreeCanvas } from "@remotion/three";
 import * as THREE from "three";
-import { PuppetBillboard, PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";
+import { HEAD_Y, PuppetBillboard, PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";
 import { Vec3 } from "./anim";
 import { useShotDuration, useShotFrame, useShotStart } from "./clock";
 import { lightForBackground, puppetTint } from "../three/moods";
 import { livenCamera, livenPose } from "./liven";
-import { useFramingFor, useImpact, useLighting, useSpeech } from "./Video";
+import { useFramingFor, useImpact, useLighting, usePost, useSpeech } from "./Video";
+import { Post } from "./post/Post";
 import { applyFramingDelta, framingDelta, keepHeadsInFrame } from "./framing";
 import { getInputProps } from "remotion";
 
@@ -49,17 +50,37 @@ const GRAIN = `url("data:image/svg+xml;utf8,${encodeURIComponent(
 )}")`;
 
 // Colour grade over the picture: truth = cold blue "behind the curtain" tint, flash = white-out (both 0..1).
-export const Grade: React.FC<{ truth?: number; flash?: number }> = ({ truth = 0, flash = 0 }) => (
+// `vignette` off when the post chain's grade draws its own.
+export const Grade: React.FC<{ truth?: number; flash?: number; vignette?: boolean }> = ({ truth = 0, flash = 0, vignette = true }) => (
   <>
     <AbsoluteFill style={{ backgroundImage: GRAIN, backgroundSize: "256px 256px", mixBlendMode: "overlay", opacity: 0.35 }} />
     {truth > 0 && <AbsoluteFill style={{ backgroundColor: `rgba(30,70,180,${0.45 * truth})`, mixBlendMode: "multiply" }} />}
-    <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(10,0,4,0.55) 100%)" }} />
+    {vignette && <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(10,0,4,0.55) 100%)" }} />}
     {flash > 0 && <AbsoluteFill style={{ backgroundColor: `rgba(255,250,235,${flash})` }} />}
   </>
 );
 
+// Where the lens focuses: the nearest puppet's head in front of the camera, else the point the camera looks at
+// (metres along the view axis).
+const focusDistance = (cam: CameraShot, puppets: PuppetPlacement[]) => {
+  const [px, py, pz] = cam.position;
+  const fx = cam.target[0] - px, fy = cam.target[1] - py, fz = cam.target[2] - pz;
+  const len = Math.hypot(fx, fy, fz) || 1;
+  const along = (x: number, y: number, z: number) => ((x - px) * fx + (y - py) * fy + (z - pz) * fz) / len;
+  const heads = puppets.map((p) => along(p.at[0], HEAD_Y, p.at[1])).filter((d) => d > 0.3);
+  return heads.length ? Math.min(...heads) : len;
+};
+
+// Blur-disc radius at infinity (px at 1080x1920) for a Stage's `blur` (the CSS blur radius it had before the post
+// chain). x3 matches the old softness of a background a few metres behind the subject (checked on ghost-army).
+const LENS_PER_BLUR = 3;
+
+// The colour lift every Stage had before the post chain; the post grade replaces it.
+const CSS_GRADE = "saturate(1.08) contrast(1.05)";
+
 // A 3D set plus puppets placed on its floor. With `blur` the set and the cast render on two canvases from the
-// same camera, so the background softens and faces stay sharp.
+// same camera, so the background softens and faces stay sharp. With the post chain on (Video `post`) it is one
+// canvas and `blur` becomes a real depth of field focused on the nearest puppet.
 // `energy` (default 1) adds automatic camera push/drift and idle acting; 0 keeps the shot exactly as authored.
 // The set receives the livened camera through `set(camera)` when given a function; a plain node keeps its own
 // <CameraRig>, which an extra rig placed after it overrides.
@@ -105,8 +126,23 @@ export const Stage: React.FC<{
   });
   // Rendered after the set, this rig wins over the set's own and applies the livened camera.
   const rig = <CameraRig {...camera} />;
+  const post = usePost();
+  if (post) {
+    const inkDebug = (getInputProps() as { inkDebug?: boolean }).inkDebug === true;
+    return (
+      <AbsoluteFill style={{ backgroundColor: bg, filter: post.grade ? undefined : CSS_GRADE }}>
+        <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE}>
+          {set}
+          {rig}
+          {cast}
+          <Post parts={post} focus={focusDistance(camera, puppets)} cInf={(blur ?? 0) * LENS_PER_BLUR} inkDebug={inkDebug} />
+        </ThreeCanvas>
+        <Grade truth={truth} flash={flash} vignette={!post.grade} />
+      </AbsoluteFill>
+    );
+  }
   return (
-    <AbsoluteFill style={{ backgroundColor: bg, filter: "saturate(1.08) contrast(1.05)" }}>
+    <AbsoluteFill style={{ backgroundColor: bg, filter: CSS_GRADE }}>
       {blur ? (
         <>
           <AbsoluteFill style={{ filter: `blur(${blur}px)` }}>

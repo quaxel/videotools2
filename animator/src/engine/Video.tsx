@@ -5,6 +5,7 @@ import { Shot, ShotList, useFinalFrame } from "./clock";
 import { MusicCue, Sfx, SoundTrack } from "./sound";
 import type { Viseme } from "../puppet/Puppet";
 import type { FramingDelta } from "./framing";
+import { ALL_PARTS, PostParts } from "./post/Post";
 
 // The whole video: shots, the narration track, effects + ducked music, and word-synced captions.
 export type Timing = {
@@ -20,7 +21,7 @@ export type Timing = {
 // `framing`: the smoothed head-framing corrections written by `pipeline.py framing` (public/videos/<slug>/framing.json),
 // per shot start, then per shot frame (from that shot's first logged frame `f0`).
 export type FramingTable = Record<string, { f0: number; d: FramingDelta[] }>;
-const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean; framing: FramingTable | null } | null>(null);
+const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean; post: boolean; framing: FramingTable | null } | null>(null);
 
 // The framing table for this video, if the pipeline wrote one (null while loading or when there is none).
 const useFramingTable = (slug: string) => {
@@ -43,13 +44,16 @@ const useFramingTable = (slug: string) => {
 // `lighting` (default on): puppets take the set's light (a rig derived from the mood, or a Stage's own `light`)
 // instead of the flat mood tint. Videos made before it existed pass `lighting={false}` to keep their look.
 // `voiceVolume` (default 1) lifts or lowers the narration when the mix lands outside the loudness target.
-export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; voiceVolume?: number }> = ({
+// `post` (default off): the post chain (engine/post: depth of field, bloom, colour grade) on every
+// Stage. Videos made before it existed leave it off to keep their look.
+export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean; voiceVolume?: number }> = ({
   slug,
   timing,
   shots,
   sfx,
   music,
   lighting = true,
+  post = false,
   voiceVolume = 1,
 }) => {
   const framing = useFramingTable(slug);
@@ -58,7 +62,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   return (
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
     {!soundOnly && (
-      <VideoContext.Provider value={{ timing, sfx, lighting, framing }}>
+      <VideoContext.Provider value={{ timing, sfx, lighting, post, framing }}>
         <ShotList shots={shots} />
       </VideoContext.Provider>
     )}
@@ -82,6 +86,18 @@ export const useLighting = () => {
   const override = (getInputProps() as { lighting?: boolean }).lighting;
   const video = useContext(VideoContext);
   return override ?? video?.lighting ?? false;
+};
+
+// Which parts of the post chain this video's Stages run, or null for none. The `post` input prop overrides the
+// video's setting, for A/B stills: `true` / `false`, or the parts to switch, e.g. `{"lens": false}` (the rest as default).
+// Off in the passes that only measure (framing pre-pass, collide, soundtrack).
+//   npx remotion still <slug> out/x.png --frame=300 --props='{"post":{"lens":false}}'
+export const usePost = (): PostParts | null => {
+  const props = getInputProps() as { post?: boolean | Partial<PostParts>; framingPass?: boolean; soundOnly?: boolean; collide?: boolean };
+  const video = useContext(VideoContext);
+  if (props.framingPass || props.soundOnly || props.collide) return null;
+  const on = props.post ?? video?.post ?? false;
+  return on ? { ...ALL_PARTS, ...(typeof on === "object" ? on : {}) } : null;
 };
 
 // True while `speaker` is saying a word at this final frame (drives mouthOpen).

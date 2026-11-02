@@ -20,6 +20,12 @@ you write the research, script and scene code. Read these first, every time:
 .venv/bin/python scripts/pipeline.py new <slug> "<topic>"
 ```
 
+At any point `pipeline.py status <slug>` lists every stage as done / stale / missing (stale = its output is older
+than the scene, timing or voice it was made from), with run times, and prints the next command.
+`pipeline.py go <slug>` runs the missing and stale stages in order up to `motion` and stops when `check` fails or
+`collide` finds a hit; `--to report --2k` carries on through the render and report, `--plan` only prints the plan.
+Each stage's run time goes to `videos/<slug>/build/timings.jsonl`.
+
 ## 2. Research → `videos/<slug>/research.md`
 
 Use web search. Open the pages you cite. Write one paragraph on the mechanism, then a `## Claims` list:
@@ -56,6 +62,8 @@ Reuse existing sets where they fit (`LakeSet`, `SpaceBaseSet`, `AlleySet`, `Grea
 Open with 3-4 hard, quick shots in the first 5 s (guide/rules.md → Hook): the strange thing coming at the lens, a
 reaction, an impact. On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters use
 the costume options (library.md → Puppets), never `cap`.
+
+Pass `post` to `Video` (library.md → Post chain: depth of field, bloom, colour grade).
 
 Write the shot list against the printed frames: cut on line and caption boundaries, average ≤ 2.2 s, none
 over 4 s, whip (`true`) on location changes. Use `Room` + kit props for new locations, and a different mood per
@@ -104,15 +112,23 @@ Every shot keeps the camera moving (orbit, crane, truck, push); sky shots need t
 ## 7. Render once, then report
 
 ```bash
-.venv/bin/python scripts/pipeline.py render <slug>
+.venv/bin/python scripts/pipeline.py render <slug> --2k
 ```
+
+`--2k` renders the delivery size, 1440x2560 (without it 1080x1920, for a quick look). The render ends with the
+frame-by-frame QA (`videos/<slug>/build/qa/`: black, white, frozen and sudden-jump frames, loudness, 2 s contact
+sheets with frame numbers). Look at every frame it lists as a pop on its sheet: a set that vanishes for a frame
+(a lost WebGL canvas) or a camera jump inside a shot is a real fault, a face change is not.
+
+Render checks every segment for broken frames (a lost WebGL canvas shows as a run of flat background colour) and
+renders that segment again; `pipeline.py glitch <slug>` checks a finished MP4 the same way.
 
 ```bash
 .venv/bin/python scripts/pipeline.py report <slug>
 ```
 
-The report (`videos/<slug>/report.md`) lists every target with ok/MISS and any spoken number without a
-sourced claim. Fix cheap misses (one more render at most); report the rest to the user honestly.
+The report (`videos/<slug>/report.md`) lists every target with ok/MISS (black frames and frozen spans included),
+the QA's pops and any spoken number without a sourced claim. Fix cheap misses (one more render at most); report the rest to the user honestly.
 
 ## 8. YouTube metadata → `videos/<slug>/youtube.md`
 
