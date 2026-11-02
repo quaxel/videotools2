@@ -39,6 +39,8 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 | `lerp3, ramp, clamp01, breathe, talk, walk` | Animation helpers. `ramp(f, a, b)` 0→1 between frames a and b. `...walk(f)` inside a pose while walking. |
 | `Easing, interpolate` | From `remotion`. |
 | `FADE` | Location-change transition length (8 frames): the old shot whips out left, the new one in from the right. |
+| `"dissolve"` (shot list, in place of `true`) | `DISSOLVE` (12) frames: the new shot fades in over the old one, which plays on to the cut. For a change of time in one place (night to dawn, before and after), not for a change of place. Ported from animated-short's `XFADE`; `src/scenes/TransitionPreview.tsx` shows it. |
+| `Stage` `foreground`, `frameSpot(cam, aspect, x, y, dist)`, `Foliage` | Framing objects between the lens and the subject (a branch, a railing, a crate corner), ported from animated-short's `FOREGROUND`. `frameSpot` gives the world point at screen position x, y (-1..1, +y up) `dist` metres in front of a camera: place from the shot's first camera so the object stays put and the camera moves past it. Keep them at 0.3-0.5 x the focus distance over 10-25 % of one frame edge, never on a face (the framing audit still flags a hidden face). Drawn over the cast and left out of `collide`; the post chain's depth of field blurs them, without it they get a canvas of their own blurred 3 x `blur`. `Foliage` is a leafy clump for it. |
 | `sfx("stamp")`, `MUSIC_FILES.lounge / .mystery / .upbeat / .tension` | Sound file paths. |
 
 ## New locations: research references first
@@ -48,6 +50,14 @@ browser and write `guide/references/<set>.md`: the sources, 5-10 concrete detail
 (objects, materials, signage, how things hang), its palette, and which of its lights are strong enough to light the
 puppets. Build from those notes in the kit's cel style: never copy an image, download nothing into the project, and
 leave out brand names and logos. Pick the 3-4 details that read in a narrow 9:16 frame.
+
+To put numbers on how our frames differ from reference frames (a look we want to get close to), the user keeps the
+frames in a folder outside the project, and `pipeline.py look <slug> <ref-dir>` takes stills with the post chain on
+and runs `scripts/look.py` (ported from animated-short's look study): `build/look/look.md` compares shadow, mid and
+highlight levels, contrast, saturation, colourfulness, warmth, hue families, edge density, ink-like dark lines and
+depth blur (ours against the references' mean ± sd, with the direction to move where we are outside it), with the
+caption band masked; `build/look/sbs.jpg` puts six of ours over six of theirs. Take rules and numbers from
+references, never their characters, props or shots; reference frames never go into git.
 
 ## Set kit (`src/three/kit.tsx`, also exported from the engine)
 
@@ -310,6 +320,49 @@ Music loops: `lounge` (112 BPM, light), `mystery` (84 BPM, dark), `upbeat` (124 
 the numbers and the reveal). Use at least three beds across a video. New sounds: add a function at the end of `sfx_generate.py`
 (after the originals, so their files stay identical) and re-run it with `../tts/qwen/.venv/bin/python`.
 
-`Sfx = { at, src, volume, until? }` (`until` loops to that frame). `MusicCue = { src, from, to, volume }`; music ducks under the voice automatically.
+`Sfx = { at, src, volume, until? }` (`until` loops to that frame). `MusicCue = { src, from, to, volume, loop?, fade? }`
+(`loop` and `fade` default to true: a library loop repeats over the cue and eases in and out); music ducks under the voice automatically.
+
+### Mix report (`pipeline.py mix <slug>`, also run by `report`)
+
+Renders the soundtrack's three stems at their mix gain (`STEM=voice|music|sfx node scripts/sound.mjs`, the `stem`
+input prop on `Video`) into `build/mix/` and measures, with animated-short's BS.1770 tables (`scripts/mixreport.py`):
+voice, music, effects and bed (music + effects) per music section, and per spoken line the 400 ms momentary margin
+of the voice over the bed while it speaks (median, 10th percentile, the three quietest words). `report` marks
+`speech_margin_p10` (the lowest line's p10, target ≥ 3 LU): under it the bed covers words; turn down the effect or
+music cue under that line.
+
+### Sync check (`pipeline.py sync <slug>`)
+
+`scripts/cues.mjs` renders one soundtrack-only frame with the `cueDump` input prop and keeps the shot, effect and
+music tables `Video` logs, fully resolved (spreads and constants included), in `videos/<slug>/build/cues.json`.
+`sync` checks them against the picture and writes `build/sync.txt`. Errors (the stage fails): a cue outside the
+video or looping past its end, a missing file, the narration running past the end, no music at all. Warnings (look,
+some are on purpose): a looped effect that ends 1-6 frames off a cut, whips with no whoosh in their pan, gaps in the
+music, and the loop seam: the music and looped effects under the last frame should be the ones under frame 0. The
+frame QA also checks that the muxed audio is as long as the picture (`AV SYNC` in `build/qa/qa.md`).
+
+### The video's own score (`videos/<slug>/music.py`, `pipeline.py music <slug>`)
+
+A video can have its own score instead of the library loops, composed for its cuts the way animated-short scores
+each short. `scripts/music/` holds the instruments (`instruments.py`: brass, glockenspiel, vibes, music box, fife,
+whistler, field snare and rolls, cymbal, triangle, timpani, pad, pizzicato, brushes) and the DSP kit (`dsp.py`,
+numpy + scipy). `score.py` gives every score its timeline and its finish:
+- `Video(slug)`: cuts, whips, impacts, spoken lines in seconds, and `library`, the scene's own music cues (where it
+  wanted which mood);
+- `Grid.fit(times, dur, lo, hi)`: a downbeat on frame 0 and a whole number of bars over the video (it loops), at the
+  tempo that puts the cuts closest to beats; patterns run on the grid, section accents sit on the cut itself;
+- `Band` (named stereo tracks, `cue(t, what)` for the cue sheet), `mixdown(band, balance)` (each track to its LU,
+  one room reverb);
+- `finish(...)`: folds the tail past the end onto the start, masters to the library loops' loudness, writes
+  `public/videos/<slug>/music.wav` and the cue sheet `build/score.md`.
+
+Write `music.py` per video (the composition is the creative part; `videos/ghost-army/music.py` is a worked example:
+march in F for the hook, light pizzicato for the story, a D-minor spy pulse for the deception, a drone at the
+twist, the theme whistled at the end, a snare pickup into frame 0). Pass `score` to `Video` to play it; the
+`score` input prop overrides that for an A/B without editing the scene:
+`SCORE=1 node scripts/sound.mjs <slug> out/ab/score.wav`, then mux it over the existing render
+(`ffmpeg -i out/<slug>.mp4 -i out/ab/score.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 320k -shortest out/ab/<slug>-score.mp4`).
+Switch a scene to its score only after the user has heard the A/B.
 
 Look (all views, every puppet): cel shading (flat, slightly soft shadow on the right and below, bangs shadow on the forehead), eyelids on white eyes, 30-unit arms and legs, short thick mitten hands with a thumb, simple rounded feet; excited is an open laugh with upper teeth and a tongue; in profile an egg-shaped head with the eye near the front of the face and, for `long` hair, one piece of hair over the back of the head and the nape. These live in `src/puppet/Puppet.tsx`; change them there so every character follows.

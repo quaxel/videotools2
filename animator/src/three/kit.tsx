@@ -357,6 +357,32 @@ export const Plant: React.FC<{ position: Vec3; scale?: number }> = ({ position, 
   </group>
 );
 
+// A leafy clump for foreground framing (Stage `foreground`, placed with `frameSpot`): toon spheres in two greens
+// around a short stem, about `size` metres across. `seed` varies the clump.
+export const Foliage: React.FC<{ position: Vec3; size?: number; color?: string; seed?: number }> = ({ position, size = 0.8, color = "#2f7d43", seed = 1 }) => {
+  const balls = useMemo(() => {
+    const rnd = (k: number) => {
+      const v = Math.sin(seed * 127.1 + k * 311.7) * 43758.5453;
+      return v - Math.floor(v);
+    };
+    return Array.from({ length: 9 }, (_, i) => {
+      const a = rnd(i) * Math.PI * 2, r = 0.15 + rnd(i + 20) * 0.3;
+      return { at: [Math.cos(a) * r, 0.1 + rnd(i + 40) * 0.55, Math.sin(a) * r * 0.6] as Vec3, s: 0.16 + rnd(i + 60) * 0.14, dark: rnd(i + 80) > 0.55 };
+    });
+  }, [seed]);
+  const shade = useMemo(() => new THREE.Color(color).multiplyScalar(0.7).getStyle(), [color]);
+  return (
+    <group position={position} scale={size}>
+      {balls.map((b, i) => (
+        <mesh key={i} position={b.at}>
+          <icosahedronGeometry args={[b.s, 1]} />
+          <meshToonMaterial color={b.dark ? shade : color} gradientMap={toonRamp} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
 // Corkboard with pinned cards; `cards` are short labels, laid out in a grid.
 export const Board: React.FC<{ position: Vec3; cards: string[]; width?: number; height?: number; color?: string }> = ({
   position,

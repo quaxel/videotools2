@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline Paneli</title>
+<style>
+  :root {
+    --bg: #f6f6f4; --panel: #ffffff; --ink: #1d1d1f; --muted: #6b6b70; --line: #e3e3e0;
+    --accent: #2456b3; --accent-ink: #fff; --ok: #1a7f4b; --ok-bg: #e5f4ec; --warn: #9a5b00; --warn-bg: #fdf1dc;
+    --err: #b42318; --err-bg: #fdecea; --chip: #efefec; --log: #111114; --log-ink: #d8d8dc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416; --panel: #1d1d20; --ink: #ececee; --muted: #9a9aa2; --line: #2e2e33;
+      --accent: #7aa7ff; --accent-ink: #0d1424; --chip: #2a2a2f; --ok: #4ccb8a; --ok-bg: #16301f; --warn: #f0b252; --warn-bg: #33270f;
+      --err: #ff7b72; --err-bg: #3a1714; --log: #0b0b0d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 16px; margin: 0; flex: 1; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-size: 12px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); } .pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .pill.err { background: var(--err-bg); color: var(--err); }
+  button, select, input { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 5px 11px; border-radius: 8px; }
+  button { cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--muted); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button.danger { color: var(--err); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  main { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 53px); }
+  #list { border-right: 1px solid var(--line); background: var(--panel); overflow-y: auto; max-height: calc(100vh - 53px); position: sticky; top: 53px; }
+  #filter { width: calc(100% - 24px); margin: 12px; }
+  .item { padding: 8px 14px; cursor: pointer; border-left: 3px solid transparent; }
+  .item:hover { background: var(--chip); }
+  .item.sel { border-left-color: var(--accent); background: var(--chip); }
+  .item .slug { font-weight: 600; }
+  .dots { display: flex; gap: 3px; margin-top: 4px; }
+  .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--line); }
+  .dot.done { background: var(--ok); } .dot.stale { background: var(--warn); } .dot.missing { background: var(--line); }
+  #detail { padding: 20px 24px 280px; min-width: 0; }
+  #detail h2 { margin: 0 0 2px; font-size: 20px; }
+  .sub { color: var(--muted); margin-bottom: 16px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; }
+  section h3 { margin: 0 0 10px; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  td.note { color: var(--muted); font-size: 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .files { display: flex; flex-wrap: wrap; gap: 6px; }
+  .files button.on { border-color: var(--accent); color: var(--accent); }
+  #viewer img { max-width: 100%; border-radius: 8px; display: block; }
+  #viewer video { max-height: 70vh; max-width: 100%; border-radius: 8px; background: #000; }
+  pre { white-space: pre-wrap; word-break: break-word; background: var(--chip); padding: 10px 12px; border-radius: 8px; margin: 0; font: 12px/1.5 ui-monospace, Menlo, monospace; max-height: 60vh; overflow: auto; }
+  textarea { width: 100%; min-height: 300px; font: 12px/1.5 ui-monospace, Menlo, monospace; background: var(--chip); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  #log { position: fixed; left: 300px; right: 0; bottom: 0; height: 240px; background: var(--log); color: var(--log-ink); display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+  #log .bar { display: flex; gap: 10px; align-items: center; padding: 6px 14px; font-size: 12px; border-bottom: 1px solid #2a2a2f; }
+  #log .bar .cmd { flex: 1; font-family: ui-monospace, Menlo, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #log pre { flex: 1; background: transparent; color: inherit; max-height: none; border-radius: 0; }
+  .msg { padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
+  .msg.err { background: var(--err-bg); color: var(--err); }
+  .empty { color: var(--muted); padding: 40px; text-align: center; }
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; }
+    #list { position: static; max-height: 260px; border-right: 0; border-bottom: 1px solid var(--line); }
+    #log { left: 0; height: 200px; }
+    #detail { padding: 16px 16px 240px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pipeline Paneli</h1>
+  <span id="jobpill" class="pill">boşta</span>
+</header>
+<main>
+  <nav id="list"><input id="filter" placeholder="Video ara…"></nav>
+  <div id="detail"><div class="empty">Soldan bir video seç.</div></div>
+</main>
+<div id="log">
+  <div class="bar"><span class="cmd" id="logcmd">Henüz iş çalışmadı.</span><span id="logtime"></span><button id="stop" class="danger" disabled>Durdur</button></div>
+  <pre id="logtext"></pre>
+</div>
+<script>
+const $ = (s) => document.querySelector(s);
+const STATE = { done: ["ok", "tamam"], stale: ["warn", "eski"], missing: ["", "yok"] };
+const GATE_TR = { script: "Senaryo (lines.json)", stills: "Stills (contact sheet)" };
+const FILE_TR = { contact: "Contact sheet", framing: "Framing", collide: "Collide", sync: "Senkron", score: "Müzik cue'ları", mix: "Mix raporu",
+  look: "Görünüm ölçümü", sbs: "Yan yana", qa: "Kare QA", report: "Rapor", youtube: "YouTube", lines: "lines.json",
+  mp4: "Video", draft: "Taslak", music: "Müzik (wav)", ab: "Müzik A/B" };
+let videos = [], stages = [], sel = null, detail = null, view = null, logFrom = 0, jobArgv = null;
+
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]); }
+function secs(s) { return s == null ? "–" : s < 90 ? `${Math.round(s)} sn` : `${(s / 60).toFixed(1)} dk`; }
+
+async function loadList() {
+  const j = await api("/api/videos");
+  videos = j.videos; stages = j.stages;
+  drawList();
+}
+
+function drawList() {
+  const q = $("#filter").value.toLowerCase();
+  const nav = $("#list");
+  nav.querySelectorAll(".item").forEach((n) => n.remove());
+  for (const v of videos.filter((v) => !q || v.slug.includes(q) || v.title.toLowerCase().includes(q))) {
+    const d = document.createElement("div");
+    d.className = "item" + (v.slug === sel ? " sel" : "");
+    d.innerHTML = `<div class="slug">${esc(v.slug)}</div><div class="dots">${v.stages.map((s) => `<span class="dot ${s.state}" title="${s.stage}: ${STATE[s.state][1]}"></span>`).join("")}</div>`;
+    d.onclick = () => select(v.slug);
+    nav.appendChild(d);
+  }
+}
+
+async function select(slug) {
+  sel = slug; view = null;
+  drawList();
+  detail = await api(`/api/video/${slug}`);
+  drawDetail();
+}
+
+function drawDetail(error) {
+  const v = detail, busy = jobRunning();
+  const gateOf = { voice: "script", render: "stills" };
+  $("#detail").innerHTML = `
+    ${error ? `<div class="msg err">${esc(error)}</div>` : ""}
+    <h2>${esc(v.slug)}</h2><div class="sub">${esc(v.title) || "&nbsp;"}</div>
+    <section><h3>Aşamalar</h3>
+      <table><tr><th>aşama</th><th>durum</th><th>son süre</th><th>not</th><th></th></tr>
+      ${v.stages.map((s) => `<tr><td>${s.stage}</td><td><span class="pill ${STATE[s.state][0]}">${STATE[s.state][1]}</span></td>
+        <td>${secs(s.last)}</td><td class="note">${esc(s.note)}</td>
+        <td><button data-run="${s.stage}" ${busy ? "disabled" : ""}>Çalıştır</button></td></tr>`).join("")}
+      </table>
+      <div class="row" style="margin-top:12px">
+        <b>go</b> şuna kadar <select id="goto">${stages.map((s) => `<option ${s === "motion" ? "selected" : ""}>${s}</option>`).join("")}</select>
+        <label><input type="checkbox" id="go2k"> 2K</label>
+        <button id="goplan" ${busy ? "disabled" : ""}>Planı göster</button>
+        <button id="gorun" class="primary" ${busy ? "disabled" : ""}>Eksikleri çalıştır</button>
+        <span style="flex:1"></span>
+        <label><input type="checkbox" id="render2k" checked> render 2K</label>
+        <input id="frames" placeholder="stills kareleri: 120,480" size="18">
+      </div>
+    </section>
+    <section><h3>Onaylar</h3>
+      <div class="note" style="margin-bottom:8px;color:var(--muted)">go, onaylanmamış ya da dosyası sonradan değişmiş bir onayda durur (senaryo → voice'tan, stills → render'dan önce).</div>
+      ${Object.entries(v.approvals).map(([g, st]) => `<div class="row" style="margin-bottom:6px">
+        <span style="width:190px">${GATE_TR[g]}</span>
+        <span class="pill ${st === "ok" ? "ok" : st === "lapsed" ? "warn" : ""}">${st === "ok" ? "onaylı" : st === "lapsed" ? "dosya değişti" : "onay yok"}</span>
+        <button data-approve="${g}">Onayla</button>${st !== "no" ? `<button data-unapprove="${g}">Geri al</button>` : ""}</div>`).join("")}
+    </section>
+    <section><h3>Görünüm (referans)</h3>
+      <div class="row"><input id="refs" placeholder="referans kare klasörü, ör. ~/refs/style" style="flex:1;min-width:200px">
+      <button id="look" ${busy ? "disabled" : ""}>Ölç ve yan yana koy</button></div>
+    </section>
+    <section><h3>Çıktılar</h3>
+      <div class="files">${v.files.map((f) => `<button data-file="${f}" class="${view === f ? "on" : ""}">${FILE_TR[f] || f}</button>`).join("") || '<span class="note">Henüz çıktı yok.</span>'}</div>
+      <div id="viewer" style="margin-top:12px"></div>
+    </section>`;
+  document.querySelectorAll("[data-run]").forEach((b) => (b.onclick = () => {
+    const st = b.dataset.run, opts = {};
+    if (st === "render" && $("#render2k").checked) opts["2k"] = true;
+    if (st === "stills" && $("#frames").value.trim()) opts.frames = $("#frames").value.trim();
+    run(st, opts);
+  }));
+  $("#goplan").onclick = () => run("go", { to: $("#goto").value, "2k": $("#go2k").checked, plan: true });
+  $("#gorun").onclick = () => run("go", { to: $("#goto").value, "2k": $("#go2k").checked });
+  $("#look").onclick = () => run("look", { refs: $("#refs").value.trim() });
+  document.querySelectorAll("[data-approve]").forEach((b) => (b.onclick = () => approve(b.dataset.approve, false)));
+  document.querySelectorAll("[data-unapprove]").forEach((b) => (b.onclick = () => approve(b.dataset.unapprove, true)));
+  document.querySelectorAll("[data-file]").forEach((b) => (b.onclick = () => { view = b.dataset.file; drawDetail(); }));
+  if (view) showFile(view);
+}
+
+async function showFile(key) {
+  const url = `/files/${sel}/${key}?t=${Date.now()}`, box = $("#viewer");
+  if (["contact", "sbs"].includes(key)) box.innerHTML = `<a href="${url}" target="_blank"><img src="${url}"></a>`;
+  else if (["mp4", "draft", "ab"].includes(key)) box.innerHTML = `<video src="${url}" controls loop></video>`;
+  else if (key === "music") box.innerHTML = `<audio src="${url}" controls style="width:100%"></audio>`;
+  else if (key === "lines") {
+    const text = await (await fetch(url)).text();
+    box.innerHTML = `<textarea id="linesEdit"></textarea><div class="row" style="margin-top:8px"><button class="primary" id="saveLines">Kaydet</button>
+      <span class="note" style="color:var(--muted)">Kaydetmek senaryo onayını düşürür; voice yeniden çalışmalı.</span></div>`;
+    $("#linesEdit").value = text;
+    $("#saveLines").onclick = async () => {
+      try { detail = await api("/api/lines", { slug: sel, text: $("#linesEdit").value }); drawDetail(); }
+      catch (e) { drawDetail(e.message); }
+    };
+  } else {
+    const text = await (await fetch(url)).text();
+    box.innerHTML = `<pre></pre>`;
+    box.querySelector("pre").textContent = text || "(boş)";
+  }
+}
+
+async function run(cmd, opts) {
+  try { await api("/api/run", { slug: sel, cmd, opts }); poll(); }
+  catch (e) { drawDetail(e.message); }
+}
+
+async function approve(gate, undo) {
+  try { detail = await api("/api/approve", { slug: sel, gate, undo }); drawDetail(); loadList(); }
+  catch (e) { drawDetail(e.message); }
+}
+
+let lastJob = null;
+function jobRunning() { return !!(lastJob && lastJob.running); }
+
+let timer = null, logLines = [], logBase = 0;
+async function poll() {
+  clearTimeout(timer);
+  // ask again for the last line we have: Remotion and ffmpeg rewrite their progress line in place
+  const { job } = await api(`/api/job?from=${Math.max(0, logFrom - 1)}`);
+  const was = jobRunning();
+  lastJob = job;
+  if (job) {
+    const key = job.argv.join(" ") + job.started;
+    if (key !== jobArgv) { jobArgv = key; logLines = []; logBase = 0; logFrom = 0; return poll(); }
+    if (job.from < logBase || job.from > logBase + logLines.length) { logLines = []; logBase = job.from; }
+    logLines.splice(job.from - logBase, Infinity, ...job.lines);
+    logFrom = job.next;
+    const pre = $("#logtext"), atEnd = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 20;
+    pre.textContent = logLines.join("\n");
+    if (atEnd) pre.scrollTop = pre.scrollHeight;
+    $("#logcmd").textContent = `${job.slug}: pipeline.py ${job.argv.join(" ")}`;
+    $("#logtime").textContent = secs(job.seconds);
+    $("#stop").disabled = !job.running;
+    const p = $("#jobpill");
+    p.className = "pill " + (job.running ? "warn" : job.rc === 0 ? "ok" : "err");
+    p.textContent = job.running ? `çalışıyor: ${job.argv[0]} ${job.slug}` : job.stopped ? "durduruldu" : job.rc === 0 ? "bitti" : `hata (çıkış ${job.rc})`;
+  }
+  if (was && !jobRunning()) { await loadList(); if (sel) { detail = await api(`/api/video/${sel}`); drawDetail(); } }
+  else if (!was && jobRunning() && sel) drawDetail();
+  timer = setTimeout(poll, jobRunning() ? 800 : 3000);
+}
+
+$("#stop").onclick = () => api("/api/stop", {}).then(poll);
+$("#filter").oninput = drawList;
+loadList().then(poll);
+</script>
+</body>
+</html>

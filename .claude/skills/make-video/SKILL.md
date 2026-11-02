@@ -22,9 +22,13 @@ you write the research, script and scene code. Read these first, every time:
 
 At any point `pipeline.py status <slug>` lists every stage as done / stale / missing (stale = its output is older
 than the scene, timing or voice it was made from), with run times, and prints the next command.
-`pipeline.py go <slug>` runs the missing and stale stages in order up to `motion` and stops when `check` fails or
-`collide` finds a hit; `--to report --2k` carries on through the render and report, `--plan` only prints the plan.
-Each stage's run time goes to `videos/<slug>/build/timings.jsonl`.
+`pipeline.py go <slug>` runs the missing and stale stages in order up to `motion` and stops when `check` or `sync`
+fails, `collide` finds a hit, or an approval is missing; `--to report --2k` carries on through the render and
+report, `--plan` only prints the plan. Each stage's run time goes to `videos/<slug>/build/timings.jsonl`.
+Approvals: `pipeline.py approve <slug> script` (before voice) and `approve <slug> stills` (before render); each
+lapses when its file changes (lines.json, the contact sheet), so a later edit needs a new look.
+`pipeline.py web` opens the panel (http://127.0.0.1:8766) with every video's stages, run / stop, the live log,
+approvals and outputs, for the user to follow or drive the pipeline.
 
 ## 2. Research → `videos/<slug>/research.md`
 
@@ -51,7 +55,8 @@ one-word sentences. Only the twist line may carry `"pauseAfter": 0.4`.
 
 It prints duration, words, wpm and each line's frame span. If duration or wpm misses, edit the lines and
 run `voice` again (unchanged lines are cached). Then show the user the script and the numbers in one short
-message and continue unless they object.
+message and continue unless they object; record it with `pipeline.py approve <slug> script` (after their OK, or
+once they have seen it and not objected).
 
 ## 5. Scene → `src/videos/<slug>/Scene.tsx` (+ `props.tsx` for new props)
 
@@ -66,7 +71,8 @@ the costume options (library.md → Puppets), never `cap`.
 Pass `post` to `Video` (library.md → Post chain: depth of field, bloom, colour grade).
 
 Write the shot list against the printed frames: cut on line and caption boundaries, average ≤ 2.2 s, none
-over 4 s, whip (`true`) on location changes. Use `Room` + kit props for new locations, and a different mood per
+over 4 s, whip (`true`) on location changes, `"dissolve"` for a change of time in one place; every cut is its
+own shot in the list. Give two or three shots a foreground framing object (Stage `foreground` + `frameSpot`, library.md). Use `Room` + kit props for new locations, and a different mood per
 location. Put the seed on screen by its line. Add SFX for every mechanical action and MUSIC cues.
 Puppets are lit by the set (library.md → Puppet lighting): leave `lighting` on. Ambient room colour does not
 change them; where a shot has a strong source (fire, lamp, headlights) pass a Stage `light` with that point or distant light. Outdoors, reuse `LakeSet` or its pieces (`Campfire`,
@@ -76,7 +82,16 @@ change them; where a shot has a strong source (fire, lamp, headlights) pass a St
 .venv/bin/python scripts/pipeline.py check <slug>
 ```
 
-Fix until it passes (tsc + contiguous shots + no shot over 4 s).
+Fix until it passes (tsc + contiguous shots + no shot over 4 s). Then check the sound cues against the picture:
+
+```bash
+.venv/bin/python scripts/pipeline.py sync <slug>
+```
+
+Fix every error. Fix the warnings that are not on purpose: a looped effect ending a few frames off a cut, music
+gaps, and the loop seam (the bed under the last frame should be the one under frame 0).
+For the video's own score instead of the library loops, write `videos/<slug>/music.py` (library.md → The video's own
+score), run `pipeline.py music <slug>` and pass `score` to `Video`.
 
 ## 6. Review on stills (no full render)
 
@@ -110,6 +125,9 @@ If motion < 6 or still frames > 15 %, give the listed stillest shots a bigger ca
 Every shot keeps the camera moving (orbit, crane, truck, push); sky shots need the biggest moves.
 
 ## 7. Render once, then report
+
+When stills, collide and motion all pass (a collide or motion fix re-renders the stills, so approve after the last
+one), record it: `pipeline.py approve <slug> stills`. `go` renders only with this approval in place.
 
 ```bash
 .venv/bin/python scripts/pipeline.py render <slug> --2k

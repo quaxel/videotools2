@@ -6,7 +6,9 @@ import { CaptionChunk } from "../ui/Captions";
 // (regenerate with scripts/sfx_generate.py).
 
 export type Sfx = { at: number; src: string; volume: number; until?: number }; // `until` loops the file up to that frame
-export type MusicCue = { src: string; from: number; to: number; volume: number };
+// `loop` (default true) repeats a library loop over the cue; `fade` (default true) eases it in and out. A video's own
+// score (`score` on Video) plays once, cut to the picture, with neither.
+export type MusicCue = { src: string; from: number; to: number; volume: number; loop?: boolean; fade?: boolean };
 
 export const SFX_FILES = [
   "reel-spin", "reel-stop", "near-miss", "chime", "button", "bill-whirr", "credit-blip", "whoosh",
@@ -47,12 +49,13 @@ export const SoundTrack: React.FC<{ sfx: Sfx[]; music: MusicCue[]; captions: Cap
       ))}
       {music.map((m, i) => {
         const dur = m.to - m.from;
+        const fade = m.fade ?? true;
         return (
           <Sequence key={`m${i}`} from={m.from} durationInFrames={dur} layout="none">
             <Audio
               src={staticFile(m.src)}
-              loop
-              volume={(f) => m.volume * duck(m.from + f) * interpolate(f, [0, 15, dur - 10, dur], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
+              loop={m.loop ?? true}
+              volume={(f) => m.volume * duck(m.from + f) * (fade ? interpolate(f, [0, 15, dur - 10, dur], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1)}
             />
           </Sequence>
         );

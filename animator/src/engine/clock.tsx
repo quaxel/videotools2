@@ -1,11 +1,16 @@
 import React, { createContext, useContext } from "react";
 import { AbsoluteFill, Sequence, useCurrentFrame } from "remotion";
 
-// Every shot sees its own frame from 0. A shot with a dissolve starts FADE frames early and sees
-// -FADE..0 while it whips in: the previous shot slides out to the left, this one slides in from the right,
-// both smeared sideways at the fastest point (a whip pan, which reads cleaner than two sets cross-fading).
+// Every shot sees its own frame from 0. A shot with a transition starts early and sees negative frames while it
+// comes in:
+//   true        a whip pan, FADE frames: the previous shot slides out to the left, this one slides in from the
+//               right, both smeared sideways at the fastest point (location changes: reads cleaner than two sets
+//               cross-fading)
+//   "dissolve"  DISSOLVE frames: this shot fades in over the previous one, which plays on to the cut (a change of
+//               time in one place: night to dawn, before and after; ported from animated-short's XFADE)
 
 export const FADE = 8;
+export const DISSOLVE = 12;
 
 const ShotClock = createContext({ from: 0, lead: 0, dur: 1 });
 export const useShotFrame = () => useCurrentFrame() - useContext(ShotClock).lead;
@@ -16,8 +21,10 @@ export const useShotStart = () => useContext(ShotClock).from;
 // Frame on the whole video's timeline (the frames in timing.json).
 export const useFinalFrame = () => useCurrentFrame() - useContext(ShotClock).lead + useContext(ShotClock).from;
 
-// [from, to, component, dissolve in] in final frames.
-export type Shot = [number, number, React.FC, boolean];
+// [from, to, component, transition in] in final frames.
+export type Transition = boolean | "dissolve";
+export type Shot = [number, number, React.FC, Transition];
+export const leadOf = (t: Transition) => (t === "dissolve" ? DISSOLVE : t ? FADE : 0);
 
 // 0..1 eased progress of a whip, and how much sideways smear goes with it at progress p.
 const whip = (p: number) => {
@@ -50,14 +57,22 @@ const Whip: React.FC<{ side: "in" | "out"; start: number; id: string; children: 
   );
 };
 
+// Fades its shot in over the DISSOLVE lead (eased), drawn over the previous shot. Same tree before, during and after.
+const Dissolve: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const p = Math.min(1, (useCurrentFrame() + 1) / (DISSOLVE + 1));
+  const a = p * p * (3 - 2 * p);
+  return <AbsoluteFill style={p < 1 ? { opacity: a } : undefined}>{children}</AbsoluteFill>;
+};
+
 export const ShotList: React.FC<{ shots: Shot[] }> = ({ shots }) => (
   <>
     {shots.map(([from, to, ShotComponent, fade], i) => {
-      const lead = fade ? FADE : 0;
-      const exits = shots[i + 1]?.[3] ?? false;
+      const lead = leadOf(fade);
+      const exits = shots[i + 1]?.[3] === true;
       let shot = <ShotComponent />;
       if (exits) shot = <Whip side="out" start={to - from + lead - FADE} id={`whip-out-${from}`}>{shot}</Whip>;
-      if (fade) shot = <Whip side="in" start={0} id={`whip-in-${from}`}>{shot}</Whip>;
+      if (fade === true) shot = <Whip side="in" start={0} id={`whip-in-${from}`}>{shot}</Whip>;
+      if (fade === "dissolve") shot = <Dissolve>{shot}</Dissolve>;
       return (
         <Sequence key={from} from={from - lead} durationInFrames={to - from + lead} layout="none">
           <ShotClock.Provider value={{ from, lead, dur: to - from }}>

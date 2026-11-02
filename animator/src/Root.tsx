@@ -9,6 +9,7 @@ import { CostumePreview } from "./scenes/CostumePreview";
 import { MarathonPreview } from "./scenes/MarathonPreview";
 import { SlotHook } from "./scenes/SlotHook";
 import { SpacePreview } from "./scenes/SpacePreview";
+import { TransitionPreview } from "./scenes/TransitionPreview";
 import { VIDEOS } from "./videos";
 
 // Every video in src/videos/ becomes a composition named after its slug.
@@ -30,6 +31,7 @@ export const Root: React.FC = () => (
     <Composition id="AlleyPreview" component={AlleyPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SpacePreview" component={SpacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="BalloonPreview" component={BalloonPreview} durationInFrames={240} fps={30} width={1080} height={1920} />
+    <Composition id="TransitionPreview" component={TransitionPreview} durationInFrames={120} fps={30} width={1080} height={1920} />
     <Composition id="LakePreview" component={LakePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="LakeLitStill" component={LakeLitStill} defaultProps={{ lit: true }} durationInFrames={1} fps={30} width={1080} height={1920} />
   </>

@@ -33,6 +33,13 @@ def analyse(vid, out, meta):
     au = [s for s in pr["streams"] if s["codec_type"] == "audio"]
     R.append(f"SPECS {v['width']}x{v['height']} {v['r_frame_rate']} fps, {v.get('nb_frames')} frames, {float(pr['format']['duration']):.3f} s; audio: "
              + (", ".join(f"{s['codec_name']} {s['sample_rate']} Hz {s['channels']}ch" for s in au) if au else "NONE"))
+    # The mux cuts to the shorter stream (-shortest): a soundtrack that ends early silently shortens the picture.
+    av_gap = None
+    if au:
+        dur = lambda kind: float(json.loads(run("ffprobe", "-v", "error", "-select_streams", kind, "-show_entries", "stream=duration", "-of", "json", vid).stdout)["streams"][0].get("duration", 0))
+        av_gap = round(dur("a:0") - dur("v:0"), 3)
+        fps = eval(v["r_frame_rate"])
+        R.append(f"AV SYNC audio {'+' if av_gap >= 0 else ''}{av_gap:.3f} s against the picture" + ("" if abs(av_gap) <= 1.5 / fps else "  <-- more than a frame apart"))
     if au:
         e = run("ffmpeg", "-i", vid, "-map", "0:a:0", "-af", "ebur128=peak=true", "-f", "null", "-").stderr
         tail = e[e.rfind("Summary:"):]
@@ -88,7 +95,7 @@ def analyse(vid, out, meta):
         S.save(os.path.join(out, f"sheet_{k:04d}.jpg"), quality=85)
 
     result = {"size": [int(v["width"]), int(v["height"])], "frames": n, "black": black, "white": white,
-              "frozen": frozen, "pops": pops}
+              "frozen": frozen, "pops": pops, "av_gap": av_gap}
     json.dump(result, open(os.path.join(out, "qa.json"), "w"))
     open(os.path.join(out, "qa.md"), "w", encoding="utf-8").write("\n".join(R) + "\n")
     print("\n".join(R))

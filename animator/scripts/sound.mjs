@@ -14,6 +14,8 @@ if (!slug || !out) {
   process.exit(2);
 }
 const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
-const inputProps = { soundOnly: true };
+// SCORE=1 / SCORE=0 plays the video's own score (public/videos/<slug>/music.wav) or the scene's library cues, for an A/B.
+// STEM=voice|music|sfx renders that part alone (pipeline.py mix).
+const inputProps = { soundOnly: true, ...(process.env.SCORE ? { score: process.env.SCORE === "1" } : {}), ...(process.env.STEM ? { stem: process.env.STEM } : {}) };
 const composition = await selectComposition({ serveUrl, id: slug, inputProps });
 await renderMedia({ serveUrl, composition, codec: "wav", outputLocation: out, inputProps });

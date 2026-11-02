@@ -44,6 +44,20 @@ const shake = (cam: CameraShot, hit: number, f: number): CameraShot => {
   };
 };
 
+// Foreground framing (animated-short's FOREGROUND): the world point at screen position (x, y) (-1..1 from the
+// centre, +y up) and `dist` metres in front of `cam`, for a Stage `foreground` object. Place it from the shot's
+// first camera, not the current frame's, so the object stays put in the world and the camera moves past it
+// (parallax); keep it at 0.3-0.5 x the focus distance, over 10-25 % of one frame edge, never over a face.
+export const frameSpot = (cam: CameraShot, aspect: number, x: number, y: number, dist: number): Vec3 => {
+  const p = new THREE.Vector3(...cam.position);
+  const fwd = new THREE.Vector3(...cam.target).sub(p).normalize();
+  const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+  const up = new THREE.Vector3().crossVectors(right, fwd);
+  const h = dist * Math.tan((cam.fov * Math.PI) / 360);
+  const q = p.addScaledVector(fwd, dist).addScaledVector(right, x * h * aspect).addScaledVector(up, y * h);
+  return [q.x, q.y, q.z];
+};
+
 // Fine paper grain over every frame (an SVG noise tile), so flat colour reads as painted rather than digital.
 const GRAIN = `url("data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0.55 0'/></filter><rect width='256' height='256' filter='url(#n)'/></svg>",
@@ -82,6 +96,9 @@ const CSS_GRADE = "saturate(1.08) contrast(1.05)";
 // same camera, so the background softens and faces stay sharp. With the post chain on (Video `post`) it is one
 // canvas and `blur` becomes a real depth of field focused on the nearest puppet.
 // `energy` (default 1) adds automatic camera push/drift and idle acting; 0 keeps the shot exactly as authored.
+// `foreground`: framing objects between the lens and the subject (a branch, a railing, a crate corner; place them
+// with `frameSpot`). They are drawn in front of the cast and left out of the collide check; with the post chain the
+// depth of field blurs them, without it they get their own canvas over the cast, blurred 3 x `blur` (6 px at least).
 // The set receives the livened camera through `set(camera)` when given a function; a plain node keeps its own
 // <CameraRig>, which an extra rig placed after it overrides.
 export const Stage: React.FC<{
@@ -95,7 +112,8 @@ export const Stage: React.FC<{
   energy?: number;
   light?: PuppetLight; // the set's lights as puppets see them (fire, lamps, sun); default: derived from the mood
   keepHeads?: boolean; // default true: pan (or widen) so no puppet's head is cut by the frame edge (engine/framing.ts)
-}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1, light, keepHeads = true }) => {
+  foreground?: React.ReactNode;
+}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1, light, keepHeads = true, foreground }) => {
   const { width, height } = useVideoConfig();
   const f = useShotFrame();
   const moved = shake(livenCamera(authored, f, useShotDuration(), energy), useImpact(), f);
@@ -126,6 +144,7 @@ export const Stage: React.FC<{
   });
   // Rendered after the set, this rig wins over the set's own and applies the livened camera.
   const rig = <CameraRig {...camera} />;
+  const front = foreground ? <group userData={{ ghost: true }}>{foreground}</group> : null;
   const post = usePost();
   if (post) {
     const inkDebug = (getInputProps() as { inkDebug?: boolean }).inkDebug === true;
@@ -135,6 +154,7 @@ export const Stage: React.FC<{
           {set}
           {rig}
           {cast}
+          {front}
           <Post parts={post} focus={focusDistance(camera, puppets)} cInf={(blur ?? 0) * LENS_PER_BLUR} inkDebug={inkDebug} />
         </ThreeCanvas>
         <Grade truth={truth} flash={flash} vignette={!post.grade} />
@@ -157,12 +177,23 @@ export const Stage: React.FC<{
               {cast}
             </ThreeCanvas>
           </AbsoluteFill>
+          {front && (
+            // nearer than the subject, so softer than the background: on its own canvas over the cast, lit flat
+            <AbsoluteFill style={{ filter: `blur(${Math.max(6, blur * 3)}px)` }}>
+              <ThreeCanvas width={width} height={height} flat dpr={SUPERSAMPLE}>
+                <CameraRig {...camera} />
+                <hemisphereLight args={["#ffffff", "#5a5a66", 1.6]} />
+                {front}
+              </ThreeCanvas>
+            </AbsoluteFill>
+          )}
         </>
       ) : (
         <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE}>
           {set}
           {rig}
           {cast}
+          {front}
         </ThreeCanvas>
       )}
       <Grade truth={truth} flash={flash} />

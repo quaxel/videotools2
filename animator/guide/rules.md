@@ -37,7 +37,7 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 - **Characters:** at least 4; at least one costume change or new arrival carries the twist.
 - **Shots:** cut to the voice. Average ≤ 2.2 s, none over 4 s. Every shot moves the camera (push-in, pull-back, drift, orbit).
 - **Angles:** each video has at least one over-the-shoulder (the head in front ≤ 25 % of the frame, at the edge), one top-down, one low angle and one macro on an object.
-- **Transitions:** hard cut inside a location; 8-frame whip pan (`true` in the shot list) when the location changes.
+- **Transitions:** hard cut inside a location; 8-frame whip pan (`true` in the shot list) when the location changes; a 12-frame `"dissolve"` for a change of time in one place. A cut is always a shot boundary in the shot list (never a switch inside one shot component), so check, QA and sync see it.
 - **Explanation shots:** one idea per shot, readable in one second, at most 6 words of readable text per frame.
 - **Characters touch the world:** they sit, hold, push, open, walk in profile. Not every shot is front-on.
 - **Key small objects must read on a phone:** a prop the story hangs on (a coin, a piece of meat, a pill) may be

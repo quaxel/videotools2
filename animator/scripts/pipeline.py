@@ -5,6 +5,11 @@
 #   .venv/bin/python scripts/pipeline.py voice <slug>           Qwen TTS -> fitted track -> timing.json + pace check
 #   .venv/bin/python scripts/pipeline.py register               regenerate src/videos/index.ts
 #   .venv/bin/python scripts/pipeline.py check <slug>           tsc + rule checks on the scene's shot list
+#   .venv/bin/python scripts/pipeline.py sync <slug>            sound cues vs the picture (scripts/cues.mjs dump) -> build/sync.txt
+#   .venv/bin/python scripts/pipeline.py music <slug>           the video's own score: videos/<slug>/music.py (scripts/music)
+#                                                              -> public/videos/<slug>/music.wav + build/score.md
+#   .venv/bin/python scripts/pipeline.py mix <slug>             voice / music / effects stems -> voice over the bed per section
+#                                                              and per line (scripts/mixreport.py) -> build/mix/mix.md
 #   .venv/bin/python scripts/pipeline.py stills <slug> [frames] one still per second (or given frames) + contact sheet
 #   .venv/bin/python scripts/pipeline.py collide <slug>         every 5th frame: puppets walking/standing inside set objects
 #   .venv/bin/python scripts/pipeline.py motion <slug>          fast 30 % draft render + motion per shot (stillest first)
@@ -16,9 +21,18 @@
 #   .venv/bin/python scripts/pipeline.py qa <slug> [mp4]        frame-by-frame QA (scripts/qa.py) -> videos/<slug>/build/qa/
 #   .venv/bin/python scripts/pipeline.py report <slug>          measure the MP4, check facts, write videos/<slug>/report.md
 #   .venv/bin/python scripts/pipeline.py status <slug>          every stage done / stale / missing, run times, next command
+#   .venv/bin/python scripts/pipeline.py look <slug> <ref-dir> [frames]
+#                                                              our stills (post chain on) measured against reference frames
+#                                                              (scripts/look.py) -> build/look/look.md + sbs.jpg
+#   .venv/bin/python scripts/pipeline.py approve <slug> script|stills [--undo]
+#                                                              record the OK on lines.json / the final contact sheet
+#                                                              (build/approvals.json); lapses when that file changes
 #   .venv/bin/python scripts/pipeline.py go <slug> [--to stage] [--plan] [--2k]
-#                                                              run the missing / stale stages in order (default up to motion)
-# voice, check, stills, collide, motion, render and report append their run time to videos/<slug>/build/timings.jsonl.
+#                                                              run the missing / stale stages in order (default up to motion),
+#                                                              stopping at an approval the files have outgrown
+#   .venv/bin/python scripts/pipeline.py web [--port 8766]      browser panel: every video's stages, run / stop, live log, outputs
+# voice, check, sync, music, stills, collide, motion, render and report append their run time to
+# videos/<slug>/build/timings.jsonl.
 #
 # Targets come from guide/rules.md (mirrored in TARGETS below); the report marks every miss.
 import json
@@ -43,6 +57,7 @@ TARGETS = {
     "long_pauses": (0, 1),  # gaps > 0.6 s in the narration
     "speech_cover": (0.80, 1.0),
     "bed_vs_speech_db": (None, -5.0),
+    "speech_margin_p10": (3.0, None),  # LU, mix.py: the quietest line's 10th-percentile voice-over-bed margin
     "avg_shot": (0, 2.2),  # seconds
     "longest_shot": (0, 4.0),
     "locations": (8, None),
@@ -161,14 +176,16 @@ def cmd_register():
 
 # ---------- check ----------
 
-SHOT_RE = re.compile(r"\[\s*(\d+)\s*,\s*(\d+|TIMING\.totalFrames)\s*,\s*(\w+)\s*,\s*(true|false)\s*\]")
+SHOT_RE = re.compile(r"\[\s*(\d+)\s*,\s*(\d+|TIMING\.totalFrames)\s*,\s*(\w+)\s*,\s*(true|false|\"dissolve\")\s*\]")
 
 
 def shot_list(slug):
     src = open(sdir(slug, "Scene.tsx")).read()
     body = src[src.index("const SHOTS") :]
     total = json.load(open(sdir(slug, "timing.json")))["totalFrames"]
-    return [(int(a), total if b.startswith("TIMING") else int(b), name, fade == "true") for a, b, name, fade in SHOT_RE.findall(body)]
+    # the transition in: True (whip pan), "dissolve" or False (a cut)
+    trans = lambda t: True if t == "true" else "dissolve" if t == '"dissolve"' else False
+    return [(int(a), total if b.startswith("TIMING") else int(b), name, trans(fade)) for a, b, name, fade in SHOT_RE.findall(body)]
 
 
 def shot_stats(slug):
@@ -240,6 +257,132 @@ def cmd_collide(slug):
     subprocess.run(["node", "scripts/stills.mjs", slug, vdir(slug, "build", "collide")], cwd=ROOT, check=True, env={**os.environ, "COLLIDE": "1"})
 
 
+# ---------- sync: the sound cues against the picture ----------
+
+def cues_path(slug):
+    return vdir(slug, "build", "cues.json")
+
+
+def cmd_cues(slug, force=False):
+    """The scene's resolved shot / effect / music tables (scripts/cues.mjs), dumped again when the scene or the
+    engine is newer than the dump."""
+    out = cues_path(slug)
+    if force or not os.path.exists(out) or newest(sdir(slug), os.path.join(ROOT, "src", "engine")) > os.path.getmtime(out):
+        cmd_register()
+        run("node", "scripts/cues.mjs", slug, out)
+    return json.load(open(out))
+
+
+LOOP_SNAP = 6  # frames: a looped effect that ends this close to a cut, but not on it, was meant to end on it
+WHOOSH_SLACK = 3  # frames around a whip's FADE window that still count as "on" it
+
+
+def sync_issues(slug):
+    """Cue-level faults between the soundtrack and the picture: ("error" | "warn", message) pairs.
+    Errors: cues outside the video, a missing file, narration past the end, no music anywhere. Warnings: a whip with
+    no whoosh, a looped effect that just misses a cut, gaps in the music, a loop seam whose sound changes."""
+    cues = cmd_cues(slug)
+    timing = json.load(open(sdir(slug, "timing.json")))
+    total = timing["totalFrames"]
+    fade = int(re.search(r"FADE = (\d+)", open(os.path.join(ROOT, "src", "engine", "clock.tsx")).read()).group(1))
+    names = {a: n for a, _, n, _ in shot_list(slug)}
+    cuts = [a for a, _, _ in cues["shots"][1:]]
+    out = []
+    err = lambda m: out.append(("error", m))
+    warn = lambda m: out.append(("warn", m))
+    for e in cues["sfx"]:
+        at, until, src = round(e["at"]), e.get("until"), e["src"]
+        if not os.path.exists(os.path.join(ROOT, "public", src)):
+            err(f"{src} at {at}: no such file in public/")
+        if at < 0 or at >= total:
+            err(f"{src} at {at}: outside the video (0-{total})")
+        if until is not None:
+            until = round(until)
+            if until <= at:
+                err(f"{src} at {at}: loops until {until}, which is not after its start")
+            elif until > total:
+                err(f"{src} at {at}: loops until {until}, past the end ({total})")
+            near = [c for c in cuts if 0 < abs(until - c) <= LOOP_SNAP]
+            if near and until not in cuts and until != total:
+                c = near[0]
+                warn(f"{src} at {at}: loop ends at {until}, {abs(until - c)} frame(s) {'before' if until < c else 'after'} the cut to {names.get(c, c)} at {c}")
+    # A whoosh on a whip is a habit, not a rule (rules.md): one line for all the silent whips.
+    whooshes = [round(e["at"]) for e in cues["sfx"] if "whoosh" in e["src"]]
+    silent = [a for a, _, whip in cues["shots"][1:] if whip is True and not any(a - fade - WHOOSH_SLACK <= w <= a + WHOOSH_SLACK for w in whooshes)]
+    if silent:
+        warn(f"{len(silent)} whip(s) without a whoosh in their {fade}-frame pan: " + ", ".join(f"{names.get(a, a)} {a}" for a in silent))
+    music = sorted((round(m["from"]), round(m["to"]), m["src"]) for m in cues["music"])
+    for a, b, src in music:
+        if not os.path.exists(os.path.join(ROOT, "public", src)):
+            err(f"music {src} ({a}-{b}): no such file in public/")
+        if a < 0 or b > total:
+            err(f"music {src} ({a}-{b}): outside the video (0-{total})")
+    if not music:
+        err("no music cue")
+    else:
+        reach = 0
+        for a, b, src in music:
+            if a - reach > 2:
+                warn(f"no music in {reach}-{a} ({(a - reach) / FPS:.1f}s)")
+            reach = max(reach, b)
+        if total - reach > 2:
+            warn(f"no music in {reach}-{total} (the end)")
+    spoken = [l["to"] for l in timing.get("lines", [])] + [c["to"] for c in timing.get("captions", [])]
+    if spoken and max(spoken) > total:
+        err(f"the narration ends at {max(spoken)}, after the video ({total})")
+    # The loop seam: the last frame plays into frame 0, so the same bed should be under both.
+    bed = lambda f: sorted({m["src"] for m in cues["music"] if m["from"] <= f < m["to"]})
+    held = lambda f: sorted({e["src"] for e in cues["sfx"] if e.get("until") is not None and e["at"] <= f < e["until"]})
+    if bed(total - 1) != bed(0):
+        warn(f"loop seam: music {', '.join(bed(total - 1)) or 'none'} at the end, {', '.join(bed(0)) or 'none'} at frame 0")
+    if held(total - 1) != held(0):
+        warn(f"loop seam: looped effects {', '.join(held(total - 1)) or 'none'} at the end, {', '.join(held(0)) or 'none'} at frame 0")
+    return out
+
+
+def cmd_sync(slug):
+    """Check the sound cues against the picture (sync_issues); videos/<slug>/build/sync.txt lists every finding.
+    Fails on errors only: warnings are for a look, some are on purpose."""
+    issues = sync_issues(slug)
+    report = vdir(slug, "build", "sync.txt")
+    lines = [f"{level.upper():5s} {msg}" for level, msg in issues]
+    open(report, "w").write("\n".join(lines) + ("\n" if lines else ""))
+    print("\n".join(lines) or "sync: no issues")
+    errors = sum(1 for level, _ in issues if level == "error")
+    print(f"sync: {errors} error(s), {len(issues) - errors} warning(s) -> {os.path.relpath(report, ROOT)}")
+    if errors:
+        sys.exit(1)
+
+
+# ---------- music: the video's own score ----------
+
+def cmd_music(slug):
+    """Run videos/<slug>/music.py (built on scripts/music/score.py) after a fresh cue dump: it writes
+    public/videos/<slug>/music.wav, cut to the picture and looping into its own start, and build/score.md.
+    The scene plays it with `score` on Video; without a music.py the video keeps the library loops."""
+    script = vdir(slug, "music.py")
+    if not os.path.exists(script):
+        print(f"no videos/{slug}/music.py: {slug} uses the library loops")
+        return
+    cmd_cues(slug)
+    run(PY, script, slug)
+
+
+# ---------- mix: the voice over the bed ----------
+
+def cmd_mix(slug):
+    """Render the soundtrack's three stems (voice, music, effects; scripts/sound.mjs with STEM) into build/mix/ and
+    measure how far the voice sits above the rest (scripts/mixreport.py -> build/mix/mix.md, mix.json)."""
+    cmd_cues(slug)
+    out = vdir(slug, "build", "mix")
+    os.makedirs(out, exist_ok=True)
+    for stem in ("voice", "music", "sfx"):
+        print(f"$ STEM={stem} node scripts/sound.mjs {slug}", flush=True)
+        subprocess.run(["node", "scripts/sound.mjs", slug, os.path.join(out, f"{stem}.wav")], cwd=ROOT, check=True, env={**os.environ, "STEM": stem})
+    run(PY, "scripts/mixreport.py", slug, out)
+    return json.load(open(os.path.join(out, "mix.json")))
+
+
 def frame_diffs(path):
     import numpy as np
 
@@ -287,17 +430,21 @@ def glitch_frames(path, first=0):
     # sharpest edge outside the captions: a drawn scene has some (a dark night scene still reaches ~30), a blank canvas
     # stays under ~10
     sharp = np.maximum(np.abs(np.diff(g, axis=2))[:, rows].max((1, 2)), np.abs(np.diff(g, axis=1))[:, rows[1:]].max((1, 2)))
-    # the blank canvas still has the vignette over it (corners ~0.6 of the centre); a white flash covers that too
+    # Without the post chain the blank canvas keeps Stage's CSS vignette (corners ~0.6 of the centre), which a white
+    # flash covers; with it the vignette is drawn in WebGL and goes too, so a bare flat run must outlast a flash (3-4).
     centre = g[:, 40:56, 20:34].mean((1, 2))
     corners = (g[:, :6, :6].mean((1, 2)) + g[:, :6, -6:].mean((1, 2)) + g[:, -6:, :6].mean((1, 2)) + g[:, -6:, -6:].mean((1, 2))) / 4
-    flat = list((sharp < 12) & (corners < 0.85 * centre))
+    vignette = corners < 0.85 * centre
+    # a flash (an explosion, a cut to white) can hold for half a second, but it is near white; a lost canvas shows the
+    # shot's background colour
+    flat = list((sharp < 12) & (vignette | (centre < 235)))
     # a lost canvas stays lost for several frames (7-19 seen); a dark graphic can dip for one or two
     found, i = [], 0
     while i < len(flat):
         j = i
         while j < len(flat) and flat[j]:
             j += 1
-        if j - i >= 3:
+        if j - i >= 6 or (j - i >= 3 and vignette[i:j].any()):
             found += range(first + i, first + j)
         i = j + 1
     return found
@@ -344,11 +491,12 @@ def impact_frames(slug):
 
 
 def qa_meta(slug):
-    """Shots and planned jumps for qa.py: whip pans (FADE frames before a whipped shot, engine/clock.tsx) and the
-    10-frame camera shake after every impact sound."""
-    fade = int(re.search(r"FADE = (\d+)", open(os.path.join(ROOT, "src", "engine", "clock.tsx")).read()).group(1))
+    """Shots and planned jumps for qa.py: whip pans and dissolves (FADE / DISSOLVE frames before the shot,
+    engine/clock.tsx) and the 10-frame camera shake after every impact sound."""
+    clock = open(os.path.join(ROOT, "src", "engine", "clock.tsx")).read()
+    fade, dissolve = (int(re.search(rf"\b{k} = (\d+)", clock).group(1)) for k in ("FADE", "DISSOLVE"))
     shots = shot_list(slug)
-    planned = [[a - fade, a + 1] for a, _, _, whip in shots if whip]
+    planned = [[a - (dissolve if t == "dissolve" else fade), a + 1] for a, _, _, t in shots if t]
     planned += [[f, f + 10] for f in impact_frames(slug)]
     return {"shots": [{"id": n, "a": a, "b": b} for a, b, n, _ in shots], "planned": planned}
 
@@ -507,6 +655,7 @@ def cmd_report(slug):
     am = audio_metrics(mp4)
     motion, still, diffs, fams, top = video_metrics(mp4)
     qa = cmd_qa(slug, mp4)
+    mixed = cmd_mix(slug)
     seed_line = plan.get("seed", {}).get("first_line", 0)
     seed_at = timing["lines"][seed_line]["from"] / FPS if seed_line < len(timing["lines"]) else 999
     rows, misses = [], 0
@@ -518,6 +667,7 @@ def cmd_report(slug):
         ("speech_cover", am["speech_cover"], "{:.0%}"),
         ("bed_vs_speech_db", am["bed_vs_speech_db"], "{:.1f} dB"),
         ("lufs", am["lufs"], "{:.1f} LUFS"),
+        ("speech_margin_p10", mixed["p10_min"] if mixed["p10_min"] is not None else 99.0, "{:.1f} LU"),
         ("avg_shot", avg, "{:.2f}s"),
         ("longest_shot", longest, "{:.2f}s"),
         ("locations", len(plan.get("locations", [])), "{}"),
@@ -550,7 +700,8 @@ def cmd_report(slug):
         "",
         f"Picture {qa['size'][0]}x{qa['size'][1]}. Sudden jumps inside a shot to look at (frame-by-frame QA, "
         f"`build/qa/sheet_*.jpg`): {spans(qa['pops']) or 'none'}."
-        + (f" Unplanned white frames: {spans(qa['white'])}." if qa["white"] else ""),
+        + (f" Unplanned white frames: {spans(qa['white'])}." if qa["white"] else "")
+        + (f" **Audio and picture differ in length by {qa['av_gap']:+.3f} s.**" if abs(qa.get("av_gap") or 0) > 1.5 / FPS else ""),
         "",
         f"## Fact check ({n_claims} sourced claims in research.md)",
         "",
@@ -581,7 +732,7 @@ def clean_remotion_temp(since):
 
 # The stages `go` runs, in order. Each has the file it leaves behind (its output) and what that output is built from;
 # an output older than any of its inputs is stale.
-STAGES = ("voice", "check", "stills", "collide", "motion", "render", "report")
+STAGES = ("voice", "check", "sync", "music", "stills", "collide", "motion", "render", "report")
 SHARED = ("engine", "puppet", "three")  # src/ folders every video uses
 
 
@@ -597,16 +748,25 @@ def newest(*paths):
     return t
 
 
+def plays_score(slug):
+    """The scene plays its own score (`score` on Video), by the last cue dump."""
+    p = cues_path(slug)
+    return os.path.exists(p) and any(m["src"].endswith(f"videos/{slug}/music.wav") for m in json.load(open(p))["music"])
+
+
 def stage_files(slug):
     voice = os.path.join(ROOT, "public", "videos", slug, "voice.wav")
+    score = os.path.join(ROOT, "public", "videos", slug, "music.wav")
     mp4 = os.path.join(ROOT, "out", f"{slug}.mp4")
     return {
         "voice": (sdir(slug, "timing.json"), [vdir(slug, "lines.json")]),
         "check": (vdir(slug, "build", "check.ok"), [sdir(slug)]),
+        "sync": (vdir(slug, "build", "sync.txt"), [sdir(slug), os.path.join(ROOT, "src", "engine", "sound.tsx")]),
+        "music": (score, [vdir(slug, "music.py"), sdir(slug, "timing.json"), cues_path(slug), os.path.join(ROOT, "scripts", "music")]),
         "stills": (vdir(slug, "build", "stills", "contact.jpg"), [sdir(slug)]),
         "collide": (vdir(slug, "build", "collide", "collide.txt"), [sdir(slug)]),
         "motion": (os.path.join(ROOT, "out", "drafts", f"{slug}.mp4"), [sdir(slug), voice]),
-        "render": (mp4, [sdir(slug), voice]),
+        "render": (mp4, [sdir(slug), voice] + ([score] if plays_score(slug) else [])),
         "report": (vdir(slug, "report.md"), [mp4, vdir(slug, "plan.json"), vdir(slug, "research.md")]),
     }
 
@@ -620,8 +780,9 @@ def video_size(path):
     return r.stdout.strip()
 
 
-def stage_states(slug, hd=False):
-    """[(stage, 'done' | 'stale' | 'missing', note)] in pipeline order. With `hd`, a render that is not 2K is stale."""
+def stage_states(slug, hd=False, probe=True):
+    """[(stage, 'done' | 'stale' | 'missing', note)] in pipeline order. With `hd`, a render that is not 2K is stale.
+    `probe=False` skips reading the render's size (the panel's list view)."""
     rows = []
     for stage, (out, inputs) in stage_files(slug).items():
         if not os.path.exists(out):
@@ -629,22 +790,71 @@ def stage_states(slug, hd=False):
         else:
             state = "stale" if newest(*inputs) > os.path.getmtime(out) else "done"
         note = ""
-        if stage == "render" and os.path.exists(out):
+        if stage == "render" and os.path.exists(out) and probe:
             size = video_size(out)
             note = size + ("" if size == HD_SIZE else ", not 2K (render --2k for delivery)")
             if hd and size != HD_SIZE:
                 state = "stale"
-        if stage == "voice" and "Replace me." in open(vdir(slug, "lines.json")).read():
+        if stage == "voice" and (not os.path.exists(vdir(slug, "lines.json")) or "Replace me." in open(vdir(slug, "lines.json")).read()):
             note = "write lines.json first"
         if stage == "collide" and os.path.exists(out) and open(out).read().strip():
             note = f"{len(open(out).read().strip().splitlines())} collision(s) to fix"
         if stage == "check" and not os.path.exists(sdir(slug, "Scene.tsx")):
             note = "write src/videos/<slug>/Scene.tsx first"
+        if stage == "sync" and os.path.exists(out) and open(out).read().strip():
+            found = open(out).read().splitlines()
+            errors = sum(1 for l in found if l.startswith("ERROR"))
+            note = f"{errors} error(s), {len(found) - errors} warning(s) in build/sync.txt"
+            if errors:
+                state = "stale"
+        if stage == "music" and not os.path.exists(vdir(slug, "music.py")):
+            state, note = "done", "library loops (no videos/<slug>/music.py)"
+        gate = GATES.get(stage)
+        if gate and state != "done" and not approved(slug, gate):
+            note = "; ".join(filter(None, [note, f"waits for `approve {slug} {gate}`"]))
         if stage in ("motion", "render") and state == "done":
             if newest(*(os.path.join(ROOT, "src", d) for d in SHARED)) > os.path.getmtime(out):
                 note = "; ".join(filter(None, [note, "engine, puppets or sets changed since (affects every video; re-render only if needed)"]))
         rows.append((stage, state, note))
     return rows
+
+
+# ---------- approvals ----------
+# The user's OK on a stage's input, kept with that file's modification time: editing the file afterwards (new
+# lines, new stills) makes the approval lapse. `go` stops before a gated stage until it is approved again; the
+# stages run on their own whenever called.
+GATED = {"script": lambda slug: vdir(slug, "lines.json"), "stills": lambda slug: stage_files(slug)["stills"][0]}
+GATES = {"voice": "script", "render": "stills"}  # stage -> the approval it waits for in `go`
+
+
+def approvals_path(slug):
+    return vdir(slug, "build", "approvals.json")
+
+
+def approvals(slug):
+    p = approvals_path(slug)
+    return json.load(open(p)) if os.path.exists(p) else {}
+
+
+def approved(slug, gate):
+    a, f = approvals(slug).get(gate), GATED[gate](slug)
+    return bool(a) and os.path.exists(f) and abs(a["mtime"] - os.path.getmtime(f)) < 1e-3
+
+
+def cmd_approve(slug, gate, undo=False):
+    if gate not in GATED:
+        sys.exit(f"approve what? {' | '.join(GATED)}")
+    f = GATED[gate](slug)
+    if not undo and not os.path.exists(f):
+        sys.exit(f"nothing to approve: {os.path.relpath(f, ROOT)} does not exist")
+    a = approvals(slug)
+    if undo:
+        a.pop(gate, None)
+    else:
+        a[gate] = {"mtime": os.path.getmtime(f), "at": time.strftime("%Y-%m-%d %H:%M:%S")}
+    os.makedirs(os.path.dirname(approvals_path(slug)), exist_ok=True)
+    json.dump(a, open(approvals_path(slug), "w"), indent=1)
+    print(f"{slug}: {gate} {'approval withdrawn' if undo else 'approved'} ({os.path.relpath(f, ROOT)})")
 
 
 def timings_path(slug):
@@ -694,6 +904,8 @@ def cmd_status(slug):
         print(f"  {stage:8s} {state:8s} {fmt_secs(last) if last else '-':>7s} {fmt_secs(mean) if mean else '-':>7s} {n:5d}  {note}")
     extras = [("youtube.md", vdir(slug, "youtube.md")), ("qa", vdir(slug, "build", "qa", "qa.json"))]
     print("\n  " + ", ".join(f"{name} {'yes' if os.path.exists(p) else 'no'}" for name, p in extras))
+    given = approvals(slug)
+    print("  approvals: " + ", ".join(f"{g} {'ok ' + given[g]['at'] if approved(slug, g) else ('lapsed (file changed)' if g in given else 'no')}" for g in GATED))
     todo = [s for s, state, _ in stage_states(slug) if state != "done"]
     print(f"\nnext: .venv/bin/python scripts/pipeline.py {todo[0]} {slug}" if todo else "\nevery stage is done")
 
@@ -714,7 +926,8 @@ def cmd_go(slug, to="motion", plan=False, hd=False):
     if plan:
         return
     calls = {
-        "voice": lambda: cmd_voice(slug), "check": lambda: cmd_check(slug), "stills": lambda: cmd_stills(slug),
+        "voice": lambda: cmd_voice(slug), "check": lambda: cmd_check(slug), "sync": lambda: cmd_sync(slug),
+        "music": lambda: cmd_music(slug), "stills": lambda: cmd_stills(slug),
         "collide": lambda: cmd_collide(slug), "motion": lambda: cmd_motion(slug),
         "render": lambda: cmd_render(slug, hd), "report": lambda: cmd_report(slug),
     }
@@ -722,8 +935,12 @@ def cmd_go(slug, to="motion", plan=False, hd=False):
         _, state, note = next(r for r in stage_states(slug, hd) if r[0] == stage)
         if state == "done":
             continue
-        if stage == "voice" and note:
-            sys.exit(f"stopped: {note}")
+        if stage == "voice" and (not os.path.exists(vdir(slug, "lines.json")) or "Replace me." in open(vdir(slug, "lines.json")).read()):
+            sys.exit("stopped: write lines.json first")
+        gate = GATES.get(stage)
+        if gate and not approved(slug, gate):
+            look = "read lines.json with the user" if gate == "script" else "look at build/stills/contact.jpg with the user"
+            sys.exit(f"stopped before {stage}: {gate} not approved ({look}, then `pipeline.py approve {slug} {gate}`)")
         print(f"\n===== {stage} =====", flush=True)
         try:
             timed(slug, stage, calls[stage], ["--2k"] if stage == "render" and hd else [])
@@ -734,6 +951,35 @@ def cmd_go(slug, to="motion", plan=False, hd=False):
         if stage == "collide" and open(stage_files(slug)["collide"][0]).read().strip():
             sys.exit("stopped: collide found puppets inside the set (videos/<slug>/build/collide/collide.txt)")
     print("\n" + ("done up to " + to if to != "report" else "done"))
+
+
+# ---------- look: our frames against reference frames ----------
+
+IMAGES = (".jpg", ".jpeg", ".png", ".webp")
+
+
+def cmd_look(slug, refs, frames=None):
+    """Stills of the video with the post chain on (the look being matched), then scripts/look.py: the numbers
+    against every image in `refs` (look.md) and a side-by-side sheet of up to 6 of each (sbs.jpg)."""
+    ref = sorted(os.path.join(refs, f) for f in os.listdir(refs) if f.lower().endswith(IMAGES))
+    if not ref:
+        sys.exit(f"no images in {refs}")
+    out = vdir(slug, "build", "look")
+    cmd_register()
+    cmd_framing(slug, force=False)
+    print("$ POST=1 node scripts/stills.mjs", slug, flush=True)
+    subprocess.run(["node", "scripts/stills.mjs", slug, out, *([frames] if frames else [])], cwd=ROOT, check=True, env={**os.environ, "POST": "1"})
+    ours = sorted(os.path.join(out, f) for f in os.listdir(out) if f[0].isdigit() and f.endswith(".jpg"))
+    run(PY, "scripts/look.py", "measure", os.path.join(out, "look.md"), "--ours", *ours, "--ref", *ref)
+    pick = lambda xs: [xs[round(i * (len(xs) - 1) / 5)] for i in range(6)] if len(xs) > 6 else xs
+    run(PY, "scripts/look.py", "sbs", os.path.join(out, "sbs.jpg"), "--ours", *pick(ours), "--ref", *pick(ref))
+
+
+def cmd_web(port):
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import web
+
+    web.serve(port)
 
 
 def flag(args, name):
@@ -780,12 +1026,22 @@ if __name__ == "__main__":
             "qa": lambda: cmd_qa(args[0], args[1] if len(args) > 1 else None),
             "report": lambda: cmd_report(args[0]),
             "status": lambda: cmd_status(args[0]),
+            "sync": lambda: cmd_sync(args[0]),
+            "cues": lambda: cmd_cues(args[0], force=True),
+            "music": lambda: cmd_music(args[0]),
+            "mix": lambda: cmd_mix(args[0]),
+            "look": lambda: cmd_look(args[0], args[1], args[2] if len(args) > 2 else None),
+            "approve": lambda: cmd_approve(args[0], args[1] if len(args) > 1 else "", flag(args, "--undo")),
+            "web": lambda: cmd_web(int(option(args, "--port", "8766"))),
             "go": lambda: cmd_go(args[0], option(args, "--to", "motion"), flag(args, "--plan"), hd),
         }[cmd]
-        if cmd in STAGES and args:
+        if cmd in STAGES and args and not (cmd == "music" and not os.path.exists(vdir(args[0], "music.py"))):
             timed(args[0], cmd, call, given[1:])
         else:
             call()
+    except KeyboardInterrupt:  # Ctrl-C, or Stop in the panel: the cleanup below still runs, no traceback
+        print("stopped", file=sys.stderr)
+        sys.exit(130)
     finally:
         clean_remotion_temp(started)
         shutil.rmtree(tempfile.tempdir, ignore_errors=True)

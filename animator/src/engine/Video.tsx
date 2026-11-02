@@ -44,9 +44,11 @@ const useFramingTable = (slug: string) => {
 // `lighting` (default on): puppets take the set's light (a rig derived from the mood, or a Stage's own `light`)
 // instead of the flat mood tint. Videos made before it existed pass `lighting={false}` to keep their look.
 // `voiceVolume` (default 1) lifts or lowers the narration when the mix lands outside the loudness target.
+// `score` (default off): play the video's own score (public/videos/<slug>/music.wav, written by `pipeline.py music`)
+// instead of the `music` cues; the `score` input prop overrides it for an A/B of the soundtrack.
 // `post` (default off): the post chain (engine/post: depth of field, bloom, colour grade) on every
 // Stage. Videos made before it existed leave it off to keep their look.
-export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean; voiceVolume?: number }> = ({
+export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean; score?: boolean; voiceVolume?: number }> = ({
   slug,
   timing,
   shots,
@@ -54,11 +56,19 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   music,
   lighting = true,
   post = false,
+  score = false,
   voiceVolume = 1,
 }) => {
   const framing = useFramingTable(slug);
   // `soundOnly` (input prop, scripts/sound.mjs): the soundtrack alone, without mounting a single 3D shot.
-  const soundOnly = (getInputProps() as { soundOnly?: boolean }).soundOnly === true;
+  const { soundOnly: so, cueDump, score: scoreProp, stem } = getInputProps() as { soundOnly?: boolean; cueDump?: boolean; score?: boolean; stem?: "voice" | "music" | "sfx" };
+  const soundOnly = so === true;
+  // `cueDump` (input prop, scripts/cues.mjs): log the resolved shot, effect and music cues once for the sync check
+  // and the score (frames and file paths only, no component names).
+  // The score is mastered to the library loops' loudness, so it plays at their usual cue volume.
+  const bed: MusicCue[] = (scoreProp ?? score) ? [{ src: `videos/${slug}/music.wav`, from: 0, to: timing.totalFrames, volume: SCORE_VOLUME, loop: false, fade: false }] : music;
+  // `library`: the music cues the scene wrote, which a score is cut to even while it replaces them.
+  if (cueDump) console.log("[cues] " + JSON.stringify({ shots: shots.map(([a, b, , whip]) => [a, b, whip]), sfx, music: bed, library: music }));
   return (
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
     {!soundOnly && (
@@ -66,12 +76,15 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
         <ShotList shots={shots} />
       </VideoContext.Provider>
     )}
-    <Audio src={staticFile(`videos/${slug}/voice.wav`)} volume={voiceVolume} />
-    <SoundTrack sfx={sfx} music={music} captions={timing.captions} total={timing.totalFrames} />
+    {/* `stem` (input prop, `pipeline.py mix`): one part of the soundtrack alone, at its mix gain (the stems sum to the mix) */}
+    {(!stem || stem === "voice") && <Audio src={staticFile(`videos/${slug}/voice.wav`)} volume={voiceVolume} />}
+    <SoundTrack sfx={!stem || stem === "sfx" ? sfx : []} music={!stem || stem === "music" ? bed : []} captions={timing.captions} total={timing.totalFrames} />
     <Captions chunks={timing.captions} />
   </AbsoluteFill>
   );
 };
+
+const SCORE_VOLUME = 0.3;
 
 // The smoothed framing correction for this shot frame, or undefined (no table, or not in it).
 export const useFramingFor = (start: number, f: number): FramingDelta | undefined => {
