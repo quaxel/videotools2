@@ -25,3 +25,7 @@ __pycache__/
 animator/uploader/secrets/
 animator/uploader/client_secret*.json
 animator/uploader/uploader.db*
+
+# Rendered videos and TTS model weights — too large for GitHub
+animator/out/
+tts/model/
