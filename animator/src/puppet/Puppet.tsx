@@ -53,7 +53,7 @@ export type PuppetLook = {
   beard?: string; // full short beard round the jaw (the mouth shows over it)
   vest?: string; // waistcoat over the shirt (the outfit colour shows down the front)
   suspenders?: string; // braces over the shoulders
-  hatStyle?: "wide" | "bowler" | "boater" | "helmet" | "stahl"; // shape of `hat`: wide felt brim (default), round bowler, flat straw boater, WWII M1 steel helmet, flared coal-scuttle helmet
+  hatStyle?: "wide" | "bowler" | "boater" | "helmet" | "stahl" | "crown" | "shako"; // shape of `hat`: wide felt brim (default), round bowler, flat straw boater, WWII M1 steel helmet, flared coal-scuttle helmet, a king's gold crown (sits on the hair), a palace guard's tall plumed shako
   shorts?: string; // athletic shorts to mid-thigh (runners)
   bib?: string; // race number on a white cloth bib, front and back (e.g. "31")
 };
@@ -184,9 +184,40 @@ const Helmet: React.FC<{ color: string; uid: string; d: string; rim: string }> =
   </g>
 );
 
+// A king's crown: a gold band with five points and jewels, sitting on top of the hair (the hair is not clipped).
+const CROWN_D = "M -150 -952 L -164 -1072 L -110 -1028 L -62 -1108 L -22 -1036 L 0 -1124 L 22 -1036 L 62 -1108 L 110 -1028 L 164 -1072 L 150 -952 Q 0 -976 -150 -952 Z";
+const Crown: React.FC<{ color: string; uid: string; dx?: number }> = ({ color, uid, dx = 0 }) => (
+  <g transform={`translate(${dx} 0)`}>
+    <Inked d={CROWN_D} fill={color} uid={uid} name="crown" />
+    <path d="M -152 -990 Q 0 -1012 152 -990" fill="none" stroke={INK} strokeWidth={8} opacity={0.5} />
+    {[-164, -62, 0, 62, 164].map((x, i) => (
+      <circle key={i} cx={x} cy={[-1074, -1110, -1126, -1110, -1074][i]} r={16} fill="#f7f0d8" stroke={INK} strokeWidth={6} />
+    ))}
+    <circle cx={0} cy={-970} r={24} fill="#c8102e" stroke={INK} strokeWidth={7} />
+    <circle cx={-90} cy={-966} r={15} fill="#1d5fd0" stroke={INK} strokeWidth={6} />
+    <circle cx={90} cy={-966} r={15} fill="#1d5fd0" stroke={INK} strokeWidth={6} />
+    <path d="M -120 -1000 Q -60 -1014 -10 -1012" fill="none" stroke="#fff" strokeWidth={14} strokeLinecap="round" opacity={0.35} />
+  </g>
+);
+
+// A palace guard's shako: a tall drum with a gold band, a black visor and a white plume.
+const SHAKO_D = "M -176 -930 L -162 -1110 Q 0 -1128 162 -1110 L 176 -930 Q 0 -950 -176 -930 Z";
+const Shako: React.FC<{ color: string; uid: string; dx?: number }> = ({ color, uid, dx = 0 }) => (
+  <g transform={`translate(${dx} 0)`}>
+    <path d="M -10 -1112 C -56 -1180 -30 -1240 20 -1256 C 10 -1214 46 -1166 30 -1112 Z" fill="#f7f4ea" stroke={INK} strokeWidth={9} strokeLinejoin="round" />
+    <Inked d={SHAKO_D} fill={color} uid={uid} name="shako" />
+    <path d="M -172 -980 Q 0 -1000 172 -980 L 170 -952 Q 0 -972 -170 -952 Z" fill="#e8b84a" stroke={INK} strokeWidth={7} />
+    <path d="M -166 -1092 Q 0 -1110 166 -1092" fill="none" stroke="#e8b84a" strokeWidth={14} />
+    <circle cx={0} cy={-1036} r={28} fill="#e8b84a" stroke={INK} strokeWidth={7} />
+    <path d="M -186 -934 Q 0 -960 186 -934 Q 150 -900 0 -902 Q -150 -900 -186 -934 Z" fill={INK} />
+  </g>
+);
+
 const HatFront: React.FC<{ color: string; uid: string; style?: PuppetLook["hatStyle"] }> = ({ color, uid, style = "wide" }) => {
   if (style === "helmet") return <Helmet color={color} uid={uid} d={M1_FRONT_D} rim="M -226 -900 Q 0 -932 226 -900" />;
   if (style === "stahl") return <Helmet color={color} uid={uid} d={STAHL_FRONT_D} rim="M -214 -902 Q 0 -936 214 -902" />;
+  if (style === "crown") return <Crown color={color} uid={uid} />;
+  if (style === "shako") return <Shako color={color} uid={uid} />;
   const crown = style === "bowler" ? BOWLER_CROWN_D : style === "boater" ? BOATER_CROWN_D : HAT_CROWN_D;
   const brim = style === "bowler" ? 222 : style === "boater" ? 262 : 292;
   return (
@@ -1012,7 +1043,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           />
           {look.beard && <Inked d={BEARD_D} fill={look.beard} uid={patternId} name="beard" />}
           {/* Messy hair */}
-          <UnderHat id={patternId} on={!!look.hat}>
+          <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "crown"}>
           <g transform={`translate(0 ${-Math.max(-20, Math.min(40, (pose.hair?.lift ?? 0) * 0.12))})`}>
           <path
             d={BANGS_D}
@@ -1261,7 +1292,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <Cel uid={patternId} name="head" d={SIDE_HEAD_D} />
           {look.beard && <Inked d={SIDE_BEARD_D} fill={look.beard} uid={patternId} name="beard" />}
           {/* Long hair is one piece: over the top, the back of the head and the nape, down to the shoulders */}
-          <UnderHat id={patternId} on={!!look.hat}>
+          <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "crown"}>
           <g transform={look.long ? hairMove(pose.hair, 0.6) : ""}>
           <path
             d={sideHair}
@@ -1288,7 +1319,9 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
               rim={look.hatStyle === "helmet" ? "M -200 -892 Q 20 -930 236 -900" : "M -200 -900 Q 20 -934 230 -916"}
             />
           )}
-          {look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl" && (
+          {look.hat && look.hatStyle === "crown" && <Crown color={look.hat} uid={patternId} dx={26} />}
+          {look.hat && look.hatStyle === "shako" && <Shako color={look.hat} uid={patternId} dx={26} />}
+          {look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl" && look.hatStyle !== "crown" && look.hatStyle !== "shako" && (
             <g>
               <Inked d={look.hatStyle === "bowler" ? BOWLER_CROWN_D : look.hatStyle === "boater" ? BOATER_CROWN_D : SIDE_HAT_CROWN_D} fill={look.hat} uid={patternId} name="hat" />
               <path d="M -152 -968 Q 26 -984 202 -968 L 200 -932 Q 26 -948 -150 -932 Z" fill={INK} opacity={0.55} />
@@ -1362,7 +1395,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <circle cx={204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
           <circle cx={0} cy={-800} r={205} fill={look.skin} stroke={INK} strokeWidth={STROKE} />
           {/* a steel helmet sits high at the back: the hair shows below it, so it is not clipped */}
-          <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl"}>
+          <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl" && look.hatStyle !== "crown"}>
             <path d={backHair} fill={look.hair} stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
             <Cel uid={patternId} name="hair" d={backHair} />
           </UnderHat>

@@ -1,0 +1,41 @@
+{
+ "chomp": {
+  "count": 7,
+  "source": "StarNinjas (https://opengameart.org/content/7-eating-crunches)",
+  "license": "CC0",
+  "note": "a soft bite into food (the crunches with the crisp taken off); low-passed at 1600 Hz"
+ },
+ "crunch": {
+  "count": 7,
+  "source": "StarNinjas (https://opengameart.org/content/7-eating-crunches)",
+  "license": "CC0",
+  "note": "a crisp bite: chips, an apple, a carrot"
+ },
+ "fork-plate": {
+  "count": 5,
+  "source": "TinyWorlds (https://opengameart.org/content/cutlery-sounds)",
+  "license": "CC0",
+  "note": "a fork tapping or scraping a plate; 2 pitched copies"
+ },
+ "munch": {
+  "count": 6,
+  "source": "synthesised, scripts/sfx_generate.py munch()",
+  "license": "own"
+ },
+ "scrape": {
+  "count": 6,
+  "source": "synthesised, scripts/sfx_generate.py scrape()",
+  "license": "own"
+ },
+ "snore": {
+  "count": 6,
+  "source": "synthesised, scripts/sfx_generate.py snore()",
+  "license": "own"
+ },
+ "thud": {
+  "count": 6,
+  "source": "Ogrebane (artisticdude) (https://opengameart.org/content/metal-and-wood-impact-sound-effects)",
+  "license": "CC BY 3.0",
+  "note": "wooden knocks: crates, chairs, a prop landing; 2 pitched copies; credit the author in the video description"
+ }
+}

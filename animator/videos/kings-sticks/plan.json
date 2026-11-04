@@ -1,0 +1,106 @@
+{
+  "title": "The Stick That Caught a Thief",
+  "topic": "The King's Sticks: a thief who catches himself",
+  "mechanism": "Ordinary sticks plus a fake threat: only the guilty guard believes his stick will grow, so only he shortens it, and the one short stick names him.",
+  "beats": {
+    "hook": "Empty velvet necklace cushion in a locked, candlelit throne room; bolted door slams; twelve guards' faces",
+    "story": "The King locks the twelve guards in and hands out identical sticks with the wizard threat",
+    "rise": "The grinning guard mocks the King ('measure mine first') and hides his stick all night; others fret and measure",
+    "twist": "Morning line-up: eleven sticks match, one is shorter, and the grinning guard blurts 'it was supposed to grow'",
+    "mechanism": "Cut to the palace woodshed: a crate stamped WOODSHED full of the same sticks; a dial/label NO MAGIC; the knife and wood shavings in the corner labelled ONE INCH; a tile ruler showing the short stick",
+    "ending": "The King holds out his hand; the necklace drops into it. Final line: the thief measured himself."
+  },
+  "seed": {
+    "what": "The grinning guard (gold tooth, red sash) and his stick, close on him laughing",
+    "first_line": 1
+  },
+  "locations": [
+    {
+      "id": "throne-night",
+      "set": "ThroneRoomSet mood night: candles, blue moonlight",
+      "colour": "deep blue"
+    },
+    {
+      "id": "throne-candle",
+      "set": "ThroneRoomSet warm: candle-lit throne dais, red banners",
+      "colour": "red-orange"
+    },
+    {
+      "id": "vault",
+      "set": "Room: queen's jewel stand with empty velvet cushion, purple drapes",
+      "colour": "purple"
+    },
+    {
+      "id": "door",
+      "set": "ThroneRoomSet doors: iron bolt, key turning",
+      "colour": "brown-green"
+    },
+    {
+      "id": "corner",
+      "set": "ThroneRoomSet dark corner, single candle, teal shadows",
+      "colour": "teal"
+    },
+    {
+      "id": "dawn",
+      "set": "ThroneRoomSet golden sunrise through tall windows",
+      "colour": "gold"
+    },
+    {
+      "id": "woodshed",
+      "set": "Room: palace woodshed, log piles, axe, WOODSHED crate",
+      "colour": "warm brown"
+    },
+    {
+      "id": "truth",
+      "set": "ThroneRoomSet truth grade: cold blue reveal of the shaved stick",
+      "colour": "cold cyan"
+    }
+  ],
+  "characters": [
+    {
+      "id": "king",
+      "look": "crown, grey beard, royal purple robe with gold vest"
+    },
+    {
+      "id": "thief",
+      "look": "palace guard, red tunic with gold vest, cocky grin"
+    },
+    {
+      "id": "guard2",
+      "look": "palace guard, red tunic, nervous, moustache-less"
+    },
+    {
+      "id": "guard3",
+      "look": "palace guard, red tunic, sleepy, snores"
+    },
+    {
+      "id": "queen",
+      "look": "long hair, green gown, worried at the empty cushion"
+    }
+  ],
+  "gags": [
+    {
+      "line": 8,
+      "what": "A guard measures his stick tile by tile, crawling on the floor, and bonks his head on a pillar"
+    },
+    {
+      "line": 9,
+      "what": "A guard holds his stick to his snoring friend's; the friend snores and his stick drops on the guard's foot"
+    },
+    {
+      "line": 11,
+      "what": "Wood shavings fly in the dark corner"
+    },
+    {
+      "line": 16,
+      "what": "The necklace slides out of the thief's sleeve into the King's palm"
+    }
+  ],
+  "story_numbers": [
+    "twelve",
+    "one inch",
+    "eleven",
+    "one"
+  ],
+  "format_note": "The short stick is drawn about 3x shorter than the real one-inch gap (about 7 cm on a 60 cm stick) so the difference reads on a phone in the top-down line-up."
+}

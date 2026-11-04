@@ -640,6 +640,66 @@ def hooves():
             place(out, sweep(260, 140, 0.07) * env(0.07, 0.001, 0.02) * 0.5 * g, at + d)
     return loop_fade(out)
 
+def munch():
+    # One soft closed-mouth chew for a puppet eating on screen (cue one per jaw close): a slow-starting wet squish over a
+    # muffled body and a faint tongue smack. No hard attack, so a run of them reads as chewing, not knocking.
+    sec = 0.32
+    out = mix(band(noise(sec), 350, 1800) * env(sec, 0.045, 0.07), low(noise(sec), 220) * env(sec, 0.03, 0.06) * 0.6)
+    place(out, band(noise(0.02), 1500, 4000) * env(0.02, 0.003, 0.006) * 0.15, 0.07)
+    return loop_fade(out, 0.02)
+
+
+def scrape():
+    # A knife shaving a wooden stick in the dark: three gritty strokes, each a stick-slip rasp that rises and stops.
+    sec = 1.5
+    out = np.zeros(int(sec * SR))
+    for k, (at, ln) in enumerate(((0.0, 0.34), (0.45, 0.3), (0.92, 0.4))):
+        t = t_axis(ln)
+        chatter = 0.55 + 0.45 * np.abs(np.sin(2 * np.pi * t * (38 + 9 * k + rng.random() * 8)))
+        rasp = band(noise(ln), 1800, 6500) * chatter * np.minimum(1, t / 0.05) * np.minimum(1, (ln - t) / 0.03)
+        body = band(noise(ln), 400, 1200) * env(ln, 0.02, 0.15) * 0.35
+        place(out, rasp + body, at)
+    return out
+
+
+def snore():
+    # A guard snoring: a slow fluttering inhale through the nose, a breathy exhale; one breath, about 2 s.
+    sec = 2.2
+    t = t_axis(sec)
+    inhale_t = t[t < 1.1]
+    flutter = 1 + 0.8 * np.sign(np.sin(2 * np.pi * inhale_t * 32))
+    inhale = band(noise(len(inhale_t) / SR) * flutter, 80, 700) * np.sin(np.pi * inhale_t / 1.1) ** 1.5
+    exhale = band(noise(0.9), 300, 2500) * np.sin(np.pi * t_axis(0.9) / 0.9) * 0.25
+    out = np.zeros(int(sec * SR))
+    place(out, inhale, 0.0)
+    place(out, exhale, 1.25)
+    return out
+
+
+def clink():
+    # A gold necklace dropping into a palm: a quick shower of small metal tinks over a soft landing.
+    sec = 0.9
+    out = low(noise(0.08), 600) * env(0.08, 0.002, 0.02) * 0.4
+    out = mix(out, np.zeros(int(sec * SR)))
+    for k in range(9):
+        hz = 2800 + rng.random() * 2600
+        at = 0.005 + k * 0.035 + rng.random() * 0.03
+        place(out, tone(hz, 0.25, (1.0, 0.4, 0.2)) * env(0.25, 0.0005, 0.04 + rng.random() * 0.05) * (0.6 - k * 0.04), at)
+    return out
+
+
+def bolt():
+    # A heavy iron bolt slid home on a palace door: a grinding slide, then a deep iron clunk.
+    sec = 1.0
+    t = t_axis(0.42)
+    slide = band(noise(0.42), 900, 4000) * (0.6 + 0.4 * np.abs(np.sin(2 * np.pi * t * 23))) * np.minimum(1, t / 0.04) * 0.5
+    clunk = mix(tone(95, 0.5, (1.0, 0.5, 0.3)) * env(0.5, 0.001, 0.09), band(noise(0.15), 600, 3500) * env(0.15, 0.0005, 0.02) * 1.2, tone(1650, 0.4, (1.0, 0.3)) * env(0.4, 0.001, 0.12) * 0.2)
+    out = np.zeros(int(sec * SR))
+    place(out, slide, 0.0)
+    place(out, clunk, 0.4)
+    return out
+
+
 if __name__ == "__main__":
     for name, fn in [
         ("reel-spin", reel_spin),
@@ -674,3 +734,6 @@ if __name__ == "__main__":
     for name, fn in [("tank", tank), ("compressor", compressor), ("squeak", squeak), ("morse", morse), ("battle", battle), ("deflate", deflate)]:
         save(f"sfx/{name}.wav", fn())
     save("sfx/hooves.wav", hooves())
+    save("sfx/munch.wav", munch())
+    for name, fn in [("scrape", scrape), ("snore", snore), ("clink", clink), ("bolt", bolt)]:
+        save(f"sfx/{name}.wav", fn())

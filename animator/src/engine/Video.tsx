@@ -213,7 +213,7 @@ export const useImpact = () => {
   let hit = 0;
   for (const e of video?.sfx ?? []) {
     const dt = frame - Math.round(e.at);
-    const w = IMPACTS[e.src];
+    const w = IMPACTS[e.src] ?? e.hit;
     if (w && dt >= 0 && dt < 10) hit += w * Math.min(1, e.volume * 2) * (1 - dt / 10) ** 2;
   }
   return Math.min(1, hit);

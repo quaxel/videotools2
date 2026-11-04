@@ -207,7 +207,9 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   // stretched (negative `squash`) rises above the standing box, and whatever leaves the box is cut off in a hard
   // straight line (a "half head"). Extend the top by the lift, in steps so the canvas is not rebuilt every frame.
   const lift = Math.max(0, pose.air ?? 0) + Math.max(0, -(pose.bob ?? 0)) + Math.max(0, -(pose.squash ?? 0)) * 1150;
-  const extra = Math.ceil(lift / 60) * 60;
+  // Tall headgear (a crown's points, a plumed shako) rises above the standing box too.
+  const hatTop = !look.hat ? 0 : look.hatStyle === "shako" ? 150 : look.hatStyle === "crown" ? 40 : 0;
+  const extra = Math.ceil((lift + hatTop) / 60) * 60;
   const VB = useMemo(() => {
     const base = lying ? VB_LIE : VB_STAND;
     return extra ? { ...base, y: base.y - extra, h: base.h + extra } : base;

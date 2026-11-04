@@ -5,6 +5,10 @@
 # Writes <dir>/mix.md and <dir>/mix.json. Loudness is BS.1770 (scripts/music/dsp.py): integrated per section and
 # stem; per line the 400 ms momentary margin (voice - bed) over windows centred on its words: median and 10th
 # percentile. A low p10 means words the bed covers; the report lists the lines under MARGIN_P10 and their worst words.
+# Effects: every one-shot effect's 400 ms momentary peak over what else plays round it (voice + music), flagged hot
+# above EFFECT_HOT and buried under EFFECT_BURIED, and runs of one file repeated (no takes) flagged as a machine gun.
+#   .venv/bin/python scripts/mixreport.py effects <cues.json> <dir>   effects alone, for a composition without a voice
+#                                                                     (a preview): sfx.wav and music.wav in <dir>
 import json
 import os
 import sys
@@ -16,6 +20,9 @@ from dsp import SR, integrated, momentary, read_wav, st  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MARGIN_P10 = 3.0  # LU: below this, the bed covers some of the line's words (pipeline.py TARGETS speech_margin_p10)
+EFFECT_HOT = 9.0  # LU over the rest: the effect jumps out (a knock, not part of the scene)
+EFFECT_BURIED = -8.0  # LU under the rest: nobody hears it
+REPEAT = (3, 30)  # this many cues of one file, each within this many frames of the last: the same take stamped out
 HOP = 0.01  # s, momentary loudness step
 
 
@@ -49,6 +56,72 @@ def sections(cues, fps, total):
         else:
             merged.append((a, b, n))
     return [(a / fps, min(b, total) / fps, " + ".join(n) or "no music") for a, b, n in merged]
+
+
+def effects(cues, stems, fps):
+    """One row per one-shot effect: its momentary peak over the cue (up to 0.4 s) against the median momentary of
+    voice + music round it. Looped effects are beds, not measured. Returns (markdown rows, json list, repeat runs)."""
+    others = stems["voice"] + stems["music"]
+    ms, mo = momentary(stems["sfx"], HOP), momentary(others, HOP)
+    centre = np.arange(len(ms)) * HOP + 0.2
+    rows = ["| frame | effect | volume | effect LU | rest LU | over the rest |", "|---|---|---|---|---|---|"]
+    out = []
+    for e in sorted(cues["sfx"], key=lambda e: e["at"]):
+        if e.get("until") is not None:
+            continue
+        t = e["at"] / fps
+        k = (centre >= t) & (centre <= t + 0.4)
+        r = (centre >= t - 0.25) & (centre <= t + 0.4)
+        if not k.any():
+            continue
+        fx, rest = float(ms[k].max()), float(np.median(mo[r]))
+        margin = None if rest < -60 else fx - rest
+        flag = "alone" if margin is None else "**hot**" if margin > EFFECT_HOT else "**buried**" if margin < EFFECT_BURIED else ""
+        name = e["src"] + (f" ({e['space']})" if e.get("space") else "")
+        rows.append(f"| {round(e['at'])} | {name} | {e['volume']:.2f} | {fx:.1f} | {fmt(rest if rest >= -60 else None)} | {fmt(margin)} {flag} |")
+        out.append({"at": round(e["at"]), "src": e["src"], "space": e.get("space"), "volume": e["volume"], "effect": fx, "rest": rest, "margin": margin})
+    runs, run = [], []
+    for e in sorted((e for e in cues["sfx"] if e.get("until") is None), key=lambda e: e["at"]):
+        if run and e["src"] == run[-1]["src"] and e["at"] - run[-1]["at"] <= REPEAT[1]:
+            run.append(e)
+        else:
+            if len(run) >= REPEAT[0]:
+                runs.append(run)
+            run = [e]
+    if len(run) >= REPEAT[0]:
+        runs.append(run)
+    repeats = [{"src": r[0]["src"], "frames": [round(e["at"]) for e in r]} for r in runs]
+    return rows, out, repeats
+
+
+def effects_md(rows, fx, repeats):
+    hot = [e["at"] for e in fx if e["margin"] is not None and e["margin"] > EFFECT_HOT]
+    buried = [e["at"] for e in fx if e["margin"] is not None and e["margin"] < EFFECT_BURIED]
+    return ["## Effects over the rest of the mix\n",
+            f"Momentary (400 ms) peak of each one-shot effect against the median of voice + music round it (looped "
+            f"effects are left out). Hot above +{EFFECT_HOT:.0f} LU, buried under {EFFECT_BURIED:.0f} LU.\n",
+            f"- Hot (turn down): {', '.join(map(str, hot)) or 'none'}",
+            f"- Buried (turn up or cut): {', '.join(map(str, buried)) or 'none'}",
+            "- Same file stamped out (use foleyCues for takes): "
+            + ("; ".join(f"{r['src']} at {', '.join(map(str, r['frames']))}" for r in repeats) or "none"), "", *rows]
+
+
+def effects_only(cues_path, d):
+    """The effects table for a composition with no voice (a preview): sfx.wav and music.wav in `d`."""
+    cues = json.load(open(cues_path))
+    fps, total = cues["fps"], cues["total"]
+    n = round(total / fps * SR)
+    stems = {}
+    for k in ("music", "sfx"):
+        x, sr = read_wav(os.path.join(d, f"{k}.wav"))
+        assert sr == SR, f"{k}.wav is {sr} Hz"
+        x = st(x)[:, :n]
+        stems[k] = np.pad(x, ((0, 0), (0, n - x.shape[1])))
+    stems["voice"] = np.zeros_like(stems["music"])
+    rows, fx, repeats = effects(cues, stems, fps)
+    md = effects_md(rows, fx, repeats)
+    open(os.path.join(d, "effects.md"), "w").write("\n".join(md) + "\n")
+    print("\n".join(md))
 
 
 def main(slug, d):
@@ -103,6 +176,7 @@ def main(slug, d):
         if p10 < MARGIN_P10:
             low.append(li + 1)
 
+    fx_rows, fx, repeats = effects(cues, stems, fps)
     whole = {k: lufs(stems[k]) for k in ("voice", "music", "sfx", "bed", "mix")}
     p10_all = min((l["p10"] for l in lines_json), default=None)
     md = [f"# {slug}: mix\n",
@@ -114,12 +188,15 @@ def main(slug, d):
           "## Per music section (integrated LUFS)\n", *rows, "",
           "## Per line: voice over the bed while it speaks\n",
           "Momentary (400 ms) margin voice - bed over the line's words; a word with no bed under it counts as 40 LU.\n",
-          *line_rows]
+          *line_rows, "", *effects_md(fx_rows, fx, repeats)]
     open(os.path.join(d, "mix.md"), "w").write("\n".join(md) + "\n")
-    json.dump({"whole": whole, "sections": sec_json, "lines": lines_json, "p10_min": p10_all, "low_lines": low},
+    json.dump({"whole": whole, "sections": sec_json, "lines": lines_json, "p10_min": p10_all, "low_lines": low, "effects": fx, "repeats": repeats},
               open(os.path.join(d, "mix.json"), "w"), indent=1)
     print("\n".join(md))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    if sys.argv[1] == "effects":
+        effects_only(sys.argv[2], sys.argv[3])
+    else:
+        main(sys.argv[1], sys.argv[2])

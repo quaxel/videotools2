@@ -1,7 +1,8 @@
 // Dumps a video's resolved cue tables (shots with their whip flag, effects, music) to JSON, for `pipeline.py sync`
 // and the per-video score (videos/<slug>/music.py). Renders one frame of the soundtrack-only composition with the
-// `cueDump` input prop and keeps what Video logs; no 3D shot is mounted.
-//   node scripts/cues.mjs <slug> <out.json>
+// `cueDump` input prop and keeps what Video logs; no 3D shot is mounted. A composition that is not a Video (a preview
+// with its own SoundTrack) gives its effect and music tables and no shots.
+//   node scripts/cues.mjs <slug | composition> <out.json>
 import { bundle } from "@remotion/bundler";
 import { renderStill, selectComposition } from "@remotion/renderer";
 import fs from "node:fs";
@@ -19,6 +20,7 @@ const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") }
 const inputProps = { soundOnly: true, cueDump: true };
 const composition = await selectComposition({ serveUrl, id: slug, inputProps });
 let cues = null;
+let track = null;
 const tmp = path.join(os.tmpdir(), `cues-${slug}-${process.pid}.png`);
 await renderStill({
   serveUrl,
@@ -29,11 +31,13 @@ await renderStill({
   output: tmp,
   onBrowserLog: ({ text }) => {
     if (text.startsWith("[cues] ")) cues = JSON.parse(text.slice(7));
+    if (text.startsWith("[soundtrack] ")) track ??= JSON.parse(text.slice(13));
   },
 });
 fs.rmSync(tmp, { force: true });
+cues ??= track && { shots: [], ...track, library: track.music };
 if (!cues) {
-  console.error("no [cues] line logged: is the composition a Video?");
+  console.error("no [cues] or [soundtrack] line logged: does the composition play a SoundTrack?");
   process.exit(1);
 }
 cues.total = composition.durationInFrames;

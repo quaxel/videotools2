@@ -20,7 +20,7 @@ export const walk = (f: number) => ({ legSwing: Math.sin(f / 3) * 20, bob: -Math
 // Metres per puppet unit (PUPPET_HEIGHT / 1060 in PuppetBillboard).
 const UNIT_M = 1.3 / 1060;
 // A step sweeps the planted foot 2 * 266 * sin(20°) ≈ 182 units back under the body.
-const STEP_M = 182 * UNIT_M;
+export const STEP_M = 182 * UNIT_M;
 // The walk cycle for a puppet that has covered `dist` metres: one step per STEP_M, so the planted foot keeps pace
 // with the ground instead of sliding (no moonwalk). `speed` 0..1 shrinks the stride while it speeds up or slows down.
 // The bob follows Williams' five poses: lowest just after each contact (the bent leg takes the weight), highest just
