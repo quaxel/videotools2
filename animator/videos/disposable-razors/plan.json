@@ -1,0 +1,112 @@
+{
+  "title": "Why Razor Refills Are Locked Up Like Jewelry",
+  "topic": "Why Razor Refills Are Locked Up Like Jewelry",
+  "mechanism": "Razor makers sell the handle cheap and make their money on refills that cost under thirty cents to make but sell for five dollars, so stores guard them like jewellery.",
+  "beats": {
+    "hook": "Macro: a $10 razor pack swings on its peg toward the lens; you grab it grinning; the $10 tag stamps on; you cheer WHAT A BARGAIN.",
+    "story": "Bathroom: the first shave is dolphin-smooth, you feel like a movie star.",
+    "rise": "Two weeks on, the blade tugs (you jump with an OUCH); you stroll to the store sure refills are a quick grab.",
+    "twist": "The refills sit in a LOCKED glass case between perfume, phones and watches; the clerk arrives with a giant key and rings up $40; you faint.",
+    "mechanism": "Cold lab: STEEL bin (<5¢), PLASTIC jar (3-5¢), balance with UNDER 30¢ vs a $5 tag that slams it down, a x15-20 dial; 1904 patent office stamp; factory belt HANDLE: ONCE / BLADES: FOREVER; neon stage blade race 2 → 7 blades and a razor-lawnmower.",
+    "ending": "Vault: a refill under a glass dome beside diamonds; back in the aisle a new guy grabs the $10 razor, loops into the hook."
+  },
+  "seed": {
+    "what": "The LOCKED refill case behind the peg wall",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "aisle",
+      "set": "Room + PegWall, LockedCase, ShowCase (guide/references/razor-aisle.md)",
+      "colour": "white / blue daylight"
+    },
+    {
+      "id": "bathroom",
+      "set": "Room tile + Vanity",
+      "colour": "teal"
+    },
+    {
+      "id": "checkout",
+      "set": "Room + Counter + register Screen",
+      "colour": "golden amber"
+    },
+    {
+      "id": "lab",
+      "set": "Room cold + SteelBin, PelletJar",
+      "colour": "cold blue"
+    },
+    {
+      "id": "scale",
+      "set": "Room alarm + Balance + Screen",
+      "colour": "red"
+    },
+    {
+      "id": "patent",
+      "set": "Room warm wood + Desk, Stamp, PatentPaper",
+      "colour": "brown sepia"
+    },
+    {
+      "id": "factory",
+      "set": "Room dusk + Conveyor",
+      "colour": "orange-violet"
+    },
+    {
+      "id": "stage",
+      "set": "Room neon + podiums",
+      "colour": "pink neon"
+    },
+    {
+      "id": "vault",
+      "set": "Room night + Pedestal, Diamond",
+      "colour": "deep navy + gold"
+    }
+  ],
+  "characters": [
+    {
+      "id": "you",
+      "look": "short brown hair, blue hoodie"
+    },
+    {
+      "id": "clerk",
+      "look": "woman, long dark hair, purple vest, gold lanyard, giant key"
+    },
+    {
+      "id": "inventor",
+      "look": "1904: beard, wide hat, vest, suspenders"
+    },
+    {
+      "id": "host",
+      "look": "game-show host, pink suit, glasses"
+    },
+    {
+      "id": "newguy",
+      "look": "red hair, green shirt, cap"
+    }
+  ],
+  "gags": [
+    {
+      "line": 2,
+      "what": "blade tugs: you jump with a shocked face"
+    },
+    {
+      "line": 5,
+      "what": "you faint flat on your back at $40"
+    },
+    {
+      "line": 9,
+      "what": "$5 tag slams onto the balance and flings the pan"
+    },
+    {
+      "line": 15,
+      "what": "the razor-lawnmower charges across the stage and the host jumps over it"
+    }
+  ],
+  "story_numbers": [
+    "ten dollars (shelf price from the claim)",
+    "two weeks",
+    "eight refills",
+    "forty dollars",
+    "four times (40 / 10)"
+  ],
+  "format_note": "Razors and refill packs are drawn about 2x real size so they read on a phone."
+}

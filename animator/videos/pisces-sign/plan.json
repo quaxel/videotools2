@@ -1,0 +1,40 @@
+{
+  "title": "A Pisces Already Planned the Wedding",
+  "topic": "Pisces zodiac satire: a Pisces already planned the wedding",
+  "mechanism": "Inside a Pisces there is a huge fish tank labelled DAYDREAMS that always overflows, a REALITY dial that fell off years ago, a TEARS tap nobody can close and a speaker playing SAD SONGS on repeat.",
+  "beats": {
+    "hook": "A coffee shop counter under a PISCES badge: the barista Sam smiles once at Mila and she is instantly at the altar with him in a pink dream",
+    "story": "Mila is dreamy and kind: she cries at sunsets, apologises to a chair she bumped, and has picked the dress, the song and the dog; Sara reminds her she doesn't even know his name",
+    "rise": "Every morning she comes back and every morning Sam smiles: Mila is sure it is fate",
+    "twist": "A woman walks behind the counter, kisses Sam and hands him his lunch: she wears a wedding ring; Mila turns and walks face-first into the glass door",
+    "mechanism": "Inside her head: a huge DAYDREAMS fish tank overflowing onto the floor, a REALITY dial lying on the wet floor, a TEARS tap that won't close, a SAD SONGS speaker on repeat",
+    "ending": "She cries one evening, feels fine, and the next morning at the flower shop the florist hands her a rose and smiles: Mila has already named their dog"
+  },
+  "seed": {
+    "what": "Sam's wife: her framed photo with Sam by the register, then she walks behind the counter",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "cafe", "set": "Room coffee shop counter: espresso machine, pastry case, chalkboard, pendant bulbs, register with the wife's photo", "colour": "warm brown" },
+    { "id": "wedding", "set": "Room dream wedding hall: flower arch, aisle runner, chairs with bows, chandeliers, three cribs, dress, dog", "colour": "blush pink" },
+    { "id": "room", "set": "Room Mila's lilac bedroom: bed, chair she apologises to, mood board with the wedding plans", "colour": "lilac purple" },
+    { "id": "balcony", "set": "Outdoor balcony at sunset: railing, planters, string lights, rooftops with parallax, magenta sky", "colour": "magenta" },
+    { "id": "mornings", "set": "Coffee shop re-lit for the next mornings: cool pale morning window light, day cards", "colour": "pale blue" },
+    { "id": "door", "set": "Coffee shop glass front door, cold blue street outside", "colour": "cold blue" },
+    { "id": "tank", "set": "Inside her head: deep-teal flooded room with the DAYDREAMS tank, REALITY dial, TEARS tap, SAD SONGS speaker", "colour": "sea teal" },
+    { "id": "florist", "set": "Room flower shop: tiered buckets of flowers, wrapping counter, hanging plants, cooler", "colour": "leaf green" }
+  ],
+  "characters": [
+    { "id": "mila", "look": "pastel lilac outfit, long honey-blonde hair, dreamy" },
+    { "id": "sara", "look": "practical friend, teal top, long dark hair, glasses" },
+    { "id": "sam", "look": "barista, man, brown apron outfit, SAM name tag" },
+    { "id": "wife", "look": "Sam's wife, red top, long black hair, wedding ring, lunch bag" },
+    { "id": "florist", "look": "florist, green outfit, long auburn hair" }
+  ],
+  "gags": [
+    { "line": 11, "what": "Mila turns and walks face-first into the glass door: smack, squash, she slides down" },
+    { "line": 14, "what": "The DAYDREAMS tank overflows and the water floods round Mila's feet" },
+    { "line": 3, "what": "Mila bumps into a chair, then bows and apologises to it" }
+  ],
+  "story_numbers": ["1", "one", "one smile", "one evening", "3", "three", "three children"]
+}

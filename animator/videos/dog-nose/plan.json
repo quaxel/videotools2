@@ -1,0 +1,41 @@
+{
+  "title": "You Wake Up With a Dog's Nose",
+  "topic": "You wake up with a dog's sense of smell",
+  "mechanism": "A dog's nose reads the street like a social feed: every tree is a wall of posts from the neighbourhood's dogs.",
+  "format_note": "Comedy on the user's script, verbatim (115 words, ellipses replaced by commas). Word count and wpm targets deliberately missed; no factual numbers. Scent is drawn as coloured 3D ribbons; the chicken scent is a giant golden ribbon shaped like a drumstick.",
+  "beats": {
+    "hook": "Your eyes snap open, your nose twitches and coffee and pizza scent ribbons fly at the lens.",
+    "story": "You smell the neighbour's breakfast, yesterday's pizza, then the sock pile: a green sock monster climbs out.",
+    "rise": "Outside, the street tree is a glowing feed: Max, Bella and Rocky notifications pop around it; Rocky posted 12 times.",
+    "twist": "A golden chicken scent pulls you down the street, round the corner, to a trash can where a dog is already waiting.",
+    "mechanism": "The dog stares, thought bubble: BRO. GET IN LINE. A queue of dogs behind it.",
+    "ending": "You get in line with the dogs, realising dogs were just reading gossip; loop back to the nose macro in bed."
+  },
+  "seed": { "what": "Rocky, the dog at the trash can, first seen as the avatar with 12 posts on the tree", "first_line": 10 },
+  "locations": [
+    { "id": "bed", "set": "BedroomSet morning", "colour": "peach / lilac" },
+    { "id": "window", "set": "BedroomSet window to neighbour's kitchen", "colour": "butter yellow" },
+    { "id": "pizza", "set": "BedroomSet desk macro, pizza box", "colour": "tomato red-orange" },
+    { "id": "socks", "set": "BedroomSet floor macro, sock pile", "colour": "toxic green" },
+    { "id": "door", "set": "StreetSet porch, white-out burst", "colour": "sky cyan" },
+    { "id": "tree", "set": "StreetSet sidewalk tree, feed notifications", "colour": "leaf green + magenta notifications" },
+    { "id": "chase", "set": "StreetSet golden hour, chicken ribbon", "colour": "gold" },
+    { "id": "corner", "set": "StreetSet corner, dusk", "colour": "orange-purple dusk" },
+    { "id": "curb", "set": "StreetSet curb bins, night teal", "colour": "teal blue" },
+    { "id": "nose", "set": "Nose-vision void, scent bubbles", "colour": "purple dream" }
+  ],
+  "characters": [
+    { "id": "you", "look": "human puppet, messy bed hair, blue striped pyjamas" },
+    { "id": "rocky", "look": "stocky brown bulldog-ish mutt, half-lidded deadpan eyes, red collar with a tag" },
+    { "id": "socks", "look": "green slimy sock monster with googly eyes and fangs climbing out of a sock pile" },
+    { "id": "neighbour", "look": "human puppet frying eggs in the kitchen across the way" },
+    { "id": "max", "look": "white poodle avatar" },
+    { "id": "bella", "look": "golden retriever avatar with a pink bow" }
+  ],
+  "gags": [
+    { "line": 5, "what": "The sock monster lunges at the lens; you fall back off the bed" },
+    { "line": 7, "what": "You fling the door open and get smacked by a wall of scent; you stagger" },
+    { "line": 15, "what": "You skid to a stop and slam into the trash can, the lid flips up" }
+  ],
+  "story_numbers": ["twelve (Rocky's posts)", "three (houses)"]
+}

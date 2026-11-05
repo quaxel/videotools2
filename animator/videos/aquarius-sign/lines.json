@@ -1,0 +1,107 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Serena",
+      "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy, flowing delivery that runs sentences together with no pauses.",
+      "seed": 7,
+      "tempo": 1.37
+    },
+    "brooke": {
+      "voice": "Vivian",
+      "instruct": "Bubbly, breathless young influencer filming herself, loud, squealing with excitement, very fast.",
+      "seed": 31,
+      "tempo": 1.35
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "Your Aquarius friend replied three days later, from a protest."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's Iris, brilliant, rebellious and slightly alien."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She brews her own kombucha in the bathtub."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She wears wool socks with sandals completely on purpose."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She loves humanity, but humans she's not so sure about."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her weird little band plays to five people in a laundromat."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nobody understands her and Iris is thrilled."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then an influencer walks in and starts filming."
+    },
+    {
+      "speaker": "narrator",
+      "text": "By morning, the video has a million views."
+    },
+    {
+      "speaker": "brooke",
+      "text": "Socks with sandals are so in right now!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Suddenly the whole city dresses like Iris."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Iris looks at them. Then she looks at her socks."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So what's going on inside an Aquarius?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Picture a lab with a telescope pointed away from people."
+    },
+    {
+      "speaker": "narrator",
+      "text": "A box labelled FEELINGS is locked. The key says LATER."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And one big switch marked IF POPULAR, STOP."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That switch just flipped."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Iris throws away her sandals and quits the band."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Back home the bathtub kombucha explodes."
+    },
+    {
+      "speaker": "narrator",
+      "text": "By Friday she's into beekeeping and medieval choir music."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her five fans follow her. So does the influencer."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You text Iris. She replies from a beehive."
+    }
+  ]
+}

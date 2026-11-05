@@ -33,5 +33,10 @@ tts/model/
 # Effects baked into a space (scripts/foley.py space), made on demand
 animator/public/space/
 
-# Mix stems rendered by `pipeline.py mix`, remade on demand
-animator/videos/*/build/mix/*.wav
+# Pipeline outputs under build/, remade on demand (TTS takes, stills, QA frames, cue dumps, logs).
+# Kept: approvals.json, check.ok, score.md and timings.jsonl, which hold state and history.
+animator/videos/*/build/*
+!animator/videos/*/build/approvals.json
+!animator/videos/*/build/check.ok
+!animator/videos/*/build/score.md
+!animator/videos/*/build/timings.jsonl

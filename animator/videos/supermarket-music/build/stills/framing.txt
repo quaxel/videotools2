@@ -1,6 +1,0 @@
- 1170  sign "FRANCE" cut by the frame edge (32% outside)
- 1170  sign "GERMANY" cut by the frame edge (23% outside)
- 1200  sign "FRANCE" cut by the frame edge (48% outside)
- 1200  sign "GERMANY" cut by the frame edge (37% outside)
- 1258  sign "FRANCE" cut by the frame edge (43% outside)
- 1258  sign "GERMANY" cut by the frame edge (35% outside)

@@ -1,0 +1,42 @@
+{
+  "title": "The Law That Made Margarine Pink",
+  "topic": "Why one state demanded pink margarine",
+  "mechanism": "New Hampshire allowed margarine to be sold only if it was dyed pink, and the Supreme Court ruled in 1898 that a permission tied to a condition nobody would buy is really a ban.",
+  "beats": {
+    "hook": "He sold one ten-pound tub of margarine and a stamp slams down: FINED $100. Not for the taste, for the colour.",
+    "story": "A margarine seller in an 1890s New Hampshire general store; his margarine looks and is dyed just like butter.",
+    "rise": "The state law looks friendly: sell as much as you like, just print OLEOMARGARINE in half-inch letters. He does, and it feels like easy money.",
+    "twist": "The shop door opens: a lawman walks in, opens the law book on the counter and reads the last line: UNLESS IT IS PINK.",
+    "mechanism": "Pink dye vat (PINK DYE), breakfast customer refusing it, fine ticket $100, jail calendar 60 DAYS, Supreme Court bench with docket card 1898, colour cards NATURAL / NOT PINK, stamp UNSELLABLE, a padlocked door SALES OPEN with a padlock PINK, sign PERMIT flipping to BAN, tubs dyed BLUE / RED / BLACK, a STINK tub, two DISSENT cards, the fine stamped REVERSED.",
+    "ending": "Back in the store a new seller gets a YES from the law book, a pink paint bucket lands on his tub, and the last card says NO."
+  },
+  "seed": { "what": "The law book lying open on the store counter and the lawman passing the store window", "first_line": 0 },
+  "locations": [
+    { "id": "store", "set": "GeneralStore (Room warm + counter, tin shelves, barrels, stove, hanging oil lamp) — refs guide/references/general-store-1890s.md", "colour": "brown-amber" },
+    { "id": "dairy", "set": "Room daylight, yellow tiled wall, two bowls BUTTER / MARGARINE, dye bottle", "colour": "yellow" },
+    { "id": "law-hall", "set": "Room dream, purple wallpaper, lectern with the big law book", "colour": "purple" },
+    { "id": "print-room", "set": "Room office, green panelled wall, desk with stencil, ruler 1/2 INCH", "colour": "green" },
+    { "id": "store-twist", "set": "GeneralStore re-lit cold blue (truth grade) when the lawman walks in", "colour": "blue" },
+    { "id": "dye-vat", "set": "Room neon, pink vat labelled PINK DYE", "colour": "pink" },
+    { "id": "kitchen", "set": "Room daylight with window, breakfast table, toast", "colour": "sky-blue/white" },
+    { "id": "jail", "set": "Room night, cell bars, bare bulb, calendar 60 DAYS, fine desk", "colour": "navy" },
+    { "id": "court", "set": "OldCourt (Room alarm + crimson drapery, gilt eagle, marble columns, mahogany bench) — refs guide/references/general-store-1890s.md", "colour": "crimson" }
+  ],
+  "characters": [
+    { "id": "seller", "look": "margarine dealer's agent: brown waistcoat over cream shirt, dark hair, no lines" },
+    { "id": "buyer", "look": "wholesale buyer in a flat cap, green jacket" },
+    { "id": "lawman", "look": "navy coat, peaked cap, brass badge (lanyard)" },
+    { "id": "customer", "look": "woman with long auburn hair, blue dress; the only speaking role (representative, not a real person)" },
+    { "id": "judges", "look": "three justices in black robes, white or grey hair, one with glasses" },
+    { "id": "new-seller", "look": "second dealer in a red waistcoat for the loop ending" }
+  ],
+  "gags": [
+    { "line": 0, "what": "A stamp slams FINED $100 onto the ticket and the tub on the counter jumps" },
+    { "line": 10, "what": "The customer flings her pink toast; it flips and lands butter-side down" },
+    { "line": 11, "what": "The cell door slams shut on the seller" },
+    { "line": 12, "what": "The seller jumps for joy in the courtroom" },
+    { "line": 17, "what": "A STINK tub's lid pops, a green cloud rolls out and a justice tips back off his chair" },
+    { "line": 19, "what": "A pink paint bucket drops onto the new seller's tub and splashes" }
+  ],
+  "story_numbers": ["one"]
+}

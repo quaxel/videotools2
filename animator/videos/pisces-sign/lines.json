@@ -1,0 +1,120 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Serena",
+      "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy, flowing delivery that runs sentences together with no pauses.",
+      "seed": 7,
+      "tempo": 1.37
+    },
+    "sara": {
+      "voice": "Vivian",
+      "instruct": "Flat, blunt, deadpan young woman, unimpressed and slightly exasperated with her friend, quick.",
+      "seed": 21,
+      "tempo": 1.3
+    },
+    "mila": {
+      "voice": "Vivian",
+      "instruct": "Dreamy, breathless, starry-eyed young woman, soft and sighing, totally in love, quick.",
+      "seed": 13,
+      "tempo": 1.25
+    },
+    "wife": {
+      "voice": "Vivian",
+      "instruct": "Warm, casual, cheerful married woman teasing her husband, bright and quick.",
+      "seed": 41,
+      "tempo": 1.3
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "Your Pisces friend got one smile and planned the wedding."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It was the barista and she already named their three children."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's Mila who's dreamy and kind and mostly in her head."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She cries at sunsets. She says sorry to furniture."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She's picked the wedding dress, the song, and the dog."
+    },
+    {
+      "speaker": "sara",
+      "text": "Mila, you don't even know his name."
+    },
+    {
+      "speaker": "mila",
+      "text": "His name tag says Sam. It's literally fate."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Every morning she comes back, and every morning he smiles."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then a woman walks behind the counter.",
+      "pauseAfter": 0.25
+    },
+    {
+      "speaker": "narrator",
+      "text": "She kisses the barista and she's wearing a ring."
+    },
+    {
+      "speaker": "wife",
+      "text": "Babe, you forgot your lunch again."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Mila turns around and walks straight into the glass door."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So what's going on inside a Pisces?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Picture a fish tank labelled DAYDREAMS."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It's huge and it's always overflowing."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Next to it a dial labelled REALITY fell off years ago."
+    },
+    {
+      "speaker": "narrator",
+      "text": "A tap marked TEARS that nobody can close."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And a speaker playing SAD SONGS on repeat."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Mila cries for one evening, then feels completely fine."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The next morning, she tries the flower shop instead."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The florist hands her a rose and smiles."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Mila has already named their dog."
+    }
+  ]
+}

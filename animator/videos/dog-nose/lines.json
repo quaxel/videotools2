@@ -1,0 +1,196 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Excited, wildly expressive comedy narrator. Big reactions, mock horror on the gross bits, gossip-show glee, never calm.",
+      "seed": 7,
+      "tempo": 1.15
+    },
+    "dog": {
+      "voice": "Eric",
+      "instruct": "Flat, deadpan, unimpressed street-wise voice. Slow and bored.",
+      "seed": 11,
+      "tempo": 0.95
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "You wake up with a dog's sense of smell.",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Punchy, amazed opening hook, like announcing a superpower.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "And WOW, this is a terrible idea.",
+      "pauseAfter": 0.25
+    },
+    {
+      "speaker": "narrator",
+      "text": "You can smell your neighbor's breakfast.",
+      "pauseAfter": 0.15
+    },
+    {
+      "speaker": "narrator",
+      "text": "Yesterday's pizza.",
+      "pauseAfter": 0.15
+    },
+    {
+      "speaker": "narrator",
+      "text": "And your socks?",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Suspicious, slowing down, dreading it.",
+        "tempo": 0.95
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "OH NO. THEY'RE ALIVE!",
+      "pauseAfter": 0.3,
+      "voice": {
+        "instruct": "Screaming in comic horror.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You run outside for some fresh air.",
+      "pauseAfter": 0.15,
+      "voice": {
+        "instruct": "Quick, cheerful, matter-of-fact.",
+        "tempo": 1.15,
+        "seed": 21
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "BIG MISTAKE.",
+      "pauseAfter": 0.25,
+      "voice": {
+        "instruct": "Short, sharp warning, two quick punchy words, no drawn-out vowels.",
+        "tempo": 1.1,
+        "seed": 21
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "That tree? It's basically Instagram for dogs.",
+      "pauseAfter": 0.2
+    },
+    {
+      "speaker": "narrator",
+      "text": "Max was here. Bella was here.",
+      "pauseAfter": 0.15,
+      "voice": {
+        "instruct": "Reading gossip out loud, delighted.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "And Rocky? He posted twelve times!",
+      "pauseAfter": 0.3,
+      "voice": {
+        "instruct": "Scandalised gossip, huge disbelief.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then suddenly, CHICKEN!",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Starts sneaky, then explodes on CHICKEN.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You follow the smell down the street.",
+      "pauseAfter": 0.1,
+      "voice": {
+        "instruct": "Fast, breathless, chasing.",
+        "tempo": 1.2,
+        "seed": 21
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Past three houses.",
+      "pauseAfter": 0.1,
+      "voice": {
+        "instruct": "Fast, breathless, chasing.",
+        "tempo": 1.2
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Around the corner.",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Fast, breathless, chasing.",
+        "tempo": 1.2
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "And, straight to a trash can.",
+      "pauseAfter": 0.25,
+      "voice": {
+        "instruct": "Building up, then a deflated letdown on trash can.",
+        "tempo": 1.0
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "There's already a dog there.",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Quiet, awkward, slowing down.",
+        "tempo": 0.95
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "He looks at you. You look at him.",
+      "pauseAfter": 0.7,
+      "voice": {
+        "instruct": "Tense, slow, western stand-off.",
+        "tempo": 0.9
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "He's like,",
+      "pauseAfter": 0.1
+    },
+    {
+      "speaker": "dog",
+      "text": "Bro. Get in line.",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "And that's when you realize,",
+      "pauseAfter": 0.15,
+      "voice": {
+        "instruct": "Dawning realisation, warm and excited.",
+        "tempo": 1.0
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Dogs aren't weird. We've just been missing all the gossip!",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Big excited punchline.",
+        "tempo": 1.05
+      }
+    }
+  ]
+}

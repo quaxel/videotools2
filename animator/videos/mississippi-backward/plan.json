@@ -1,0 +1,39 @@
+{
+  "title": "The Day the Mississippi Ran Backward",
+  "topic": "The Mississippi River ran backward (New Madrid earthquakes 1811-1812)",
+  "format_note": "User-specified ~35 s historical Short with a user-given first line ('The Mississippi River once flowed backward.'), so it overrides the 50-60 s / 180-210 word targets and the He/It's/You opener on purpose (105 words, 34.2 s). The river is drawn far narrower than its real width so both banks read in a 9:16 frame.",
+  "mechanism": "On 7 February 1812 the Reelfoot fault pushed up the land under the Mississippi like a step; the water piled against it, waterfalls formed and part of the current ran upstream for a few hours before flowing south again, while the sunken ground beside it filled to become Reelfoot Lake.",
+  "beats": {
+    "hook": "Brown water surges at the lens upstream past the NEW ORLEANS post; the boatman turns, shocked; a cottonwood smashes into the river",
+    "story": "A flatboat crew floating down to New Orleans past New Madrid, Missouri, the night the earthquakes strike",
+    "rise": "The boat rides the current south as usual; then cabins shake, chimneys fall, banks crack and crash into the water",
+    "twist": "Event: the land under the river pushes up like a giant step and the boat is carried back upstream",
+    "mechanism": "Labelled physical props: the riverbank slice with the LAND PUSHES UP block rising under the water, the NEW ORLEANS post with debris drifting the wrong way, the waterfall across the channel, the REELFOOT LAKE sign in the drowned forest",
+    "ending": "Dawn: the river runs south again; aerial over the changed land and the new lake; the last shot runs back into the opening surge (loop)"
+  },
+  "seed": { "what": "The boatman and his flatboat (carried upstream by the uplift)", "first_line": 0 },
+  "locations": [
+    { "id": "surge", "set": "RiverSet pre-dawn, water level", "colour": "teal / brown" },
+    { "id": "boat-night", "set": "RiverSet night, flatboat deck by lantern", "colour": "amber" },
+    { "id": "village", "set": "VillageSet New Madrid, moonlit night", "colour": "navy blue" },
+    { "id": "bank", "set": "RiverSet cut bank, pre-dawn", "colour": "ochre clay" },
+    { "id": "section", "set": "RiverSet riverbank slice (cutaway)", "colour": "earth brown / cyan" },
+    { "id": "falls", "set": "RiverSet waterfall across the channel, dawn", "colour": "white / gold" },
+    { "id": "aerial", "set": "RiverSet top-down day", "colour": "olive green" },
+    { "id": "reelfoot", "set": "CypressLakeSet sunrise", "colour": "pink / violet" },
+    { "id": "changed", "set": "RiverSet aerial morning, scarp and broken forest", "colour": "gold" }
+  ],
+  "characters": [
+    { "id": "boatman", "look": "Old flatboat captain, grey beard, wide hat, red shirt, vest" },
+    { "id": "deckhand", "look": "Young deckhand, suspenders, blue shirt" },
+    { "id": "eliza", "look": "New Madrid settler woman, long dark hair, nightgown-like long skirt, shawl" },
+    { "id": "settler", "look": "Settler man, beard, hat, brown coat" },
+    { "id": "fisher", "look": "Reelfoot fisherman in a dugout canoe, straw hat" }
+  ],
+  "gags": [
+    { "line": 1, "what": "The chimney topples and its top lands on the settler's hat, squashing it" },
+    { "line": 4, "what": "The wave tips the deck and the deckhand falls flat on his back" },
+    { "line": 6, "what": "A falling cottonwood splashes a wall of water over the boat, soaking the boatman" }
+  ],
+  "story_numbers": []
+}

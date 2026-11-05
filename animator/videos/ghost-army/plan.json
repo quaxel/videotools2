@@ -1,0 +1,111 @@
+{
+  "title": "These WWII Tanks Were Full of Air",
+  "topic": "The WWII Ghost Army and its inflatable tanks",
+  "format_note": "User-specified Short of at most 35 s with a fixed opening line ('These World War Two tanks were full of air.') and a user-written voiceover (80 words, 25.7 s). Overrides the 50-60 s, 180-word and He/It's/You rules on purpose. The Morse key, valve and binoculars are drawn larger than scale so they read on a phone.",
+  "mechanism": "A 1,100-man US unit faked an army of about 30,000 with inflatable rubber tanks, recorded battle sounds played from speaker half-tracks and spoof radio traffic, so the enemy watched the fake force while real troops moved elsewhere.",
+  "beats": {
+    "hook": "A Sherman's barrel swings at the lens at dawn; an enemy observer lowers his binoculars; a GI slaps the hull and it wobbles like jelly; four GIs lift the whole tank over their heads",
+    "story": "The secret 23rd: a SECRET stamp on the crates, an artist painting the white star on a rubber tank",
+    "rise": "Compressors pump tanks up across an open field; the speaker half-track blasts battle sounds; the spoof radio taps fake messages",
+    "twist": "At night, while the observer watches the fake field, a column of real tanks rolls past in the dark the other way (event: they drive into frame)",
+    "mechanism": "Labelled physical props: AIR COMPRESSOR, BATTLE SOUNDS speaker array, FAKE RADIO set, a roll-call board counting 1,100 and the enemy map tag counting up to 30,000",
+    "ending": "Sunrise: a GI leans on the dummy, it sags with a hiss; the camera swings back to the opening low angle of the barrel (loop)"
+  },
+  "seed": {
+    "what": "The enemy observer with binoculars (the twist depends on him watching the wrong field)",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "dawn-field",
+      "set": "GhostFieldSet dawn: mist, low orange sun, hedgerows",
+      "colour": "orange / gold"
+    },
+    {
+      "id": "observer-hill",
+      "set": "GhostFieldSet dusk: hedge on a ridge above the field",
+      "colour": "violet / steel"
+    },
+    {
+      "id": "hq-tent",
+      "set": "Room night: canvas tent, lantern, crates",
+      "colour": "olive / amber"
+    },
+    {
+      "id": "artist-barn",
+      "set": "Room warm: plank barn, easel, paint pots",
+      "colour": "brown / yellow"
+    },
+    {
+      "id": "noon-field",
+      "set": "GhostFieldSet noon: rows of decoys, compressor",
+      "colour": "green / blue"
+    },
+    {
+      "id": "sound-truck",
+      "set": "GhostFieldSet dusk: half-track with speaker array",
+      "colour": "magenta / purple"
+    },
+    {
+      "id": "radio-truck",
+      "set": "Room night: radio table, green dial lamp",
+      "colour": "teal / green"
+    },
+    {
+      "id": "map-room",
+      "set": "Room alarm: enemy map table, red lamp",
+      "colour": "red"
+    },
+    {
+      "id": "night-road",
+      "set": "GhostFieldSet night: real tank column under moonlight",
+      "colour": "navy"
+    },
+    {
+      "id": "sunrise-field",
+      "set": "GhostFieldSet sunrise",
+      "colour": "pink / peach"
+    }
+  ],
+  "characters": [
+    {
+      "id": "gi",
+      "look": "Ghost Army GI, olive drab, M1 helmet"
+    },
+    {
+      "id": "gi2",
+      "look": "Second GI, darker skin, olive drab, M1 helmet"
+    },
+    {
+      "id": "artist",
+      "look": "603rd camoufleur artist, no helmet, glasses, paint-spattered fatigues"
+    },
+    {
+      "id": "radioman",
+      "look": "Signal soldier with headphones, garrison look, no helmet"
+    },
+    {
+      "id": "observer",
+      "look": "Enemy observer, field-grey coat, plain grey helmet, binoculars"
+    },
+    {
+      "id": "officer",
+      "look": "Enemy officer at the map table, grey, no insignia"
+    }
+  ],
+  "gags": [
+    {
+      "line": 0,
+      "what": "A GI slaps the tank and it wobbles like jelly with a squeak"
+    },
+    {
+      "line": 0,
+      "what": "Four GIs lift the whole tank over their heads"
+    },
+    {
+      "line": 7,
+      "what": "A GI leans on the barrel and it bends down with a hiss"
+    }
+  ],
+  "story_numbers": []
+}

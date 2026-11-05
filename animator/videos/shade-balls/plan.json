@@ -1,0 +1,102 @@
+{
+  "title": "Why a City Dumped 96 Million Black Balls in Its Water",
+  "topic": "Why a city poured 96 million black balls into its reservoir",
+  "mechanism": "Sunlight turned the bromide and added chlorine in open reservoirs into bromate, a suspected carcinogen; bottle tests at different depths showed more light meant more bromate and cutting light by about 80 % stopped it, so the city floated cheap black (carbon-black, UV-resistant) balls that block about 95 % of sunlight instead of $300 million covers; less evaporation was a bonus.",
+  "beats": {
+    "hook": "You jog past the city reservoir and the water is gone, covered in black balls",
+    "story": "You figure they are saving water from the sun",
+    "rise": "You explain it to a tourist like an expert",
+    "twist": "A lab worker climbs out of a boat holding a sample bottle: evaporation is the bonus, the sun was making a chemical",
+    "mechanism": "Lab screen BROMATE OVER LIMIT with a 2007 calendar; a bottle labelled SUSPECTED CARCINOGEN; beakers BROMIDE + CHLORINE under a SUNLIGHT lamp turning into BROMATE; a glass tank with bottles on a rope at depths turning red near the surface (MORE / LESS); a LIGHT dimmer to -80% and a NO BROMATE screen; price tags COVERS $300M+ vs BALL 36 CENTS; a light meter SUN BLOCKED 95%; a CARBON BLACK sack in the ball hopper and a UV lamp; the release counter to 96,000,000",
+    "ending": "Back on the path, the tourist explains it to someone else: it's just to stop evaporation; you facepalm"
+  },
+  "seed": {
+    "what": "The small boat moored at the far bank and the bottle on a rope (the lab worker's sampling gear)",
+    "first_line": 1
+  },
+  "locations": [
+    {
+      "id": "reservoir",
+      "set": "ReservoirSet daylight: path, fence, slope, ball field, hills with pylons — guide/references/shade-ball-reservoir.md",
+      "colour": "sky blue / black"
+    },
+    {
+      "id": "reservoir-release",
+      "set": "ReservoirSet golden hour with bulk sacks pouring balls (2015)",
+      "colour": "gold"
+    },
+    {
+      "id": "lab-2007",
+      "set": "Room office + bench, sample rack, screen, calendar",
+      "colour": "mint green"
+    },
+    {
+      "id": "hazard",
+      "set": "Room alarm + hazard bottle",
+      "colour": "red"
+    },
+    {
+      "id": "recipe",
+      "set": "Room dream + beakers BROMIDE / CHLORINE + SUNLIGHT lamp",
+      "colour": "purple"
+    },
+    {
+      "id": "depth-tank",
+      "set": "Room cold + glass tank with bottles at depths + LIGHT dimmer",
+      "colour": "blue"
+    },
+    {
+      "id": "budget-room",
+      "set": "Room warm + cover model and ball with price tags",
+      "colour": "orange"
+    },
+    {
+      "id": "ball-factory",
+      "set": "Room neon + hopper, CARBON BLACK sack, UV lamp, light meter",
+      "colour": "pink"
+    }
+  ],
+  "characters": [
+    {
+      "id": "you",
+      "look": "woman jogger, long auburn hair, teal running top"
+    },
+    {
+      "id": "tourist",
+      "look": "woman tourist, long blonde hair, yellow shirt, camera"
+    },
+    {
+      "id": "worker",
+      "look": "lab worker in a white coat and blue cap, carries a bottle on a rope (fictional)"
+    },
+    {
+      "id": "scientist",
+      "look": "researcher with glasses lowering bottles into the tank (generic, no dialogue)"
+    },
+    {
+      "id": "accountant",
+      "look": "budget officer in a grey suit and tie"
+    },
+    {
+      "id": "stranger",
+      "look": "new tourist in a red cap at the end"
+    }
+  ],
+  "gags": [
+    {
+      "line": 1,
+      "what": "You lean on the fence and a stray ball bonks you on the head"
+    },
+    {
+      "line": 13,
+      "what": "The accountant sees the $300M+ tag and keels over flat on his back"
+    },
+    {
+      "line": 20,
+      "what": "You facepalm so hard you stumble while the tourist lectures the stranger"
+    }
+  ],
+  "story_numbers": [
+    "two"
+  ]
+}

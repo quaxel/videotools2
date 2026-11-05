@@ -1,0 +1,33 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": { "voice": "Serena", "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no pauses between sentences.", "seed": 7, "tempo": 1.34 },
+    "rina": { "voice": "Vivian", "instruct": "Three excited young women shouting a surprise at a party, loud, bright and joyful.", "seed": 11, "tempo": 1.25 },
+    "diana": { "voice": "Vivian", "instruct": "Calm, flat, very serious young businesswoman, deadpan and precise, slightly annoyed.", "seed": 21, "tempo": 1.15 }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "It's 3:15, and your Capricorn friend's calendar says LAUGH." },
+    { "speaker": "narrator", "text": "She laughs exactly once, then gets back to work." },
+    { "speaker": "narrator", "text": "That's Diana. Ambitious, reliable, and always working." },
+    { "speaker": "narrator", "text": "Her five-year plan has its own five-year plan." },
+    { "speaker": "narrator", "text": "She's twenty-six, and she already has a retirement fund." },
+    { "speaker": "narrator", "text": "Her friends love her. They just never see her." },
+    { "speaker": "narrator", "text": "Her last vacation was a work trip with a pool." },
+    { "speaker": "narrator", "text": "So they plan a surprise party in a meeting room." },
+    { "speaker": "narrator", "text": "Diana walks in with her laptop, ready to present.", "pauseAfter": 0.4 },
+    { "speaker": "rina", "text": "Surprise!" },
+    { "speaker": "narrator", "text": "The confetti cannon hits her right in the face." },
+    { "speaker": "diana", "text": "This was not in my calendar." },
+    { "speaker": "narrator", "text": "So what's going on inside a Capricorn?" },
+    { "speaker": "narrator", "text": "Picture a mountain with a ladder labelled GOALS." },
+    { "speaker": "narrator", "text": "The ladder has no top, and she's still climbing." },
+    { "speaker": "narrator", "text": "At the bottom, a stamp marked APPROVED, covered in dust." },
+    { "speaker": "narrator", "text": "There's a dial labelled FUN, and it's set to two." },
+    { "speaker": "narrator", "text": "And a laptop that never, ever closes." },
+    { "speaker": "narrator", "text": "But here's her secret. She keeps every birthday card." },
+    { "speaker": "narrator", "text": "They're all in a folder labelled IMPORTANT." },
+    { "speaker": "narrator", "text": "Diana stays for exactly one hour." },
+    { "speaker": "narrator", "text": "Then she books the next party for October." },
+    { "speaker": "narrator", "text": "She sends everyone a calendar invite." }
+  ]
+}

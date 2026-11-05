@@ -1,0 +1,39 @@
+{
+  "title": "Your Sagittarius Friend Is Always Leaving",
+  "topic": "Sagittarius zodiac satire: a Sagittarius is always leaving",
+  "mechanism": "Inside a Sagittarius there is a room where every door says EXIT, a compass with no north, a bow and arrow labelled TRUTH aimed at your bangs, and a calendar marked PLANS that is completely blank, so she books flights mid-sentence and forgets the passport.",
+  "beats": {
+    "hook": "Brunch under a big SAGITTARIUS sign: Luna books a flight to Peru mid-brunch, mid-sentence",
+    "story": "Syrup floods her phone; fun, free and dangerously honest: your bangs were a mistake; suitcase always packed, sleeps in hiking boots; thirty countries, zero dentists",
+    "rise": "A goodbye party where everyone cries; Luna waves from the gate, never happier",
+    "twist": "The gate agent holds out her hand: passport, please. Luna turns her bag upside down; the passport is in the freezer next to the peas",
+    "mechanism": "Inside her head: every door says EXIT, a compass with no north, a bow and arrow TRUTH that pops the balloon next to Bea, a blank PLANS calendar",
+    "ending": "She takes the night bus home, the party is still going, Maya cheers, Luna eats half the cake, and that night she books a flight to Iceland"
+  },
+  "seed": {
+    "what": "Luna's phone (it books Peru in the hook and Iceland in the end)",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "brunch", "set": "Room warm, brunch table, SAGITTARIUS sign", "colour": "yellow" },
+    { "id": "bedroom", "set": "Room daylight, bed, packed suitcase, nightstand", "colour": "turquoise" },
+    { "id": "map", "set": "Room warm, pinned world map, DENTISTS note", "colour": "brown" },
+    { "id": "party", "set": "Room dream, balloons, BON VOYAGE banner, cake", "colour": "pink" },
+    { "id": "gate", "set": "Room daylight, gate desk, big window", "colour": "white / blue" },
+    { "id": "freezer", "set": "Room cold, wire shelves, peas, passport, frost", "colour": "cold blue" },
+    { "id": "exits", "set": "Room daylight, EXIT doors, compass, bow TRUTH, PLANS calendar", "colour": "green" },
+    { "id": "bus", "set": "Room night, bus seats, windows with passing orange lights", "colour": "night orange" }
+  ],
+  "characters": [
+    { "id": "luna", "look": "khaki-green outfit, long brown hair" },
+    { "id": "bea", "look": "lilac top, long black hair" },
+    { "id": "maya", "look": "pink top, long dark hair" },
+    { "id": "agent", "look": "navy uniform, yellow lanyard, long blonde hair" }
+  ],
+  "gags": [
+    { "line": 1, "what": "Luna knocks the syrup over and it floods her phone" },
+    { "line": 11, "what": "Luna turns her bag upside down and the clothes explode out" },
+    { "line": 16, "what": "The TRUTH arrow flies across the room and pops the balloon next to Bea" }
+  ],
+  "story_numbers": ["thirty", "30", "zero", "0", "half", "7"]
+}

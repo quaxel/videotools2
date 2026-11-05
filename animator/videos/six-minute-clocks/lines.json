@@ -1,0 +1,40 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "neighbour": {
+      "voice": "Eric",
+      "instruct": "Flustered, slightly out of breath neighbour in a bathrobe, surprised and talkative.",
+      "seed": 3,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You sprint onto the platform just as your train pulls away." },
+    { "speaker": "narrator", "text": "Your phone says you're late. Your oven clock swore you had time." },
+    { "speaker": "narrator", "text": "That oven clock has never been wrong." },
+    { "speaker": "narrator", "text": "Each week your mornings feel calmer. You're winning." },
+    { "speaker": "narrator", "text": "Then your neighbour knocks, holding up his radio alarm clock.", "pauseAfter": 0.4 },
+    { "speaker": "neighbour", "text": "Is yours slow too? Mine's six minutes behind!" },
+    { "speaker": "narrator", "text": "So are millions of clocks across Europe." },
+    { "speaker": "narrator", "text": "Your phone keeps its own time. These clocks don't." },
+    { "speaker": "narrator", "text": "They count the electricity coming out of the wall." },
+    { "speaker": "narrator", "text": "The current swings back and forth fifty times a second." },
+    { "speaker": "narrator", "text": "Fifty swings, one tick. That's the whole clock." },
+    { "speaker": "narrator", "text": "Twenty-five countries share that one rhythm, from Spain to Turkey." },
+    { "speaker": "narrator", "text": "It stays at fifty only if power in matches power out." },
+    { "speaker": "narrator", "text": "In early twenty eighteen, two Balkan grid operators fell into a dispute." },
+    { "speaker": "narrator", "text": "Kosovo's grid was short of power, and Serbia's operator didn't fill the gap." },
+    { "speaker": "narrator", "text": "So the whole grid ran at about forty-nine point nine nine six." },
+    { "speaker": "narrator", "text": "Each second, your oven lost a sliver." },
+    { "speaker": "narrator", "text": "From January to March, the slivers added up to almost six minutes." },
+    { "speaker": "narrator", "text": "In March, operators pushed extra energy in to run it slightly fast." },
+    { "speaker": "narrator", "text": "By April, the oven clocks had quietly caught up." },
+    { "speaker": "narrator", "text": "Your neighbour is still resetting his radio." }
+  ]
+}

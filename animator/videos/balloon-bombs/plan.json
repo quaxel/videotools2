@@ -1,0 +1,43 @@
+{
+  "title": "The WWII Balloon Bombs That Reached America",
+  "topic": "WWII Japanese balloon bombs that reached America",
+  "format_note": "User-specified ~35 s historical Short (119 words, 36.9 s, fast narrator). Overrides the 50-60 s explainer targets on purpose. The chandelier, sandbags and bomb are drawn larger than scale so they read on a phone.",
+  "mechanism": "Paper balloons launched from Japanese beaches rode the winter jet stream 6,000 miles to North America, an altimeter dropping sandbags to keep them up; the US hid them from the press and traced their sand, and one killed six picnickers in Oregon.",
+  "beats": {
+    "hook": "A bomb on a paper balloon swings at the lens over the clouds; crew let one go on a dawn beach; it races the jet stream; it smashes into an American pine top",
+    "story": "Schoolgirls paste the paper; soldiers fill it with hydrogen and let it go",
+    "rise": "It crosses the ocean by itself, dropping sandbags, and lands in Alaska, Montana, Michigan",
+    "twist": "A church picnic in an Oregon forest walks up to one hanging in a pine (white flash, silence)",
+    "mechanism": "Altimeter box and sandbag ring, newsroom DO NOT PRINT stamp, geologist's microscope on the ballast sand",
+    "ending": "The monument in the pines, then an old balloon half-buried in the needles; loops back to the bomb over the clouds"
+  },
+  "seed": { "what": "The paper balloon with its bomb and sandbag ring", "first_line": 0 },
+  "locations": [
+    { "id": "sky-day", "set": "SkySet mode day (above the cloud deck)", "colour": "deep blue / white" },
+    { "id": "beach", "set": "BeachLaunchSet", "colour": "violet / orange dawn" },
+    { "id": "paper-hall", "set": "Room warm, paste tables", "colour": "amber wood" },
+    { "id": "sky-night", "set": "SkySet mode night", "colour": "navy / silver" },
+    { "id": "coast", "set": "SkySet mode coast", "colour": "gold / dark green" },
+    { "id": "snow", "set": "SnowFieldSet alaska / montana / michigan", "colour": "white / pale blue" },
+    { "id": "newsroom", "set": "Room office", "colour": "green / brown" },
+    { "id": "japan-office", "set": "Room dusk", "colour": "dark red" },
+    { "id": "lab", "set": "Room cold", "colour": "cold blue" },
+    { "id": "forest", "set": "PineForestSet", "colour": "orange bark / green" }
+  ],
+  "characters": [
+    { "id": "soldiers", "look": "Three Japanese launch crew in khaki" },
+    { "id": "schoolgirls", "look": "Two teenage girls, long black hair, navy uniforms, white headbands" },
+    { "id": "editor", "look": "US newspaper editor, vest, glasses, green eyeshade colour" },
+    { "id": "officer", "look": "Japanese officer in olive uniform" },
+    { "id": "geologist", "look": "USGS geologist, glasses, white coat" },
+    { "id": "elsie", "look": "Elsie Mitchell, long hair, 1940s dress" },
+    { "id": "kids", "look": "Sunday school children" }
+  ],
+  "gags": [
+    { "line": 0, "what": "The chandelier smashes into a pine top, needles burst" },
+    { "line": 1, "what": "A paper sheet blows up over a schoolgirl's face" },
+    { "line": 3, "what": "A sandbag drops away and the balloon jumps up" },
+    { "line": 5, "what": "The editor slams a DO NOT PRINT stamp, papers fly" }
+  ],
+  "story_numbers": []
+}

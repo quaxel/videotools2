@@ -1,0 +1,39 @@
+{
+  "title": "The Day Niagara Falls Went Silent",
+  "topic": "The day Niagara Falls went silent (1848)",
+  "format_note": "User-specified ~35 s historical Short with a user-given first line ('Niagara Falls once went silent.'), so it overrides the 50-60 s / 180-210 word targets and the He/It's/You opener on purpose (106 words, 32.6 s). The river and falls are drawn far narrower than real so both banks read in a 9:16 frame; the musket is drawn about 1.5x its size so it reads on a phone.",
+  "mechanism": "Gale winds drove Lake Erie's broken ice fields into the mouth of the Niagara River, where the floes jammed into a dam like a cork in a bottle; with no water coming in, the river below drained and the falls stopped for about thirty hours until the wind shifted and the dam broke.",
+  "beats": {
+    "hook": "Roaring Horseshoe Falls thunders at the lens, mist and rainbow; HARD CUT to the same view in dead silence: bare wet rock, a trickle; the miller's face in the moonlight",
+    "story": "A village miller and his family by the Niagara River on the night of 29 March 1848; his water wheel creaks to a stop",
+    "rise": "Out on the riverbed at dawn people stroll, laugh, a rider trots across, a boy finds a musket: the river is theirs",
+    "twist": "Event: the wind turns, the ice dam at Lake Erie cracks apart and a wall of water comes down the channel at the people on the bed",
+    "mechanism": "Labelled physical props: LAKE ERIE fingerpost where the gale shoves the ice sheets, a giant cork-shaped ice jam at the river mouth beside a NIAGARA RIVER post, the miller's stopped water wheel, a pocket watch counting the hours",
+    "ending": "The roaring falls with a rainbow, the family cheering on the bank; the camera rushes back to the opening view of the falls (loop)"
+  },
+  "seed": { "what": "The Lake Erie ice sheets (they dam the river, then break and send the water back)", "first_line": 4 },
+  "locations": [
+    { "id": "roar", "set": "NiagaraSet day, falls in full flow from the gorge", "colour": "white / teal" },
+    { "id": "silent", "set": "NiagaraSet moonlit, dry brink", "colour": "navy / slate" },
+    { "id": "mill", "set": "NiagaraSet mill bank with the water wheel, lantern", "colour": "amber" },
+    { "id": "erie", "set": "ErieSet: Lake Erie ice fields in a gale at night", "colour": "ice cyan" },
+    { "id": "jam", "set": "ErieSet river mouth, ice jam, grey dawn", "colour": "pale grey / white" },
+    { "id": "bed", "set": "NiagaraSet dry riverbed at sunrise, people and a rider", "colour": "gold / ochre" },
+    { "id": "musket", "set": "NiagaraSet riverbed macro, green pools", "colour": "moss green" },
+    { "id": "wall", "set": "NiagaraSet upper river, wall of water rushing down, dusk", "colour": "violet / blue" },
+    { "id": "back", "set": "NiagaraSet falls back to life, sunset rainbow", "colour": "pink / orange" }
+  ],
+  "characters": [
+    { "id": "miller", "look": "Old miller, grey beard, flour-white apron, brown vest, wide hat" },
+    { "id": "martha", "look": "Miller's wife, long auburn hair, long blue skirt, shawl kerchief" },
+    { "id": "tom", "look": "Boy, freckled, suspenders, cap-less, red shirt" },
+    { "id": "rider", "look": "Young rider on a chestnut horse, green coat, hat" },
+    { "id": "walker", "look": "Townswoman, long black hair, purple skirt, apron" }
+  ],
+  "gags": [
+    { "line": 3, "what": "The miller cups his ear at the silent river; a single last drop plinks off the stopped wheel onto his nose" },
+    { "line": 7, "what": "Tom yanks the musket out of the rocks, falls back on his bottom into a pool with a splash" },
+    { "line": 8, "what": "The rider's horse spins round and bolts from the wall of water; the rider's hat flies off and the water swallows it" }
+  ],
+  "story_numbers": []
+}

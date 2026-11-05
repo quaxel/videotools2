@@ -1,0 +1,96 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, excited, slightly outraged comedy explainer narrator. Punchy, sarcastic, brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.25
+    },
+    "clerk": {
+      "voice": "Vivian",
+      "instruct": "Polite, overly fancy jewellery-store clerk, quietly proud of the price.",
+      "seed": 2,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "You just bought a shiny new razor for ten dollars. What a bargain."
+    },
+    {
+      "speaker": "narrator",
+      "text": "First shave? Smooth as a dolphin. You feel like a movie star."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Two weeks later, the blade tugs your face like tiny pliers."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You go buy refills, and they're locked in a glass case."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Right next to the perfume, the phones and the fancy watches."
+    },
+    {
+      "speaker": "clerk",
+      "text": "Eight refills? That comes to forty dollars.",
+      "pauseAfter": 0.5
+    },
+    {
+      "speaker": "narrator",
+      "text": "Four times the price of the razor. The handle was just the bait."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Inside each refill, the steel costs well under five cents."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The plastic adds another three to five cents."
+    },
+    {
+      "speaker": "narrator",
+      "text": "All the materials? Under thirty cents. The shelf price? Five dollars."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's fifteen to twenty times what the stuff is worth."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In nineteen oh-four, a razor maker patented the throwaway blade."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Sell the handle once. Sell the blades forever."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And to keep you paying, they keep adding blades."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Two blades in the early seventies. Seven blades by twenty seventeen."
+    },
+    {
+      "speaker": "narrator",
+      "text": "At this rate, your next razor comes with a tiny lawnmower."
+    },
+    {
+      "speaker": "narrator",
+      "text": "No wonder the store guards them like diamonds."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Back at the shelf, a new guy grabs a shiny ten dollar razor."
+    },
+    {
+      "speaker": "narrator",
+      "text": "What a bargain."
+    }
+  ]
+}

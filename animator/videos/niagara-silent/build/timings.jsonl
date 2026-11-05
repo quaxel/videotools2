@@ -1,0 +1,5 @@
+{"stage": "sync", "start": "2026-11-02 23:38:52", "seconds": 8.0, "result": "ok", "args": []}
+{"stage": "sync", "start": "2026-11-02 23:41:43", "seconds": 0.0, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-03 00:03:14", "seconds": 74.3, "result": "ok", "args": ["96,100,106,120,139,355,358,720,722"]}
+{"stage": "stills", "start": "2026-11-03 00:04:52", "seconds": 88.9, "result": "ok", "args": ["99,100,106,120,139"]}
+{"stage": "stills", "start": "2026-11-03 00:06:47", "seconds": 148.8, "result": "ok", "args": ["100,120,139"]}

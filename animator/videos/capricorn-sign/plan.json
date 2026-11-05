@@ -1,0 +1,41 @@
+{
+  "title": "A Capricorn Schedules Her Fun",
+  "topic": "Capricorn zodiac satire: a Capricorn schedules her fun",
+  "mechanism": "Inside a Capricorn there is a mountain with an endless GOALS ladder, a dusty APPROVED stamp at its foot, a FUN dial stuck at 2 and a laptop that never closes; her secret is a folder marked IMPORTANT full of birthday cards.",
+  "beats": {
+    "hook": "Glass office under a CAPRICORN badge: Diana's calendar pings 3:15 LAUGH",
+    "story": "Diana laughs once and gets back to work; her five-year plan has a five-year plan; at 26 she opens a retirement fund; her friends never see her; her vacation was a work trip by a pool",
+    "rise": "The friends plan a surprise party in a dark meeting room and hide behind the table with a confetti cannon",
+    "twist": "Diana walks in with her laptop to present; the lights snap on: SURPRISE! The confetti cannon hits her in the face and she tips over backwards with her chair",
+    "mechanism": "Mountain in her head: a GOALS ladder with no top, an APPROVED stamp covered in dust, a FUN dial stuck at 2, a laptop that never closes, and a folder IMPORTANT full of birthday cards",
+    "ending": "She stays exactly one hour, books the next party for October and sends everyone a calendar invite"
+  },
+  "seed": {
+    "what": "The confetti cannon labelled PARTY on the friends' coffee table, with Rina, Tess and Paula",
+    "first_line": 5
+  },
+  "locations": [
+    { "id": "office", "set": "Room grey-blue glass office: glass partitions, desks, monitor calendar, CAPRICORN badge", "colour": "grey-blue" },
+    { "id": "planner", "set": "Room white wall planner with red grid: 5-YEAR PLAN, OCTOBER", "colour": "white-red" },
+    { "id": "bank", "set": "Room green bank hall: teller counter, queue posts, RETIREMENT FUND piggy bank", "colour": "green" },
+    { "id": "chat", "set": "Room pink lounge: friends on a couch, giant phone chat, confetti cannon", "colour": "pink" },
+    { "id": "pool", "set": "Room turquoise hotel pool: lounger, parasol, palms", "colour": "turquoise" },
+    { "id": "meeting", "set": "Room dark meeting room at night: long table, chairs, door light", "colour": "navy" },
+    { "id": "party", "set": "The meeting room lit for the party: yellow, balloons, SURPRISE banner, confetti", "colour": "yellow" },
+    { "id": "mountain", "set": "Mountain in her head: GOALS ladder into the clouds, APPROVED stamp, FUN dial, laptop; dusk violet", "colour": "violet-grey" },
+    { "id": "folder", "set": "Room cream study at night with a desk lamp: the IMPORTANT folder of birthday cards", "colour": "cream" }
+  ],
+  "characters": [
+    { "id": "diana", "look": "navy blazer, long dark brown hair, glasses" },
+    { "id": "rina", "look": "orange top, long black hair" },
+    { "id": "tess", "look": "green top, long red hair" },
+    { "id": "paula", "look": "purple top, long blonde hair" },
+    { "id": "teller", "look": "bank green uniform, long grey hair" }
+  ],
+  "gags": [
+    { "line": 10, "what": "The confetti cannon blasts Diana in the face and she tips over backwards with her chair" },
+    { "line": 14, "what": "Diana slips down the GOALS ladder but holds her laptop up safe the whole way" },
+    { "line": 6, "what": "A beach ball bounces off Diana's head at the pool; she keeps typing" }
+  ],
+  "story_numbers": ["3", "15", "3:15", "three", "fifteen", "three fifteen", "five", "5", "five-year", "26", "twenty-six", "once", "one", "1", "one hour", "two", "2", "october"]
+}

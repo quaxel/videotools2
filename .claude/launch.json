@@ -6,6 +6,12 @@
       "runtimeExecutable": "animator/.venv/bin/python",
       "runtimeArgs": ["animator/scripts/pipeline.py", "web", "--no-browser"],
       "port": 8766
+    },
+    {
+      "name": "uploader",
+      "runtimeExecutable": "animator/.venv/bin/python",
+      "runtimeArgs": ["animator/uploader/server.py"],
+      "port": 8765
     }
   ]
 }

@@ -1,4 +1,0 @@
-  390  sign "BAGS" cut by the frame edge (27% outside)
-  600  face of h0 cut by the frame edge (83% outside)
-  600  face of h2 cut by the frame edge (63% outside)
- 1600  face of you under the captions

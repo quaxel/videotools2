@@ -1,0 +1,39 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "customer": {
+      "voice": "Serena",
+      "instruct": "Baffled, slightly horrified breakfast customer staring at her plate, comic.",
+      "seed": 3,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "He sold one tub of margarine and got a hundred-dollar fine." },
+    { "speaker": "narrator", "text": "Not for the taste. For the colour." },
+    { "speaker": "narrator", "text": "This is New Hampshire in the eighteen-nineties. The tub weighs ten pounds." },
+    { "speaker": "narrator", "text": "It looks just like butter, dyed with the same colouring butter gets." },
+    { "speaker": "narrator", "text": "And the state law seems friendly. Sell as much as you like." },
+    { "speaker": "narrator", "text": "Just print oleomargarine on the tub, in letters half an inch tall." },
+    { "speaker": "narrator", "text": "He prints the letters. Clean, legal, easy money." },
+    { "speaker": "narrator", "text": "Then a lawman walks in and reads the last line. It must be pink.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "Not a pink label. Pink margarine, all the way through." },
+    { "speaker": "customer", "text": "Why is my butter pink?" },
+    { "speaker": "narrator", "text": "Nobody would buy that. But the normal colour cost him a hundred dollars." },
+    { "speaker": "narrator", "text": "The law even allowed sixty days in jail." },
+    { "speaker": "narrator", "text": "He took it to the Supreme Court, and in eighteen ninety-eight he won." },
+    { "speaker": "narrator", "text": "The judges said pink is not margarine's natural colour." },
+    { "speaker": "narrator", "text": "Dyeing it pink would make it impossible to sell." },
+    { "speaker": "narrator", "text": "A permission with a rule that stops every sale is really a ban." },
+    { "speaker": "narrator", "text": "If pink was allowed, why not blue, red or black?" },
+    { "speaker": "narrator", "text": "Or a law that made it stink?" },
+    { "speaker": "narrator", "text": "Two justices disagreed, but his conviction was thrown out." },
+    { "speaker": "narrator", "text": "So when a law says yes, but make it pink, it means no." }
+  ]
+}

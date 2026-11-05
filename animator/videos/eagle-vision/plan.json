@@ -1,0 +1,106 @@
+{
+  "title": "You Wake Up With an Eagle's Vision",
+  "topic": "You wake up with an eagle's vision",
+  "mechanism": "Eagle eyes see a fly across the room, a neighbour's nose and a bird a kilometre away, but sharp eyes do not stop you walking into a glass door.",
+  "format_note": "Comedy on the user's own script, verbatim (ellipses replaced by full stops; Emma's 'Hey, Buddy!' from the storyboard version). Word count and wpm targets deliberately missed; no factual numbers. Zooms are exaggerated; the eagle-eye HUD is a golden targeting overlay. Alex wears yellow hoodie, blue jeans, white sneakers; Emma has long hair (long: true).",
+  "beats": {
+    "hook": "Alex's eye opens: a gold iris flashes, the camera rockets across the room to a fly on the wall and out of the window to an eagle.",
+    "story": "He sees everything: a fly's compound eyes, then across the street his neighbour Mr Jenkins picking his nose: eww, he looks away.",
+    "rise": "Emma waves from down the street; Alex fixes his hair and waves back, glowing.",
+    "twist": "Emma says 'Hey, Buddy!': she was waving at the golden retriever sitting behind him.",
+    "mechanism": "Recovering with his super eyes, he spots a bird high in the sky and keeps staring up while the glass café door grows behind him.",
+    "ending": "BONK: face squashed on the cracked glass reading DOOR; a pigeon strolls past; loop back to the opening eye."
+  },
+  "seed": {
+    "what": "The glass café door with DOOR on it, standing behind Alex in the NO PROBLEM shot at 9 s and in the street wides before the walk",
+    "first_line": 4
+  },
+  "locations": [
+    {
+      "id": "eye",
+      "set": "EagleEye macro on a dark backdrop",
+      "colour": "deep violet with gold"
+    },
+    {
+      "id": "bedroom",
+      "set": "BedroomSet (no paw poster, no duvet hang), mirror, fly on the wall",
+      "colour": "lilac / peach"
+    },
+    {
+      "id": "sky",
+      "set": "StreetSet sky with the Eagle and clouds",
+      "colour": "sky blue"
+    },
+    {
+      "id": "block",
+      "set": "NeighbourSet brick block + Jenkins window",
+      "colour": "brick red / orange"
+    },
+    {
+      "id": "street",
+      "set": "StreetSet morning, Emma and Buddy",
+      "colour": "leaf green + pastel houses"
+    },
+    {
+      "id": "cafe",
+      "set": "StreetSet + CafeFront glass door",
+      "colour": "warm olive / cream"
+    },
+    {
+      "id": "hud",
+      "set": "EagleHud over each zoom",
+      "colour": "gold"
+    },
+    {
+      "id": "mirror",
+      "set": "BedroomSet corner: arch-top standing mirror with a gold-eyed reflection",
+      "colour": "lilac / pink glass"
+    },
+    {
+      "id": "forecourt",
+      "set": "CafeFront tiled forecourt, top-down and low angles",
+      "colour": "cream tile / red awning"
+    }
+  ],
+  "characters": [
+    {
+      "id": "alex",
+      "look": "yellow hoodie, blue jeans, white sneakers, brown hair, brown eyes that glow gold"
+    },
+    {
+      "id": "jenkins",
+      "look": "blue bathrobe, thick glasses, grey hair, coffee mug"
+    },
+    {
+      "id": "emma",
+      "look": "long dark hair, turquoise jacket, black pants, white sneakers"
+    },
+    {
+      "id": "buddy",
+      "look": "golden retriever, red collar"
+    },
+    {
+      "id": "eagle",
+      "look": "bald-eagle style, white head, hooked yellow beak"
+    },
+    {
+      "id": "pigeon",
+      "look": "grey city pigeon with an iridescent neck"
+    }
+  ],
+  "gags": [
+    {
+      "line": 7,
+      "what": "Jenkins's finger goes into his nose; he hides behind a giant mug when he is caught"
+    },
+    {
+      "line": 13,
+      "what": "Emma's wave lands on Buddy; Alex's hand freezes in the air and lowers slowly"
+    },
+    {
+      "line": 21,
+      "what": "Alex walks into the glass door, face squashed, glass cracks, dizzy stars; a pigeon walks calmly by"
+    }
+  ],
+  "story_numbers": []
+}

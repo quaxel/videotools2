@@ -1,0 +1,110 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "worker": {
+      "voice": "Aiden",
+      "instruct": "Calm, slightly amused water-quality technician, quick and matter-of-fact.",
+      "seed": 5,
+      "tempo": 1.1
+    },
+    "tourist": {
+      "voice": "Vivian",
+      "instruct": "Confident, chirpy tourist explaining something she just learned, quick and bright.",
+      "seed": 2,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "You jog past the city reservoir. The water is gone."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Millions of black balls, bobbing like a giant ball pit."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You figure they're saving water from the sun. Smart."
+    },
+    {
+      "speaker": "narrator",
+      "text": "You explain it to a tourist like an expert."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then a lab worker climbs out of a boat, holding a bottle.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "worker",
+      "text": "Evaporation is the bonus. The sun was making a chemical."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Back in twenty oh seven, tests found bromate above the federal limit."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Bromate is a suspected carcinogen."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The water had bromide, plus chlorine to disinfect it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Add sunlight, and the two make bromate."
+    },
+    {
+      "speaker": "narrator",
+      "text": "To prove it, scientists hung bottles at different depths in a reservoir."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Bottles near the surface, in more sunlight, made more bromate."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Cut the light by about eighty percent, and bromate stopped forming."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Floating covers would cost over three hundred million dollars."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Plastic balls cost thirty-six cents each."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They block about ninety-five percent of the sunlight."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They're black because carbon black shields the plastic from ultraviolet."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In twenty fifteen, the biggest reservoir reached ninety-six million balls."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Yes, they cut evaporation too. But sunlight was the real enemy."
+    },
+    {
+      "speaker": "narrator",
+      "text": "On your way back, the tourist is explaining it to someone else."
+    },
+    {
+      "speaker": "tourist",
+      "text": "It's just to stop evaporation!"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast-paced, energetic, punchy explainer narrator. Brisk delivery with no long pauses.",
+      "seed": 7,
+      "tempo": 1.18
+    },
+    "trucker": {
+      "voice": "Serena",
+      "instruct": "Dry, amused long-haul truck driver, warm and matter-of-fact, speaking quickly.",
+      "seed": 4,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "You've been crawling for twenty minutes. Then the road just opens up." },
+    { "speaker": "narrator", "text": "No crash. No roadworks. Nothing." },
+    { "speaker": "narrator", "text": "You floor it, sure you've beaten the traffic." },
+    { "speaker": "narrator", "text": "At the rest stop, you sip your coffee like a genius." },
+    { "speaker": "narrator", "text": "Then the trucker from behind you walks in, shaking her head.", "pauseAfter": 0.4 },
+    { "speaker": "trucker", "text": "There was no crash, honey. It was just us, braking." },
+    { "speaker": "narrator", "text": "Sounds crazy, but scientists in Japan tested it." },
+    { "speaker": "narrator", "text": "In a twenty oh eight study, they put twenty-two cars on a circular track." },
+    { "speaker": "narrator", "text": "The loop was two hundred thirty metres. No obstacle at all." },
+    { "speaker": "narrator", "text": "Every driver got one rule: cruise at thirty, follow safely." },
+    { "speaker": "narrator", "text": "At first, the circle flowed perfectly." },
+    { "speaker": "narrator", "text": "Then tiny wobbles appeared in the gaps." },
+    { "speaker": "narrator", "text": "One car slowed a little. The one behind slowed more." },
+    { "speaker": "narrator", "text": "Soon, cars were stopping completely." },
+    { "speaker": "narrator", "text": "A stop-and-go wave was born. Here's the weird part." },
+    { "speaker": "narrator", "text": "The cars drive forward, but the jam crawls backward, about twenty kilometres an hour." },
+    { "speaker": "narrator", "text": "New cars join its back as others leave its front." },
+    { "speaker": "narrator", "text": "Bottlenecks still cause jams, by packing cars closer." },
+    { "speaker": "narrator", "text": "But packed tightly enough, one tap of the brakes is all it takes." },
+    { "speaker": "narrator", "text": "Back on the highway, the wave is still rolling backward." },
+    { "speaker": "narrator", "text": "Twenty minutes behind you, someone is looking for a crash." }
+  ]
+}

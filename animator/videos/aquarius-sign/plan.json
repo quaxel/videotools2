@@ -1,0 +1,40 @@
+{
+  "title": "An Aquarius Quits When It Gets Cool",
+  "topic": "Aquarius zodiac satire: an Aquarius quits when it gets cool",
+  "mechanism": "Inside an Aquarius there is a lab with a telescope pointed away from people, a box of FEELINGS locked with a key labelled LATER, and one big switch marked IF POPULAR, STOP that drops anything the moment it gets popular.",
+  "beats": {
+    "hook": "A red street protest under an AQUARIUS placard: Iris, mid-chant, finally answers your text three days late",
+    "story": "Iris brews kombucha in her bathtub, wears wool socks with sandals on purpose, loves humanity but not humans, and her weird band plays to five people in a laundromat",
+    "rise": "Nobody understands her, and Iris is thrilled",
+    "twist": "Influencer Brooke walks into the laundromat and starts filming; by morning the video has a million views and the whole city dresses like Iris",
+    "mechanism": "A lab in her head: a telescope pointed away from people, a FEELINGS box locked with a key labelled LATER, and a big switch IF POPULAR, STOP that flips",
+    "ending": "She throws away her sandals, quits the band, the bathtub kombucha explodes, and by Friday she keeps bees and sings medieval choir music; her five fans and the influencer follow, and she replies from a beehive"
+  },
+  "seed": {
+    "what": "Brooke the influencer, filming herself with a ring light at the edge of the protest and later outside the laundromat window",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "protest", "set": "StreetSet re-dressed for a protest: red banners, placards, barriers, AQUARIUS placard with the badge", "colour": "red" },
+    { "id": "room", "set": "Room purple bedroom: record player, globe, lava lamp, posters, window", "colour": "purple" },
+    { "id": "bathroom", "set": "Room green tiled bathroom: clawfoot tub full of amber kombucha, jars with cloth covers, bottles", "colour": "green-brown" },
+    { "id": "laundromat", "set": "Room laundromat: washer row, stacked dryers, fluorescent tubes, folding table, five chairs", "colour": "turquoise" },
+    { "id": "phone", "set": "Room pink studio: giant phone with the viral video and a view counter, ring light", "colour": "pink" },
+    { "id": "street", "set": "StreetSet on a sunny day with yellow awnings: everyone dressed like Iris", "colour": "yellow" },
+    { "id": "lab", "set": "Room steel-blue lab in her head: telescope on a pier, FEELINGS strongbox, LATER key, IF POPULAR, STOP switch", "colour": "metal blue" },
+    { "id": "apiary", "set": "Outdoor meadow apiary at golden hour: pastel box hives, a giant hive, bees, choir notes", "colour": "honey orange" }
+  ],
+  "characters": [
+    { "id": "iris", "look": "silver long hair, thrifted mustard outfit with a green print" },
+    { "id": "june", "look": "teal top, long black hair (bandmate, drums)" },
+    { "id": "ada", "look": "rust top, long red hair, glasses (bandmate, washboard)" },
+    { "id": "brooke", "look": "hot pink top, long blonde hair, always filming" },
+    { "id": "fans", "look": "five audience members (four women with long hair, one man)" }
+  ],
+  "gags": [
+    { "line": 17, "what": "Iris flings her sandals away; one smacks the phone out of Brooke's hand" },
+    { "line": 18, "what": "The bathtub kombucha explodes and the foam hits the ceiling" },
+    { "line": 4, "what": "Iris hugs a globe labelled HUMANITY, then snaps the curtains shut on the actual humans waving outside" }
+  ],
+  "story_numbers": ["3", "three", "three days", "5", "five", "1,000,000", "1000000", "a million", "million", "one", "1", "friday"]
+}

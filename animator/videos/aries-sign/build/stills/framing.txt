@@ -1,6 +1,0 @@
-  830  sign "MANUAL" under the captions (52%)
-  870  sign "MANUAL" under the captions (95%)
-  940  sign "GO" under the captions (100%)
- 1080  sign "GO" under the captions (41%)
- 1080  sign "ANGER" cut by the frame edge (25% outside)
- 1460  sign "MIA'S BAKERY" cut by the frame edge (34% outside)

@@ -1,0 +1,67 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Fast, gripping, high-energy history storyteller. Excited and urgent, punchy emphasis on the surprising facts, brisk pace, no long pauses.",
+      "seed": 7,
+      "tempo": 1.42
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "During World War Two, bombs crossed the Pacific without a pilot.",
+      "pauseAfter": 0.12,
+      "voice": {
+        "instruct": "Dramatic, excited opening hook, urgent and amazed, hitting 'without a pilot' hard.",
+        "tempo": 1.32
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Japan built about nine thousand three hundred paper balloons, glued by teenage schoolgirls.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Full of hydrogen, they rode the jet stream thirty-five thousand feet up, six thousand miles to America.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Whenever one sank, it dropped a sandbag and climbed again.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "About three hundred made it. Alaska, Montana, even Michigan.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "America told newspapers to print nothing. Japan was left guessing.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Geologists studied the sand in those bags to hunt down the launch beaches.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then, on May fifth, nineteen forty-five, a church picnic in an Oregon forest found one.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "Six people died, the only deaths from enemy attack on the American mainland.",
+      "pauseAfter": 0.12
+    },
+    {
+      "speaker": "narrator",
+      "text": "And some of those balloons were never found.",
+      "pauseAfter": 0.1
+    }
+  ]
+}

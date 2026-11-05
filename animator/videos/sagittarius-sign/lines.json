@@ -1,0 +1,119 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Serena",
+      "instruct": "Fast, dry, witty female narrator teasing a friend. Brisk, punchy delivery with no pauses between sentences.",
+      "seed": 7,
+      "tempo": 1.3
+    },
+    "luna": {
+      "voice": "Vivian",
+      "instruct": "Carefree, sunny, brutally honest young woman, laughing, fast and breezy.",
+      "seed": 5,
+      "tempo": 1.3
+    },
+    "agent": {
+      "voice": "Serena",
+      "instruct": "Calm, flat, professional airport gate agent, short and matter of fact.",
+      "seed": 3,
+      "tempo": 1.2
+    },
+    "maya": {
+      "voice": "Vivian",
+      "instruct": "Happy, surprised friend at a party, bright and fast.",
+      "seed": 11,
+      "tempo": 1.3
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "Your Sagittarius friend booked a flight to Peru mid-brunch."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She did it mid-sentence with syrup all over her phone."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Meet Luna who is fun and free and dangerously honest."
+    },
+    {
+      "speaker": "luna",
+      "text": "Your bangs were a mistake babe but I love you!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Bea touches her bangs while Luna is already ordering pancakes."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her suitcase is always packed and she sleeps in hiking boots."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She has seen thirty countries and zero dentists."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her friends throw her a goodbye party and everyone cries."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Luna waves from the gate and she has never been happier."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then the gate agent holds out her hand."
+    },
+    {
+      "speaker": "agent",
+      "text": "Passport, please."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Luna checks her pockets and her bag and her boots."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her passport is at home in the freezer next to the peas."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So what's going on inside a Sagittarius?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Picture a room where every door says EXIT."
+    },
+    {
+      "speaker": "narrator",
+      "text": "There's a compass on the wall but north is missing."
+    },
+    {
+      "speaker": "narrator",
+      "text": "A bow and arrow labelled TRUTH is aimed right at your bangs."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And a calendar marked PLANS is completely blank."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Luna takes the bus home and the party is still going."
+    },
+    {
+      "speaker": "maya",
+      "text": "You're back? We still have cake!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Everyone cheers and Luna eats half the cake."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That night she books a flight to Iceland."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "title": "A Scorpio Already Knows",
+  "topic": "Scorpio zodiac satire: a Scorpio already knows",
+  "mechanism": "Inside a Scorpio head there is a dark room: a corkboard of SUSPECT photos tied with red string, a filing cabinet marked EVIDENCE, a SECRETS padlock with no key, and a DAYS SINCE I FORGAVE counter stuck at 0.",
+  "beats": {
+    "hook": "Girls' night at the bar under a SCORPIO sign: Vera stares at Jen's new boyfriend Tom without blinking",
+    "story": "Vera knows your password; her phone finds Tom's ex in 8 minutes; Jen tells her to stop; Vera writes in her notebook",
+    "rise": "Jen ignores her: flowers, dinners, weekend trips, matching sweaters",
+    "twist": "The doorbell rings: Kim, his other girlfriend, in the same sweater; Tom flees into the closet; Vera is already pouring three glasses",
+    "mechanism": "Dark room in her head: corkboard SUSPECT photos with red string, filing cabinet EVIDENCE, padlock SECRETS with no key, counter DAYS SINCE I FORGAVE at 0",
+    "ending": "Jen and Kim become best friends at the wine table; Vera pins a new photo: YOUR NEW COWORKER"
+  },
+  "seed": {
+    "what": "Vera's notebook on the bar, open on a page headed TOM, with a sketch of a second girl",
+    "first_line": 6
+  },
+  "locations": [
+    { "id": "bar", "set": "Room burgundy bar, counter, stools, SCORPIO badge", "colour": "burgundy" },
+    { "id": "phone", "set": "Room dark green, giant phone screen: PASSWORD, EX FOUND", "colour": "dark green" },
+    { "id": "dinner", "set": "Room pink, dinner table with flowers", "colour": "pink" },
+    { "id": "living", "set": "Room warm yellow, Jen's couch, matching sweaters", "colour": "yellow" },
+    { "id": "door", "set": "Room cold blue hallway, front door, closet", "colour": "cold blue" },
+    { "id": "head", "set": "Room near-black red, corkboard with red string, SUSPECT photos", "colour": "red" },
+    { "id": "archive", "set": "Room grey, filing cabinet EVIDENCE, padlock SECRETS, counter DAYS SINCE I FORGAVE", "colour": "grey" },
+    { "id": "wine", "set": "Room purple, wine table, three glasses", "colour": "purple" }
+  ],
+  "characters": [
+    { "id": "vera", "look": "black turtleneck, long black hair" },
+    { "id": "jen", "look": "pink patterned sweater, long blonde hair" },
+    { "id": "kim", "look": "the same pink patterned sweater, long red hair" },
+    { "id": "tom", "look": "pink patterned sweater, short hair, cap" }
+  ],
+  "gags": [
+    { "line": 12, "what": "Tom bolts into the closet instead of the door and a pile of coats rains down on him" },
+    { "line": 17, "what": "The EVIDENCE drawer shoots out and files explode into the air" },
+    { "line": 20, "what": "Someone taps the DAYS SINCE I FORGAVE counter; it clicks to 1 and snaps back to 0" }
+  ],
+  "story_numbers": ["eight", "8", "three", "3", "zero", "0", "once", "one", "1"]
+}

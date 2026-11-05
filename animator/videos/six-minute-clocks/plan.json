@@ -1,0 +1,41 @@
+{
+  "title": "Why Europe's Oven Clocks Ran Six Minutes Slow",
+  "topic": "Why some European oven clocks ran six minutes slow in 2018",
+  "mechanism": "Some plug-in clocks count the grid's 50 swings per second instead of using quartz, so when a political dispute between two Balkan grid operators left the shared European grid short and its frequency sagged to about 49.996 Hz, those clocks fell almost six minutes behind until operators ran the grid slightly fast in March.",
+  "beats": {
+    "hook": "You sprint onto the platform as your train pulls away",
+    "story": "Your phone says you're late; the oven clock said you had time",
+    "rise": "The oven clock has never been wrong; mornings feel calmer every week",
+    "twist": "The neighbour knocks holding his radio alarm clock: it is six minutes behind too",
+    "mechanism": "QUARTZ crystal in the phone vs NO QUARTZ in the oven; wall SOCKET with a swinging wave rope into a SWINGS counter and '50 SWINGS = 1 SEC' label; power strip '25 COUNTRIES' SPAIN..TURKEY; balance scale POWER IN / POWER OUT with a 50.000 HZ dial; desks KOSOVO GRID / SERBIA GRID with a GAP; alarm screen 49.996 HZ; calendar JAN-FEB-MAR and oven counter -6 MIN; EXTRA ENERGY crates and 50.01 HZ screen",
+    "ending": "By April the oven clock matches the phone and you make the train; the neighbour is still resetting his blinking radio"
+  },
+  "seed": { "what": "The oven clock with its plug in the wall socket (and the radio alarm clock the neighbour brings)", "first_line": 1 },
+  "locations": [
+    { "id": "platform", "set": "Room cold + Train + departure board + round clock (guide/references/station-platform.md)", "colour": "blue" },
+    { "id": "kitchen", "set": "Room warm + OvenColumn + Socket + Pendant + WallCalendar (guide/references/kitchen-oven.md)", "colour": "orange" },
+    { "id": "hallway", "set": "Room golden + Door + coat rack", "colour": "yellow" },
+    { "id": "clock-wall", "set": "Room neon + ClockWall of oven and radio displays", "colour": "pink" },
+    { "id": "clockworks", "set": "Room dream + giant Socket + WaveRope + SwingCounter + quartz phone", "colour": "purple" },
+    { "id": "power-strip", "set": "Room office + PowerStrip with 25 plugs", "colour": "mint green" },
+    { "id": "control-room", "set": "Room night + VideoWall + Console + HzDial + BalanceScale (guide/references/grid-control-room.md)", "colour": "navy" },
+    { "id": "control-room-alarm", "set": "control room re-lit alarm with a red beacon", "colour": "red" },
+    { "id": "balkan-office", "set": "Room daylight + two desks KOSOVO GRID / SERBIA GRID + GAP cable", "colour": "teal" },
+    { "id": "kitchen-dusk", "set": "kitchen re-lit dusk for the slivers and calendar", "colour": "violet" }
+  ],
+  "characters": [
+    { "id": "you", "look": "woman, long brown hair, mustard coat" },
+    { "id": "neighbour", "look": "grey hair, glasses, maroon bathrobe, carries a red-digit radio alarm clock" },
+    { "id": "operator", "look": "control-room operator, cream shirt, blue lanyard" },
+    { "id": "opk", "look": "grid operator at the KOSOVO GRID desk, blue shirt (generic, no dialogue)" },
+    { "id": "ops", "look": "grid operator at the SERBIA GRID desk, green shirt, long hair (generic, no dialogue)" },
+    { "id": "commuter", "look": "commuter in a red jacket on the platform" }
+  ],
+  "gags": [
+    { "line": 0, "what": "You skid along the platform edge as the train doors shut in your face" },
+    { "line": 3, "what": "Calm morning: the coffee overflows the cup while you smile" },
+    { "line": 5, "what": "The radio alarm blares in the neighbour's hands; he juggles it and drops it with a thud" },
+    { "line": 20, "what": "The neighbour jabs the radio buttons; it blinks 12:00 and he facepalms" }
+  ],
+  "story_numbers": []
+}

@@ -1,0 +1,38 @@
+{
+  "title": "Why Traffic Jams Form With Nothing in the Way",
+  "topic": "Why traffic jams form with no obstacle ahead",
+  "mechanism": "Above a critical density, small speed wobbles between following cars amplify (each driver brakes a bit harder than the one ahead) until cars stop, and the stop-and-go wave travels backward at about 20 km/h while the cars move forward, as a 2008 experiment with 22 cars on a 230 m ring showed; bottlenecks cause jams by raising density, but no obstacle is required.",
+  "beats": {
+    "hook": "You've been crawling for twenty minutes, then the road just opens up with no crash in sight",
+    "story": "You floor it, sure you beat the traffic",
+    "rise": "At the rest stop you sip coffee like a genius",
+    "twist": "The trucker who was behind you walks in: there was no crash, it was just everyone braking",
+    "mechanism": "Briefing board 22 CARS / 230 M / 30 KM/H; the ring track with 22 cars and a centre camera mast; speed sign 30 + FOLLOW SAFELY; a row of toy cars with SPEED gauges dipping more down the row; the JAM flag riding the stopped clump backward; trackside board JAM MOVES BACK 20 KM/H; a BOTTLENECK funnel model packing cars; a BRAKE pedal tap rippling brake lights down a packed row",
+    "ending": "Back on the night highway the brake-light wave rolls backward; twenty minutes behind, a new driver looks for the crash"
+  },
+  "seed": { "what": "The trucker's cab in your mirror / the truck right behind your car on the highway", "first_line": 0 },
+  "locations": [
+    { "id": "highway-dusk", "set": "HighwaySet dusk (guardrail, gantry, parallax ridges) — guide/references/highway-jam.md", "colour": "orange-violet" },
+    { "id": "diner", "set": "Room neon + counter, stools, neon sign, door", "colour": "pink" },
+    { "id": "briefing", "set": "Room office + corkboard plan + ring model", "colour": "mint green" },
+    { "id": "ring-track", "set": "TrackSet daylight (lot, ring, 22 simulated cars, mast) — guide/references/ring-track.md", "colour": "sky blue / grey" },
+    { "id": "ring-track-golden", "set": "TrackSet golden hour with the JAM flag", "colour": "gold" },
+    { "id": "wave-strip", "set": "Room dream + row of toy cars with SPEED gauges + BRAKE pedal", "colour": "purple" },
+    { "id": "bottleneck", "set": "Room cold + Funnel model", "colour": "blue" },
+    { "id": "highway-night", "set": "HighwaySet night with a backward brake-light wave", "colour": "navy" }
+  ],
+  "characters": [
+    { "id": "you", "look": "man, dark hair, green hoodie, drives a white car" },
+    { "id": "trucker", "look": "woman trucker, long red hair, plaid red shirt, cap" },
+    { "id": "scientist", "look": "researcher in a white coat with glasses (generic, no dialogue)" },
+    { "id": "barista", "look": "diner server, teal apron" },
+    { "id": "driver", "look": "test driver in a yellow jacket in one of the ring cars" },
+    { "id": "victim", "look": "woman driver at night, long dark hair, blue coat" }
+  ],
+  "gags": [
+    { "line": 2, "what": "You floor it and your head snaps back into the seat" },
+    { "line": 5, "what": "Spit-take: the coffee sprays across the counter when the trucker says braking" },
+    { "line": 13, "what": "A ring driver stops so suddenly his cap flies off" }
+  ],
+  "story_numbers": ["twenty"]
+}

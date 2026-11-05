@@ -1,0 +1,206 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Excited, wildly expressive comedy narrator. Big reactions, slightly sarcastic, never calm.",
+      "seed": 7,
+      "tempo": 1.15
+    },
+    "emma": {
+      "voice": "Serena",
+      "instruct": "Bright, cheerful, warm, calling out to a pet far away.",
+      "seed": 5,
+      "tempo": 1.0
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "You wake up with an eagle's vision.",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Punchy, amazed opening hook, like announcing a superpower.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "And HOLY COW!",
+      "pauseAfter": 0.12,
+      "voice": {
+        "instruct": "Explosive amazement.",
+        "tempo": 1.1
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You can see EVERYTHING!",
+      "pauseAfter": 0.2
+    },
+    {
+      "speaker": "narrator",
+      "text": "A tiny bird flying way up in the sky?",
+      "pauseAfter": 0.15
+    },
+    {
+      "speaker": "narrator",
+      "text": "NO PROBLEM!",
+      "pauseAfter": 0.25,
+      "voice": {
+        "instruct": "Cocky, triumphant shout.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then you look across the street.",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Casual, nosy, setting up a secret.",
+        "tempo": 1.1
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Your neighbor is picking his nose.",
+      "pauseAfter": 0.25,
+      "voice": {
+        "instruct": "Gossip-show glee, mock whisper.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "Wait. DID HE JUST EAT THAT?!",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Mock horror, rising to a scream.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "EWW! WHY CAN I SEE THIS?!",
+      "pauseAfter": 0.25,
+      "voice": {
+        "instruct": "Disgusted comic scream.",
+        "tempo": 1.05
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You quickly look away.",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Quick, flustered.",
+        "tempo": 1.15
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "OH! Your crush is waving at you!",
+      "pauseAfter": 0.15,
+      "voice": {
+        "instruct": "Giddy, excited gasp.",
+        "tempo": 1.1
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You wave back!",
+      "pauseAfter": 0.3,
+      "voice": {
+        "instruct": "Proud, hopeful.",
+        "tempo": 1.1
+      }
+    },
+    {
+      "speaker": "emma",
+      "text": "Hey, Buddy!",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "Wait a second. She's waving at the DOG behind you.",
+      "pauseAfter": 0.25,
+      "voice": {
+        "instruct": "Slow, deadpan dread, then dry.",
+        "tempo": 0.98
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "AWESOME. JUST AWESOME.",
+      "pauseAfter": 0.25,
+      "voice": {
+        "instruct": "Heavy sarcasm, flat and dry.",
+        "tempo": 0.98
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "But hey! At least you've got super eyes!",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Forced cheerfulness, bouncing back.",
+        "tempo": 1.1
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You spot another bird high in the sky.",
+      "pauseAfter": 0.15
+    },
+    {
+      "speaker": "narrator",
+      "text": "WOW! LOOK AT THAT THING!",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Wide-eyed excited shout.",
+        "tempo": 1.1
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You keep staring up. And then.",
+      "pauseAfter": 0.15,
+      "voice": {
+        "instruct": "Slow, building suspense.",
+        "tempo": 0.95
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "BONK!",
+      "pauseAfter": 0.3,
+      "voice": {
+        "instruct": "One loud punchy word.",
+        "tempo": 1.0
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You walk straight into a glass door!",
+      "pauseAfter": 0.2
+    },
+    {
+      "speaker": "narrator",
+      "text": "Congratulations!",
+      "pauseAfter": 0.3,
+      "voice": {
+        "instruct": "Mock applause voice.",
+        "tempo": 1.0
+      }
+    },
+    {
+      "speaker": "narrator",
+      "text": "You've got eagle eyes. AND A PIGEON BRAIN!",
+      "pauseAfter": 0.2,
+      "voice": {
+        "instruct": "Deadpan, then a punchy final line.",
+        "tempo": 1.05
+      }
+    }
+  ]
+}
