@@ -79,6 +79,29 @@ references, never their characters, props or shots; reference frames never go in
 
 Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `InteriorStrip`, `XrayWheel`, `AtmSet`, `ExteriorSet`, `LabSet`.
 
+### Blender models (`src/three/model.tsx`, also exported from the engine)
+
+For props the kit primitives cannot make read (car, bicycle, boat, animal, instrument). One bpy script per model in
+`videos/<slug>/blender/<name>.py`; `guide/blender/car.py` is a worked example to copy. Build it:
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P videos/<slug>/blender/<name>.py -- public/videos/<slug>/models/<name>.glb
+```
+
+- Script rules: metres; origin on the ground under the model's centre; front toward Blender -Y (it faces +Z, the
+  camera, in the scene); flat cartoon proportions with bevels (`BEVEL` modifier, 3-4 segments) and `shade_smooth`;
+  one Principled material per colour with only Base Color set (textures are allowed, roughness and metal are ignored).
+  Every part that moves (wheel, door, propeller, jaw) is its own object with a name without dots or spaces, rotation
+  and scale applied and its origin on the pivot; children follow their parent. Keep it under ~50k triangles.
+- `BlenderModel({ src, position?, rotation?, scale?, ink?, shadows?, parts? })` — `src` under public/
+  (`"videos/<slug>/models/car.glb"`). Every material becomes the kit's toon material (colour and texture kept) with
+  an ink hull of `ink` metres (default 0.015, like `InkBox`; a mesh named `..._noink` gets none). The frame waits for
+  the file. `parts` poses named objects per frame relative to their rest pose:
+  `{ Wheel_FL: { rotation: [-f * 0.2, 0, 0] }, Door_L: { rotation: [0, open * 1.2, 0] } }` (`position` added,
+  `rotation` Euler in the part's own axes, `scale` multiplied, `visible`). An unknown part name throws.
+- A model that drives or flies through a shot moves as a whole with the group `position`; spin its wheels from the
+  distance travelled (`distance / radius`) so they do not skid.
+
 ### Outdoor set, fire, smoke and distant mountains (`src/three/LakeSet.tsx`)
 
 - `LakeSet({ camera, frame, fire? })` — mountain lake at dusk (mood `dusk`): grass bank (floor y = 0, z > -1.5), water
@@ -244,6 +267,61 @@ already 2× supersampled). The sets keep only their own hull outlines:
   one headline across several shots, render it in each with `at` = minus the shot's offset (no re-pop). Use it for
   the hook question and short on-screen facts ("NO CLOUDS. NO STORM."), at most 6 words.
 
+### Sunbeams through a window (`src/three/godrays.tsx`)
+
+- `GodRays({ center, size, panes?, bar?, sun, strength?, patch?, tops?, motes? })` — one slanted shaft of light per
+  window pane (`center` = the glass on a wall facing +z, `panes` [columns, rows], `sun` = the way the light travels,
+  y < 0), bright at the glass and fading to the floor, the panes' patches where they land (`tops: [{ y, x, z }]` adds
+  patches on a table top), and dust motes. Additive: they lighten whatever stands in them. They read as rays only when
+  the sun crosses the frame (a big x part in `sun`) against a mid-dark wall; light pointing at the camera turns into
+  haze. Pass `frame` and the motes drift down the shafts. `src/scenes/SunlitLunch.tsx` uses them with `strength`
+  0.08: composition `SunlitLunch` (one frame) and `SunlitLunchEat` (5 s: two bites, chewing, fork back to the plate).
+
+### Physics: falls, topples and bounces baked offline (`scripts/physics.mjs`, `src/three/physics.tsx`)
+
+For a gag where things fall, tip over, scatter or bounce (a crate stack knocked down, cans flying, a chest dropped
+on a foot), simulate it instead of keyframing it. Rapier runs once, offline; the render only looks poses up, so
+every frame renders on its own. `src/scenes/PhysicsPreview.tsx` (composition `PhysicsPreview`) is a worked example.
+- Write `videos/<slug>/physics.mjs` (a JS module, so a stack can be a loop) exporting one simulation or an object of
+  named ones: `{ frames, gravity?, floor?, warmup?, statics, bodies, events }` (the file header in
+  `scripts/physics.mjs` lists every field). Shapes: `box` (`size` full [w, h, d], as InkBox), `ball` (`radius`),
+  `cylinder` (`radius`, `height`). Metres; y = 0 is the floor. `warmup` frames settle a stack before frame 0.
+  `events: [{ frame, body, kick: [vx, vy, vz], at? }]` pushes a body (a kick is a change of speed in m/s whatever
+  the mass; `at` pushes at that point so it tips over). Give light things a `mass` (a tin can 0.3 kg, an empty
+  crate 12): mass only matters between bodies. `statics` are fixed colliders standing in for set pieces (a table
+  top, a ramp); draw those with the set.
+- `pipeline.py physics <slug>` bakes it into `src/videos/<slug>/physics.json` (`check`, `stills`, `collide`, `motion`
+  and `render` re-bake when the spec is newer). Import it like `timing.json`:
+  `import SIM_JSON from "./physics.json"; const SIM = SIM_JSON as unknown as PhysicsSim;` (with named
+  simulations, `SIM_JSON.name`).
+- `<Simulation sim={SIM} frame={f - START} />` in the set draws every body in its colour at sim frame `f - START`
+  (it waits at its start pose before 0 and holds where it came to rest after the track). `draw={(body) => ...}`
+  swaps in your own prop for a body, built centred on its centre. Bodies squash on hard landings (`squashy={false}`
+  off). `simPose(SIM, name, f)` gives one body's `{ position, quaternion }` for anything else that should follow it.
+- `SIM.impacts` / `simImpacts(SIM, body?, minSpeed?)`: every contact that starts at ≥ 0.6 m/s, `{ frame, body, other,
+  speed, at }` (`other` is the body or static it hit, or `"floor"`). Put the sounds on these frames (spread
+  `simImpacts(SIM, undefined, 2).map((h) => ({ at: START + h.frame, src: sfx("plop"), volume: ... }))` into the
+  effect list, a `stamp` or `boom` for the big one: that also jolts the camera) and dust on the floor hits.
+- Tune by baking and looking: `node scripts/physics.mjs videos/<slug>/physics.mjs /tmp/x.json` prints bodies,
+  frames and impacts in a second. Keep the scatter inside the frame: the narrow 9:16 frame loses anything that rolls
+  more than ~0.25 × the camera distance sideways.
+
+### Particles: confetti, sparks, dust, stars (`src/three/particles.tsx`)
+
+Instanced, seeded and closed-form (gravity with air drag), so any frame renders on its own; wrapped as `ghost`, so
+`collide` ignores them. Place inside the set like any prop.
+- `Burst({ kind, at, frame, count?, size?, speed?, spray?, colors?, seed?, floor? })` — one burst from a point;
+  `frame` = frames since it went off (`f - hitFrame`, negative hides it). Kinds: `confetti` (shot up, flutters down,
+  tumbles, lies flat where it lands), `sparks` (fast, falling, cooling white to red; bright enough for the post
+  chain's bloom), `dust` (low puffs rolling out along the ground: put `at` on the floor, `[x, 0.02, z]`, and scale
+  `size` with the impact speed), `stars` (cartoon impact stars with an ink rim, popping round a bonk, turned to the
+  camera). `spray` adds a velocity to every particle (a popper aimed sideways). Give two bursts of one kind in one
+  shot different `seed`s.
+- `Shower({ kind?: confetti | stars, area: [x0, z0, x1, z1], top, frame, frames?, count?, ... })` — rains from
+  height `top` over an area for `frames` frames; confetti stays on the floor, stars pop out as they land.
+- No emoji (they need a colour emoji font inside the headless browser) and no second WebGL library (Pixi and the
+  like): another canvas is another context to lose mid-render.
+
 ## Puppets
 
 `PuppetPlacement = { id, look, pose, at: [x, z] }` — feet on the floor at (x, z); always faces the camera.
@@ -317,13 +395,48 @@ put it on the twist line), `riser` (1.6 s build; start it so it ends on the twis
 `crowd` (stadium cheering, loop), `engine` (early motor car chugging, loop), `honk` (bulb horn), `hiss` (steam burst),
 `steps` (running on dirt, loop), `rumble` (earthquake roar, loop), `river` (rushing water, loop), `falls` (waterfall roar,
 loop), `splash` (something big hitting water), `crack` (tree trunk snapping and groaning over), `creak` (boat timbers),
-`hooves` (a horse trotting on rock, loop).
+`hooves` (a horse trotting on rock, loop), `munch` (one soft closed-mouth chew: cue one on every jaw close of an eating
+puppet, around volume 0.2; `chew` is two hard thumps and knocks when repeated).
 Music loops: `lounge` (112 BPM, light), `mystery` (84 BPM, dark), `upbeat` (124 BPM, bright: hooks), `tension` (100 BPM, pulsing:
 the numbers and the reveal). Use at least three beds across a video. New sounds: add a function at the end of `sfx_generate.py`
 (after the originals, so their files stay identical) and re-run it with `../tts/qwen/.venv/bin/python`.
 
-`Sfx = { at, src, volume, until? }` (`until` loops to that frame). `MusicCue = { src, from, to, volume, loop?, fade? }`
-(`loop` and `fade` default to true: a library loop repeats over the cue and eases in and out); music ducks under the voice automatically.
+`Sfx = { at, src, volume, until?, space?, hit? }` (`until` loops to that frame; `space` and `hit` below).
+`MusicCue = { src, from, to, volume, loop?, fade? }` (`loop` and `fade` default to true: a library loop repeats over
+the cue and eases in and out); music ducks under the voice automatically.
+
+### Foley: takes, cues from the motion, the room (`scripts/foley.py`, `engine/cues.ts`)
+
+Synthesised effects are fine for clicks, beeps and whooshes; organic sounds (chewing, steps, knocks, cloth) want
+recordings, and any sound repeated wants several takes, or a run of it sounds stamped out.
+- **Takes.** `public/foley/<name>/NN.wav`, listed with source and licence in `src/engine/foley.json`
+  (`foley.py list`). Import recordings with `foley.py import <name> <files> --license L --source URL`, or from the
+  shared sound library (`$SOUND_LIBRARY`, default `../../videotools/sound-library`, search it with its
+  `kutuphane.mjs liste`) with `lib:<glob>`, which carries over its author, source and licence. Each file is trimmed,
+  faded and normalised into a take; fewer than `--min` (4) are filled with pitched copies. `foley.py synth <name>
+  --from <sfx_generate function>` makes takes of a synthesised sound with different seeds. A licence with BY needs
+  the author in the video description (the manifest says so). Present: `chomp` (a soft bite: recorded crunches
+  low-passed, CC0, 7), `crunch` (a crisp bite, CC0, 7), `fork-plate` (CC0, 5), `munch` (a wet chew, synthesised, 6),
+  `thud` (wooden knocks, CC BY 3.0 Ogrebane, 6). An eating puppet: `fork-plate` as the fork leaves the plate,
+  `chomp` on the bite, `munch` on each jaw close after it (`SunlitLunch.tsx`).
+- **Cues.** `foleyCues(name, frames, volume, { space?, hit?, jitter? })` puts a different take on each frame (never
+  the same twice in a row) at ±2 dB. Take the frames from the motion, not typed numbers, so the sound moves with it:
+  `jawCloses(windows, speed)` (each close of a jaw opening `|sin((f - a) * speed)|`), `stepFrames(start, frames,
+  from, to)` (each foot landing of the same `stroll`), `impactCues(sim, start, (h) => ({ name, volume, space, hit }) |
+  null)` (each physics impact, louder with `h.speed`). `src/scenes/SunlitLunch.tsx` (chewing) and
+  `src/scenes/PhysicsPreview.tsx` (crates) use them. `hit` (0..1) jolts the camera like `boom` and `stamp` do.
+- **Space.** `space: "room" | "hall" | "outdoor" | "far"` plays the effect with that place's reflections (a short
+  furnished room, a big hard hall, open air with a far slap, across a field: dull and quieter). `foley.py` bakes
+  `public/space/<space>/<src>` (gitignored) for every cue that uses one; `pipeline.py` does it after the cue dump,
+  so sync, mix and render find them; for a preview, run `foley.py space --cues <cues.json>`. The baked file keeps the
+  dry loudness, so the volume means the same. Looped cues (`until`) always play dry. Use the location's space on
+  every one-shot effect in it, `far` for what happens off in the distance.
+- **Level.** The mix report's effects table (below) lists each one-shot effect over the voice and music round it:
+  hot above +9 LU (it knocks), buried under -8 LU (nobody hears it), and runs of one file stamped out. Keep effects
+  in the scene, not on top of it: a chew or a step around -5 to 0 LU, a bite or a clink -5 to +3, only a gag's big
+  hit up to +6 (0 to +4 for chewing was too loud). A very short sound (a 15 ms tick) measures low: give it more volume.
+  For a preview composition: `node scripts/cues.mjs <id> <dir>/cues.json`, `STEM=sfx` and `STEM=music node
+  scripts/sound.mjs <id> <dir>/<stem>.wav`, then `.venv/bin/python scripts/mixreport.py effects <dir>/cues.json <dir>`.
 
 ### Mix report (`pipeline.py mix <slug>`, also run by `report`)
 
@@ -332,7 +445,8 @@ input prop on `Video`) into `build/mix/` and measures, with animated-short's BS.
 voice, music, effects and bed (music + effects) per music section, and per spoken line the 400 ms momentary margin
 of the voice over the bed while it speaks (median, 10th percentile, the three quietest words). `report` marks
 `speech_margin_p10` (the lowest line's p10, target ≥ 3 LU): under it the bed covers words; turn down the effect or
-music cue under that line.
+music cue under that line. The same report has the effects table (Foley → Level above); `report` marks
+`effects_hot` and `effects_repeated` (target 0 each).
 
 ### Sync check (`pipeline.py sync <slug>`)
 

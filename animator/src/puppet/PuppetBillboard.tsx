@@ -16,6 +16,8 @@ export const HEAD_Y = 800 * K; // centre of the head above the feet
 const VB_STAND = { x: -540, y: -1120, w: 1080, h: 1160 }; // covers raised and outstretched arms, caps and hat brims
 // A puppet lying down (or on its way down) stretches to the left of its feet, head first.
 const VB_LIE = { x: -1180, y: -1120, w: 1620, h: 1160 };
+// A crawling puppet tips its body forward, head reaching past the standing box on whichever side it faces.
+const VB_CRAWL = { x: -1180, y: -1120, w: 2360, h: 1160 };
 // Texture density in pixels per puppet unit. It follows the puppet's size on screen (a close-up needs ~2,
 // a wide shot ~0.3), snapped to a few steps so the canvas is not reallocated every frame. Rasterising the
 // SVG and uploading it is the main render cost, so this is what keeps crowded shots fast.
@@ -233,11 +235,18 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   // stretched (negative `squash`) rises above the standing box, and whatever leaves the box is cut off in a hard
   // straight line (a "half head"). Extend the top by the lift, in steps so the canvas is not rebuilt every frame.
   const lift = Math.max(0, pose.air ?? 0) + Math.max(0, -(pose.bob ?? 0)) + Math.max(0, -(pose.squash ?? 0)) * 1150;
-  const extra = Math.ceil(lift / 60) * 60;
+  // Tall headgear (a crown's points, a plumed shako) rises above the standing box too.
+  const hatTop = !look.hat ? 0 : look.hatStyle === "shako" ? 150 : look.hatStyle === "crown" ? 40 : 0;
+  // A sleeper's "z"s float up past the hat.
+  const zzz = pose.sleep && !lying ? 240 : 0;
+  const extra = Math.ceil((lift + hatTop + zzz) / 60) * 60;
+  const crawling = pose.crawl !== undefined;
+  // Lying down, the headgear points to screen-left instead, past the lying box.
+  const hatSide = lying ? Math.ceil(hatTop / 60) * 60 : 0;
   const VB = useMemo(() => {
-    const base = lying ? VB_LIE : VB_STAND;
+    const base = lying ? { ...VB_LIE, x: VB_LIE.x - hatSide, w: VB_LIE.w + hatSide } : crawling ? VB_CRAWL : VB_STAND;
     return extra ? { ...base, y: base.y - extra, h: base.h + extra } : base;
-  }, [lying, extra]);
+  }, [lying, crawling, extra, hatSide]);
   const root = useRef<THREE.Group>(null);
   const headY = HEAD_Y + (pose.air ?? 0) * K; // a puppet lifted onto a seat (a car bench) carries its head up too
   usePuppetAudit(root, () => root.current?.parent?.localToWorld(new THREE.Vector3(x, headY, z)) ?? new THREE.Vector3(x, headY, z), 205 * K, id, !!pose.sit);

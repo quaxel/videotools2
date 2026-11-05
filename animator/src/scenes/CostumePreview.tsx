@@ -11,14 +11,17 @@ const YOUNG: PuppetLook = { skin: "#f4d0b0", hair: "#8a5a2a", outfit: "#9aa0a0",
 const RUNNER: PuppetLook = { skin: "#f2c9a4", hair: "#2a1d16", outfit: "#f4f2ea", shorts: "#2a2f4a", bib: "31" };
 const OFFICIAL: PuppetLook = { skin: "#eac09a", hair: "#4a3a2a", outfit: "#2e2e36", hat: "#1e1e24", hatStyle: "bowler", beard: "#4a3a2a" };
 
+const KING: PuppetLook = { skin: "#eec4a0", hair: "#d8d4cc", outfit: "#5a2a7a", vest: "#e0b040", hat: "#f2c230", hatStyle: "crown", beard: "#d8d4cc" };
+const GUARD: PuppetLook = { skin: "#d8a47a", hair: "#2a1e16", outfit: "#b8242a", vest: "#1f2a5a", hat: "#1a1a22", hatStyle: "shako" };
+
 const VIEWS: Partial<PuppetPose>[] = [{ view: "front" }, { view: "side", facing: 1 }, { view: "back" }];
 
 export const CostumePreview: React.FC = () => (
   <AbsoluteFill style={{ background: "#e8eef2" }}>
     <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
-      {[CROUCH, ELDER, RUNNER, OFFICIAL].map((look, r) =>
+      {[KING, GUARD, RUNNER, OFFICIAL].map((look, r) =>
         VIEWS.map((v, c) => (
-          <svg key={`${r}${c}`} x={c * 360} y={20 + r * 470} width={360} height={460} viewBox="-440 -1130 880 1170">
+          <svg key={`${r}${c}`} x={c * 360} y={20 + r * 470} width={360} height={460} viewBox="-440 -1280 880 1320">
             <Puppet look={look} pose={{ expression: c === 0 ? (r === 2 ? "disgusted" : "neutral") : "happy", ...v } as PuppetPose} id={`c${r}${c}`} />
           </svg>
         )),

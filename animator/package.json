@@ -19,6 +19,7 @@
     "three": "0.180.0"
   },
   "devDependencies": {
+    "@dimforge/rapier3d-compat": "0.21.0",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "@types/three": "0.180.0",

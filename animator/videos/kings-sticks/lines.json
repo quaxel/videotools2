@@ -1,0 +1,114 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a palace mystery, brisk and suspenseful, never calm.",
+      "seed": 7,
+      "tempo": 1.34
+    },
+    "king": {
+      "voice": "Eric",
+      "instruct": "Cold, confident king, quietly amused. Firm, crisp and commanding, no long pauses.",
+      "seed": 5,
+      "tempo": 1.15
+    },
+    "thief": {
+      "voice": "Aiden",
+      "instruct": "Cocky young palace guard, mocking and loud, a nervous laugh underneath.",
+      "seed": 11,
+      "tempo": 1.15
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "It's gone. The Queen's necklace vanished from a locked throne room."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Every door was bolted. So the thief is one of these twelve guards."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The King locks them in and hands each guard the same wooden stick."
+    },
+    {
+      "speaker": "king",
+      "text": "These are my wizard's sticks. Tonight, the thief's stick grows one inch."
+    },
+    {
+      "speaker": "narrator",
+      "text": "One guard can't stop grinning."
+    },
+    {
+      "speaker": "thief",
+      "text": "Then measure mine first!"
+    },
+    {
+      "speaker": "king",
+      "text": "Tomorrow."
+    },
+    {
+      "speaker": "narrator",
+      "text": "All night, the guards stare at their sticks."
+    },
+    {
+      "speaker": "narrator",
+      "text": "At midnight, one measures his against the floor tiles."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Another holds his up to a snoring friend's stick."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But the grinning guard hides his stick inside his jacket."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Just before sunrise, a faint scraping comes from the corner. Then silence."
+    },
+    {
+      "speaker": "narrator",
+      "text": "By morning, the guards lay their sticks side by side."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Eleven match perfectly. One is shorter.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "thief",
+      "text": "That's impossible! It was supposed to grow!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "He freezes. Too late."
+    },
+    {
+      "speaker": "king",
+      "text": "The necklace."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Here's the trick. These were never a wizard's sticks."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They came from the palace woodshed. No stick could ever grow."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So the innocent guards had no reason to touch theirs."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Only the thief believed. So he shaved one inch off the end."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The King never measured anything. The thief did it for him."
+    }
+  ]
+}

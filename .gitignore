@@ -29,3 +29,9 @@ animator/uploader/uploader.db*
 # Rendered videos and TTS model weights — too large for GitHub
 animator/out/
 tts/model/
+
+# Effects baked into a space (scripts/foley.py space), made on demand
+animator/public/space/
+
+# Mix stems rendered by `pipeline.py mix`, remade on demand
+animator/videos/*/build/mix/*.wav

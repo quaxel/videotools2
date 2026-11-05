@@ -29,7 +29,7 @@ SLUG = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 LOG_MAX = 5000
 # command -> the extra arguments the page may pass (each checked against its pattern)
 COMMANDS = {
-    "status": {}, "voice": {}, "check": {}, "sync": {}, "music": {}, "mix": {}, "collide": {}, "motion": {}, "report": {},
+    "status": {}, "voice": {}, "physics": {}, "check": {}, "sync": {}, "music": {}, "mix": {}, "collide": {}, "motion": {}, "report": {},
     "stills": {"frames": r"\d+(,\d+)*"},
     "render": {"2k": True},
     "qa": {},

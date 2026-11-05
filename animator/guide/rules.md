@@ -40,6 +40,14 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 - **Transitions:** hard cut inside a location; 8-frame whip pan (`true` in the shot list) when the location changes; a 12-frame `"dissolve"` for a change of time in one place. A cut is always a shot boundary in the shot list (never a switch inside one shot component), so check, QA and sync see it.
 - **Explanation shots:** one idea per shot, readable in one second, at most 6 words of readable text per frame.
 - **Characters touch the world:** they sit, hold, push, open, walk in profile. Not every shot is front-on.
+- **No action twice the same way:** an action a character repeats (a bite, a knock, a wave, a sip) differs each time
+  in path, speed and the acting round it (lean, head, the free hand): eager then careful, straight then curved.
+  Rhythmic motion (chewing, walking, hammering, nodding) drifts in pace and size from one beat to the next; a
+  constant `sin` reads as a loop. Give the free hand something to do (on the cheek, patting, resting, gesturing).
+- **Held props stay in sight:** a puppet seated behind a table needs the top at ≤ 0.45 m and its hands above it
+  (reach y above about -450); a hand or a fork that dips behind the top vanishes for those frames.
+- **Faces read on the stills:** check every expression close up. Contentment and eating read as `happy`;
+  `excited` and `neutral` show wide round eyes that read as startled in a close shot.
 - **Key small objects must read on a phone:** a prop the story hangs on (a coin, a piece of meat, a pill) may be
   drawn up to 2× its real size; say so in `plan.json` (`format_note`) when the real size is a sourced fact.
 - **Sky shots are never an empty flat colour:** a dome sky, something moving in it (birds, falling objects, smoke)
@@ -62,6 +70,15 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 
 - Music ducks under the voice; between words it sits at least 5 dB below speech.
 - Every on-screen mechanical action gets an effect (click, thud, whirr, stamp, tick).
+- **Effects sit in the scene, under the music, never on top of it:** a chew or a step -5 to 0 LU over voice + music,
+  a bite or a clink -5 to +3, only a gag's big hit up to +6 (the effects table of `pipeline.py mix`). Nothing hot
+  (> +9, it knocks), nothing buried (< -8). The user found chews at 0 to +4 too loud.
+- **Organic and repeated sounds are recorded takes, never one file again and again:** chewing, steps, knocks,
+  cutlery come from the foley library (`foleyCues`: a different take and level each time), on frames taken from the
+  motion (`jawCloses`, `stepFrames`, `impactCues`), so the sound follows the action. Soft-attack sounds for soft
+  actions: chewing is a wet munch, never a thump (`chew` knocks; do not use it for eating).
+- **Every one-shot effect has the location's `space`** (`room`, `hall`, `outdoor`, `far` for what happens far off).
+- **No effect starts in the last 8 frames** unless it carries over the loop seam on purpose: it is cut into a click.
 - Mix lands at -17 to -14 LUFS.
 
 ## Process

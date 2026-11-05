@@ -3,6 +3,8 @@
 #
 #   .venv/bin/python scripts/pipeline.py new <slug> "<topic>"   scaffold videos/<slug>/ and src/videos/<slug>/
 #   .venv/bin/python scripts/pipeline.py voice <slug>           Qwen TTS -> fitted track -> timing.json + pace check
+#   .venv/bin/python scripts/pipeline.py physics <slug>         bake videos/<slug>/physics.mjs (Rapier, scripts/physics.mjs)
+#                                                              -> src/videos/<slug>/physics.json (run by check/stills when stale)
 #   .venv/bin/python scripts/pipeline.py register               regenerate src/videos/index.ts
 #   .venv/bin/python scripts/pipeline.py check <slug>           tsc + rule checks on the scene's shot list
 #   .venv/bin/python scripts/pipeline.py sync <slug>            sound cues vs the picture (scripts/cues.mjs dump) -> build/sync.txt
@@ -31,7 +33,7 @@
 #                                                              run the missing / stale stages in order (default up to motion),
 #                                                              stopping at an approval the files have outgrown
 #   .venv/bin/python scripts/pipeline.py web [--port 8766]      browser panel: every video's stages, run / stop, live log, outputs
-# voice, check, sync, music, stills, collide, motion, render and report append their run time to
+# voice, physics, check, sync, music, stills, collide, motion, render and report append their run time to
 # videos/<slug>/build/timings.jsonl.
 #
 # Targets come from guide/rules.md (mirrored in TARGETS below); the report marks every miss.
@@ -47,6 +49,7 @@ from collections import Counter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 QWEN_PY = os.path.join(ROOT, "..", "tts", "qwen", ".venv", "bin", "python")
+EFFECT_HOT = 9.0  # LU: an effect this far over voice + music knocks (scripts/mixreport.py, same name)
 PY = os.path.join(ROOT, ".venv", "bin", "python")
 FPS = 30
 
@@ -58,6 +61,8 @@ TARGETS = {
     "speech_cover": (0.80, 1.0),
     "bed_vs_speech_db": (None, -5.0),
     "speech_margin_p10": (3.0, None),  # LU, mix.py: the quietest line's 10th-percentile voice-over-bed margin
+    "effects_hot": (0, 0),  # mixreport.py: one-shot effects more than EFFECT_HOT over voice + music round them
+    "effects_repeated": (0, 0),  # mixreport.py: runs of 3+ cues of one file within a second (no takes)
     "avg_shot": (0, 2.2),  # seconds
     "longest_shot": (0, 4.0),
     "locations": (8, None),
@@ -194,7 +199,28 @@ def shot_stats(slug):
     return shots, sum(lens) / len(lens), max(lens)
 
 
+# ---------- physics: rigid bodies baked offline ----------
+
+def physics_stale(slug):
+    """The video has a physics spec and its baked table is missing or older than the spec or the baker."""
+    spec, out = vdir(slug, "physics.mjs"), sdir(slug, "physics.json")
+    if not os.path.exists(spec):
+        return False
+    return not os.path.exists(out) or os.path.getmtime(out) < newest(spec, os.path.join(ROOT, "scripts", "physics.mjs"))
+
+
+def cmd_physics(slug, force=True):
+    """Bake videos/<slug>/physics.mjs into src/videos/<slug>/physics.json, which the scene imports like timing.json."""
+    if not os.path.exists(vdir(slug, "physics.mjs")):
+        if force:
+            print(f"no videos/{slug}/physics.mjs: nothing to bake")
+        return
+    if force or physics_stale(slug):
+        run("node", "scripts/physics.mjs", vdir(slug, "physics.mjs"), sdir(slug, "physics.json"))
+
+
 def cmd_check(slug):
+    cmd_physics(slug, force=False)  # tsc needs the baked table the scene imports
     cmd_register()
     res = run("npx", "tsc", "-p", ".", check=False, capture=True)
     out = (res.stdout + res.stderr).strip()
@@ -240,6 +266,7 @@ def framing_stale(slug):
 
 
 def cmd_framing(slug, force=True):
+    cmd_physics(slug, force=False)
     if force or framing_stale(slug):
         cmd_register()
         run("node", "scripts/framing.mjs", slug)
@@ -252,6 +279,7 @@ def cmd_stills(slug, frames=None):
 
 
 def cmd_collide(slug):
+    cmd_physics(slug, force=False)
     cmd_register()
     print("$ COLLIDE=1 node scripts/stills.mjs", slug, flush=True)
     subprocess.run(["node", "scripts/stills.mjs", slug, vdir(slug, "build", "collide")], cwd=ROOT, check=True, env={**os.environ, "COLLIDE": "1"})
@@ -270,7 +298,15 @@ def cmd_cues(slug, force=False):
     if force or not os.path.exists(out) or newest(sdir(slug), os.path.join(ROOT, "src", "engine")) > os.path.getmtime(out):
         cmd_register()
         run("node", "scripts/cues.mjs", slug, out)
+    # Effects with a `space` play a baked file (public/space/<space>/<src>): make the missing ones now, before sync,
+    # mix or render needs them.
+    run(PY, "scripts/foley.py", "space", "--cues", out)
     return json.load(open(out))
+
+
+def played_src(e):
+    """The file a cue plays (engine/sound.tsx playedSrc): its own, or the version baked for its space."""
+    return f"space/{e['space']}/{e['src']}" if e.get("space") and e.get("until") is None else e["src"]
 
 
 LOOP_SNAP = 6  # frames: a looped effect that ends this close to a cut, but not on it, was meant to end on it
@@ -292,8 +328,8 @@ def sync_issues(slug):
     warn = lambda m: out.append(("warn", m))
     for e in cues["sfx"]:
         at, until, src = round(e["at"]), e.get("until"), e["src"]
-        if not os.path.exists(os.path.join(ROOT, "public", src)):
-            err(f"{src} at {at}: no such file in public/")
+        if not os.path.exists(os.path.join(ROOT, "public", played_src(e))):
+            err(f"{played_src(e)} at {at}: no such file in public/")
         if at < 0 or at >= total:
             err(f"{src} at {at}: outside the video (0-{total})")
         if until is not None:
@@ -476,8 +512,14 @@ CONST_RE = re.compile(r"^(?:export\s+)?const\s+([A-Z_][A-Z0-9_]*)\s*=\s*(-?[\d.]
 
 
 def impact_frames(slug):
-    """Frames of the scene's impact sounds. `at` may be an expression over numeric top-level constants
-    (`42 + SLAP`); one that does not resolve is skipped."""
+    """Frames of the scene's impact sounds, from the resolved cue dump (spreads included, e.g. cues built from a
+    physics bake's impacts). If the dump fails, from the source: `at` may be an expression over numeric top-level
+    constants (`42 + SLAP`); one that does not resolve is skipped."""
+    try:
+        impact = {f"sfx/{n}.wav" for n in IMPACT_SFX}
+        return [round(e["at"]) for e in cmd_cues(slug)["sfx"] if e["src"] in impact or e.get("hit")]
+    except SystemExit:
+        print("cue dump failed: impact frames read from Scene.tsx", file=sys.stderr)
     src = open(sdir(slug, "Scene.tsx")).read()
     consts = {k: float(v) for k, v in CONST_RE.findall(src)}
     found = []
@@ -522,15 +564,27 @@ def render_video(slug, out, *args):
     total = json.load(open(os.path.join(ROOT, "src", "videos", slug, "timing.json")))["totalFrames"]
     parts = []
     began = time.time()
-    for start in range(0, total, RENDER_SEGMENT):
+
+    cuts = sorted({s[0] for s in shot_list(slug)} | {total})
+
+    def segment(start, end, split=True):
+        # A tab can die with "Page crashed!" (a V8 fatal check while copying an object literal, seen in kings-sticks
+        # whenever one tab rendered across the cut at frame 1204). A crashed segment is rendered again one shot at a
+        # time, so no tab crosses a cut.
         part = f"{out}.part{start}.mp4"
-        end = min(total, start + RENDER_SEGMENT) - 1
         for attempt in range(RENDER_RETRIES + 1):
             ok = run("npx", "remotion", "render", slug, part, f"--frames={start}-{end}", "--muted", *args,
                      check=False).returncode == 0
             clean_remotion_temp(began)
             if not ok:
-                # A render tab that crashes takes the whole segment down; a fresh browser usually gets through it.
+                inner = [c for c in cuts if start < c <= end]
+                if split and inner:
+                    edges = [start] + inner + [end + 1]
+                    print(f"render crashed in {start}-{end}, rendering it shot by shot: {edges}")
+                    for a, b in zip(edges, edges[1:]):
+                        segment(a, b - 1, split=False)
+                    return
+                # A segment with no cut inside it: a fresh browser usually gets through it.
                 if attempt == RENDER_RETRIES:
                     raise SystemExit(f"render of frames {start}-{end} failed {RENDER_RETRIES + 1} times")
                 print(f"render of frames {start}-{end} failed, rendering the segment again")
@@ -541,6 +595,9 @@ def render_video(slug, out, *args):
             print(f"broken (flat) frames {spans(found)} in {start}-{end}"
                   + (", rendering the segment again" if attempt < RENDER_RETRIES else ", giving up: check these frames as stills"))
         parts.append(part)
+
+    for start in range(0, total, RENDER_SEGMENT):
+        segment(start, min(total, start + RENDER_SEGMENT) - 1)
     listing = f"{out}.parts.txt"
     with open(listing, "w") as fh:
         fh.writelines(f"file '{p}'\n" for p in parts)
@@ -577,6 +634,7 @@ def cmd_render(slug, hd=False):
     out = os.path.join(ROOT, "out", f"{slug}.mp4")
     picture, sound = f"{out}.picture.mp4", f"{out}.sound.wav"
     render_video(slug, picture, "--log=error", *([f"--scale={HD_SCALE}"] if hd else []))
+    cmd_cues(slug)  # bakes the effects' spaces the soundtrack plays
     run("node", "scripts/sound.mjs", slug, sound)
     run("ffmpeg", "-v", "error", "-y", "-i", picture, "-i", sound, "-c:v", "copy", "-c:a", "aac", "-b:a", "320k", "-shortest", out)
     os.remove(picture)
@@ -676,6 +734,8 @@ def cmd_report(slug):
         ("bed_vs_speech_db", am["bed_vs_speech_db"], "{:.1f} dB"),
         ("lufs", am["lufs"], "{:.1f} LUFS"),
         ("speech_margin_p10", mixed["p10_min"] if mixed["p10_min"] is not None else 99.0, "{:.1f} LU"),
+        ("effects_hot", sum(1 for e in mixed.get("effects", []) if e["margin"] is not None and e["margin"] > EFFECT_HOT), "{}"),
+        ("effects_repeated", len(mixed.get("repeats", [])), "{}"),
         ("avg_shot", avg, "{:.2f}s"),
         ("longest_shot", longest, "{:.2f}s"),
         ("locations", len(plan.get("locations", [])), "{}"),
@@ -740,7 +800,7 @@ def clean_remotion_temp(since):
 
 # The stages `go` runs, in order. Each has the file it leaves behind (its output) and what that output is built from;
 # an output older than any of its inputs is stale.
-STAGES = ("voice", "check", "sync", "music", "stills", "collide", "motion", "render", "report")
+STAGES = ("voice", "physics", "check", "sync", "music", "stills", "collide", "motion", "render", "report")
 SHARED = ("engine", "puppet", "three")  # src/ folders every video uses
 
 
@@ -768,6 +828,7 @@ def stage_files(slug):
     mp4 = os.path.join(ROOT, "out", f"{slug}.mp4")
     return {
         "voice": (sdir(slug, "timing.json"), [vdir(slug, "lines.json")]),
+        "physics": (sdir(slug, "physics.json"), [vdir(slug, "physics.mjs"), os.path.join(ROOT, "scripts", "physics.mjs")]),
         "check": (vdir(slug, "build", "check.ok"), [sdir(slug)]),
         "sync": (vdir(slug, "build", "sync.txt"), [sdir(slug), os.path.join(ROOT, "src", "engine", "sound.tsx")]),
         "music": (score, [vdir(slug, "music.py"), sdir(slug, "timing.json"), cues_path(slug), os.path.join(ROOT, "scripts", "music")]),
@@ -817,6 +878,8 @@ def stage_states(slug, hd=False, probe=True):
                 state = "stale"
         if stage == "music" and not os.path.exists(vdir(slug, "music.py")):
             state, note = "done", "library loops (no videos/<slug>/music.py)"
+        if stage == "physics" and not os.path.exists(vdir(slug, "physics.mjs")):
+            state, note = "done", "no physics (no videos/<slug>/physics.mjs)"
         gate = GATES.get(stage)
         if gate and state != "done" and not approved(slug, gate):
             note = "; ".join(filter(None, [note, f"waits for `approve {slug} {gate}`"]))
@@ -934,7 +997,7 @@ def cmd_go(slug, to="motion", plan=False, hd=False):
     if plan:
         return
     calls = {
-        "voice": lambda: cmd_voice(slug), "check": lambda: cmd_check(slug), "sync": lambda: cmd_sync(slug),
+        "voice": lambda: cmd_voice(slug), "physics": lambda: cmd_physics(slug), "check": lambda: cmd_check(slug), "sync": lambda: cmd_sync(slug),
         "music": lambda: cmd_music(slug), "stills": lambda: cmd_stills(slug),
         "collide": lambda: cmd_collide(slug), "motion": lambda: cmd_motion(slug),
         "render": lambda: cmd_render(slug, hd), "report": lambda: cmd_report(slug),
@@ -1024,6 +1087,7 @@ if __name__ == "__main__":
             "new": lambda: cmd_new(args[0], args[1]),
             "voice": lambda: cmd_voice(args[0]),
             "register": cmd_register,
+            "physics": lambda: cmd_physics(args[0]),
             "check": lambda: cmd_check(args[0]),
             "stills": lambda: cmd_stills(args[0], args[1] if len(args) > 1 else None),
             "collide": lambda: cmd_collide(args[0]),
@@ -1043,7 +1107,8 @@ if __name__ == "__main__":
             "web": lambda: cmd_web(int(option(args, "--port", "8766"))),
             "go": lambda: cmd_go(args[0], option(args, "--to", "motion"), flag(args, "--plan"), hd),
         }[cmd]
-        if cmd in STAGES and args and not (cmd == "music" and not os.path.exists(vdir(args[0], "music.py"))):
+        optional = {"music": "music.py", "physics": "physics.mjs"}  # stages that do nothing without their file
+        if cmd in STAGES and args and not (cmd in optional and not os.path.exists(vdir(args[0], optional[cmd]))):
             timed(args[0], cmd, call, given[1:])
         else:
             call()

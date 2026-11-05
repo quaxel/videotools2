@@ -74,6 +74,9 @@ Write the shot list against the printed frames: cut on line and caption boundari
 over 4 s, whip (`true`) on location changes, `"dissolve"` for a change of time in one place; every cut is its
 own shot in the list. Give two or three shots a foreground framing object (Stage `foreground` + `frameSpot`, library.md). Use `Room` + kit props for new locations, and a different mood per
 location. Put the seed on screen by its line. Add SFX for every mechanical action and MUSIC cues.
+Write each repeated action (a bite, a knock, a wave) with its own path, timing and body acting every time, and let
+rhythmic motion (chewing, walking) drift in pace and size (guide/rules.md → No action twice the same way). A seated
+puppet behind a table: top ≤ 0.45 m, hands above it.
 Puppets are lit by the set (library.md → Puppet lighting): leave `lighting` on. Ambient room colour does not
 change them; where a shot has a strong source (fire, lamp, headlights) pass a Stage `light` with that point or distant light. Outdoors, reuse `LakeSet` or its pieces (`Campfire`,
 `SmokePlume`, `Pine`, `Ridge` + `Haze` with parallax) and truck the camera sideways in front of distant backdrops.
@@ -93,6 +96,44 @@ gaps, and the loop seam (the bed under the last frame should be the one under fr
 For the video's own score instead of the library loops, write `videos/<slug>/music.py` (library.md → The video's own
 score), run `pipeline.py music <slug>` and pass `score` to `Video`.
 
+Building blocks for the picture (library.md has each API):
+- **Blender models** for complex props. Decide per prop while writing the shot list, without asking: build it from
+  kit pieces (`InkBox`, `InkCylinder`, existing props) when it is boxes, cylinders and slabs (a desk, a crate, a sign,
+  a door); model it in Blender when the viewer must recognise it by its silhouette and that needs curved or compound
+  surfaces or many fitted parts (a car, a bicycle, a boat, a plane, an animal, an instrument, a cannon). When in
+  doubt and the prop is on screen for more than one shot or close to the lens, use Blender. Write
+  `videos/<slug>/blender/<name>.py` (bpy, from `guide/blender/car.py`), run it headless to
+  `public/videos/<slug>/models/<name>.glb`, and show it with `BlenderModel` (library.md → Blender models). The script
+  is the source: change the script and run it again, never hand-edit in a live Blender session.
+- **Physics** for a gag where things fall, topple or scatter: `videos/<slug>/physics.mjs`, baked by
+  `pipeline.py physics <slug>` (check, stills and render re-bake it when it changes), played by `<Simulation>`. Tune by
+  baking and reading the printed impacts; keep the scatter inside the narrow 9:16 frame.
+- **Particles** (`Burst`, `Shower`): dust on every hard landing, stars on a bonk, sparks, confetti. Pure functions
+  of the frame; hang them off the physics impacts or the cue frames.
+- **Sunbeams** (`GodRays`) for a sunny interior: the sun must cross the frame (a big x part) against a mid-dark wall,
+  `strength` about 0.08, `frame` for drifting motes, `tops` for a patch on a table.
+
+Sound, after the cues pass `sync` (guide/rules.md → Sound):
+- Effects for organic or repeated actions come from the foley takes (`foley.py list`; library.md → Foley) through
+  `foleyCues`, on frames from the motion: `jawCloses` for chewing, `stepFrames` for a `stroll`, `impactCues` for a
+  physics bake (louder with the speed; `hit` for a camera jolt). Never put one file on a run of cues.
+- Give every one-shot effect the location's `space`.
+- A sound the library lacks: search the shared sound library first (`node ../../videotools/sound-library/kutuphane.mjs
+  liste <word>`), then propose CC0 files to the user with name, page and size, and download only on their yes (never
+  from a site that blocks scripts; ask the user to fetch those into `sound-library/_gelen/`). Add them to the
+  library's catalog (`kutuphane.mjs ekle ... --lisans --kaynak --yazar`), then `foley.py import <name> lib:<glob>`
+  (`--lowpass` softens a crisp recording).
+
+Then measure the levels:
+
+```bash
+.venv/bin/python scripts/pipeline.py mix <slug>
+```
+
+Read the effects table in `videos/<slug>/build/mix/mix.md`: chews and steps -5 to 0 LU, bites and clinks -5 to +3, a
+gag's big hit up to +6; fix every hot, buried or stamped-out (repeated file) row and run `mix` again. A 15 ms click
+measures low: give it more volume rather than reading it as buried.
+
 ## 6. Review on stills (no full render)
 
 ```bash
@@ -102,7 +143,8 @@ score), run `pipeline.py music <slug>` and pass `score` to `Video`.
 It also prints a framing audit (saved to `videos/<slug>/build/stills/framing.txt`): faces or signs cut by the frame edge, under
 the captions, or hidden behind the set. Fix every hit on a key face or sign; background signs and crowd extras at the edge can stay.
 Read `videos/<slug>/build/stills/contact.jpg` (one frame per second). Check: faces in frame and not cut,
-labels readable, no empty or black frames, over-the-shoulder head ≤ 25 %, colour varies, gags read.
+labels readable, no empty or black frames, over-the-shoulder head ≤ 25 %, colour varies, gags read, Blender models
+read at a glance in the toon look (ink outline, flat bands, right way round and on the floor).
 For a closer look pass frames: `pipeline.py stills <slug> 120,480,900`. Fix and repeat, at most 3 rounds.
 
 Then check that no character walks or stands through a set object (every 5th frame, tiny scale):
@@ -183,6 +225,31 @@ uploader's database (after this, only `out/<slug>.mp4` is needed; `videos/<slug>
 ```bash
 .venv/bin/python uploader/server.py --import <slug>
 ```
+
+## Short clips and stills outside the pipeline
+
+When the user asks for a single frame or a few seconds rather than a full explainer, write a composition in
+`src/scenes/<Name>.tsx` (a `ShotList` plus `SoundTrack`, as `src/scenes/SunlitLunch.tsx` does: one function of the
+frame that both a still and a clip use) and register it in `src/Root.tsx`. The same rules apply to picture and sound.
+
+```bash
+POST=1 STILL_SCALE=1 node scripts/stills.mjs <Name> out/stills-<name> <frames>
+```
+
+For a clip, check the effects the same way (`$D` a scratch folder):
+
+```bash
+node scripts/cues.mjs <Name> $D/cues.json && .venv/bin/python scripts/foley.py space --cues $D/cues.json && STEM=sfx node scripts/sound.mjs <Name> $D/sfx.wav && STEM=music node scripts/sound.mjs <Name> $D/music.wav && .venv/bin/python scripts/mixreport.py effects $D/cues.json $D
+```
+
+Then render it with the post chain and bring the audio to -15 LUFS (the clip has no pipeline mastering):
+
+```bash
+npx remotion render <Name> $D/raw.mp4 --props='{"post":true}' --gl=angle && ffmpeg -y -i $D/raw.mp4 -c:v copy -af loudnorm=I=-15:TP=-2:LRA=11 -c:a aac -b:a 320k -ar 48000 out/<name>.mp4
+```
+
+Check the result with `pipeline.glitch_frames` (no broken frames) before sending it, and delete `$TMPDIR/remotion-*`
+afterwards (set `TMPDIR` to the scratch folder for these commands so the bundles land there).
 
 ## Deliver
 

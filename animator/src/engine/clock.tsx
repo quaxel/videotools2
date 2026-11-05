@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react";
-import { AbsoluteFill, Sequence, useCurrentFrame } from "remotion";
+import { AbsoluteFill, getInputProps, Sequence, useCurrentFrame } from "remotion";
 
 // Every shot sees its own frame from 0. A shot with a transition starts early and sees negative frames while it
 // comes in:
@@ -64,7 +64,10 @@ const Dissolve: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <AbsoluteFill style={p < 1 ? { opacity: a } : undefined}>{children}</AbsoluteFill>;
 };
 
-export const ShotList: React.FC<{ shots: Shot[] }> = ({ shots }) => (
+// `soundOnly` (input prop: the soundtrack render, the cue dump) mounts no shot, so a preview composition's sound
+// renders as fast as a Video's.
+export const ShotList: React.FC<{ shots: Shot[] }> = ({ shots }) =>
+  (getInputProps() as { soundOnly?: boolean }).soundOnly === true ? null : (
   <>
     {shots.map(([from, to, ShotComponent, fade], i) => {
       const lead = leadOf(fade);

@@ -9,6 +9,7 @@ export type { Expression, HeldItem, PuppetLook, PuppetPose } from "../puppet/Pup
 export { cardTilt, handWorld, HEAD_Y, HIP_HEIGHT, PUPPET_HEIGHT, PuppetBillboard } from "../puppet/PuppetBillboard";
 export type { PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";
 export { InkBox, InkCylinder, toonRamp } from "../three/toon";
+export { BlenderModel, type PartPose } from "../three/model";
 export * from "../three/kit";
 export { Campfire, DOCK, FIRE, firePoint, Haze, LakeSet, lakeLight, Pine, Ridge, Rock, SmokePlume } from "../three/LakeSet";
 export { moodLight } from "../three/moods";
@@ -21,3 +22,10 @@ export { Vultures } from "../three/Birds";
 export { CLEAR_SKY, SkyDome, SUN_DIR } from "../three/sky";
 export { Automobile, BOARD, CAR, carSeat, DustTrail, ROAD, RoadSet, StadiumSet, summerLight, TRACK } from "../three/MarathonSets";
 export { Headline } from "../ui/Headline";
+export { simImpacts, simPose, simSquash, SimShape, Simulation } from "../three/physics";
+export type { PhysicsSim, SimBody, SimImpact } from "../three/physics";
+export { Burst, Shower } from "../three/particles";
+export type { ParticleKind } from "../three/particles";
+export { GodRays, windowPanes } from "../three/godrays";
+export type { SunTop } from "../three/godrays";
+export * from "./cues";
