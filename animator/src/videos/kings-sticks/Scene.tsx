@@ -198,13 +198,12 @@ const TopRing = (f: number) => {
   );
 };
 
-// Truck along the line of guards; it ends on the grinning one (the seed).
+// Down the line of guards from its right end, so every head stays whole; it eases in on the grinning one (the seed).
 const LINE_X = [-2.3, -1.75, -1.2, -0.65, -0.1, 0.45, 1.0, 1.55, 2.1];
 const LineTruck = (f: number) => {
   const p = ease(f, 0, 63);
-  const x = -1.7 + p * 2.7;
-  const camera: CameraShot = { position: [x, 1.18, 2.9], target: [x + 0.15, 0.95, 0.2], fov: 38 };
-  const looks = [EXTRAS[0], EXTRAS[1], MEASURER, EXTRAS[2], COMPARER, EXTRAS[3], SLEEPER, THIEF, EXTRAS[4]];
+  const camera: CameraShot = { position: [4.3 - p * 0.1, 1.25, 1.5 - p * 0.15], target: [-0.5 + p * 0.3, 0.92, -0.15], fov: 50 };
+  const looks = [EXTRAS[0], EXTRAS[1], MEASURER, EXTRAS[2], COMPARER, EXTRAS[3], SLEEPER, EXTRAS[4], THIEF];
   return (
     <>
       <Throne
@@ -365,12 +364,12 @@ const KingTomorrow = (f: number) => {
 
 // ---------- 19-33 s: the night ----------
 
-// Night (dissolve): guards on the bench stare at their sticks; the camera trucks along them to the grinning one.
+// Night (dissolve): guards on the bench stare at their sticks; seen down the bench from its far end, every head
+// whole, the camera eases in towards the grinning one nearest us.
 const BENCH_ZS = [-1.0, -0.25, 0.5, 1.25, 2.0];
 const NightStare = (f: number) => {
   const p = ease(f, -12, 84);
-  const z = -0.85 + p * 2.3;
-  const camera: CameraShot = { position: [1.85, 1.02, z], target: [3.72, 0.8, z + 0.35], fov: 46 };
+  const camera: CameraShot = { position: [1.6 + p * 0.1, 1.15, 3.0 - p * 0.3], target: [3.75, 0.75, -0.3 + p * 0.6], fov: 46 };
   const looks = [MEASURER, EXTRAS[0], COMPARER, SLEEPER, THIEF];
   const x = BENCH.x - 0.24;
   return (
@@ -402,8 +401,10 @@ const NightStare = (f: number) => {
 
 // Top-down at midnight: one guard crawls along the tiles, flipping his stick end over end to measure it.
 const MeasureTop = (f: number) => {
-  const camera: CameraShot = { position: [-0.55 + f * 0.012, 3.5, 1.75], target: [-0.55 + f * 0.012, 0, 1.25], fov: 44 };
   const c = crawlish(f, 0, 43, [-1.25, 1.42], [-0.05, 1.42]);
+  // Ride along with the crawler so his head never leaves the frame.
+  const cx = c.at[0] + 0.85;
+  const camera: CameraShot = { position: [cx, 3.5, 1.75], target: [cx, 0, 1.25], fov: 44 };
   const hop = Math.min(3, Math.floor(f / 13));
   const flip = ease(f - hop * 13, 0, 6);
   const sx = -0.75 + hop * 0.3 + 0.15 * flip;
@@ -425,8 +426,9 @@ const crawlish = (f: number, start: number, frames: number, from: [number, numbe
 const BONK = 15;
 const BONK_AT: Vec3 = [2.55, 0, 1.3];
 const Bonk = (f: number) => {
-  const camera = cam([1.85, 0.36, 2.55], [1.95, 0.38, 2.35], [2.45, 0.45, 1.3], 46, ease(f, 0, 46));
-  const c = crawlish(f, -10, BONK + 10, [1.65, 1.3], [2.3, 1.3]);
+  // Tips down after the hit so his dazed face rides above the captions.
+  const camera = cam([2.05, 0.8, 4.4], [2.1, 0.8, 4.15], [2.35, 0.6 - 0.35 * ease(f, BONK, BONK + 10), 1.3], 46, ease(f, 0, 46));
+  const c = crawlish(f, -10, BONK + 10, [1.5, 1.3], [2.15, 1.3]);
   const t = f - BONK;
   const wob = t > 0 ? Math.exp(-t / 10) * Math.sin(t * 0.7) * 0.22 : 0;
   const after = t > 0;
@@ -436,7 +438,7 @@ const Bonk = (f: number) => {
       f={f + 707}
       mode="night"
       puppets={[
-        P("measurer", MEASURER, after ? [2.3 - 0.22 * ease(t, 0, 6), 1.3] : c.at, after ? { ...faceChange([[0, "shocked"], [14, "sad"]], t), view: "side", facing: 1, crouch: 0.7, reachL: [-30, -1000], handL: "open", bob: t < 6 ? -10 : 0 } : { expression: "thinking", ...c.pose }),
+        P("measurer", MEASURER, after ? [2.15 - 0.2 * ease(t, 0, 6), 1.3] : c.at, after ? { ...faceChange([[0, "shocked"], [14, "sad"]], t), view: "side", facing: 1, crouch: 0.7, reachL: [-30, -1000], handL: "open", bob: t < 6 ? -10 : 0 } : { expression: "thinking", ...c.pose }),
       ]}
       light={throneLight("night", f, [BONK_AT])}
     >
@@ -452,8 +454,10 @@ const Bonk = (f: number) => {
 // Another guard holds his stick up to a snoring friend's, squinting at the tops.
 const SLEEP_AT: [number, number] = [-1.47, 1.0];
 const COMP_AT: [number, number] = [-1.1, 1.08];
+// The two-shot spreads them a little wider than the topple that follows, so neither head hides behind the other.
+const SLEEP_WIDE: [number, number] = [-1.66, 1.0];
 const Compare = (f: number) => {
-  const camera = cam([-1.29, 1.12, 3.05], [-1.29, 1.1, 2.85], [-1.29, 0.98, 1.0], 44, ease(f, 0, 33));
+  const camera = cam([-1.38, 1.12, 3.95], [-1.38, 1.1, 3.7], [-1.38, 0.95, 1.0], 44, ease(f, 0, 33));
   const nudge = Math.sin(f * 0.25) * 12;
   return (
     <Throne
@@ -461,11 +465,11 @@ const Compare = (f: number) => {
       f={f + 753}
       mode="night"
       puppets={[
-        P("sleeper", SLEEPER, SLEEP_AT, { expression: "neutral", sleep: true, reachR: [170, -640], frontR: true, handR: "fist", headTilt: -12, bob: Math.sin(f * 0.12) * 6 }),
+        P("sleeper", SLEEPER, SLEEP_WIDE, { expression: "neutral", sleep: true, reachR: [170, -640], frontR: true, handR: "fist", headTilt: -12, bob: Math.sin(f * 0.12) * 6 }),
         P("comparer", COMPARER, COMP_AT, { expression: "thinking", reachL: [-175, -640 + nudge], frontL: true, handL: "fist", lookX: -0.7, headTilt: -8, lean: -5 }),
       ]}
     >
-      {held(SLEEP_AT, [170, -640], camera)}
+      {held(SLEEP_WIDE, [170, -640], camera)}
       {held(COMP_AT, [-175, -640 + nudge], camera)}
     </Throne>
   );
@@ -569,14 +573,14 @@ const Scrape = (f: number) => {
 
 // Wide and dark: everyone asleep; the last candle sputters out. Silence.
 const SLEEPERS: [PuppetLook, [number, number]][] = [
-  [MEASURER, [-1.15, 1.35]],
-  [COMPARER, [0.75, 1.55]],
-  [SLEEPER, [-0.35, 0.45]],
-  [EXTRAS[0], [1.15, 0.25]],
-  [EXTRAS[3], [-1.45, 0.05]],
+  [MEASURER, [0.2, 1.35]],
+  [COMPARER, [1.35, 1.6]],
+  [SLEEPER, [0.55, 0.5]],
+  [EXTRAS[0], [1.5, 0.3]],
+  [EXTRAS[3], [-0.2, 0.1]],
 ];
 const Silence = (f: number) => {
-  const camera = cam([0.45, 2.25, 4.9], [0.4, 2.1, 4.45], [0.3, 0.6, -0.4], 48, ease(f, 0, 40));
+  const camera = cam([-0.3, 2.9, 6.7], [-0.32, 2.7, 6.3], [-0.35, 0.3, 0.6], 48, ease(f, 0, 40));
   const last = 0.6 * (1 - ease(f, 14, 24)) * (f > 8 && f < 12 ? 0.5 : 1);
   return (
     <Throne
@@ -831,10 +835,11 @@ const Ruler = (f: number) => {
 };
 
 // Back in the throne room, cold "truth" light: the innocent guards doze on the bench, sticks leaning untouched.
-const TRUTH_ZS = [-0.25, 0.5, 1.25];
+const TRUTH_ZS = [0, 0.5, 1.0];
 const TruthSleep = (f: number) => {
-  const z = 0.1 + ease(f, 0, 42) * 0.7;
-  const camera: CameraShot = { position: [1.05, 1.15, z], target: [3.72, 0.72, z + 0.3], fov: 46 };
+  // All three sleepers stay whole in frame; only a slow drift along the bench.
+  const z = 0.42 + ease(f, 0, 42) * 0.16;
+  const camera: CameraShot = { position: [0.3, 1.15, z], target: [3.72, 0.72, z], fov: 46 };
   const looks = [EXTRAS[0], COMPARER, MEASURER];
   const x = BENCH.x - 0.24;
   return (

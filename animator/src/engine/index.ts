@@ -9,6 +9,7 @@ export type { Expression, HeldItem, PuppetLook, PuppetPose } from "../puppet/Pup
 export { cardTilt, handWorld, HEAD_Y, HIP_HEIGHT, PUPPET_HEIGHT, PuppetBillboard } from "../puppet/PuppetBillboard";
 export type { PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";
 export { InkBox, InkCylinder, toonRamp } from "../three/toon";
+export { BlenderModel, type PartPose } from "../three/model";
 export * from "../three/kit";
 export { Campfire, DOCK, FIRE, firePoint, Haze, LakeSet, lakeLight, Pine, Ridge, Rock, SmokePlume } from "../three/LakeSet";
 export { moodLight } from "../three/moods";

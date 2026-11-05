@@ -21,14 +21,14 @@
 | gags | 4 | ≥ 2 | ok |
 | hue_families | 7 | 5 – 12 | ok |
 | top_hue_share | 41% | 0 – 0.4 | **MISS** |
-| motion | 10.4 | ≥ 6.0 | ok |
+| motion | 8.5 | ≥ 6.0 | ok |
 | still_share | 2% | 0 – 0.15 | ok |
 | seed_by | 2.9s | 0 – 20 | ok |
 | glitch_frames | 0 | 0 – 0 | ok |
 | black_frames | 0 | 0 – 0 | ok |
 | frozen_spans | 0 | 0 – 0 | ok |
 
-Stillest shots: ShedShot 2.9, DawnShot 3.5, GiveShot 3.7, Over2Shot 3.8, OverShot 4.3.
+Stillest shots: ShedShot 2.9, DawnShot 3.4, StareShot 3.5, GiveShot 3.7, Over2Shot 3.8.
 
 Picture 1440x2560. Sudden jumps inside a shot to look at (frame-by-frame QA, `build/qa/sheet_*.jpg`): 389, 904, 922, 944, 1247-1249.
 

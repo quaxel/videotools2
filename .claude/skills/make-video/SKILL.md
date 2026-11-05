@@ -97,6 +97,14 @@ For the video's own score instead of the library loops, write `videos/<slug>/mus
 score), run `pipeline.py music <slug>` and pass `score` to `Video`.
 
 Building blocks for the picture (library.md has each API):
+- **Blender models** for complex props. Decide per prop while writing the shot list, without asking: build it from
+  kit pieces (`InkBox`, `InkCylinder`, existing props) when it is boxes, cylinders and slabs (a desk, a crate, a sign,
+  a door); model it in Blender when the viewer must recognise it by its silhouette and that needs curved or compound
+  surfaces or many fitted parts (a car, a bicycle, a boat, a plane, an animal, an instrument, a cannon). When in
+  doubt and the prop is on screen for more than one shot or close to the lens, use Blender. Write
+  `videos/<slug>/blender/<name>.py` (bpy, from `guide/blender/car.py`), run it headless to
+  `public/videos/<slug>/models/<name>.glb`, and show it with `BlenderModel` (library.md → Blender models). The script
+  is the source: change the script and run it again, never hand-edit in a live Blender session.
 - **Physics** for a gag where things fall, topple or scatter: `videos/<slug>/physics.mjs`, baked by
   `pipeline.py physics <slug>` (check, stills and render re-bake it when it changes), played by `<Simulation>`. Tune by
   baking and reading the printed impacts; keep the scatter inside the narrow 9:16 frame.
@@ -135,7 +143,8 @@ measures low: give it more volume rather than reading it as buried.
 It also prints a framing audit (saved to `videos/<slug>/build/stills/framing.txt`): faces or signs cut by the frame edge, under
 the captions, or hidden behind the set. Fix every hit on a key face or sign; background signs and crowd extras at the edge can stay.
 Read `videos/<slug>/build/stills/contact.jpg` (one frame per second). Check: faces in frame and not cut,
-labels readable, no empty or black frames, over-the-shoulder head ≤ 25 %, colour varies, gags read.
+labels readable, no empty or black frames, over-the-shoulder head ≤ 25 %, colour varies, gags read, Blender models
+read at a glance in the toon look (ink outline, flat bands, right way round and on the floor).
 For a closer look pass frames: `pipeline.py stills <slug> 120,480,900`. Fix and repeat, at most 3 rounds.
 
 Then check that no character walks or stands through a set object (every 5th frame, tiny scale):

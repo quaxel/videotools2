@@ -79,6 +79,29 @@ references, never their characters, props or shots; reference frames never go in
 
 Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `InteriorStrip`, `XrayWheel`, `AtmSet`, `ExteriorSet`, `LabSet`.
 
+### Blender models (`src/three/model.tsx`, also exported from the engine)
+
+For props the kit primitives cannot make read (car, bicycle, boat, animal, instrument). One bpy script per model in
+`videos/<slug>/blender/<name>.py`; `guide/blender/car.py` is a worked example to copy. Build it:
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P videos/<slug>/blender/<name>.py -- public/videos/<slug>/models/<name>.glb
+```
+
+- Script rules: metres; origin on the ground under the model's centre; front toward Blender -Y (it faces +Z, the
+  camera, in the scene); flat cartoon proportions with bevels (`BEVEL` modifier, 3-4 segments) and `shade_smooth`;
+  one Principled material per colour with only Base Color set (textures are allowed, roughness and metal are ignored).
+  Every part that moves (wheel, door, propeller, jaw) is its own object with a name without dots or spaces, rotation
+  and scale applied and its origin on the pivot; children follow their parent. Keep it under ~50k triangles.
+- `BlenderModel({ src, position?, rotation?, scale?, ink?, shadows?, parts? })` — `src` under public/
+  (`"videos/<slug>/models/car.glb"`). Every material becomes the kit's toon material (colour and texture kept) with
+  an ink hull of `ink` metres (default 0.015, like `InkBox`; a mesh named `..._noink` gets none). The frame waits for
+  the file. `parts` poses named objects per frame relative to their rest pose:
+  `{ Wheel_FL: { rotation: [-f * 0.2, 0, 0] }, Door_L: { rotation: [0, open * 1.2, 0] } }` (`position` added,
+  `rotation` Euler in the part's own axes, `scale` multiplied, `visible`). An unknown part name throws.
+- A model that drives or flies through a shot moves as a whole with the group `position`; spin its wheels from the
+  distance travelled (`distance / radius`) so they do not skid.
+
 ### Outdoor set, fire, smoke and distant mountains (`src/three/LakeSet.tsx`)
 
 - `LakeSet({ camera, frame, fire? })` — mountain lake at dusk (mood `dusk`): grass bank (floor y = 0, z > -1.5), water
