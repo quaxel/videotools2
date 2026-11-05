@@ -18,7 +18,7 @@ export const criteria: Criterion[] = [
     key: "brand_free",
     label: "Markasız",
     question:
-      "The story is not about one company, brand or branded product/model (an industry or a public institution is fine).",
+      "The story is not built around a commercial brand: one company, trademark or branded product/model. Names of temples, mosques, churches, buildings, places, cities, institutions, cultures and people are not brands; an industry is fine.",
     weight: 0,
     gate: true,
   },

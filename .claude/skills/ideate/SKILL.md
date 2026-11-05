@@ -25,8 +25,10 @@ name.
 Also read `../animator/guide/rules.md` (Story and Script sections). The rubric questions are short forms of it.
 
 House rules that override everything:
-- No topic centred on one company, brand or branded product/model. An industry (airlines, gyms, casinos) or a
-  public institution is fine. Hiding the brand name does not make a brand story eligible.
+- No topic centred on a commercial brand: one company, trademark or branded product/model. This covers
+  commercial brands only. Names of temples, mosques, churches, buildings, places, cities, institutions, cultures
+  and people are not brands, and an industry (airlines, gyms, casinos) is fine. Hiding the brand name does not
+  make a brand story eligible.
 - The format is the make-video Short: 50–60 s, 180–210 words, one character, a twist that arrives as an event,
   a mechanism shown with labelled physical props. Topics that need a list of reasons or a chart fail.
 - Stay inside `channel.categories` and the channel promise. If a seed theme was given, every candidate must be
@@ -87,9 +89,10 @@ Do not grade your own drafts in the same breath. Write the drafts (everything ab
 > `channel`, `videos` already made, workspace `ideas` incl. trashed/archived ones, which count as already
 > considered); the format rules `<repo>/animator/guide/rules.md` (Story and Script); and, for any made video that
 > looks close to a draft, `<repo>/videos/<slug>/plan.json` to compare the core.
-> House rules: no topic centred on one company, brand or branded product/model (an industry or public institution
-> is fine; a story that rests on one specific aircraft/train/car model counts as model-centred). Zodiac is
-> off-limits.
+> House rules: no topic centred on a commercial brand: one company, trademark or branded product/model (a story
+> that rests on one specific aircraft/train/car model counts as model-centred). This covers commercial brands
+> only: names of temples, mosques, churches, buildings, places, cities, institutions, cultures and people are not
+> brands, and an industry is fine. Zodiac is off-limits.
 > For each draft give one entry per rubric key (all of them): verdict "pass" | "fail" | "unknown".
 > - `sourceable`: pass only if a listed source plausibly backs the key number/claim and is reasonably
 >   authoritative; a blog or forum quoting a study is "unknown"; a contested core claim is "fail".
