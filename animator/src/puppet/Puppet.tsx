@@ -56,12 +56,19 @@ export type PuppetLook = {
   hatStyle?: "wide" | "bowler" | "boater" | "helmet" | "stahl"; // shape of `hat`: wide felt brim (default), round bowler, flat straw boater, WWII M1 steel helmet, flared coal-scuttle helmet
   shorts?: string; // athletic shorts to mid-thigh (runners)
   bib?: string; // race number on a white cloth bib, front and back (e.g. "31")
+  pants?: string; // trouser colour: a coloured leg inside the ink outline (default: plain ink legs)
+  shoes?: string; // shoe colour: a coloured sneaker inside the ink outline
+  iris?: string; // iris colour: a coloured ring round the pupil (default: plain black dots); pose `gold` turns it glowing gold
 };
+
+// Pants and shoe colours reach every Leg and Foot through context, so the front, side and back views share them.
+const WearCtx = React.createContext<{ pants?: string; shoes?: string }>({});
 
 export type PuppetPose = {
   expression: Expression;
   blink?: boolean;
   mouthOpen?: number; // 0..1, used while talking
+  gold?: number; // 0..1 the iris (look.iris) glows gold: eagle eyes
   viseme?: Viseme; // mouth shape for the sound being said (Stage sets it from the words); default "a"
   swing?: number; // degrees the lanyard, chain and cap brim lag behind the body (follow-through)
   lookX?: number; // -1..1 pupil shift
@@ -292,11 +299,20 @@ const Hand: React.FC<{ x: number; y: number; side: 1 | -1; angle: number; shape?
   );
 
 // Simple rounded foot.
-const Foot: React.FC<{ x: number; y: number; scale?: number }> = ({ x, y, scale = 1.3 }) => (
-  <g transform={`translate(${x} ${y}) scale(${scale})`}>
-    <rect x={-38} y={-14} width={76} height={36} rx={18} fill={INK} />
-  </g>
-);
+const Foot: React.FC<{ x: number; y: number; scale?: number }> = ({ x, y, scale = 1.3 }) => {
+  const { shoes } = React.useContext(WearCtx);
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`}>
+      <rect x={-38} y={-14} width={76} height={36} rx={18} fill={INK} />
+      {shoes && (
+        <>
+          <rect x={-31} y={-8} width={62} height={24} rx={12} fill={shoes} />
+          <rect x={-31} y={10} width={62} height={7} rx={3.5} fill="#d9d4cc" />
+        </>
+      )}
+    </g>
+  );
+};
 
 const THIGH = 133;
 const SHIN = 133;
@@ -311,12 +327,27 @@ const knee = (hx: number, hy: number, fx: number, fy: number, kx: number, ky: nu
   const cand = [base + off, base - off].map((a) => [hx + Math.cos(a) * THIGH, hy + Math.sin(a) * THIGH] as [number, number]);
   return cand.sort((p, q) => (q[0] - hx) * kx + (q[1] - hy) * ky - ((p[0] - hx) * kx + (p[1] - hy) * ky))[0];
 };
-const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number }> = ({ pts, foot, footScale }) => (
-  <g>
-    <polyline points={pts.map((p) => p.join(",")).join(" ")} fill="none" stroke={INK} strokeWidth={LIMB} strokeLinecap="round" strokeLinejoin="round" />
-    <Foot x={foot[0]} y={foot[1]} scale={footScale} />
-  </g>
-);
+const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number }> = ({ pts, foot, footScale }) => {
+  const { pants } = React.useContext(WearCtx);
+  const d = pts.map((p) => p.join(",")).join(" ");
+  return (
+    <g>
+      <polyline points={d} fill="none" stroke={INK} strokeWidth={LIMB} strokeLinecap="round" strokeLinejoin="round" />
+      {pants && <polyline points={d} fill="none" stroke={pants} strokeWidth={LIMB - 10} strokeLinecap="round" strokeLinejoin="round" />}
+      <Foot x={foot[0]} y={foot[1]} scale={footScale} />
+    </g>
+  );
+};
+// Straight back-view leg (a line from the hip), with the pants colour inside the outline.
+const BackLeg: React.FC<{ x1: number; y1: number; x2: number; y2: number }> = ({ x1, y1, x2, y2 }) => {
+  const { pants } = React.useContext(WearCtx);
+  return (
+    <>
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={INK} strokeWidth={LIMB} strokeLinecap="round" />
+      {pants && <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={pants} strokeWidth={LIMB - 10} strokeLinecap="round" />}
+    </>
+  );
+};
 const lerp2 = (a: [number, number], b: [number, number], t: number): [number, number] => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 
 // Eyelid over a white eye: a skin-coloured lid with a line and a soft shadow under it. yl / yr are the lid line's height at the
@@ -555,7 +586,16 @@ const eyeShape = (e: Expression) => {
 };
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
-const Eyes: React.FC<{ expression: Expression; from?: Expression; blend: number; blink: boolean; asleep?: boolean; lookX: number; skin: string; uid: string; micro: FaceMicro }> = ({
+const hex = (c: string): [number, number, number] => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+const mixHex = (a: string, b: string, t: number) => {
+  const A = hex(a);
+  const B = hex(b);
+  return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",")})`;
+};
+
+const Eyes: React.FC<{ expression: Expression; from?: Expression; blend: number; blink: boolean; asleep?: boolean; lookX: number; skin: string; uid: string; micro: FaceMicro; iris?: string; gold?: number }> = ({
+  iris,
+  gold = 0,
   expression,
   asleep,
   from,
@@ -622,7 +662,13 @@ const Eyes: React.FC<{ expression: Expression; from?: Expression; blend: number;
         return (
           <g key={x}>
             <circle cx={x} cy={y} r={r} fill="#fff" stroke={INK} strokeWidth={9} />
-            <circle cx={x + px + mix(A.px, B.px, t)} cy={y + 4 + mix(A.py, B.py, t) + (micro.lookY ?? 0)} r={mix(A.pr, B.pr, t)} fill={INK} />
+            {iris && (
+              <>
+                {gold > 0.05 && <circle cx={x + px + mix(A.px, B.px, t)} cy={y + 4 + mix(A.py, B.py, t) + (micro.lookY ?? 0)} r={r * 0.9} fill="#ffe27a" opacity={0.7 * gold} />}
+                <circle cx={x + px + mix(A.px, B.px, t)} cy={y + 4 + mix(A.py, B.py, t) + (micro.lookY ?? 0)} r={r * 0.68} fill={mixHex(iris, "#ffc21a", gold)} stroke={mixHex("#3a2210", "#ff9a00", gold)} strokeWidth={4} />
+              </>
+            )}
+            <circle cx={x + px + mix(A.px, B.px, t)} cy={y + 4 + mix(A.py, B.py, t) + (micro.lookY ?? 0)} r={mix(A.pr, B.pr, t) + (iris ? 3 : 0)} fill={INK} />
             <Lid uid={uid} cx={x} cy={y} r={r} yl={y + lid + l0} yr={y + lid + l1} skin={skin} />
           </g>
         );
@@ -1039,7 +1085,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             </g>
           )}
           <Brows expression={pose.expression} from={pose.from} blend={blend} micro={micro} />
-          <Eyes expression={pose.expression} from={pose.from} blend={blend} blink={pose.blink ?? false} asleep={pose.sleep} lookX={pose.lookX ?? 0} skin={look.skin} uid={patternId} micro={micro} />
+          <Eyes expression={pose.expression} from={pose.from} blend={blend} blink={pose.blink ?? false} asleep={pose.sleep} lookX={pose.lookX ?? 0} skin={look.skin} uid={patternId} micro={micro} iris={look.iris} gold={pose.gold} />
           {pose.sleep ? (
             <ellipse cx={0} cy={-680} rx={16} ry={11 + Math.sin((micro.t ?? 0) / 14) * 3} fill={INK} />
           ) : changing ? (
@@ -1324,7 +1370,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
     <g>
       <LeafPattern look={look} id={patternId} />
       {pose.sit ? (
-        [-1, 1].map((side) => <line key={side} x1={side * 55} y1={-280} x2={side * 62} y2={-210} stroke={INK} strokeWidth={LIMB} strokeLinecap="round" />)
+        [-1, 1].map((side) => <BackLeg key={side} x1={side * 55} y1={-280} x2={side * 62} y2={-210} />)
       ) : (
         [-1, 1].map((side) => {
           const a = ((pose.legSwing ?? 0) * side * Math.PI) / 180;
@@ -1332,7 +1378,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           const fy = -280 + Math.cos(a) * 266;
           return (
             <g key={side}>
-              <line x1={side * 55} y1={-280} x2={fx} y2={fy} stroke={INK} strokeWidth={LIMB} strokeLinecap="round" />
+              <BackLeg x1={side * 55} y1={-280} x2={fx} y2={fy} />
               <Foot x={fx} y={fy - 4} scale={1.05} />
             </g>
           );
@@ -1401,7 +1447,8 @@ const Zzz: React.FC<{ x: number; y: number; t: number }> = ({ x, y, t }) => (
 
 export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> = (props) => {
   const { pose } = props;
-  const body = pose.view === "side" ? <SidePuppet {...props} /> : pose.view === "back" ? <BackPuppet {...props} /> : <FrontPuppet {...props} />;
+  const inner = pose.view === "side" ? <SidePuppet {...props} /> : pose.view === "back" ? <BackPuppet {...props} /> : <FrontPuppet {...props} />;
+  const body = <WearCtx.Provider value={{ pants: props.look.pants, shoes: props.look.shoes }}>{inner}</WearCtx.Provider>;
   // Squash and stretch about the contact point (the feet, or the middle of the body in the air); sy * sx^2 = 1.
   const sq = Math.max(-0.45, Math.min(0.45, pose.squash ?? 0));
   const sy = 1 - sq;

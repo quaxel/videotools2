@@ -11,6 +11,8 @@ import { SlotHook } from "./scenes/SlotHook";
 import { SpacePreview } from "./scenes/SpacePreview";
 import { TransitionPreview } from "./scenes/TransitionPreview";
 import { VIDEOS } from "./videos";
+import { DESIGN_FRAMES, DogNoseDesign } from "./videos/dog-nose/Design";
+import { DESIGN_FRAMES as EAGLE_DESIGN_FRAMES, EagleVisionDesign } from "./videos/eagle-vision/Design";
 
 // Every video in src/videos/ becomes a composition named after its slug.
 export const Root: React.FC = () => (
@@ -18,6 +20,8 @@ export const Root: React.FC = () => (
     {VIDEOS.map((v) => (
       <Composition key={v.slug} id={v.slug} component={v.Scene} durationInFrames={v.frames} fps={30} width={1080} height={1920} />
     ))}
+    <Composition id="DogNoseDesign" component={DogNoseDesign} durationInFrames={DESIGN_FRAMES} fps={30} width={1080} height={1920} />
+    <Composition id="EagleVisionDesign" component={EagleVisionDesign} durationInFrames={EAGLE_DESIGN_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="FaceTour" component={FaceTour} durationInFrames={FACE_TOUR_STEP * 15} fps={30} width={1080} height={1920} />
     <Composition id="GestureTour" component={GestureTour} durationInFrames={GESTURE_TOUR_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="MoveTour" component={MoveTour} durationInFrames={MOVE_TOUR_FRAMES} fps={30} width={1080} height={1920} />

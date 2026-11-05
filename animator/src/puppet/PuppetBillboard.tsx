@@ -33,7 +33,13 @@ export type PuppetPlacement = {
   at: [number, number]; // feet position on the floor: x, z
   tint?: string; // multiplies the cut-out's colours, so it takes on the set's light (Stage sets it from the mood)
   light?: PuppetLight; // light the cut-out from the set's lights instead of the flat tint
+  fixedYaw?: number; // do not turn to the camera: keep the card facing this direction (radians; 0 = +z, PI / 2 = +x), e.g. lying in a mirror
   crop?: boolean; // let the frame edge cut this puppet's head (Stage otherwise pans to keep every head whole)
+  // Show the puppet only inside an ellipse in world space (a reflection in a mirror, a figure behind a porthole): pixels where
+  // ((p - center) . u)^2 + ((p - center) . v)^2 > 1 are not drawn. u and v are the ellipse axes scaled by 1 / radius.
+  // With `archBottom` (a negative number in v units) the shape is an arch instead: a rectangle from there up to the centre line
+  // topped by the half ellipse above it (a standing mirror).
+  mask?: { center: [number, number, number]; u: [number, number, number]; v: [number, number, number]; archBottom?: number };
 };
 
 // The set's light as the cut-out sees it. Only strong light sources change a puppet: point lights (a campfire,
@@ -85,6 +91,12 @@ uniform vec3 axis;
 uniform float bodyHalf;
 uniform float headY;
 uniform float headR;
+uniform float maskOn;
+uniform vec3 maskC;
+uniform vec3 maskU;
+uniform vec3 maskV;
+uniform float maskArch;
+uniform float maskBMin;
 varying vec2 vUv;
 varying vec3 vWorld;
 varying vec3 vRight;
@@ -124,6 +136,19 @@ void shade(vec3 L, vec3 col, inout vec3 diffuse, inout vec3 rim) {
 void main() {
   vec4 tex = texture2D(map, vUv);
   if (tex.a < 0.02) discard;
+  if (maskOn > 0.5) {
+    // Test where the view ray through this pixel meets the mask's plane, so the cut follows the glass outline on screen
+    // even though the card stands a little in front of it.
+    vec3 mn = normalize(cross(maskU, maskV));
+    float mt = dot(maskC - cameraPosition, mn) / dot(vWorld - cameraPosition, mn);
+    vec3 md = cameraPosition + (vWorld - cameraPosition) * mt - maskC;
+    float ma = dot(md, maskU);
+    float mb = dot(md, maskV);
+    if (maskArch > 0.5) {
+      if (mb <= 0.0) { if (abs(ma) > 1.0 || mb < maskBMin) discard; }
+      else if (ma * ma + mb * mb > 1.0) discard;
+    } else if (ma * ma + mb * mb > 1.0) discard;
+  }
   vec3 diffuse = vec3(0.0);
   vec3 rim = vec3(0.0);
   for (int i = 0; i < 2; i++) {
@@ -195,14 +220,15 @@ export const handWorld = (at: [number, number], reach: [number, number], camera:
   return [at[0] + right[0] * reach[0] * K + fwd[0] * back, h * Math.cos(t), at[1] + right[1] * reach[0] * K + fwd[1] * back];
 };
 
-export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff", light }) => {
+export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff", light: lightIn, mask, fixedYaw }) => {
+  const light = lightIn ?? (mask ? ({} as PuppetLight) : undefined);
   const [x, z] = at;
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   // Turn to face the camera around the vertical axis only, like a cardboard cut-out.
-  const yaw = Math.atan2(camera.position.x - x, camera.position.z - z);
+  const yaw = fixedYaw ?? Math.atan2(camera.position.x - x, camera.position.z - z);
   const pose = turnToCamera(authored, yaw);
   const lying = (pose.lie ?? 0) > 0;
-  const tilt = lying ? 0 : cardTilt([camera.position.x, camera.position.y, camera.position.z], at);
+  const tilt = lying || fixedYaw !== undefined ? 0 : cardTilt([camera.position.x, camera.position.y, camera.position.z], at);
   // The card must grow with the puppet: a puppet lifted off the floor (`air`: a car seat, a jump), bobbed up or
   // stretched (negative `squash`) rises above the standing box, and whatever leaves the box is cut off in a hard
   // straight line (a "half head"). Extend the top by the lift, in steps so the canvas is not rebuilt every frame.
@@ -244,6 +270,8 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
     const c = document.createElement("canvas");
     c.width = Math.round(VB.w * density);
     c.height = Math.round(VB.h * density);
+    // Give it its 2D context now: the texture uploads before the first raster, and WebGPU refuses a context-less canvas.
+    c.getContext("2d");
     return c;
   }, [density, VB]);
   const texture = useMemo(() => {
@@ -261,7 +289,7 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
         ? new THREE.ShaderMaterial({
             vertexShader: LIT_VERTEX,
             fragmentShader: LIT_FRAGMENT,
-            uniforms: { map: { value: texture }, rimUv: { value: new THREE.Vector2(RIM / VB.w, RIM / VB.h) }, axis: { value: new THREE.Vector3() }, bodyHalf: { value: BODY_HALF }, headY: { value: HEAD_Y }, headR: { value: 0.27 }, ...Object.fromEntries(Object.entries(litUniforms(light)).map(([k, v]) => [k, { value: v }])) },
+            uniforms: { map: { value: texture }, rimUv: { value: new THREE.Vector2(RIM / VB.w, RIM / VB.h) }, axis: { value: new THREE.Vector3() }, bodyHalf: { value: BODY_HALF }, headY: { value: HEAD_Y }, headR: { value: 0.27 }, maskOn: { value: mask ? 1 : 0 }, maskC: { value: new THREE.Vector3(...(mask?.center ?? [0, 0, 0])) }, maskU: { value: new THREE.Vector3(...(mask?.u ?? [0, 0, 0])) }, maskV: { value: new THREE.Vector3(...(mask?.v ?? [0, 0, 0])) }, maskArch: { value: mask?.archBottom !== undefined ? 1 : 0 }, maskBMin: { value: mask?.archBottom ?? 0 }, ...Object.fromEntries(Object.entries(litUniforms(light)).map(([k, v]) => [k, { value: v }])) },
             transparent: true,
           })
         : null,
@@ -271,6 +299,14 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   if (litMaterial && light) {
     for (const [k, v] of Object.entries(litUniforms(light))) litMaterial.uniforms[k].value = v;
     litMaterial.uniforms.axis.value.set(x, 0, z);
+    litMaterial.uniforms.maskOn.value = mask ? 1 : 0;
+    if (mask) {
+      litMaterial.uniforms.maskC.value.set(...mask.center);
+      litMaterial.uniforms.maskU.value.set(...mask.u);
+      litMaterial.uniforms.maskV.value.set(...mask.v);
+      litMaterial.uniforms.maskArch.value = mask.archBottom !== undefined ? 1 : 0;
+      litMaterial.uniforms.maskBMin.value = mask.archBottom ?? 0;
+    }
     litMaterial.uniforms.headY.value = pose.sit ? HEAD_Y - HIP_HEIGHT * 0.55 : HEAD_Y;
   }
   useEffect(() => () => litMaterial?.dispose(), [litMaterial]);
@@ -302,7 +338,7 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
 
   return (
     <group ref={root} position={[x, 0, z]} userData={{ puppet: true }}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} scale={[1, 0.42, 1]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} scale={[1, 0.42, 1]} visible={!mask}>
         <circleGeometry args={[0.28, 40]} />
         <meshBasicMaterial color="#000" transparent opacity={0.3} depthWrite={false} />
       </mesh>

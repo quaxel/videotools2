@@ -12,6 +12,22 @@ import { useFramingFor, useImpact, useLighting, usePost, useSpeech } from "./Vid
 import { Post } from "./post/Post";
 import { applyFramingDelta, framingDelta, keepHeadsInFrame } from "./framing";
 import { getInputProps } from "remotion";
+import { WebGPURenderer } from "three/webgpu";
+
+// WebGPU trial (input prop `webgpu`): "on" draws the canvases with three's WebGPURenderer, "off" with WebGL. Either
+// value turns the post chain and the lit puppet shader off (both are WebGL-only GLSL), so the two compare like for
+// like. Unset: the normal look.
+const GPU_TRIAL = (getInputProps() as { webgpu?: "on" | "off" }).webgpu;
+// R3F 9 awaits an async gl factory, though its types only describe the sync one.
+const gpuGl =
+  GPU_TRIAL === "on"
+    ? ((async (props: { canvas: HTMLCanvasElement }) => {
+        const r = new WebGPURenderer({ canvas: props.canvas, antialias: false });
+        await r.init();
+        return r;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any)
+    : undefined;
 
 export type CameraShot = { position: Vec3; target: Vec3; fov: number };
 
@@ -134,7 +150,7 @@ export const Stage: React.FC<{
   const speech = useSpeech();
   const tint = puppetTint(bg);
   // Lit videos light puppets from the Stage's own rig, or one derived from the mood its background belongs to.
-  const lit = light ?? (useLighting() ? lightForBackground(bg) : undefined);
+  const lit = GPU_TRIAL ? undefined : light ?? (useLighting() ? lightForBackground(bg) : undefined);
   const cast = puppets.map((p) => {
     // A speaking puppet's mouth follows its voice, over whatever the shot authored.
     const said = speech(p.id);
@@ -145,12 +161,13 @@ export const Stage: React.FC<{
   // Rendered after the set, this rig wins over the set's own and applies the livened camera.
   const rig = <CameraRig {...camera} />;
   const front = foreground ? <group userData={{ ghost: true }}>{foreground}</group> : null;
-  const post = usePost();
+  const usedPost = usePost();
+  const post = GPU_TRIAL ? null : usedPost;
   if (post) {
     const inkDebug = (getInputProps() as { inkDebug?: boolean }).inkDebug === true;
     return (
       <AbsoluteFill style={{ backgroundColor: bg, filter: post.grade ? undefined : CSS_GRADE }}>
-        <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE}>
+        <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE} gl={gpuGl}>
           {set}
           {rig}
           {cast}
@@ -166,13 +183,13 @@ export const Stage: React.FC<{
       {blur ? (
         <>
           <AbsoluteFill style={{ filter: `blur(${blur}px)` }}>
-            <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE}>
+            <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE} gl={gpuGl}>
               {set}
               {rig}
             </ThreeCanvas>
           </AbsoluteFill>
           <AbsoluteFill>
-            <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE}>
+            <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE} gl={gpuGl}>
               <CameraRig {...camera} />
               {cast}
             </ThreeCanvas>
@@ -180,7 +197,7 @@ export const Stage: React.FC<{
           {front && (
             // nearer than the subject, so softer than the background: on its own canvas over the cast, lit flat
             <AbsoluteFill style={{ filter: `blur(${Math.max(6, blur * 3)}px)` }}>
-              <ThreeCanvas width={width} height={height} flat dpr={SUPERSAMPLE}>
+              <ThreeCanvas width={width} height={height} flat dpr={SUPERSAMPLE} gl={gpuGl}>
                 <CameraRig {...camera} />
                 <hemisphereLight args={["#ffffff", "#5a5a66", 1.6]} />
                 {front}
@@ -189,7 +206,7 @@ export const Stage: React.FC<{
           )}
         </>
       ) : (
-        <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE}>
+        <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE} gl={gpuGl}>
           {set}
           {rig}
           {cast}
