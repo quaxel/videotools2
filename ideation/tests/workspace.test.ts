@@ -67,7 +67,7 @@ test("imports 20 actual research ideas idempotently, preserving scope and source
   const store = fixture(t);
   const path = join(
     repoRoot,
-    "animator/videos/video-fikirleri-arastirma-ve-degerlendirme.md",
+    "ideation/docs/video-fikirleri-arastirma-ve-degerlendirme.md",
   );
   const before = hash(readFileSync(path));
   assert.equal(importResearch(store).created, 20);

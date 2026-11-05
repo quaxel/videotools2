@@ -2,12 +2,12 @@
 # uploads with one click — scheduled to go public at a chosen time (YouTube publishes it, this server doesn't need to
 # stay running).
 #
-#   .venv/bin/python uploader/server.py                 http://127.0.0.1:8765
-#   .venv/bin/python uploader/server.py --dry-run       whole flow without calling YouTube (nothing is saved as uploaded)
-#   .venv/bin/python uploader/server.py --import <slug> add (or refresh) one video in the database and exit
+#   animator/.venv/bin/python uploader/server.py                 http://127.0.0.1:8765
+#   animator/.venv/bin/python uploader/server.py --dry-run       whole flow without calling YouTube (nothing is saved as uploaded)
+#   animator/.venv/bin/python uploader/server.py --import <slug> add (or refresh) one video in the database and exit
 #   --db PATH, --port N                                 another database file / port (tests)
 #
-# Everything lives in uploader/uploader.db (SQLite, gitignored). A video is imported once: when out/<slug>.mp4 and
+# Everything lives in uploader/uploader.db (SQLite, gitignored). A video is imported once: when output/<slug>.mp4 and
 # videos/<slug>/ both exist, its title / description / tags are read from videos/<slug>/youtube.md (or drafted from
 # plan.json, lines.json and research.md) and stored. After that only the MP4 is needed; videos/<slug>/ can go.
 #
@@ -53,7 +53,7 @@ auth_state = {"connecting": False, "error": None}
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS videos (
     slug       TEXT PRIMARY KEY,
-    video_path TEXT NOT NULL,             -- relative to animator/
+    video_path TEXT NOT NULL,             -- relative to the repository root
     source     TEXT NOT NULL,             -- 'md' (youtube.md) or 'auto' (drafted from plan / lines / research)
     imported   TEXT NOT NULL,             -- JSON {title, description, tags, titleOptions} as imported
     draft      TEXT,                      -- JSON of the user's edits, NULL = unedited
@@ -121,10 +121,10 @@ def vdir(slug, *p):
 
 
 def rendered_slugs():
-    """Videos worth importing: a videos/<slug>/ folder plus its rendered out/<slug>.mp4 (skips previews and tours)."""
+    """Videos worth importing: a videos/<slug>/ folder plus its rendered output/<slug>.mp4 (skips previews and tours)."""
     vroot = os.path.join(ROOT, "videos")
     return sorted(s for s in os.listdir(vroot)
-                  if os.path.isdir(os.path.join(vroot, s)) and os.path.isfile(os.path.join(ROOT, "out", s + ".mp4")))
+                  if os.path.isdir(os.path.join(vroot, s)) and os.path.isfile(os.path.join(ROOT, "output", s + ".mp4")))
 
 
 def parse_youtube_md(path):
@@ -200,7 +200,7 @@ def import_video(slug, archived=False):
         pass
     with closing(db()) as con, con:
         con.execute("INSERT INTO videos VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (slug, os.path.join("out", slug + ".mp4"), source, dumps(meta), dumps(draft), dumps(upload),
+                    (slug, os.path.join("output", slug + ".mp4"), source, dumps(meta), dumps(draft), dumps(upload),
                      int(archived), now()))
     return "added", source
 
@@ -585,7 +585,7 @@ if __name__ == "__main__":
     if "--import" in sys.argv:
         slug = sys.argv[sys.argv.index("--import") + 1]
         if slug not in rendered_slugs():
-            sys.exit(f"{slug}: out/{slug}.mp4 ve videos/{slug}/ ikisi de olmalı.")
+            sys.exit(f"{slug}: output/{slug}.mp4 ve videos/{slug}/ ikisi de olmalı.")
         import_video(slug)  # refreshes the imported text from the folder; the user's edits stay
         info = video_info(get_row(slug))
         print(f"{slug}: veritabanında ({'youtube.md' if info['hasMd'] else 'otomatik taslak'}), başlık: {info['meta']['title']!r}"

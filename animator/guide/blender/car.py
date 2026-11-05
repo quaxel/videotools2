@@ -1,4 +1,4 @@
-# Example Blender model script (a cartoon hatchback): copy to videos/<slug>/blender/<name>.py and rewrite.
+# Example Blender model script (a cartoon hatchback): copy to ../videos/<slug>/blender/<name>.py and rewrite.
 # Run: /Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P <script> -- public/videos/<slug>/models/<name>.glb
 # Units: metres, origin on the ground under the model's centre, front toward Blender -Y (faces +Z, the camera, in three).
 # Moving parts (Wheel_FL ...) are their own objects with rotation applied and the origin on the pivot.

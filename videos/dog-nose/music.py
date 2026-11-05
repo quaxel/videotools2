@@ -6,7 +6,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts", "music"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "animator", "scripts", "music"))
 import instruments as I  # noqa: E402
 from score import Band, Grid, Video, envelope, finish, mixdown, r  # noqa: E402
 

@@ -10,7 +10,7 @@
     {
       "name": "uploader",
       "runtimeExecutable": "animator/.venv/bin/python",
-      "runtimeArgs": ["animator/uploader/server.py"],
+      "runtimeArgs": ["uploader/server.py"],
       "port": 8765
     }
   ]

@@ -28,8 +28,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main(slug):
-    spec = json.load(open(os.path.join(ROOT, "videos", slug, "lines.json")))
-    out_dir = os.path.join(ROOT, "videos", slug, "build", "voice")
+    spec = json.load(open(os.path.join(ROOT, "..", "videos", slug, "lines.json")))
+    out_dir = os.path.join(ROOT, "..", "videos", slug, "build", "voice")
     os.makedirs(out_dir, exist_ok=True)
     model = None
     for i, line in enumerate(spec["lines"]):

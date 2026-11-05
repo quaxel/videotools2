@@ -36,7 +36,7 @@ COMMANDS = {
     "go": {"to": "|".join(P.STAGES), "2k": True, "plan": True},
     "look": {"refs": r"[\w./~ -]+"},
 }
-# what the page may open per video, relative to animator/ ({slug} filled in)
+# what the page may open per video, relative to the repository root ({slug} filled in)
 FILES = {
     "contact": "videos/{slug}/build/stills/contact.jpg",
     "framing": "videos/{slug}/build/stills/framing.txt",
@@ -50,10 +50,10 @@ FILES = {
     "report": "videos/{slug}/report.md",
     "youtube": "videos/{slug}/youtube.md",
     "lines": "videos/{slug}/lines.json",
-    "mp4": "out/{slug}.mp4",
-    "draft": "out/drafts/{slug}.mp4",
-    "music": "public/videos/{slug}/music.wav",
-    "ab": "out/ab/{slug}-score.mp4",
+    "mp4": "output/{slug}.mp4",
+    "draft": "output/drafts/{slug}.mp4",
+    "music": "animator/public/videos/{slug}/music.wav",
+    "ab": "output/ab/{slug}-score.mp4",
 }
 
 
@@ -110,7 +110,7 @@ lock = threading.Lock()
 
 
 def slugs():
-    root = os.path.join(P.ROOT, "videos")
+    root = P.VIDEOS
     return sorted(s for s in os.listdir(root) if SLUG.match(s) and os.path.isdir(os.path.join(root, s)))
 
 
@@ -123,7 +123,7 @@ def summary(slug, sizes=False):
         "slug": slug,
         "stages": [{"stage": s, "state": st, "note": n, "last": runs.get(s, (None,))[0]} for s, st, n in rows],
         "approvals": {g: ("ok" if P.approved(slug, g) else "lapsed" if g in given else "no") for g in P.GATED},
-        "files": [k for k, rel in FILES.items() if os.path.exists(os.path.join(P.ROOT, rel.format(slug=slug)))],
+        "files": [k for k, rel in FILES.items() if os.path.exists(os.path.join(P.REPO, rel.format(slug=slug)))],
         "title": plan_title(slug),
     }
 
@@ -196,7 +196,7 @@ class Handler(BaseHTTPRequestHandler):
             slug, key = m.group(1), m.group(2)
             if slug not in slugs() or key not in FILES:
                 return self.send_json({"error": "Bulunamadı."}, 404)
-            full = os.path.join(P.ROOT, FILES[key].format(slug=slug))
+            full = os.path.join(P.REPO, FILES[key].format(slug=slug))
             if not os.path.isfile(full):
                 return self.send_json({"error": "Dosya yok."}, 404)
             if full.endswith((".mp4", ".wav")):

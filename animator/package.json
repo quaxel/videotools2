@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render SlotMachines60 out/slot-machines-60.mp4",
-    "still": "remotion still SlotMachines60 out/still.png"
+    "render": "remotion render SlotMachines60 ../output/slot-machines-60.mp4",
+    "still": "remotion still SlotMachines60 ../output/still.png"
   },
   "dependencies": {
     "@react-three/fiber": "9.3.0",

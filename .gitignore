@@ -22,12 +22,12 @@ __pycache__/
 .claude/settings.local.json
 
 # YouTube uploader OAuth client and token
-animator/uploader/secrets/
-animator/uploader/client_secret*.json
-animator/uploader/uploader.db*
+uploader/secrets/
+uploader/client_secret*.json
+uploader/uploader.db*
 
 # Rendered videos and TTS model weights — too large for GitHub
-animator/out/
+output/
 tts/model/
 
 # Effects baked into a space (scripts/foley.py space), made on demand
@@ -35,8 +35,8 @@ animator/public/space/
 
 # Pipeline outputs under build/, remade on demand (TTS takes, stills, QA frames, cue dumps, logs).
 # Kept: approvals.json, check.ok, score.md and timings.jsonl, which hold state and history.
-animator/videos/*/build/*
-!animator/videos/*/build/approvals.json
-!animator/videos/*/build/check.ok
-!animator/videos/*/build/score.md
-!animator/videos/*/build/timings.jsonl
+videos/*/build/*
+!videos/*/build/approvals.json
+!videos/*/build/check.ok
+!videos/*/build/score.md
+!videos/*/build/timings.jsonl

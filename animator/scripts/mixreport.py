@@ -126,7 +126,7 @@ def effects_only(cues_path, d):
 
 def main(slug, d):
     timing = json.load(open(os.path.join(ROOT, "src", "videos", slug, "timing.json")))
-    cues = json.load(open(os.path.join(ROOT, "videos", slug, "build", "cues.json")))
+    cues = json.load(open(os.path.join(ROOT, "..", "videos", slug, "build", "cues.json")))
     fps, total = timing["fps"], timing["totalFrames"]
     n = round(total / fps * SR)
     stems = {}

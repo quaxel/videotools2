@@ -163,7 +163,7 @@ function renderList() {
       <span class="slug">${esc(v.slug)}</span>
       <span class="t">${esc(v.meta.title || "— başlık yok —")}</span>
       ${statusChip(v)}
-    </button>`).join("") || `<div class="empty">${DATA.videos.length ? "Bu filtrede video yok." : "Henüz video yok. Render edilen yeni videolar (out/&lt;slug&gt;.mp4) burada görünür."}</div>`;
+    </button>`).join("") || `<div class="empty">${DATA.videos.length ? "Bu filtrede video yok." : "Henüz video yok. Render edilen yeni videolar (output/&lt;slug&gt;.mp4) burada görünür."}</div>`;
 }
 
 function defaultWhen() {

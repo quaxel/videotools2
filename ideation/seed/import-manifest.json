@@ -6,13 +6,13 @@
   "documents": [
     {
       "id": "research-batch-01",
-      "repoRelativePath": "animator/videos/video-fikirleri-arastirma-ve-degerlendirme.md",
+      "repoRelativePath": "ideation/docs/video-fikirleri-arastirma-ve-degerlendirme.md",
       "sha256": "c613d53132ca4954fa235ea565649b78d67925f9c469b1cc38826299a2d522d2",
       "format": "markdown"
     },
     {
       "id": "research-batch-02",
-      "repoRelativePath": "animator/videos/video-fikirleri-arastirma-ve-degerlendirme-02.md",
+      "repoRelativePath": "ideation/docs/video-fikirleri-arastirma-ve-degerlendirme-02.md",
       "sha256": "cdeb2869b990aeaef9d696a172f4e9d5e293b4996b9d3662db5c615fbba084a7",
       "format": "markdown"
     }

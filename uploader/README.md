@@ -1,13 +1,13 @@
 # YouTube Yükleyici
 
-A local page that lists every rendered video (`out/<slug>.mp4`) and uploads it with one button, with the title,
+A local page that lists every rendered video (`output/<slug>.mp4`) and uploads it with one button, with the title,
 description and tags already filled in. When you schedule a video, it is uploaded as **private** with `publishAt`.
 YouTube itself makes it public at that time, so this page doesn't need to stay open.
 
 ```bash
-.venv/bin/python uploader/server.py                 # http://127.0.0.1:8765 opens
-.venv/bin/python uploader/server.py --dry-run       # whole flow without sending anything to YouTube
-.venv/bin/python uploader/server.py --import <slug> # add one video to the database now (make-video step 8 runs it)
+animator/.venv/bin/python uploader/server.py                 # http://127.0.0.1:8765 opens
+animator/.venv/bin/python uploader/server.py --dry-run       # whole flow without sending anything to YouTube
+animator/.venv/bin/python uploader/server.py --import <slug> # add one video to the database now (make-video step 8 runs it)
 ```
 
 ## Where the data lives: `uploader/uploader.db`
@@ -19,7 +19,7 @@ Everything is stored in one SQLite file, `uploader/uploader.db`:
 - the archive flag
 - the upload record: video ID, schedule, and the last status YouTube reported
 
-**A video is imported once.** That happens when both `out/<slug>.mp4` and `videos/<slug>/` exist, either when you
+**A video is imported once.** That happens when both `output/<slug>.mp4` and `videos/<slug>/` exist, either when you
 open the page or when you run `--import`:
 
 - The text comes from `videos/<slug>/youtube.md`.

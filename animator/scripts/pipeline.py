@@ -17,7 +17,7 @@
 #   .venv/bin/python scripts/pipeline.py motion <slug>          fast 30 % draft render + motion per shot (stillest first)
 #   .venv/bin/python scripts/pipeline.py framing <slug>         head-framing pre-pass -> public/videos/<slug>/framing.json
 #                                                              (run by stills/motion/render when the scene changed)
-#   .venv/bin/python scripts/pipeline.py render <slug> [--2k]   full MP4 -> out/<slug>.mp4 (broken segments rendered again),
+#   .venv/bin/python scripts/pipeline.py render <slug> [--2k]   full MP4 -> output/<slug>.mp4 (broken segments rendered again),
 #                                                              then qa; --2k renders the 1440x2560 delivery size
 #   .venv/bin/python scripts/pipeline.py glitch <slug> [mp4]    flat runs in a render (a lost WebGL canvas); render retries them
 #   .venv/bin/python scripts/pipeline.py qa <slug> [mp4]        frame-by-frame QA (scripts/qa.py) -> videos/<slug>/build/qa/
@@ -47,7 +47,10 @@ import tempfile
 import time
 from collections import Counter
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # animator/: the Remotion project
+REPO = os.path.dirname(ROOT)
+VIDEOS = os.path.join(REPO, "videos")  # per-video work: script, research, music.py, build/
+OUT = os.path.join(REPO, "output")  # rendered MP4s (gitignored)
 QWEN_PY = os.path.join(ROOT, "..", "tts", "qwen", ".venv", "bin", "python")
 EFFECT_HOT = 9.0  # LU: an effect this far over voice + music knocks (scripts/mixreport.py, same name)
 PY = os.path.join(ROOT, ".venv", "bin", "python")
@@ -86,7 +89,7 @@ def run(*cmd, cwd=ROOT, check=True, capture=False):
 
 
 def vdir(slug, *p):
-    return os.path.join(ROOT, "videos", slug, *p)
+    return os.path.join(VIDEOS, slug, *p)
 
 
 def sdir(slug, *p):
@@ -498,7 +501,7 @@ def spans(frames):
 
 
 def cmd_glitch(slug, path=None):
-    found = glitch_frames(path or os.path.join(ROOT, "out", f"{slug}.mp4"))
+    found = glitch_frames(path or os.path.join(OUT, f"{slug}.mp4"))
     print(f"glitch frames: {spans(found) or 'none'}")
     return found
 
@@ -545,7 +548,7 @@ def qa_meta(slug):
 
 def cmd_qa(slug, path=None):
     """Frame-by-frame QA of a render (scripts/qa.py) into videos/<slug>/build/qa/."""
-    path = path or os.path.join(ROOT, "out", f"{slug}.mp4")
+    path = path or os.path.join(OUT, f"{slug}.mp4")
     out = vdir(slug, "build", "qa")
     os.makedirs(out, exist_ok=True)
     meta = os.path.join(out, "meta.json")
@@ -611,7 +614,7 @@ def cmd_motion(slug):
 
     cmd_register()
     cmd_framing(slug, force=False)
-    draft = os.path.join(ROOT, "out", "drafts", f"{slug}.mp4")
+    draft = os.path.join(OUT, "drafts", f"{slug}.mp4")
     os.makedirs(os.path.dirname(draft), exist_ok=True)
     render_video(slug, draft, "--scale=0.3", "--log=error")
     _, d = frame_diffs(draft)
@@ -630,8 +633,8 @@ HD_SCALE = "1.3333333333333333"  # 4/3 to full precision: 1080 and 1920 times it
 def cmd_render(slug, hd=False):
     cmd_register()
     cmd_framing(slug, force=False)
-    os.makedirs(os.path.join(ROOT, "out"), exist_ok=True)
-    out = os.path.join(ROOT, "out", f"{slug}.mp4")
+    os.makedirs(OUT, exist_ok=True)
+    out = os.path.join(OUT, f"{slug}.mp4")
     picture, sound = f"{out}.picture.mp4", f"{out}.sound.wav"
     render_video(slug, picture, "--log=error", *([f"--scale={HD_SCALE}"] if hd else []))
     cmd_cues(slug)  # bakes the effects' spaces the soundtrack plays
@@ -713,7 +716,7 @@ def fact_gate(slug):
 
 
 def cmd_report(slug):
-    mp4 = os.path.join(ROOT, "out", f"{slug}.mp4")
+    mp4 = os.path.join(OUT, f"{slug}.mp4")
     plan = json.load(open(vdir(slug, "plan.json")))
     lines = json.load(open(vdir(slug, "lines.json")))["lines"]
     timing = json.load(open(sdir(slug, "timing.json")))
@@ -825,7 +828,7 @@ def plays_score(slug):
 def stage_files(slug):
     voice = os.path.join(ROOT, "public", "videos", slug, "voice.wav")
     score = os.path.join(ROOT, "public", "videos", slug, "music.wav")
-    mp4 = os.path.join(ROOT, "out", f"{slug}.mp4")
+    mp4 = os.path.join(OUT, f"{slug}.mp4")
     return {
         "voice": (sdir(slug, "timing.json"), [vdir(slug, "lines.json")]),
         "physics": (sdir(slug, "physics.json"), [vdir(slug, "physics.mjs"), os.path.join(ROOT, "scripts", "physics.mjs")]),
@@ -834,7 +837,7 @@ def stage_files(slug):
         "music": (score, [vdir(slug, "music.py"), sdir(slug, "timing.json"), cues_path(slug), os.path.join(ROOT, "scripts", "music")]),
         "stills": (vdir(slug, "build", "stills", "contact.jpg"), [sdir(slug)]),
         "collide": (vdir(slug, "build", "collide", "collide.txt"), [sdir(slug)]),
-        "motion": (os.path.join(ROOT, "out", "drafts", f"{slug}.mp4"), [sdir(slug), voice]),
+        "motion": (os.path.join(OUT, "drafts", f"{slug}.mp4"), [sdir(slug), voice]),
         "render": (mp4, [sdir(slug), voice] + ([score] if plays_score(slug) else [])),
         "report": (vdir(slug, "report.md"), [mp4, vdir(slug, "plan.json"), vdir(slug, "research.md")]),
     }

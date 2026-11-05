@@ -82,10 +82,10 @@ Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `Interio
 ### Blender models (`src/three/model.tsx`, also exported from the engine)
 
 For props the kit primitives cannot make read (car, bicycle, boat, animal, instrument). One bpy script per model in
-`videos/<slug>/blender/<name>.py`; `guide/blender/car.py` is a worked example to copy. Build it:
+`../videos/<slug>/blender/<name>.py`; `guide/blender/car.py` is a worked example to copy. Build it:
 
 ```bash
-/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P videos/<slug>/blender/<name>.py -- public/videos/<slug>/models/<name>.glb
+/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P ../videos/<slug>/blender/<name>.py -- public/videos/<slug>/models/<name>.glb
 ```
 
 - Script rules: metres; origin on the ground under the model's centre; front toward Blender -Y (it faces +Z, the
@@ -282,7 +282,7 @@ already 2× supersampled). The sets keep only their own hull outlines:
 For a gag where things fall, tip over, scatter or bounce (a crate stack knocked down, cans flying, a chest dropped
 on a foot), simulate it instead of keyframing it. Rapier runs once, offline; the render only looks poses up, so
 every frame renders on its own. `src/scenes/PhysicsPreview.tsx` (composition `PhysicsPreview`) is a worked example.
-- Write `videos/<slug>/physics.mjs` (a JS module, so a stack can be a loop) exporting one simulation or an object of
+- Write `../videos/<slug>/physics.mjs` (a JS module, so a stack can be a loop) exporting one simulation or an object of
   named ones: `{ frames, gravity?, floor?, warmup?, statics, bodies, events }` (the file header in
   `scripts/physics.mjs` lists every field). Shapes: `box` (`size` full [w, h, d], as InkBox), `ball` (`radius`),
   `cylinder` (`radius`, `height`). Metres; y = 0 is the floor. `warmup` frames settle a stack before frame 0.
@@ -302,7 +302,7 @@ every frame renders on its own. `src/scenes/PhysicsPreview.tsx` (composition `Ph
   speed, at }` (`other` is the body or static it hit, or `"floor"`). Put the sounds on these frames (spread
   `simImpacts(SIM, undefined, 2).map((h) => ({ at: START + h.frame, src: sfx("plop"), volume: ... }))` into the
   effect list, a `stamp` or `boom` for the big one: that also jolts the camera) and dust on the floor hits.
-- Tune by baking and looking: `node scripts/physics.mjs videos/<slug>/physics.mjs /tmp/x.json` prints bodies,
+- Tune by baking and looking: `node scripts/physics.mjs ../videos/<slug>/physics.mjs /tmp/x.json` prints bodies,
   frames and impacts in a second. Keep the scatter inside the frame: the narrow 9:16 frame loses anything that rolls
   more than ~0.25 × the camera distance sideways.
 
@@ -451,14 +451,14 @@ music cue under that line. The same report has the effects table (Foley → Leve
 ### Sync check (`pipeline.py sync <slug>`)
 
 `scripts/cues.mjs` renders one soundtrack-only frame with the `cueDump` input prop and keeps the shot, effect and
-music tables `Video` logs, fully resolved (spreads and constants included), in `videos/<slug>/build/cues.json`.
+music tables `Video` logs, fully resolved (spreads and constants included), in `../videos/<slug>/build/cues.json`.
 `sync` checks them against the picture and writes `build/sync.txt`. Errors (the stage fails): a cue outside the
 video or looping past its end, a missing file, the narration running past the end, no music at all. Warnings (look,
 some are on purpose): a looped effect that ends 1-6 frames off a cut, whips with no whoosh in their pan, gaps in the
 music, and the loop seam: the music and looped effects under the last frame should be the ones under frame 0. The
 frame QA also checks that the muxed audio is as long as the picture (`AV SYNC` in `build/qa/qa.md`).
 
-### The video's own score (`videos/<slug>/music.py`, `pipeline.py music <slug>`)
+### The video's own score (`../videos/<slug>/music.py`, `pipeline.py music <slug>`)
 
 A video can have its own score instead of the library loops, composed for its cuts the way animated-short scores
 each short. `scripts/music/` holds the instruments (`instruments.py`: brass, glockenspiel, vibes, music box, fife,
@@ -473,12 +473,12 @@ numpy + scipy). `score.py` gives every score its timeline and its finish:
 - `finish(...)`: folds the tail past the end onto the start, masters to the library loops' loudness, writes
   `public/videos/<slug>/music.wav` and the cue sheet `build/score.md`.
 
-Write `music.py` per video (the composition is the creative part; `videos/ghost-army/music.py` is a worked example:
+Write `music.py` per video (the composition is the creative part; `../videos/ghost-army/music.py` is a worked example:
 march in F for the hook, light pizzicato for the story, a D-minor spy pulse for the deception, a drone at the
 twist, the theme whistled at the end, a snare pickup into frame 0). Pass `score` to `Video` to play it; the
 `score` input prop overrides that for an A/B without editing the scene:
-`SCORE=1 node scripts/sound.mjs <slug> out/ab/score.wav`, then mux it over the existing render
-(`ffmpeg -i out/<slug>.mp4 -i out/ab/score.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 320k -shortest out/ab/<slug>-score.mp4`).
+`SCORE=1 node scripts/sound.mjs <slug> ../output/ab/score.wav`, then mux it over the existing render
+(`ffmpeg -i ../output/<slug>.mp4 -i ../output/ab/score.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 320k -shortest ../output/ab/<slug>-score.mp4`).
 Switch a scene to its score only after the user has heard the A/B.
 
 Look (all views, every puppet): cel shading (flat, slightly soft shadow on the right and below, bangs shadow on the forehead), eyelids on white eyes, 30-unit arms and legs, short thick mitten hands with a thumb, simple rounded feet; excited is an open laugh with upper teeth and a tongue; in profile an egg-shaped head with the eye near the front of the face and, for `long` hair, one piece of hair over the back of the head and the nape. These live in `src/puppet/Puppet.tsx`; change them there so every character follows.

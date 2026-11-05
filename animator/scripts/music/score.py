@@ -28,7 +28,7 @@ class Video:
 
     def __init__(self, slug):
         self.slug = slug
-        cues = json.load(open(os.path.join(ROOT, "videos", slug, "build", "cues.json")))
+        cues = json.load(open(os.path.join(ROOT, "..", "videos", slug, "build", "cues.json")))
         timing = json.load(open(os.path.join(ROOT, "src", "videos", slug, "timing.json")))
         self.fps = cues["fps"]
         self.total = timing["totalFrames"]
@@ -163,7 +163,7 @@ def finish(video, x, band, levels, notes=""):
     wav = os.path.join(ROOT, "public", "videos", video.slug, "music.wav")
     os.makedirs(os.path.dirname(wav), exist_ok=True)
     write_wav(wav, y, 24)
-    sheet = os.path.join(ROOT, "videos", video.slug, "build", "score.md")
+    sheet = os.path.join(ROOT, "..", "videos", video.slug, "build", "score.md")
     rows = [f"# {video.slug}: score cue sheet\n", f"Written by `videos/{video.slug}/music.py`. {notes}".strip() + "\n",
             f"- {video.dur:.3f} s, {n} samples, 48 kHz stereo; integrated {integrated(y):.1f} LUFS (library loop {target:.1f}), "
             f"true peak {true_peak(y):.1f} dBTP; tail folded onto the start: {k / SR:.2f} s\n",

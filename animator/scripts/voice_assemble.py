@@ -103,9 +103,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main(slug):
-    spec = json.load(open(os.path.join(ROOT, "videos", slug, "lines.json")))
+    spec = json.load(open(os.path.join(ROOT, "..", "videos", slug, "lines.json")))
     fps = spec.get("fps", 30)
-    build = os.path.join(ROOT, "videos", slug, "build", "voice")
+    build = os.path.join(ROOT, "..", "videos", slug, "build", "voice")
     fitted = os.path.join(build, "fitted")
     os.makedirs(fitted, exist_ok=True)
     stt = WhisperModel("small.en", compute_type="int8")
@@ -193,7 +193,7 @@ def mouth_only(slug):
     """Add mouth tracks to an existing timing.json from the fitted clips, without transcribing again."""
     path = os.path.join(ROOT, "src", "videos", slug, "timing.json")
     timing = json.load(open(path))
-    fitted = os.path.join(ROOT, "videos", slug, "build", "voice", "fitted")
+    fitted = os.path.join(ROOT, "..", "videos", slug, "build", "voice", "fitted")
     placed = []
     for line in timing["lines"]:
         clip = os.path.join(fitted, f"{line['i']:02d}.wav")

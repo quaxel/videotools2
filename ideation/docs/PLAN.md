@@ -33,8 +33,8 @@ Tarihî yerlerin, bilim insanlarının ve kaynak kurumlarının adları şirket 
 
 İki Markdown araştırma dokümanından 20 fikir içe aktarılacak:
 
-- `animator/videos/video-fikirleri-arastirma-ve-degerlendirme.md`
-- `animator/videos/video-fikirleri-arastirma-ve-degerlendirme-02.md`
+- `ideation/docs/video-fikirleri-arastirma-ve-degerlendirme.md`
+- `ideation/docs/video-fikirleri-arastirma-ve-degerlendirme-02.md`
 
 | Kapsam durumu | Sayı | Davranış |
 | --- | --- | --- |
@@ -347,7 +347,7 @@ Değişikliklere uygun birim ve entegrasyon testleriyle başlanır. Sonrasında 
 
 ## 15. İlk sürüm sonrasında
 
-İhtiyaç görüldüğünde: mevcut `animator/videos` projeleriyle bağlantı, yayın sonuçlarının manuel kaydı, fikir karşılaştırma ekranı, benzer konu uyarıları, PDF metin çıkarma, referans görsel panosu ve kontrollü yardımcı araştırma özellikleri.
+İhtiyaç görüldüğünde: mevcut `videos/` projeleriyle bağlantı, yayın sonuçlarının manuel kaydı, fikir karşılaştırma ekranı, benzer konu uyarıları, PDF metin çıkarma, referans görsel panosu ve kontrollü yardımcı araştırma özellikleri.
 
 Otomatik internet araştırması, izlenme tahmini, ekip içi işbirliği ve doğrudan video render başlatma ilk sürümün zorunlu parçası değildir. Bunlar çekirdek fikir ve doküman yönetimi tamamlandıktan sonra değerlendirilecek.
 
