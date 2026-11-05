@@ -2,16 +2,13 @@ import Database from "better-sqlite3";
 import {
   mkdirSync,
   readFileSync,
-  writeFileSync,
-  existsSync,
-  renameSync,
-  rmSync,
 } from "node:fs";
 import { join, resolve } from "node:path";
 import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import {
   categories,
+  factoryDefaults,
   normalize,
   ideaDataSchema,
   documentSchema,
@@ -104,6 +101,7 @@ export class Store {
         .prepare("SELECT * FROM ideas ORDER BY updated_at DESC,id")
         .all() as any[]
     ).map((r) => ({
+      ...factoryDefaults,
       ...JSON.parse(r.data),
       id: r.id,
       version: r.version,
@@ -115,6 +113,7 @@ export class Store {
     const r = this.db.prepare("SELECT * FROM ideas WHERE id=?").get(id) as any;
     if (!r) throw new AppError(404, "Fikir bulunamadı.");
     return {
+      ...factoryDefaults,
       ...JSON.parse(r.data),
       id: r.id,
       version: r.version,

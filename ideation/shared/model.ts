@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { verdicts } from "./rubric.ts";
 
 export const stages = [
   "inbox",
@@ -92,6 +93,39 @@ export const claimSchema = z.object({
     )
     .max(100),
 });
+export const triageStates = ["none", "pending", "kept", "rejected"] as const;
+export const triageLabels: Record<string, string> = {
+  none: "Elle eklendi",
+  pending: "Eleme bekliyor",
+  kept: "Tutuldu",
+  rejected: "Elendi",
+};
+export const rubricEntrySchema = z.object({
+  key: z.string().min(1).max(60),
+  verdict: z.enum(verdicts),
+  evidence: z.string().max(3000).default(""),
+  reason: z.string().max(3000).default(""),
+});
+export const dupeSchema = z.object({
+  kind: z.enum(["video", "idea"]),
+  ref: z.string().max(200),
+  title: z.string().max(500),
+  score: z.number().min(0).max(1),
+  why: z.string().max(1000).default(""),
+});
+export type Dupe = z.infer<typeof dupeSchema>;
+/** Fields the idea factory adds; old rows get these defaults when they are read. */
+export const factoryDefaults = {
+  origin: "manual" as "manual" | "generated",
+  triage: "none" as (typeof triageStates)[number],
+  triageReason: "",
+  titleEn: "",
+  batch: "",
+  rubric: [] as z.infer<typeof rubricEntrySchema>[],
+  rubricScore: null as number | null,
+  rubricSummary: "",
+  dupes: [] as Dupe[],
+};
 export const ideaDataSchema = z
   .object({
     title: z.string().trim().min(1).max(300),
@@ -125,6 +159,15 @@ export const ideaDataSchema = z
       .default({ hook: null, story: null, visual: null }),
     measuredDuration: z.number().min(0).max(600).nullable().default(null),
     externalNumber: z.number().int().nullable().default(null),
+    origin: z.enum(["manual", "generated"]).default("manual"),
+    triage: z.enum(triageStates).default("none"),
+    triageReason: z.string().max(3000).default(""),
+    titleEn: z.string().max(300).default(""),
+    batch: z.string().max(100).default(""),
+    rubric: z.array(rubricEntrySchema).max(40).default([]),
+    rubricScore: z.number().min(0).max(100).nullable().default(null),
+    rubricSummary: z.string().max(5000).default(""),
+    dupes: z.array(dupeSchema).max(20).default([]),
   })
   .superRefine((v, ctx) => {
     if (v.durationMin > v.durationMax)

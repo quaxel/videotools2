@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Plus,
@@ -8,12 +8,7 @@ import {
   Upload,
   ArrowLeft,
   BookOpen,
-  Search,
-  Download,
-  Image,
-  File,
   CheckCircle2,
-  AlertCircle,
   PenLine,
   Check,
 } from "lucide-react";
@@ -597,7 +592,7 @@ export function Documents() {
 }
 
 export function IdeaResearch({ idea }: { idea: Idea }) {
-  const { data, action } = useWorkspace();
+  const { data } = useWorkspace();
   const [adding, setAdding] = useState(false),
     [linking, setLinking] = useState(false),
     [claim, setClaim] = useState<Claim | null>(null),

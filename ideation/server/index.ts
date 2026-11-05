@@ -8,6 +8,7 @@ import { Store, AppError, uid, hash, now, projectRoot } from "./store.ts";
 import { newIdea } from "../shared/model.ts";
 import { importResearch, previewImport } from "./importer.ts";
 import { exportMarkdown, makeBackup, restoreBackup } from "./transfer.ts";
+import { catalog, addCandidates, triage } from "./factory.ts";
 
 export async function createApp(store = new Store(), seed = true) {
   const app = Fastify({ logger: false, bodyLimit: 2 * 1024 * 1024 });
@@ -104,6 +105,11 @@ export async function createApp(store = new Store(), seed = true) {
     const { version, ...data } = req.body as any;
     return store.saveIdea(data, id, z.number().int().parse(version));
   });
+  app.get("/api/factory/catalog", () => catalog(store));
+  app.post("/api/factory/candidates", (req) => addCandidates(store, req.body));
+  app.post("/api/ideas/:id/triage", (req) =>
+    triage(store, (req.params as any).id, req.body),
+  );
   app.post("/api/documents", (req) => store.saveDocument(req.body));
   app.put("/api/documents/:id", (req) => {
     const { id } = req.params as any;

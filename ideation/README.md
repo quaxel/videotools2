@@ -38,6 +38,18 @@ Adres: [http://127.0.0.1:4310](http://127.0.0.1:4310). Geliştirme sunucusu ayn�
 
 Başlangıç durumu: 14 uygun, 1 yeniden yazılması gereken ve 5 kapsam dışı fikir. Kaynakların varlığı iddiaları otomatik doğrulamaz. İddia kartları editoryal inceleme için ayrıca oluşturulur.
 
+## Fikir fabrikası
+
+Claude Code'da `/ideate 10` (veya `/ideate 8 havalimanları`) çalıştırılınca skill yeni adaylar üretir, her biri için 1–2 kaynak açar, ayrı bir değerlendirici ile `animator/guide/rules.md`'ye dayanan ölçütlere göre puanlar ve adayları **Fabrika** sayfasına yükler. Puan, kararlardan uygulamada hesaplanır (`shared/rubric.ts`): dört kapı (markasız, 50–60 sn'ye sığar, bükülme bir olay, mekanizma nesneyle gösterilir) geçilemezse aday elenmiş sayılır; doğrulanamayan her kapı puandan düşer.
+
+Tekrar kontrolü, yapılmış videolar (`videos/*/plan.json`) ve çöptekiler ile elenenler dahil bütün fikirlerle karşılaştırır. Fabrikada `j`/`k` ile gezilir, `y` ile tutulur (fikir havuzuna geçer), `n` ile elenir (arşivlenir ama tekrar kontrolünde kalır).
+
+```bash
+npm run candidates -- catalog          # skill'in okuduğu bağlam
+npm run candidates -- add aday.json    # adayları yükle
+npm run candidates -- pending          # eleme kuyruğu
+```
+
 ## Dokümanlar
 
 - [Ayrıntılı uygulama planı](docs/PLAN.md)

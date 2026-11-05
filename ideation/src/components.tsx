@@ -6,7 +6,6 @@ import {
   Star,
   X,
   Plus,
-  FileText,
   Coffee,
   FlaskConical,
   Bridge,

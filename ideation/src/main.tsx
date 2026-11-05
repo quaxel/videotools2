@@ -6,7 +6,6 @@ import {
   Route,
   NavLink,
   useLocation,
-  useNavigate,
   useSearchParams,
   Link,
 } from "react-router-dom";
@@ -19,12 +18,11 @@ import {
   Columns3,
   Archive,
   Settings,
+  Factory,
   Plus,
   Search,
   Menu,
   X,
-  ArrowUpRight,
-  Command,
 } from "lucide-react";
 import { Workspace, useWorkspace } from "./api";
 import { NewIdea } from "./components";
@@ -34,6 +32,9 @@ const IdeaDetail = lazy(() =>
 );
 const Documents = lazy(() =>
   import("./research").then((m) => ({ default: m.Documents })),
+);
+const FactoryPage = lazy(() =>
+  import("./factory").then((m) => ({ default: m.FactoryPage })),
 );
 const Sources = lazy(() =>
   import("./research").then((m) => ({ default: m.Sources })),
@@ -46,6 +47,7 @@ const client = new QueryClient({
 });
 const nav = [
   ["/", "Dashboard", LayoutDashboard],
+  ["/factory", "Fabrika", Factory],
   ["/ideas", "Fikir kütüphanesi", Lightbulb],
   ["/sources", "Araştırma", BookOpen],
   ["/documents", "Dokümanlar", Files],
@@ -84,8 +86,15 @@ function App() {
     }, 250);
     return () => clearTimeout(t);
   }, [draft, params, setParams]);
+  const pending = data.ideas.filter(
+    (i) => i.triage === "pending" && !i.deleted,
+  ).length;
   const count = data.ideas.filter(
-    (i) => !i.deleted && !i.archived && i.scope !== "excluded",
+    (i) =>
+      !i.deleted &&
+      !i.archived &&
+      i.scope !== "excluded" &&
+      i.triage !== "pending",
   ).length;
   return (
     <div className="app">
@@ -96,60 +105,30 @@ function App() {
       />
       <aside className={"sidebar " + (mobile ? "open" : "")}>
         <Link to="/" className="brand">
-          <div className="brand-symbol">
-            i<span>✦</span>
-          </div>
-          <div>
-            ideation<span>FİKİRDEN HİKÂYEYE</span>
-          </div>
+          ideation
         </Link>
-        <div className="workspace-label">
-          <span className="workspace-icon">V</span>
-          <div>
-            Video çalışma alanı<small>Kişisel kütüphaneniz</small>
-          </div>
-        </div>
-        <div className="nav-caption">ÇALIŞMA ALANI</div>
         <nav>
           {nav.map(([to, label, Icon]) => (
             <NavLink key={to} to={to} end={to === "/"}>
-              <Icon size={18} />
+              <Icon size={16} />
               {label}
               {to === "/ideas" && <span className="nav-count">{count}</span>}
+              {to === "/factory" && pending > 0 && (
+                <span className="nav-count hot">{pending}</span>
+              )}
             </NavLink>
           ))}
         </nav>
-        <div className="sidebar-note">
-          <span>✦</span>
-          <strong>
-            İyi hikâyeler,
-            <br />
-            iyi sorularla başlar.
-          </strong>
-          <p>
-            Aklınıza takılan bir şeyi
-            <br />
-            kaybolmadan not edin.
-          </p>
-          <button onClick={() => setAdding(true)}>
-            <Plus size={15} />
-            Bir fikir bırak
-          </button>
-        </div>
         <nav className="bottom-nav">
           <NavLink to="/archive">
-            <Archive size={18} />
-            Arşiv ve kapsam dışı
+            <Archive size={16} />
+            Arşiv
           </NavLink>
           <NavLink to="/settings">
-            <Settings size={18} />
+            <Settings size={16} />
             Ayarlar
           </NavLink>
         </nav>
-        <div className="local-status">
-          <span />
-          Yerel çalışma alanı<small>Verileriniz bu bilgisayarda</small>
-        </div>
       </aside>
       <div className="main-shell">
         <header className="topbar">
@@ -160,24 +139,14 @@ function App() {
           >
             <Menu size={21} />
           </button>
-          <div className="breadcrumb">
-            Çalışma alanı<span>/</span>
-            <strong>
-              {location.pathname.startsWith("/ideas/")
-                ? "Fikir detayı"
-                : location.pathname.startsWith("/documents/")
-                  ? "Doküman"
-                  : nav.find(([p]) => p === location.pathname)?.[1] ||
-                    (location.pathname === "/archive" ? "Arşiv" : "Ayarlar")}
-            </strong>
-          </div>
+          <span className="spacer" />
           <div className="topbar-right">
             <div className="global-search">
               <Search size={16} />
               <input
                 ref={search}
                 aria-label="Çalışma alanında ara"
-                placeholder="Fikir, kaynak veya not ara…"
+                placeholder="Ara"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
               />
@@ -189,16 +158,13 @@ function App() {
                   <X size={14} />
                 </button>
               ) : (
-                <kbd>⌘ K</kbd>
+                <kbd>⌘K</kbd>
               )}
             </div>
             <button className="button primary" onClick={() => setAdding(true)}>
               <Plus size={16} />
-              <span>Yeni fikir</span>
+              <span>Yeni</span>
             </button>
-            <div className="avatar" title="Kişisel çalışma alanı">
-              M
-            </div>
           </div>
         </header>
         <main>
@@ -220,6 +186,7 @@ function App() {
                 element={<Ideas onNew={() => setAdding(true)} />}
               />
               <Route path="/ideas/:id" element={<IdeaDetail />} />
+              <Route path="/factory" element={<FactoryPage />} />
               <Route path="/sources" element={<Sources />} />
               <Route path="/documents" element={<Documents />} />
               <Route path="/documents/:id" element={<Documents />} />
@@ -241,12 +208,6 @@ function App() {
             </Routes>
           </Suspense>
         </main>
-        <footer className="app-footer">
-          <span>
-            ideation <span>✦</span> Merakınızı bir sonraki hikâyeye dönüştürün.
-          </span>
-          <span>20–60 saniyelik büyük fikirler</span>
-        </footer>
       </div>
       {adding && <NewIdea onClose={() => setAdding(false)} />}
     </div>

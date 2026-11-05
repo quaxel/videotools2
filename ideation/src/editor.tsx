@@ -6,11 +6,9 @@ import {
   Eye,
   Code2,
   History,
-  FilePlus2,
   AlertCircle,
   Download,
   Check,
-  RotateCcw,
 } from "lucide-react";
 import type { Doc } from "../shared/model";
 import { wordCount, estimateDuration } from "../shared/model";

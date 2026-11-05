@@ -15,11 +15,7 @@ import {
   ArrowDown,
   Save,
   FileText,
-  Link2,
   AlertCircle,
-  FlaskConical,
-  Clapperboard,
-  History,
   Image,
 } from "lucide-react";
 import { useWorkspace, api } from "./api";

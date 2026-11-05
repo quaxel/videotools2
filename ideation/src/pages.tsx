@@ -10,21 +10,17 @@ import {
   Plus,
   Clock3,
   FileText,
-  Link2,
   Star,
   LayoutGrid,
   List,
   Download,
-  Archive,
   RotateCcw,
-  Trash2,
   Filter,
   GripVertical,
   Upload,
   Save,
   ShieldCheck,
   AlertCircle,
-  X,
   ChevronRight,
 } from "lucide-react";
 import { useWorkspace, api } from "./api";
@@ -50,7 +46,8 @@ export function Dashboard({ onNew }: { onNew: () => void }) {
   const { data } = useWorkspace();
   const [params] = useSearchParams();
   const active = data.ideas.filter(
-    (i) => !i.deleted && !i.archived && i.scope === "eligible",
+    (i) =>
+      !i.deleted && !i.archived && i.scope === "eligible" && i.triage !== "pending",
   );
   const ready = active.filter((i) => i.stage === "ready");
   const candidates = active
@@ -114,60 +111,13 @@ export function Dashboard({ onNew }: { onNew: () => void }) {
     .slice(0, 3);
   return (
     <>
-      <PageHeading
-        eyebrow="SİZİN YARATICI ÇALIŞMA ALANINIZ"
-        title="Merhaba, yeni bir hikâyeye hazır mısınız?"
-        description="Merak ettiklerinizi toplayın. Araştırın. Anlatmaya değer olanı bulun."
-      />
-      <section className="hero">
-        <div className="hero-copy">
-          <Badge tone="hero">KÜÇÜK SORULAR, BÜYÜK HİKÂYELER</Badge>
-          <h2>
-            Bir sonraki iyi hikâye,
-            <br />
-            <em>bir fikirle başlar.</em>
-          </h2>
-          <p>
-            Gündelik hayatın içindeki şaşırtıcı açıklamaları
-            <br className="desktop-only" /> bir araya getirdiğiniz yer.
-          </p>
-          <button className="button dark" onClick={onNew}>
-            Aklımdaki fikri ekle
-            <Plus size={17} />
-          </button>
-        </div>
-        <div className="hero-illustration" aria-hidden="true">
-          <span className="hero-ray ray1" />
-          <span className="hero-ray ray2" />
-          <div className="hero-paper back" />
-          <div className="hero-paper front">
-            <div className="paper-label">BİR HİKÂYENİN BAŞLANGICI</div>
-            <Lightbulb size={75} strokeWidth={1.1} />
-            <span className="paper-line" />
-            <span className="paper-line short" />
-          </div>
-          <div className="hero-sticker">
-            <span>✦</span>Merak et.
-            <br />
-            Peşine düş.
-          </div>
-          <span className="hero-star">✧</span>
-        </div>
-      </section>
       <section className="stats-grid">
         {stats.map((s) => (
           <Link key={s.label} className="stat-card" to={s.link}>
-            <div className="stat-top">
-              <span className={"stat-icon " + s.color}>
-                <s.icon size={19} />
-              </span>
-              <ArrowUpRight size={16} />
-            </div>
             <div className="stat-number">
               {s.value}
               <span>{s.label}</span>
             </div>
-            <small>{s.note}</small>
           </Link>
         ))}
       </section>
@@ -182,11 +132,6 @@ export function Dashboard({ onNew }: { onNew: () => void }) {
                 {params.get("q") ? filtered.length : candidates.length}
               </span>
             </h2>
-            <p>
-              {params.get("q")
-                ? `“${params.get("q")}” için aktif fikirler`
-                : "Öncelik verdiğiniz, anlatılmaya değer adaylar."}
-            </p>
           </div>
           <Link
             className="text-link"
@@ -225,7 +170,6 @@ export function Dashboard({ onNew }: { onNew: () => void }) {
           <div className="section-heading">
             <div>
               <h2>Son dokümanlar</h2>
-              <p>Araştırma masanızdaki son notlar.</p>
             </div>
             <Link
               to="/documents"
@@ -262,10 +206,8 @@ export function Dashboard({ onNew }: { onNew: () => void }) {
         <section className="panel next-steps">
           <div className="section-heading">
             <div>
-              <h2>Bir adım daha</h2>
-              <p>Fikirleri ileri taşıyan küçük işler.</p>
+              <h2>Sıradaki işler</h2>
             </div>
-            <span className="step-symbol">✦</span>
           </div>
           {gaps.map((i) => (
             <Link
@@ -287,14 +229,6 @@ export function Dashboard({ onNew }: { onNew: () => void }) {
               <ArrowUpRight size={15} />
             </Link>
           ))}
-          <div className="editorial-note">
-            <ShieldCheck size={18} />
-            <p>
-              <strong>Kaynak var ≠ iddia doğrulandı.</strong>
-              <br />
-              Her önemli cümleyi kendi kanıtıyla eşleştirin.
-            </p>
-          </div>
         </section>
       </div>
     </>
@@ -326,7 +260,10 @@ export function Ideas({
       ? bin
         ? i.deleted
         : !i.deleted && (i.archived || i.scope === "excluded")
-      : !i.deleted && !i.archived && i.scope !== "excluded",
+      : !i.deleted &&
+          !i.archived &&
+          i.scope !== "excluded" &&
+          i.triage !== "pending",
   );
   const q = params.get("q");
   if (q && data.searchMatches)
@@ -677,7 +614,8 @@ export function Ideas({
 export function Pipeline() {
   const { data, action } = useWorkspace();
   const active = data.ideas.filter(
-    (i) => !i.deleted && !i.archived && i.scope === "eligible",
+    (i) =>
+      !i.deleted && !i.archived && i.scope === "eligible" && i.triage !== "pending",
   );
   async function move(i: Idea, stage: string) {
     try {
