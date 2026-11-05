@@ -517,7 +517,8 @@ RENDER_RETRIES = 2
 
 def render_video(slug, out, *args):
     """Render the picture of `slug` to `out` (muted) in segments and join them without re-encoding. Each segment is
-    checked for broken frames (glitch_frames) and rendered again, up to RENDER_RETRIES times, until it is clean."""
+    checked for broken frames (glitch_frames) and rendered again, up to RENDER_RETRIES times, until it is clean; a
+    segment whose render process fails (a crashed browser) is rendered again the same way."""
     total = json.load(open(os.path.join(ROOT, "src", "videos", slug, "timing.json")))["totalFrames"]
     parts = []
     began = time.time()
@@ -525,8 +526,15 @@ def render_video(slug, out, *args):
         part = f"{out}.part{start}.mp4"
         end = min(total, start + RENDER_SEGMENT) - 1
         for attempt in range(RENDER_RETRIES + 1):
-            run("npx", "remotion", "render", slug, part, f"--frames={start}-{end}", "--muted", *args)
+            ok = run("npx", "remotion", "render", slug, part, f"--frames={start}-{end}", "--muted", *args,
+                     check=False).returncode == 0
             clean_remotion_temp(began)
+            if not ok:
+                # A render tab that crashes takes the whole segment down; a fresh browser usually gets through it.
+                if attempt == RENDER_RETRIES:
+                    raise SystemExit(f"render of frames {start}-{end} failed {RENDER_RETRIES + 1} times")
+                print(f"render of frames {start}-{end} failed, rendering the segment again")
+                continue
             found = glitch_frames(part, start)
             if not found:
                 break

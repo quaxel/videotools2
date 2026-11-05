@@ -640,6 +640,92 @@ def hooves():
             place(out, sweep(260, 140, 0.07) * env(0.07, 0.001, 0.02) * 0.5 * g, at + d)
     return loop_fade(out)
 
+
+def sniff():
+    # Three quick nasal sniffs, rising, then a big one: band-passed noise bursts with a breathy whistle.
+    sec = 1.0
+    out = np.zeros(int(sec * SR))
+    for k, (at, d, g) in enumerate(((0.0, 0.09, 0.6), (0.14, 0.09, 0.7), (0.28, 0.1, 0.8), (0.45, 0.28, 1.0))):
+        n = band(noise(d), 1200 + k * 300, 5200) * env(d, d * 0.35, d * 0.45) * g
+        place(out, n, at)
+        place(out, tone(2400 + k * 200, d) * env(d, d * 0.4, d * 0.4) * 0.05 * g, at)
+    return out
+
+
+def roar():
+    # Goofy monster roar: a growly sawtooth sweeping up and down with gargle wobble and a noisy breath on top.
+    sec = 1.3
+    t = t_axis(sec)
+    f0 = 95 + 70 * np.sin(np.pi * t / sec) + 12 * np.sin(2 * np.pi * t * 23)
+    ph = np.cumsum(f0) / SR
+    saw = 2 * (ph - np.floor(ph + 0.5))
+    growl = band(saw, 80, 1800) * (0.6 + 0.4 * np.sin(2 * np.pi * t * 31))
+    breath = band(noise(sec), 300, 2500) * 0.35
+    return np.tanh((growl + breath) * env(sec, 0.06, 0.6) * 2.2) * 0.8
+
+
+def bark():
+    # One cartoon "woof": a pitched-down vocal formant burst with a gruff edge.
+    sec = 0.35
+    t = t_axis(sec)
+    f0 = 300 * np.exp(-t * 4) + 140
+    ph = np.cumsum(f0) / SR
+    v = np.sign(np.sin(2 * np.pi * ph)) * 0.5 + np.sin(2 * np.pi * ph * 2) * 0.3
+    v = band(v, 250, 2200) + band(noise(sec), 400, 1800) * 0.25
+    return np.tanh(v * env(sec, 0.008, 0.09) * 3) * 0.7
+
+
+def slime():
+    # Wet squelch: low pitch-drop blob with bubbly noise.
+    sec = 0.6
+    t = t_axis(sec)
+    blob = np.sin(2 * np.pi * np.cumsum(320 * np.exp(-t * 7) + 60) / SR) * env(sec, 0.004, 0.15)
+    bub = band(noise(sec), 500, 3000) * (np.sin(2 * np.pi * t * 37) > 0.4) * env(sec, 0.01, 0.2) * 0.35
+    return blob * 0.8 + bub
+
+
+def notif():
+    # Phone notification: two bright bell pings a fifth apart.
+    sec = 0.6
+    out = np.zeros(int(sec * SR))
+    for at, hz in ((0.0, 1318.5), (0.09, 1975.5)):
+        d = 0.45
+        b = (tone(hz, d) + tone(hz * 2.01, d) * 0.3 + tone(hz * 3.02, d) * 0.1) * env(d, 0.002, 0.12)
+        place(out, b * 0.5, at)
+    return out
+
+
+def skid():
+    # Sneakers skidding on concrete: a squealing rubber chirp over gritty scrape.
+    sec = 0.7
+    t = t_axis(sec)
+    chirp = np.sin(2 * np.pi * np.cumsum(1700 - 600 * t / sec + 120 * np.sin(2 * np.pi * t * 40)) / SR) * env(sec, 0.01, 0.3) * 0.4
+    grit = band(noise(sec), 1500, 6000) * env(sec, 0.01, 0.25) * 0.5
+    return chirp + grit
+
+
+def clang():
+    # A plastic bin lid slammed up and banging back: hollow knock and rattle.
+    sec = 0.8
+    out = np.zeros(int(sec * SR))
+    for at, g in ((0.0, 1.0), (0.18, 0.55), (0.27, 0.3)):
+        k = (tone(210, 0.3) + tone(355, 0.3) * 0.6 + tone(530, 0.3) * 0.3) * env(0.3, 0.001, 0.06)
+        place(out, (k + band(noise(0.3), 800, 4000) * env(0.3, 0.0005, 0.02) * 0.8) * g, at)
+    return out
+
+
+def crickets():
+    # Night crickets for a comic silence: chirp trains from two insects at different rates; 3 s loop.
+    sec = 3.0
+    out = np.zeros(int(sec * SR))
+    for hz, rate, off, g in ((4600, 0.55, 0.0, 0.25), (5200, 0.8, 0.3, 0.15)):
+        at = off
+        while at < sec - 0.2:
+            for k in range(3):
+                place(out, tone(hz, 0.025) * env(0.025, 0.002, 0.01) * g, at + k * 0.035)
+            at += rate
+    return loop_fade(out)
+
 if __name__ == "__main__":
     for name, fn in [
         ("reel-spin", reel_spin),
@@ -674,3 +760,5 @@ if __name__ == "__main__":
     for name, fn in [("tank", tank), ("compressor", compressor), ("squeak", squeak), ("morse", morse), ("battle", battle), ("deflate", deflate)]:
         save(f"sfx/{name}.wav", fn())
     save("sfx/hooves.wav", hooves())
+    for name, fn in [("sniff", sniff), ("roar", roar), ("bark", bark), ("slime", slime), ("notif", notif), ("skid", skid), ("clang", clang), ("crickets", crickets)]:
+        save(f"sfx/{name}.wav", fn())
