@@ -32,13 +32,21 @@ approvals and outputs, for the user to follow or drive the pipeline.
 
 ## 2. Research → `videos/<slug>/research.md`
 
+If the user gave no topic or only a broad one, first list the topics already made (`ls videos/`, the uploader's
+database) and propose 5 new ones that are not among them: a title, the visual hook (what moves or changes on screen),
+the escalation (but / then / so) and 2-3 hard numbers or names each, checked with a quick search. Ask which one;
+then scaffold.
+
 Use web search. Open the pages you cite. Write one paragraph on the mechanism, then a `## Claims` list:
 `- <claim with its number> — <URL>`. Every factual number in the script must appear in a claim.
-If a number cannot be sourced, write the script without it.
+If a number cannot be sourced, write the script without it. A key number or name that only one source gives, or
+that sources disagree on, stays out too. End with `## Left out`: the tempting details you dropped and why, so they
+do not creep back into the script.
 
 ## 3. Plan → `videos/<slug>/plan.json`
 
-Fill every field: title, mechanism (one sentence), the six beats, the seed (what, and the index of the first
+Fill every field: title, mechanism (one sentence), the seven beats (hook, but, then, conflict, pivot, so, closing;
+guide/rules.md → Story), the seed (what, and the index of the first
 line where it appears on screen), at least 8 locations (id, set, dominant colour; no two neighbours share a
 colour), at least 4 characters with looks, at least 2 physical gags, and `story_numbers`.
 For each mechanism idea, name the labelled physical prop that shows it.
@@ -47,7 +55,8 @@ For each mechanism idea, name the labelled physical prop that shows it.
 
 180-210 words, one line per sentence pair, dialogue as separate speakers (add the voice under `voices`; Qwen
 English voices: Ryan, Aiden, Eric, Dylan, Uncle_Fu male; Vivian, Serena female). No ellipses, no repeated
-one-word sentences. Only the twist line may carry `"pauseAfter": 0.4`.
+one-word sentences. Only the line before the pivot ("You see ...") may carry `"pauseAfter": 0.4`. End sentences where the shots will
+change: 9-12 shots, one per location.
 
 ```bash
 .venv/bin/python scripts/pipeline.py voice <slug>
@@ -62,18 +71,27 @@ once they have seen it and not objected).
 
 For a location the kit does not already have, research it first (library.md → New locations: research references
 first): look at 3-5 photo references in the browser, write `guide/references/<set>.md`, then build the set from it.
+Calibrate a new set on one still before building shots on it: build in order room → light → puppets → camera,
+render a still after each step and list in plain words what still differs from the references (boxy props, missing
+wear, wrong scale, flat light) before fixing it.
 Reuse existing sets where they fit (`LakeSet`, `SpaceBaseSet`, `AlleySet`, `GreatWallSet`).
 
-Open with 3-4 hard, quick shots in the first 5 s (guide/rules.md → Hook): the strange thing coming at the lens, a
-reaction, an impact. On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters use
+Open with one continuous camera move onto the strange thing while the first sentence states the paradox
+(guide/rules.md → Story, Hook). On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters use
 the costume options (library.md → Puppets), never `cap`.
 
-Pass `post` to `Video` (library.md → Post chain: depth of field, bloom, colour grade).
+Pass `post` and `steady` to `Video` (library.md → Post chain: depth of field, bloom, colour grade; `steady`: the
+camera glides, almost no hand-held drift).
 
-Write the shot list against the printed frames: cut on line and caption boundaries, average ≤ 2.2 s, none
-over 4 s, whip (`true`) on location changes, `"dissolve"` for a change of time in one place; every cut is its
-own shot in the list. Give two or three shots a foreground framing object (Stage `foreground` + `frameSpot`, library.md). Use `Room` + kit props for new locations, and a different mood per
-location. Put the seed on screen by its line. Add SFX for every mechanical action and MUSIC cues.
+First write `videos/<slug>/camera_plan.md` (guide/rules.md → Camera moves): per shot the time, location, camera path
+start → end, move type (about half push, a third crane, a fifth sideways track), net travel (25-40 % of the frame
+width), the foreground / midground / background objects and the in-world labels. Then write the shot list against
+the printed frames: 9-12 shots, one location each, each ending on a sentence end (average 4-7 s, none under 1.5 s or
+over 10 s); `"dip"` at every change of location, `"dissolve"` for a change of time in one place, at most one hard cut
+(`false`) in the video, no whips. Inside a shot move the camera with `beatPath` (library.md → Engine), one key per
+subject at the frame its name is spoken, so it eases out of the first key, glides through the others and comes to
+rest at the last. Every shot gets a foreground object near the lens (Stage `foreground` + `frameSpot`), the subject
+sharp, the background soft. Use `Room` + kit props for new locations, and a different mood per location. Put the seed on screen by its line. Add SFX for every mechanical action and MUSIC cues.
 Write each repeated action (a bite, a knock, a wave) with its own path, timing and body acting every time, and let
 rhythmic motion (chewing, walking) drift in pace and size (guide/rules.md → No action twice the same way). A seated
 puppet behind a table: top ≤ 0.45 m, hands above it.
@@ -91,8 +109,8 @@ Fix until it passes (tsc + contiguous shots + no shot over 4 s). Then check the 
 .venv/bin/python scripts/pipeline.py sync <slug>
 ```
 
-Fix every error. Fix the warnings that are not on purpose: a looped effect ending a few frames off a cut, music
-gaps, and the loop seam (the bed under the last frame should be the one under frame 0).
+Fix every error. Fix the warnings that are not on purpose: a looped effect ending a few frames off a cut, and music
+gaps.
 For the video's own score instead of the library loops, write `videos/<slug>/music.py` (library.md → The video's own
 score), run `pipeline.py music <slug>` and pass `score` to `Video`.
 
@@ -101,10 +119,11 @@ Building blocks for the picture (library.md has each API):
   kit pieces (`InkBox`, `InkCylinder`, existing props) when it is boxes, cylinders and slabs (a desk, a crate, a sign,
   a door); model it in Blender when the viewer must recognise it by its silhouette and that needs curved or compound
   surfaces or many fitted parts (a car, a bicycle, a boat, a plane, an animal, an instrument, a cannon). When in
-  doubt and the prop is on screen for more than one shot or close to the lens, use Blender. Write
-  `videos/<slug>/blender/<name>.py` (bpy, from `guide/blender/car.py`), run it headless to
-  `public/videos/<slug>/models/<name>.glb`, and show it with `BlenderModel` (library.md → Blender models). The script
-  is the source: change the script and run it again, never hand-edit in a live Blender session.
+  doubt and the prop is on screen for more than one shot or close to the lens, use Blender. Model it with the
+  **sand3d-model** skill: a sand3d program in `videos/<slug>/sand3d/<name>.py` (from `guide/sand3d/car.py`), exported
+  to `public/videos/<slug>/models/<name>.glb`, checked in `ModelPreview`, shown with `BlenderModel` and its joints
+  posed by name (library.md → Blender models). Raw bpy (`guide/blender/car.py`) only for what sand3d can't express.
+  The program is the source: change it and run it again, never hand-edit in a live Blender session.
 - **Physics** for a gag where things fall, topple or scatter: `videos/<slug>/physics.mjs`, baked by
   `pipeline.py physics <slug>` (check, stills and render re-bake it when it changes), played by `<Simulation>`. Tune by
   baking and reading the printed impacts; keep the scatter inside the narrow 9:16 frame.
@@ -144,7 +163,11 @@ It also prints a framing audit (saved to `videos/<slug>/build/stills/framing.txt
 the captions, or hidden behind the set. Fix every hit on a key face or sign; background signs and crowd extras at the edge can stay.
 Read `videos/<slug>/build/stills/contact.jpg` (one frame per second). Check: faces in frame and not cut,
 labels readable, no empty or black frames, over-the-shoulder head ≤ 25 %, colour varies, gags read, Blender models
-read at a glance in the toon look (ink outline, flat bands, right way round and on the floor).
+read at a glance in the toon look (ink outline, flat bands, right way round and on the floor). Also (guide/rules.md →
+Picture): camera inside geometry or something through the lens, a pole or prop crossing a face, floating props or
+black voids, puppets too small to act (40-60 % of the frame height in a medium shot), the main event shown in steps,
+the light following the story, and every date, name and number on screen spelled as in the script.
+Write what you find to `build/mistakes_<round>.md` (rules.md → Process) and fix high severity first.
 For a closer look pass frames: `pipeline.py stills <slug> 120,480,900`. Fix and repeat, at most 3 rounds.
 
 Then check that no character walks or stands through a set object (every 5th frame, tiny scale):
@@ -163,8 +186,14 @@ Then check motion without a full render (30 % draft, ~2 min):
 .venv/bin/python scripts/pipeline.py motion <slug>
 ```
 
-If motion < 6 or still frames > 15 %, give the listed stillest shots a bigger camera move or puppet action.
-Every shot keeps the camera moving (orbit, crane, truck, push); sky shots need the biggest moves.
+If motion < 3 or still frames > 30 % (provisional targets for the slow camera), give the listed stillest shots more
+net travel (up to 40 % of the frame width) or more puppet and secondary action; never add wobble. Every shot keeps
+the camera travelling (push, crane, track) and eases out to rest.
+
+When the hardest shot is new (a new set, a physics gag, the main event), look at it moving before the full render:
+render those few seconds as a clip (`TMPDIR=$D npx remotion render <slug> $D/hard.mp4 --frames=<a>-<b>
+--props='{"post":true}' --gl=angle`, `$D` a scratch folder) and look at frames from it for stiff acting, outline
+flicker, popping and camera clipping.
 
 ## 7. Render once, then report
 

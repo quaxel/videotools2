@@ -6,8 +6,12 @@ import { AlleyPreview } from "./scenes/AlleyPreview";
 import { BalloonPreview } from "./scenes/BalloonPreview";
 import { GreatWallPreview } from "./scenes/GreatWallPreview";
 import { ThronePreview } from "./scenes/ThronePreview";
+import { DUEL_FRAMES, DuelAnim, DuelPreview } from "./scenes/DuelPreview";
 import { CostumePreview } from "./scenes/CostumePreview";
 import { MarathonPreview } from "./scenes/MarathonPreview";
+import { MODEL_PREVIEW_FRAMES, ModelPreview } from "./scenes/ModelPreview";
+import { LAUNDRY_FRAMES, LaundryPreview } from "./scenes/LaundryPreview";
+import { DRIVE_FRAMES, DrivePreview } from "./scenes/DrivePreview";
 import { PhysicsPreview } from "./scenes/PhysicsPreview";
 import { SlotHook } from "./scenes/SlotHook";
 import { SpacePreview } from "./scenes/SpacePreview";
@@ -30,16 +34,29 @@ export const Root: React.FC = () => (
     <Composition id="SlotHook" component={SlotHook} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="MarathonPreview" component={MarathonPreview} durationInFrames={120} fps={30} width={1080} height={1920} />
     <Composition id="CostumePreview" component={CostumePreview} durationInFrames={30} fps={30} width={1080} height={1920} />
+    <Composition id="DuelPreview" component={DuelPreview} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="DuelAnim" component={DuelAnim} durationInFrames={DUEL_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="ThronePreview" component={ThronePreview} durationInFrames={50} fps={30} width={1080} height={1920} />
     <Composition id="GreatWallPreview" component={GreatWallPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="AlleyPreview" component={AlleyPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SpacePreview" component={SpacePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="BalloonPreview" component={BalloonPreview} durationInFrames={240} fps={30} width={1080} height={1920} />
-    <Composition id="TransitionPreview" component={TransitionPreview} durationInFrames={120} fps={30} width={1080} height={1920} />
+    <Composition id="TransitionPreview" component={TransitionPreview} durationInFrames={180} fps={30} width={1080} height={1920} />
     <Composition id="PhysicsPreview" component={PhysicsPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SunlitLunch" component={SunlitLunch} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="SunlitLunchEat" component={SunlitLunchEat} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="LakePreview" component={LakePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
+    <Composition
+      id="ModelPreview"
+      component={ModelPreview}
+      defaultProps={{ src: "models/preview/car.glb", joints: { spin_FL: -5, spin_FR: -5, spin_RL: -5, spin_RR: -5 } }}
+      durationInFrames={MODEL_PREVIEW_FRAMES}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition id="LaundryPreview" component={LaundryPreview} durationInFrames={LAUNDRY_FRAMES} fps={30} width={1080} height={1920} />
+    <Composition id="DrivePreview" component={DrivePreview} durationInFrames={DRIVE_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="LakeLitStill" component={LakeLitStill} defaultProps={{ lit: true }} durationInFrames={1} fps={30} width={1080} height={1920} />
   </>
 );

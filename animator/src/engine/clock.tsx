@@ -8,9 +8,13 @@ import { AbsoluteFill, getInputProps, Sequence, useCurrentFrame } from "remotion
 //               cross-fading)
 //   "dissolve"  DISSOLVE frames: this shot fades in over the previous one, which plays on to the cut (a change of
 //               time in one place: night to dawn, before and after; ported from animated-short's XFADE)
+//   "dip"       DIP frames (0.4 s): the previous shot plays on while the frame fills with cream, this one takes over
+//               under the full cream at the midpoint and the cream clears by the cut (every change of location)
 
 export const FADE = 8;
 export const DISSOLVE = 12;
+export const DIP = 12;
+export const DIP_COLOUR = "#f2e6d0";
 
 const ShotClock = createContext({ from: 0, lead: 0, dur: 1 });
 export const useShotFrame = () => useCurrentFrame() - useContext(ShotClock).lead;
@@ -22,9 +26,9 @@ export const useShotStart = () => useContext(ShotClock).from;
 export const useFinalFrame = () => useCurrentFrame() - useContext(ShotClock).lead + useContext(ShotClock).from;
 
 // [from, to, component, transition in] in final frames.
-export type Transition = boolean | "dissolve";
+export type Transition = boolean | "dissolve" | "dip";
 export type Shot = [number, number, React.FC, Transition];
-export const leadOf = (t: Transition) => (t === "dissolve" ? DISSOLVE : t ? FADE : 0);
+export const leadOf = (t: Transition) => (t === "dissolve" ? DISSOLVE : t === "dip" ? DIP : t ? FADE : 0);
 
 // 0..1 eased progress of a whip, and how much sideways smear goes with it at progress p.
 const whip = (p: number) => {
@@ -64,6 +68,20 @@ const Dissolve: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <AbsoluteFill style={p < 1 ? { opacity: a } : undefined}>{children}</AbsoluteFill>;
 };
 
+// Dips through cream over the DIP lead: the cream rises over the previous shot, this shot appears under it at the
+// midpoint (when the cream is opaque) and the cream clears by the cut. Same tree before, during and after.
+const Dip: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const p = Math.min(1, (useCurrentFrame() + 1) / (DIP + 1));
+  const k = Math.min(1, (1 - Math.abs(2 * p - 1)) * 1.25); // holds full cream for a frame or two round the midpoint
+  const cream = k * k * (3 - 2 * k);
+  return (
+    <AbsoluteFill>
+      <AbsoluteFill style={p < 0.5 ? { opacity: 0 } : undefined}>{children}</AbsoluteFill>
+      <AbsoluteFill style={{ backgroundColor: DIP_COLOUR, opacity: p < 1 ? cream : 0 }} />
+    </AbsoluteFill>
+  );
+};
+
 // `soundOnly` (input prop: the soundtrack render, the cue dump) mounts no shot, so a preview composition's sound
 // renders as fast as a Video's.
 export const ShotList: React.FC<{ shots: Shot[] }> = ({ shots }) =>
@@ -76,6 +94,7 @@ export const ShotList: React.FC<{ shots: Shot[] }> = ({ shots }) =>
       if (exits) shot = <Whip side="out" start={to - from + lead - FADE} id={`whip-out-${from}`}>{shot}</Whip>;
       if (fade === true) shot = <Whip side="in" start={0} id={`whip-in-${from}`}>{shot}</Whip>;
       if (fade === "dissolve") shot = <Dissolve>{shot}</Dissolve>;
+      if (fade === "dip") shot = <Dip>{shot}</Dip>;
       return (
         <Sequence key={from} from={from - lead} durationInFrames={to - from + lead} layout="none">
           <ShotClock.Provider value={{ from, lead, dur: to - from }}>

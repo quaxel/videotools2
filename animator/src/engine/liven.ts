@@ -13,7 +13,9 @@ const scale = (a: Vec3, k: number) => [a[0] * k, a[1] * k, a[2] * k] as Vec3;
 const len = (a: Vec3) => Math.hypot(a[0], a[1], a[2]);
 
 // f = shot frame (negative during a dissolve), dur = shot length.
-export const livenCamera = (cam: CameraShot, f: number, dur: number, energy: number): CameraShot => {
+// `steady` (Video prop): the camera glides instead of being hand-held: no settle after the cut and a fifth of the
+// drift, so the authored move and the push are the motion.
+export const livenCamera = (cam: CameraShot, f: number, dur: number, energy: number, steady = false): CameraShot => {
   if (energy <= 0) return cam;
   const p = Math.min(1, Math.max(0, f / Math.max(1, dur)));
   const back = sub(cam.position, cam.target);
@@ -21,10 +23,10 @@ export const livenCamera = (cam: CameraShot, f: number, dur: number, energy: num
   // 1. Constant push toward the subject across the shot (on top of the authored move).
   const push = 0.1 * energy * (1 - Math.pow(1 - p, 1.6));
   // 2. Settle after the cut: start a little wide and ease in over the first 10 frames.
-  const settle = 0.06 * energy * Math.max(0, 1 - Math.max(0, f) / 10) ** 2;
+  const settle = (steady ? 0 : 0.06) * energy * Math.max(0, 1 - Math.max(0, f) / 10) ** 2;
   const position = add(cam.target, scale(back, 1 - push + settle));
   // 3. Hand-held drift: slow, smooth, proportional to the distance, on both camera and aim.
-  const a = 0.022 * energy * dist;
+  const a = (steady ? 0.0045 : 0.022) * energy * dist;
   const drift: Vec3 = [Math.sin(f / 23) * a + Math.sin(f / 9.1) * a * 0.35, Math.sin(f / 29 + 1.3) * a * 0.6, 0];
   const aim: Vec3 = [Math.sin(f / 31 + 0.7) * a * 0.5, Math.sin(f / 17 + 2.1) * a * 0.3, 0];
   return { ...cam, position: add(position, drift), target: add(cam.target, aim) };

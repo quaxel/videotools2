@@ -276,3 +276,45 @@ export const crawlTo = (f: number, start: number, frames: number, from: [number,
   };
   return { at, pose };
 };
+
+// Path position 0..1 at frame f for a camera that passes key i (of n, evenly spaced along the path) at beat frame
+// beats[i]: a monotone cubic time warp with zero speed at the first and last key (ease in, ease out) and no stop or
+// overshoot in between, so the camera arrives at each subject on the word that names it.
+export const warpU = (beats: number[], f: number) => {
+  const n = beats.length;
+  if (n < 2 || f <= beats[0]) return 0;
+  if (f >= beats[n - 1]) return 1;
+  const sec = beats.slice(1).map((b, i) => 1 / (n - 1) / Math.max(1e-6, b - beats[i]));
+  const m = [0, ...sec.slice(1).map((s, i) => (2 * sec[i] * s) / (sec[i] + s)), 0];
+  let i = 0;
+  while (f > beats[i + 1]) i++;
+  const h = beats[i + 1] - beats[i];
+  const x = (f - beats[i]) / h, x2 = x * x, x3 = x2 * x;
+  return (2 * x3 - 3 * x2 + 1) * (i / (n - 1)) + (x3 - 2 * x2 + x) * h * m[i] + (-2 * x3 + 3 * x2) * ((i + 1) / (n - 1)) + (x3 - x2) * h * m[i + 1];
+};
+
+// A point on a smooth curve (Catmull-Rom) through `pts` at path position u 0..1.
+const curve = (pts: Vec3[], u: number): Vec3 => {
+  const n = pts.length;
+  if (n === 1) return pts[0];
+  const s = clamp01(u) * (n - 1);
+  const i = Math.min(n - 2, Math.floor(s));
+  const t = s - i;
+  const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n - 1, i + 2)];
+  return p1.map((_, k) => 0.5 * (2 * p1[k] + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t * t * t)) as Vec3;
+};
+
+// A camera that travels through key views and reaches key i at shot frame `at` (take it from the line's frame span,
+// placing the word by its position in the line). Smooth through every key, at rest at the first and the last.
+//   const camera = beatPath([{ at: 0, position: [...], target: [...] }, { at: 52, ... }, { at: 110, ... }], f);
+export type BeatKey = { at: number; position: Vec3; target: Vec3; fov?: number };
+export const beatPath = (keys: BeatKey[], f: number, fov = 40) => {
+  const u = warpU(keys.map((k) => k.at), f);
+  const fovs = keys.map((k) => k.fov ?? fov);
+  const s = u * (keys.length - 1), i = Math.min(keys.length - 2, Math.floor(s));
+  return {
+    position: curve(keys.map((k) => k.position), u),
+    target: curve(keys.map((k) => k.target), u),
+    fov: keys.length < 2 ? fovs[0] : fovs[i] + (fovs[i + 1] - fovs[i]) * (s - i),
+  };
+};

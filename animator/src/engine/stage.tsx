@@ -8,7 +8,7 @@ import { Vec3 } from "./anim";
 import { useShotDuration, useShotFrame, useShotStart } from "./clock";
 import { lightForBackground, puppetTint } from "../three/moods";
 import { livenCamera, livenPose } from "./liven";
-import { useFramingFor, useImpact, useLighting, usePost, useSpeech } from "./Video";
+import { useFramingFor, useImpact, useLighting, usePost, useSpeech, useSteady } from "./Video";
 import { Post } from "./post/Post";
 import { applyFramingDelta, framingDelta, keepHeadsInFrame } from "./framing";
 import { getInputProps } from "remotion";
@@ -113,10 +113,11 @@ export const Stage: React.FC<{
   light?: PuppetLight; // the set's lights as puppets see them (fire, lamps, sun); default: derived from the mood
   keepHeads?: boolean; // default true: pan (or widen) so no puppet's head is cut by the frame edge (engine/framing.ts)
   foreground?: React.ReactNode;
-}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1, light, keepHeads = true, foreground }) => {
+  focus?: number; // post chain only: focus distance (m along the view axis) instead of the nearest puppet's head
+}> = ({ set, camera: authored, bg, puppets = [], blur, truth, flash, energy = 1, light, keepHeads = true, foreground, focus }) => {
   const { width, height } = useVideoConfig();
   const f = useShotFrame();
-  const moved = shake(livenCamera(authored, f, useShotDuration(), energy), useImpact(), f);
+  const moved = shake(livenCamera(authored, f, useShotDuration(), energy, useSteady()), useImpact(), f);
   // Whole heads, without jumps: the pipeline's framing pass logs the raw correction every frame, smooths it over each
   // shot (it eases in before a head reaches the edge and holds) and the render applies the smoothed table. With no
   // table yet the raw correction is used directly.
@@ -155,7 +156,7 @@ export const Stage: React.FC<{
           {rig}
           {cast}
           {front}
-          <Post parts={post} focus={focusDistance(camera, puppets)} cInf={(blur ?? 0) * LENS_PER_BLUR} inkDebug={inkDebug} />
+          <Post parts={post} focus={focus ?? focusDistance(camera, puppets)} cInf={(blur ?? 0) * LENS_PER_BLUR} inkDebug={inkDebug} />
         </ThreeCanvas>
         <Grade truth={truth} flash={flash} vignette={!post.grade} />
       </AbsoluteFill>

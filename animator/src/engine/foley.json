@@ -17,6 +17,21 @@
   "license": "CC0",
   "note": "a fork tapping or scraping a plate; 2 pitched copies"
  },
+ "gunshot": {
+  "count": 1,
+  "source": "eaglaxle (https://pixabay.com/sound-effects/gun-shot-1-530788/)",
+  "license": "Pixabay Content License"
+ },
+ "gunshot-echo": {
+  "count": 1,
+  "source": "flutie8211 (https://pixabay.com/sound-effects/gun-shot-and-echo-549910/)",
+  "license": "Pixabay Content License"
+ },
+ "jingle": {
+  "count": 6,
+  "source": "synthesised, scripts/sfx_generate.py jingle()",
+  "license": "own"
+ },
  "munch": {
   "count": 6,
   "source": "synthesised, scripts/sfx_generate.py munch()",

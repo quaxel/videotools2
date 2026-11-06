@@ -63,8 +63,11 @@ TARGETS = {
     "speech_margin_p10": (3.0, None),  # LU, mix.py: the quietest line's 10th-percentile voice-over-bed margin
     "effects_hot": (0, 0),  # mixreport.py: one-shot effects more than EFFECT_HOT over voice + music round them
     "effects_repeated": (0, 0),  # mixreport.py: runs of 3+ cues of one file within a second (no takes)
-    "avg_shot": (0, 2.2),  # seconds
-    "longest_shot": (0, 4.0),
+    "shots": (9, 12),  # one shot per location visit; the camera travels inside it instead of cutting
+    "avg_shot": (4.0, 7.0),  # seconds
+    "shortest_shot": (1.5, None),
+    "longest_shot": (0, 10.0),
+    "hard_cuts": (0, 1),  # `false` transitions after the first shot; locations change with a cream "dip"
     "locations": (8, None),
     "characters": (4, None),
     "gags": (2, None),
@@ -72,8 +75,10 @@ TARGETS = {
     "top_hue_share": (0, 0.40),
     "seed_by": (0, 20),  # seconds: the twist's object or person first appears
     "lufs": (-17, -14),
-    "motion": (6.0, None),  # median frame-to-frame change (10 fps, 54x96); reference 8.0
-    "still_share": (0, 0.15),  # share of frame pairs that barely change (< 2); reference 10 %
+    # PROVISIONAL: the old fast-cut, hand-held references gave 8.0 and 10 %; the slow gliding camera (rules.md →
+    # Camera) moves less per frame. Recalibrate from the first video made with it.
+    "motion": (3.0, None),  # median frame-to-frame change (10 fps, 54x96)
+    "still_share": (0, 0.30),  # share of frame pairs that barely change (< 2)
     "glitch_frames": (0, 0),  # broken frames in the render (lost WebGL canvas); render retries them
     "black_frames": (0, 0),  # qa.py: frames with mean luma < 4 %
     "frozen_spans": (0, 0),  # qa.py: 12+ frames without any change
@@ -124,7 +129,7 @@ PLAN_TEMPLATE = {
     "title": "",
     "topic": "",
     "mechanism": "One sentence: the hidden real-world system this video reveals.",
-    "beats": {"hook": "", "story": "", "rise": "", "twist": "", "mechanism": "", "ending": ""},
+    "beats": {"hook": "", "but": "", "then": "", "conflict": "", "pivot": "You see ...", "so": "So ...", "closing": ""},
     "seed": {"what": "The object or person the twist depends on", "first_line": 0},
     "locations": [{"id": "", "set": "existing component or new file", "colour": "dominant colour family"}],
     "characters": [{"id": "", "look": ""}],
@@ -181,15 +186,15 @@ def cmd_register():
 
 # ---------- check ----------
 
-SHOT_RE = re.compile(r"\[\s*(\d+)\s*,\s*(\d+|TIMING\.totalFrames)\s*,\s*(\w+)\s*,\s*(true|false|\"dissolve\")\s*\]")
+SHOT_RE = re.compile(r"\[\s*(\d+)\s*,\s*(\d+|TIMING\.totalFrames)\s*,\s*(\w+)\s*,\s*(true|false|\"dissolve\"|\"dip\")\s*\]")
 
 
 def shot_list(slug):
     src = open(sdir(slug, "Scene.tsx")).read()
     body = src[src.index("const SHOTS") :]
     total = json.load(open(sdir(slug, "timing.json")))["totalFrames"]
-    # the transition in: True (whip pan), "dissolve" or False (a cut)
-    trans = lambda t: True if t == "true" else "dissolve" if t == '"dissolve"' else False
+    # the transition in: True (whip pan), "dissolve", "dip" or False (a cut)
+    trans = lambda t: True if t == "true" else t.strip('"') if t.startswith('"') else False
     return [(int(a), total if b.startswith("TIMING") else int(b), name, trans(fade)) for a, b, name, fade in SHOT_RE.findall(body)]
 
 
@@ -197,6 +202,10 @@ def shot_stats(slug):
     shots = shot_list(slug)
     lens = [(b - a) / FPS for a, b, _, _ in shots]
     return shots, sum(lens) / len(lens), max(lens)
+
+
+def hard_cuts(shots):
+    return sum(1 for _, _, _, t in shots[1:] if t is False)
 
 
 # ---------- physics: rigid bodies baked offline ----------
@@ -238,7 +247,14 @@ def cmd_check(slug):
     for a, b, n, _ in shots:
         if (b - a) / FPS > TARGETS["longest_shot"][1]:
             problems.append(f"{n} is {(b - a) / FPS:.1f}s (max {TARGETS['longest_shot'][1]}s)")
-    print(f"{len(shots)} shots, average {avg:.2f}s, longest {longest:.2f}s")
+        if (b - a) / FPS < TARGETS["shortest_shot"][0]:
+            problems.append(f"{n} is {(b - a) / FPS:.1f}s (min {TARGETS['shortest_shot'][0]}s)")
+    if not within("shots", len(shots)):
+        problems.append(f"{len(shots)} shots (want {TARGETS['shots'][0]}-{TARGETS['shots'][1]}: one per location visit)")
+    cuts = hard_cuts(shots)
+    if cuts > TARGETS["hard_cuts"][1]:
+        problems.append(f"{cuts} hard cuts (at most {TARGETS['hard_cuts'][1]}): change location with \"dip\", stay in one with a camera move")
+    print(f"{len(shots)} shots, average {avg:.2f}s, longest {longest:.2f}s, hard cuts {cuts}")
     for p in problems:
         print("  MISS", p)
     marker = vdir(slug, "build", "check.ok")
@@ -316,7 +332,7 @@ WHOOSH_SLACK = 3  # frames around a whip's FADE window that still count as "on" 
 def sync_issues(slug):
     """Cue-level faults between the soundtrack and the picture: ("error" | "warn", message) pairs.
     Errors: cues outside the video, a missing file, narration past the end, no music anywhere. Warnings: a whip with
-    no whoosh, a looped effect that just misses a cut, gaps in the music, a loop seam whose sound changes."""
+    no whoosh, a looped effect that just misses a cut, gaps in the music."""
     cues = cmd_cues(slug)
     timing = json.load(open(sdir(slug, "timing.json")))
     total = timing["totalFrames"]
@@ -366,13 +382,6 @@ def sync_issues(slug):
     spoken = [l["to"] for l in timing.get("lines", [])] + [c["to"] for c in timing.get("captions", [])]
     if spoken and max(spoken) > total:
         err(f"the narration ends at {max(spoken)}, after the video ({total})")
-    # The loop seam: the last frame plays into frame 0, so the same bed should be under both.
-    bed = lambda f: sorted({m["src"] for m in cues["music"] if m["from"] <= f < m["to"]})
-    held = lambda f: sorted({e["src"] for e in cues["sfx"] if e.get("until") is not None and e["at"] <= f < e["until"]})
-    if bed(total - 1) != bed(0):
-        warn(f"loop seam: music {', '.join(bed(total - 1)) or 'none'} at the end, {', '.join(bed(0)) or 'none'} at frame 0")
-    if held(total - 1) != held(0):
-        warn(f"loop seam: looped effects {', '.join(held(total - 1)) or 'none'} at the end, {', '.join(held(0)) or 'none'} at frame 0")
     return out
 
 
@@ -533,12 +542,12 @@ def impact_frames(slug):
 
 
 def qa_meta(slug):
-    """Shots and planned jumps for qa.py: whip pans and dissolves (FADE / DISSOLVE frames before the shot,
+    """Shots and planned jumps for qa.py: whip pans, dissolves and dips (FADE / DISSOLVE / DIP frames before the shot,
     engine/clock.tsx) and the 10-frame camera shake after every impact sound."""
     clock = open(os.path.join(ROOT, "src", "engine", "clock.tsx")).read()
-    fade, dissolve = (int(re.search(rf"\b{k} = (\d+)", clock).group(1)) for k in ("FADE", "DISSOLVE"))
+    lead = {k: int(re.search(rf"\b{k} = (\d+)", clock).group(1)) for k in ("FADE", "DISSOLVE", "DIP")}
     shots = shot_list(slug)
-    planned = [[a - (dissolve if t == "dissolve" else fade), a + 1] for a, _, _, t in shots if t]
+    planned = [[a - lead[{"dissolve": "DISSOLVE", "dip": "DIP"}.get(t, "FADE")], a + 1] for a, _, _, t in shots if t]
     planned += [[f, f + 10] for f in impact_frames(slug)]
     return {"shots": [{"id": n, "a": a, "b": b} for a, b, n, _ in shots], "planned": planned}
 
@@ -730,8 +739,11 @@ def cmd_report(slug):
         ("speech_margin_p10", mixed["p10_min"] if mixed["p10_min"] is not None else 99.0, "{:.1f} LU"),
         ("effects_hot", sum(1 for e in mixed.get("effects", []) if e["margin"] is not None and e["margin"] > EFFECT_HOT), "{}"),
         ("effects_repeated", len(mixed.get("repeats", [])), "{}"),
+        ("shots", len(shots), "{}"),
         ("avg_shot", avg, "{:.2f}s"),
+        ("shortest_shot", min((b - a) / FPS for a, b, _, _ in shots), "{:.2f}s"),
         ("longest_shot", longest, "{:.2f}s"),
+        ("hard_cuts", hard_cuts(shots), "{}"),
         ("locations", len(plan.get("locations", [])), "{}"),
         ("characters", len(plan.get("characters", [])), "{}"),
         ("gags", len(plan.get("gags", [])), "{}"),

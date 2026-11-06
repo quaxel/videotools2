@@ -21,7 +21,7 @@ export type Timing = {
 // `framing`: the smoothed head-framing corrections written by `pipeline.py framing` (public/videos/<slug>/framing.json),
 // per shot start, then per shot frame (from that shot's first logged frame `f0`).
 export type FramingTable = Record<string, { f0: number; d: FramingDelta[] }>;
-const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean; post: boolean; framing: FramingTable | null } | null>(null);
+const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean; post: boolean; steady: boolean; framing: FramingTable | null } | null>(null);
 
 // The framing table for this video, if the pipeline wrote one (null while loading or when there is none).
 const useFramingTable = (slug: string) => {
@@ -48,7 +48,9 @@ const useFramingTable = (slug: string) => {
 // instead of the `music` cues; the `score` input prop overrides it for an A/B of the soundtrack.
 // `post` (default off): the post chain (engine/post: depth of field, bloom, colour grade) on every
 // Stage. Videos made before it existed leave it off to keep their look.
-export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean; score?: boolean; voiceVolume?: number }> = ({
+// `steady` (default off): the camera glides (rules.md → camera): no settle after a cut, a fifth of the hand-held drift.
+// New videos pass it; older ones leave it off and keep their hand-held look.
+export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean; steady?: boolean; score?: boolean; voiceVolume?: number }> = ({
   slug,
   timing,
   shots,
@@ -56,6 +58,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   music,
   lighting = true,
   post = false,
+  steady = false,
   score = false,
   voiceVolume = 1,
 }) => {
@@ -72,7 +75,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   return (
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
     {!soundOnly && (
-      <VideoContext.Provider value={{ timing, sfx, lighting, post, framing }}>
+      <VideoContext.Provider value={{ timing, sfx, lighting, post, steady, framing }}>
         <ShotList shots={shots} />
       </VideoContext.Provider>
     )}
@@ -112,6 +115,9 @@ export const usePost = (): PostParts | null => {
   const on = props.post ?? video?.post ?? false;
   return on ? { ...ALL_PARTS, ...(typeof on === "object" ? on : {}) } : null;
 };
+
+// Whether this video's camera glides (Video `steady`).
+export const useSteady = () => useContext(VideoContext)?.steady ?? false;
 
 // True while `speaker` is saying a word at this final frame (drives mouthOpen).
 export const speaking = (timing: Timing, speaker: string, finalFrame: number) =>

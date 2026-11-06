@@ -1,0 +1,48 @@
+{
+  "title": "The Mongol Mail That Never Stopped",
+  "topic": "How the Mongol Yam relay carried messages 200 miles a day",
+  "mechanism": "No horse ran far: stations every 25 miles kept horses saddled, and riders' bells warned the next station so the letter changed hands at a gallop without ever stopping.",
+  "beats": {
+    "hook": "A courier gallops across the dawn steppe; Polo's claim of 200 miles a day, yet no single horse made the trip",
+    "but": "A horse at full gallop tires long before sunset (the exhausted horse folds under its rider)",
+    "then": "The Khan builds a Yam station every 25 miles, up to 400 horses, half saddled, half at grass; Polo's 10,000 stations and 300,000 horses on a clerk's tally boards",
+    "conflict": "The villages next door must supply the horses: a woman with three goats is outraged; the paiza lets a rider take anyone's horse",
+    "pivot": "You see, no horse ran far, only the letter did: the bells ring out at night long before the rider arrives",
+    "so": "The next station saddles a fresh horse, the clerk logs the time, the letter changes hands at a gallop; fruit picked in the capital reaches the Khan the next evening",
+    "closing": "Every horse got tired. The letter never did."
+  },
+  "seed": {
+    "what": "The courier's belt of brass bells (and his bound chest), close on it in the hook",
+    "first_line": 1
+  },
+  "locations": [
+    { "id": "steppe-dawn", "set": "SteppeSet mode dawn: grass, ridges, rising sun", "colour": "orange" },
+    { "id": "hill-dusk", "set": "SteppeSet mode dusk on a hillside: the tired horse", "colour": "purple" },
+    { "id": "yam-day", "set": "SteppeSet day + YamHouse, hitch rail of saddled horses, mile post, horses at grass", "colour": "yellow-green" },
+    { "id": "tally-room", "set": "Room cold: the clerk's office with tally boards STATIONS / HORSES", "colour": "blue-grey" },
+    { "id": "village", "set": "SteppeSet day: two gers, three goats, the village woman and the station official", "colour": "green" },
+    { "id": "tack-room", "set": "Room teal: saddles on pegs, the paiza handed over on a saddle", "colour": "teal" },
+    { "id": "desert-road", "set": "SteppeSet desert ground, warm ochre: the lame horse and the merchant", "colour": "ochre" },
+    { "id": "night-road", "set": "SteppeSet night, cold blue: the rider coming, the station keeper listening", "colour": "deep blue" },
+    { "id": "yam-night", "set": "SteppeSet night + YamHouse with lantern light: the hand-over at a gallop", "colour": "amber" },
+    { "id": "khan-hall", "set": "Room warm red panel hall: Kublai with the basket of fruit", "colour": "red" },
+    { "id": "steppe-sunset", "set": "SteppeSet sunset: tired horses grazing, the letter riding on", "colour": "pink" }
+  ],
+  "characters": [
+    { "id": "rider", "look": "Mongol courier: deep blue deel coat with orange sash vest, fur-brimmed hat, bands round the chest, bell belt" },
+    { "id": "rider2", "look": "second courier: dark red deel, brown hat" },
+    { "id": "villager", "look": "village woman: long black hair, green deel, kerchief" },
+    { "id": "merchant", "look": "merchant: plump, purple robe with gold vest, beard, wide hat" },
+    { "id": "clerk", "look": "station clerk: grey robe, glasses, brush in hand" },
+    { "id": "keeper", "look": "station keeper: brown deel, beard" },
+    { "id": "khan", "look": "Kublai Khan: gold robe with red vest, grey beard, hat" },
+    { "id": "polo", "look": "Marco Polo: Venetian red cloak, dark beard, notebook" }
+  ],
+  "gags": [
+    { "line": 2, "what": "The exhausted horse folds down onto its belly; the rider slides off its neck onto the grass with a thud" },
+    { "line": 10, "what": "The merchant is hauled off his horse and lands on his backside in the dust while the courier gallops off on it" },
+    { "line": 7, "what": "A goat butts the official in the shin; he hops" }
+  ],
+  "story_numbers": ["three goats", "half", "one morning", "next evening"],
+  "format_note": "The bells on the belt and the paiza are drawn about 2x real size so they read on a phone."
+}

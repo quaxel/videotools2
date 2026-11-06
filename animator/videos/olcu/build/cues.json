@@ -1,0 +1,232 @@
+{
+ "shots": [
+  [
+   0,
+   150,
+   false
+  ],
+  [
+   150,
+   222,
+   false
+  ],
+  [
+   222,
+   282,
+   false
+  ],
+  [
+   282,
+   345,
+   false
+  ],
+  [
+   345,
+   399,
+   false
+  ],
+  [
+   399,
+   520,
+   false
+  ],
+  [
+   520,
+   700,
+   false
+  ],
+  [
+   700,
+   752,
+   false
+  ],
+  [
+   752,
+   912,
+   false
+  ],
+  [
+   912,
+   985,
+   false
+  ],
+  [
+   985,
+   1090,
+   false
+  ],
+  [
+   1090,
+   1112,
+   false
+  ],
+  [
+   1112,
+   1132,
+   false
+  ],
+  [
+   1132,
+   1163,
+   false
+  ],
+  [
+   1163,
+   1323,
+   false
+  ],
+  [
+   1323,
+   1530,
+   "dissolve"
+  ],
+  [
+   1530,
+   1700,
+   "dissolve"
+  ],
+  [
+   1700,
+   1785,
+   false
+  ],
+  [
+   1785,
+   1916,
+   false
+  ]
+ ],
+ "sfx": [
+  {
+   "at": 0,
+   "src": "sfx/wind.wav",
+   "volume": 0.4,
+   "until": 150
+  },
+  {
+   "at": 222,
+   "src": "sfx/wind.wav",
+   "volume": 0.4,
+   "until": 345
+  },
+  {
+   "at": 399,
+   "src": "sfx/wind.wav",
+   "volume": 0.35,
+   "until": 985
+  },
+  {
+   "at": 1090,
+   "src": "sfx/wind.wav",
+   "volume": 0.5,
+   "until": 1916
+  },
+  {
+   "at": 150,
+   "src": "sfx/door.wav",
+   "volume": 0.12,
+   "space": "room"
+  },
+  {
+   "at": 700,
+   "src": "sfx/creak.wav",
+   "volume": 0.25,
+   "until": 745
+  },
+  {
+   "at": 1132,
+   "src": "sfx/riser.wav",
+   "volume": 0.3
+  },
+  {
+   "at": 1706,
+   "src": "foley/gunshot-echo/01.wav",
+   "volume": 0.815257312473881
+  },
+  {
+   "at": 1709,
+   "src": "foley/gunshot/01.wav",
+   "volume": 0.7120185628583988
+  },
+  {
+   "at": 1728,
+   "src": "sfx/clink.wav",
+   "volume": 0.35,
+   "space": "outdoor"
+  },
+  {
+   "at": 1731,
+   "src": "foley/thud/03.wav",
+   "volume": 0.572517982467253,
+   "space": "outdoor"
+  },
+  {
+   "at": 1770,
+   "src": "sfx/door.wav",
+   "volume": 0.25,
+   "space": "outdoor"
+  }
+ ],
+ "music": [
+  {
+   "src": "videos/olcu/piano_day.wav",
+   "from": 172,
+   "to": 1067,
+   "volume": 0.55,
+   "loop": false,
+   "fade": false
+  },
+  {
+   "src": "music/tension.wav",
+   "from": 1163,
+   "to": 1323,
+   "volume": 0.18
+  },
+  {
+   "src": "music/mystery.wav",
+   "from": 1323,
+   "to": 1530,
+   "volume": 0.16
+  },
+  {
+   "src": "videos/olcu/piano_night.wav",
+   "from": 1536,
+   "to": 1695,
+   "volume": 0.5,
+   "loop": false,
+   "fade": false
+  }
+ ],
+ "library": [
+  {
+   "src": "videos/olcu/piano_day.wav",
+   "from": 172,
+   "to": 1067,
+   "volume": 0.55,
+   "loop": false,
+   "fade": false
+  },
+  {
+   "src": "music/tension.wav",
+   "from": 1163,
+   "to": 1323,
+   "volume": 0.18
+  },
+  {
+   "src": "music/mystery.wav",
+   "from": 1323,
+   "to": 1530,
+   "volume": 0.16
+  },
+  {
+   "src": "videos/olcu/piano_night.wav",
+   "from": 1536,
+   "to": 1695,
+   "volume": 0.5,
+   "loop": false,
+   "fade": false
+  }
+ ],
+ "total": 1916,
+ "fps": 30
+}

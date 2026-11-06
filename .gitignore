@@ -35,3 +35,6 @@ animator/public/space/
 
 # Mix stems rendered by `pipeline.py mix`, remade on demand
 animator/videos/*/build/mix/*.wav
+
+# ModelPreview sample, regenerated from animator/guide/sand3d/car.py (sand3d-model skill)
+animator/public/models/preview/

@@ -1,0 +1,409 @@
+{
+ "shots": [
+  [
+   0,
+   283,
+   false
+  ],
+  [
+   283,
+   366,
+   "dip"
+  ],
+  [
+   366,
+   594,
+   "dip"
+  ],
+  [
+   594,
+   724,
+   "dip"
+  ],
+  [
+   724,
+   919,
+   "dip"
+  ],
+  [
+   919,
+   1014,
+   "dip"
+  ],
+  [
+   1014,
+   1161,
+   "dip"
+  ],
+  [
+   1161,
+   1325,
+   "dip"
+  ],
+  [
+   1325,
+   1516,
+   "dip"
+  ],
+  [
+   1516,
+   1643,
+   "dip"
+  ],
+  [
+   1643,
+   1743,
+   "dip"
+  ]
+ ],
+ "sfx": [
+  {
+   "at": 0,
+   "src": "sfx/hooves.wav",
+   "volume": 0.144,
+   "until": 283
+  },
+  {
+   "at": 0,
+   "src": "sfx/wind.wav",
+   "volume": 0.084,
+   "until": 283
+  },
+  {
+   "at": 240,
+   "src": "foley/jingle/06.wav",
+   "volume": 0.20506858040126003,
+   "space": "outdoor"
+  },
+  {
+   "at": 60,
+   "src": "sfx/pop.wav",
+   "volume": 0.5
+  },
+  {
+   "at": 283,
+   "src": "sfx/hooves.wav",
+   "volume": 0.099,
+   "until": 323
+  },
+  {
+   "at": 337,
+   "src": "foley/thud/03.wav",
+   "volume": 0.572517982467253,
+   "space": "outdoor"
+  },
+  {
+   "at": 345,
+   "src": "foley/thud/03.wav",
+   "volume": 0.8396930409519711,
+   "space": "outdoor",
+   "hit": 0.3
+  },
+  {
+   "at": 366,
+   "src": "sfx/wind.wav",
+   "volume": 0.07,
+   "until": 594
+  },
+  {
+   "at": 394,
+   "src": "sfx/pop.wav",
+   "volume": 0.85
+  },
+  {
+   "at": 546,
+   "src": "sfx/pop.wav",
+   "volume": 0.77
+  },
+  {
+   "at": 576,
+   "src": "sfx/pop.wav",
+   "volume": 0.77
+  },
+  {
+   "at": 634,
+   "src": "sfx/pop.wav",
+   "volume": 0.55
+  },
+  {
+   "at": 635,
+   "src": "sfx/credit-blip.wav",
+   "volume": 0.27
+  },
+  {
+   "at": 684,
+   "src": "sfx/pop.wav",
+   "volume": 0.5
+  },
+  {
+   "at": 685,
+   "src": "sfx/credit-blip.wav",
+   "volume": 0.14
+  },
+  {
+   "at": 604,
+   "src": "foley/scrape/02.wav",
+   "volume": 0.304934960008879,
+   "space": "room"
+  },
+  {
+   "at": 724,
+   "src": "sfx/wind.wav",
+   "volume": 0.07,
+   "until": 919
+  },
+  {
+   "at": 889,
+   "src": "foley/thud/03.wav",
+   "volume": 0.524808150594982,
+   "space": "outdoor",
+   "hit": 0.25
+  },
+  {
+   "at": 890,
+   "src": "sfx/chime.wav",
+   "volume": 0.14
+  },
+  {
+   "at": 954,
+   "src": "sfx/pop.wav",
+   "volume": 0.55
+  },
+  {
+   "at": 981,
+   "src": "sfx/chime.wav",
+   "volume": 0.31,
+   "space": "room"
+  },
+  {
+   "at": 1014,
+   "src": "sfx/hooves.wav",
+   "volume": 0.09,
+   "until": 1054
+  },
+  {
+   "at": 1026,
+   "src": "foley/jingle/06.wav",
+   "volume": 0.3129994121913968,
+   "space": "outdoor"
+  },
+  {
+   "at": 1090,
+   "src": "foley/thud/03.wav",
+   "volume": 0.9160287719476048,
+   "space": "outdoor",
+   "hit": 0.35
+  },
+  {
+   "at": 1098,
+   "src": "sfx/hooves.wav",
+   "volume": 0.09,
+   "until": 1161
+  },
+  {
+   "at": 1112,
+   "src": "foley/jingle/06.wav",
+   "volume": 0.19427549722224632,
+   "space": "outdoor"
+  },
+  {
+   "at": 1118,
+   "src": "sfx/riser.wav",
+   "volume": 0.25
+  },
+  {
+   "at": 1168,
+   "src": "sfx/sting.wav",
+   "volume": 0.4
+  },
+  {
+   "at": 1161,
+   "src": "sfx/hooves.wav",
+   "volume": 0.117,
+   "until": 1325
+  },
+  {
+   "at": 1172,
+   "src": "foley/jingle/06.wav",
+   "volume": 0.34537866172843795,
+   "space": "outdoor"
+  },
+  {
+   "at": 1201,
+   "src": "foley/jingle/01.wav",
+   "volume": 0.27740914168976927,
+   "space": "outdoor"
+  },
+  {
+   "at": 1262,
+   "src": "foley/jingle/06.wav",
+   "volume": 0.4425164103395611,
+   "space": "far"
+  },
+  {
+   "at": 1285,
+   "src": "foley/jingle/01.wav",
+   "volume": 0.3554304627900169,
+   "space": "far"
+  },
+  {
+   "at": 1161,
+   "src": "sfx/crackle.wav",
+   "volume": 0.08,
+   "until": 1325
+  },
+  {
+   "at": 1409,
+   "src": "foley/scrape/02.wav",
+   "volume": 0.4878959360142064,
+   "space": "outdoor"
+  },
+  {
+   "at": 1409,
+   "src": "sfx/pop.wav",
+   "volume": 0.77
+  },
+  {
+   "at": 1385,
+   "src": "sfx/hooves.wav",
+   "volume": 0.08,
+   "until": 1516
+  },
+  {
+   "at": 1425,
+   "src": "foley/jingle/06.wav",
+   "volume": 0.16189624768520527,
+   "space": "outdoor"
+  },
+  {
+   "at": 1452,
+   "src": "foley/jingle/01.wav",
+   "volume": 0.13003553516707936,
+   "space": "outdoor"
+  },
+  {
+   "at": 1479,
+   "src": "foley/jingle/02.wav",
+   "volume": 0.1295766314814082,
+   "space": "outdoor"
+  },
+  {
+   "at": 1475,
+   "src": "sfx/whoosh.wav",
+   "volume": 0.15
+  },
+  {
+   "at": 1606,
+   "src": "sfx/pop.wav",
+   "volume": 0.42
+  },
+  {
+   "at": 1590,
+   "src": "foley/crunch/06.wav",
+   "volume": 0.13811027616168356,
+   "space": "room"
+  },
+  {
+   "at": 1612,
+   "src": "foley/munch/03.wav",
+   "volume": 0.5025213339292134,
+   "space": "room"
+  },
+  {
+   "at": 1620,
+   "src": "foley/munch/06.wav",
+   "volume": 0.538415010301085,
+   "space": "room"
+  },
+  {
+   "at": 1629,
+   "src": "foley/munch/04.wav",
+   "volume": 0.5081914263776286,
+   "space": "room"
+  },
+  {
+   "at": 1637,
+   "src": "foley/munch/02.wav",
+   "volume": 0.5078790572625023,
+   "space": "room"
+  },
+  {
+   "at": 1643,
+   "src": "sfx/hooves.wav",
+   "volume": 0.081,
+   "until": 1743
+  },
+  {
+   "at": 1643,
+   "src": "sfx/wind.wav",
+   "volume": 0.084,
+   "until": 1743
+  },
+  {
+   "at": 1650,
+   "src": "foley/jingle/06.wav",
+   "volume": 0.32379249537041055,
+   "space": "outdoor"
+  },
+  {
+   "at": 1681,
+   "src": "foley/jingle/01.wav",
+   "volume": 0.2600710703341587,
+   "space": "outdoor"
+  }
+ ],
+ "music": [
+  {
+   "src": "music/upbeat.wav",
+   "from": 0,
+   "to": 594,
+   "volume": 0.26
+  },
+  {
+   "src": "music/lounge.wav",
+   "from": 594,
+   "to": 1014,
+   "volume": 0.26
+  },
+  {
+   "src": "music/tension.wav",
+   "from": 1014,
+   "to": 1516,
+   "volume": 0.26
+  },
+  {
+   "src": "music/upbeat.wav",
+   "from": 1516,
+   "to": 1743,
+   "volume": 0.26
+  }
+ ],
+ "library": [
+  {
+   "src": "music/upbeat.wav",
+   "from": 0,
+   "to": 594,
+   "volume": 0.26
+  },
+  {
+   "src": "music/lounge.wav",
+   "from": 594,
+   "to": 1014,
+   "volume": 0.26
+  },
+  {
+   "src": "music/tension.wav",
+   "from": 1014,
+   "to": 1516,
+   "volume": 0.26
+  },
+  {
+   "src": "music/upbeat.wav",
+   "from": 1516,
+   "to": 1743,
+   "volume": 0.26
+  }
+ ],
+ "total": 1743,
+ "fps": 30
+}

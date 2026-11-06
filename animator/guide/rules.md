@@ -1,21 +1,31 @@
 # Rules for every explainer video
 
-Distilled from frame-by-frame study of three reference Shorts and two comparison rounds against our own output.
-`scripts/pipeline.py report` measures the numeric ones; the rest are checked by eye on the contact sheet.
+Distilled from frame-by-frame study of three reference Shorts and two comparison rounds against our own output;
+story, cutting and camera since replaced by the 3D-story house style (a slow camera travelling through one 3D world
+per shot, a cream dip between locations). `scripts/pipeline.py report` measures the numeric ones; the rest are
+checked by eye on the contact sheet.
 
-## Story (six beats)
+## Story (seven beats)
 
-1. **Hook, 0–3 s:** start mid-action at the strangest moment. First word "He", "It's" or "You". No intro, no channel name, no call to action.
-   The first 5 s are 3-4 quick, hard shots (0.8-1.2 s each), not one slow establishing move: the strange thing
-   coming at the lens, a face reacting, the thing hitting something (a splash, a smash) and an impact with a camera
-   jolt (`stamp` at low volume). Put the hero object close to the camera so it fills part of the frame.
-2. **Small story:** one character in one concrete situation, told as "you" or in third person.
-3. **Rise:** the character thinks they are winning.
-4. **Twist:** the win is a trap. It arrives as an **event** (someone walks in, a door opens, a costume changes), not as information.
-5. **Mechanism, last 20–35 %:** go behind the scenes. Explain the system only with **labelled physical props** in the scene (buttons, padlocks, switches, dials, wheels, stamps, counters, corkboards) with short UPPERCASE labels. No charts, arrows or floating numbers; numbers appear only on objects (a counter, a screen, a calendar).
-6. **Ending:** loop back to the opening shot with a new victim, or land on one final word.
+Nine to twelve shots, one location each; the beats sit on the shots as below (shot numbers for a 10-shot video,
+percentages of the runtime).
 
-- **Seed:** the person or object the twist depends on is visible within the first 20 s.
+1. **Hook (shots 1-3):** the first word at frame 0, no intro, no channel name. The first sentence states the premise
+   as a paradox, something that sounds impossible; the hook is 5-23 words (aim 16) and ends at about 4-5 s. The
+   picture is one continuous camera move onto the strange thing (the visual hook: what moves or changes on screen),
+   not a burst of cuts. Put the hero object close to the camera so it fills part of the frame.
+2. **But (shot 4):** the obstacle.
+3. **Then (shot 5):** what was tried, or what happened next.
+4. **Conflict (shot 6):** the complaint, the cost, who is unhappy.
+5. **Pivot, at 53-87 %:** "You see, ..." — the real reason, told by the narrator. Show it only with **labelled
+   physical props** in the scene (buttons, padlocks, switches, dials, wheels, stamps, counters, corkboards) with short
+   UPPERCASE labels. No charts, arrows or floating numbers; numbers appear only on objects (a counter, a screen, a
+   calendar).
+6. **So..., at 80-93 %:** the consequence.
+7. **Closing line:** 5-19 words (about 9) that land the story. No outro, no call to action, no loop back to the start.
+
+- Escalation reads as but / then / so; one idea per sentence, concrete numbers and names.
+- **Seed:** the person or object the pivot depends on is visible within the first 20 s.
 - **Gags:** at least two physical actions (smack, fall, pop, spill, dive). Expression changes alone do not count. Aim for one visual joke every ~15 s.
 
 ## Script and voice
@@ -23,21 +33,34 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 - **Word budget:** 180–210 words for 50–60 s. Target pace 190–215 words per minute.
 - Sentences of 4–10 words, plain spoken English, concrete numbers ("2 minutes", "3 years").
 - The narrator is excited and gripping, never a calm documentary read, even for history or mystery topics.
-  Keep `pauseAfter` short (≤ 0.3 s) except at the twist and before the last on-screen line.
+  Keep `pauseAfter` short (≤ 0.3 s) except before the pivot and before the closing line.
 - Spell years out as words ("eighteen seventy-six") so Qwen reads them right, and put the spelled form in the
   sourced claim too, or the report's fact check flags it.
 - **Never** use ellipses (...) or one-word repeated sentences ("Seven. Seven."): Qwen pauses 1–2 s on them.
-- At most one pause over 0.6 s, and only at the twist (use `pauseAfter` on that line).
+- At most one pause over 0.6 s, and only before the pivot (use `pauseAfter` on the line before "You see").
 - Dialogue is a separate line with its own speaker (`buddy`, `boss`, ...), one short line each.
 - **Facts:** every number spoken as a fact must be backed by a sourced claim in `research.md`. Story numbers go in `plan.json` → `story_numbers`.
 
 ## Picture
 
 - **Locations:** at least 8, each with its own dominant colour family. No colour above 40 % of the runtime. Re-light a location (warm, cold blue "truth", purple dream, night) to vary colour without a new set.
-- **Characters:** at least 4; at least one costume change or new arrival carries the twist.
-- **Shots:** cut to the voice. Average ≤ 2.2 s, none over 4 s. Every shot moves the camera (push-in, pull-back, drift, orbit).
-- **Angles:** each video has at least one over-the-shoulder (the head in front ≤ 25 % of the frame, at the edge), one top-down, one low angle and one macro on an object.
-- **Transitions:** hard cut inside a location; 8-frame whip pan (`true` in the shot list) when the location changes; a 12-frame `"dissolve"` for a change of time in one place. A cut is always a shot boundary in the shot list (never a switch inside one shot component), so check, QA and sync see it.
+- **Characters:** at least 4.
+- **Shots:** 9-12, one location each (average 4-7 s, none under 1.5 s or over 10 s). A shot ends on a real sentence end
+  from the voice timing. Inside a shot the camera does not cut: it carries from one subject to the next (`beatPath`).
+- **Transitions:** a 12-frame (0.4 s) cream `"dip"` at every change of location; a 12-frame `"dissolve"` for a change
+  of time in one place; at most one hard cut (`false`) in the whole video, kept for the one moment that needs a jolt.
+  New videos do not use the whip (`true`). Every transition is a shot boundary in the shot list (never a switch inside
+  one shot component), so check, QA and sync see it.
+- **Camera speed:** mostly slow and smooth. Every shot has net travel, about 10 % of the frame width per second
+  (25-40 % travel or push over a shot); ease in at the start, ease out to rest at the end, almost no wobble (`Video`
+  `steady`). No sudden tilt or snap unless the story needs one; a jolt only on an impact sound.
+- **Camera moves:** about half push-ins, a third crane moves (rising or sinking), a fifth sideways tracks. Inside a
+  location the camera travels from subject to subject and reaches each as the narrator names it (`beatPath`, keys
+  on the word frames). Write the plan per shot in `videos/<slug>/camera_plan.md`: time, location, path start → end,
+  move type, foreground / midground / background objects and the in-world labels.
+- **Depth in every shot:** a foreground object close to the lens (blurred), the subject sharp in the midground, the
+  background softly blurred (Stage `foreground` + `frameSpot`, the post chain's depth of field focused on the subject).
+  The foreground never covers a face or a label.
 - **Explanation shots:** one idea per shot, readable in one second, at most 6 words of readable text per frame.
 - **Characters touch the world:** they sit, hold, push, open, walk in profile. Not every shot is front-on.
 - **No action twice the same way:** an action a character repeats (a bite, a knock, a wave, a sip) differs each time
@@ -51,7 +74,7 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
 - **Key small objects must read on a phone:** a prop the story hangs on (a coin, a piece of meat, a pill) may be
   drawn up to 2× its real size; say so in `plan.json` (`format_note`) when the real size is a sourced fact.
 - **Sky shots are never an empty flat colour:** a dome sky, something moving in it (birds, falling objects, smoke)
-  and a strong camera move (track the subject, tilt, zoom). Sky shots are the stillest in `motion`; fix them first.
+  and a clear camera move (track the subject, tilt, crane). Sky shots are the stillest in `motion`; fix them first.
 - **Effects must not show through props:** smoke from a fire under a pot, steam in front of a hero object; check
   the macro stills for grey blobs over the subject.
 - **No half heads:** a head is either whole in the frame or wholly out. Stage enforces it (library.md → `keepHeads`);
@@ -59,12 +82,33 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
   the picture is the puppet's card, not the camera (the audit says "card of X cuts the drawing").
 - **No camera jumps:** the camera never snaps between two frames of one shot except on an impact sound. Head framing
   is smoothed per shot by the framing pre-pass; animate camera moves with eased ramps, not steps.
-- **Loop:** the last frame runs into the first (library.md → Seamless loop), so the Short replays without a jump.
+- **Painted, not rendered:** flat colour fills with soft cel bands; no grain, gloss, bevels or reflections. Big
+  surfaces (walls, floors, crates, hulls) carry painted wear in their `canvasTexture`: stains, chips, scratches, a
+  gentle gradient on walls. A spotless flat fill reads as a placeholder.
+- **Light follows the story:** warm and bright from the hook to the conflict, deeper and bluer at the pivot, and a slow drift of light inside long shots (a sun patch sliding, a lamp flickering, dusk coming on).
+- **Character size:** a speaking puppet's body is 40-60 % of the frame height in a medium shot, 70 %+ in a close
+  shot. A wide shot is the exception, not the default.
+- **The main event happens in steps:** the thing the story is about (a collapse, a launch, a lift) is shown as
+  cause and effect, not a jump between two states: a small first move, a shudder, the big move, then dust or debris
+  (`Burst`, physics) and someone reacting. One idea per shot still holds; give the event two or three shots.
+- **Secondary motion:** something besides the camera and the speaker moves in most shots: cloth, a curtain, a rope,
+  water ripples, smoke, dust in a light beam, a sign swinging.
+- **The world reacts:** background people turn, point or flinch when the main event happens; nobody stands frozen.
+- **Act on the words:** a label or number appears on the word that says it, the thing happens on its verb, the
+  camera arrives at a subject as it is named. Timing is per line (`voice` prints each line's frame span); place a
+  word inside its line by its position in the text. A gesture or face change lands on the stressed word, and the
+  video uses 3-5 different expressions that follow the script's emotion.
+- **Nothing floats or flickers:** every prop rests on something or is mounted; no black voids under buildings or in
+  openings; no limbs without a body, no feet sliding on the floor; nothing pops in, stretches or intersects.
+- **The camera stays clear:** never inside a wall or prop, nothing passes through the lens, no pole, lamp or prop
+  crosses a face or sits behind a head as if growing from it. Every move eases out to rest, never stops with a
+  jolt.
 - **Characters never pass through the set:** no puppet stands inside or walks through a counter, desk or prop
   (`pipeline.py collide` finds them).
-- **Motion:** median frame-to-frame change ≥ 6 and fewer than 15 % near-still frame pairs (reference: 8.0 and 10 %).
-  `Stage` adds camera push, hand-held drift and idle acting automatically (`energy`, default 1); use `energy={0}`
-  only for shots that must hold perfectly still, and fix the stillest shots `pipeline.py motion` lists.
+- **Motion:** median frame-to-frame change ≥ 3 and at most 30 % near-still frame pairs. Provisional: the old 6 / 15 %
+  came from fast, hand-held references; recalibrate from the first video made with the slow camera. `Stage` adds a
+  push and idle acting automatically (`energy`, default 1; with `steady` almost no drift); use `energy={0}` only for
+  shots that must hold perfectly still, and give the stillest shots `pipeline.py motion` lists more net travel.
 
 ## Sound
 
@@ -78,12 +122,21 @@ Distilled from frame-by-frame study of three reference Shorts and two comparison
   motion (`jawCloses`, `stepFrames`, `impactCues`), so the sound follows the action. Soft-attack sounds for soft
   actions: chewing is a wet munch, never a thump (`chew` knocks; do not use it for eating).
 - **Every one-shot effect has the location's `space`** (`room`, `hall`, `outdoor`, `far` for what happens far off).
-- **No effect starts in the last 8 frames** unless it carries over the loop seam on purpose: it is cut into a click.
+- **No effect starts in the last 8 frames:** it is cut into a click.
 - Mix lands at -17 to -14 LUFS.
 
 ## Process
 
 - Voice first: write `lines.json`, run `pipeline.py voice`, then cut shots to the printed line frames.
 - Do not render the full video after every change. Type-check, look at stills, fix, and render once at the end.
+- Test small first: one still, then a short clip of the hardest shot when it is new (a new set, a physics gag, the
+  main event), then the full video.
+- Judge by eye. A check can pass while the picture still looks wrong; then say what is different in plain words and
+  fix that, not the number.
+- Fix from a list, not at random: write every problem found on the stills or a render to
+  `videos/<slug>/build/mistakes_<round>.md` (numbered: time or frame, shot, problem, severity high / medium / low),
+  fix high first, one shot at a time, and look at the new frame of each fix before calling it fixed.
+- Facts on screen: every date, name and number in a label, sign or `Headline` matches the script and is spelled
+  right.
 - `pipeline.py` deletes the Remotion temp bundles each command leaves behind (~190 MB per still/render run). If you
   call `npx remotion` directly, delete `$TMPDIR/remotion-*` from that run afterwards, or the disk fills up.

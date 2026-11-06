@@ -2,8 +2,8 @@ import React from "react";
 import { useVideoConfig } from "remotion";
 import { CameraShot, FIRE, Foliage, frameSpot, lakeLight, LakeSet, lerp3, moodBackground, PuppetLook, PuppetPlacement, ramp, Shot, ShotList, Stage, useShotFrame } from "../engine";
 
-// Two-shot check of the dissolve transition and foreground framing: a wide of the lake, then the fireside fading
-// in over it with a leafy clump in the bottom-right corner in front of the lens.
+// Check of the dissolve and dip transitions and foreground framing: a wide of the lake, the fireside fading in over
+// it with a leafy clump in the bottom-right corner in front of the lens, then a dip through cream back to the wide.
 
 const MAYA: PuppetLook = { skin: "#f6d2b0", hair: "#3a1f14", outfit: "#e0262f", pattern: "#ffd23f", long: true };
 const BG = moodBackground("dusk");
@@ -38,6 +38,7 @@ const Fireside: React.FC = () => {
 const SHOTS: Shot[] = [
   [0, 60, Wide, false],
   [60, 120, Fireside, "dissolve"],
+  [120, 180, Wide, "dip"],
 ];
 
 export const TransitionPreview: React.FC = () => <ShotList shots={SHOTS} />;
