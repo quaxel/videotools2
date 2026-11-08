@@ -1,0 +1,260 @@
+{
+ "fps": 30,
+ "totalFrames": 323,
+ "lines": [
+  {
+   "i": 0,
+   "speaker": "narrator",
+   "text": "Viking or Roman.",
+   "from": 0,
+   "to": 43
+  },
+  {
+   "i": 1,
+   "speaker": "narrator",
+   "text": "Choose your daily life.",
+   "from": 47,
+   "to": 81
+  },
+  {
+   "i": 2,
+   "speaker": "narrator",
+   "text": "Pick the Viking, and your workplace is right outside your house.",
+   "from": 84,
+   "to": 194
+  },
+  {
+   "i": 3,
+   "speaker": "narrator",
+   "text": "Pick the Roman, and your base has a heated bathhouse.",
+   "from": 197,
+   "to": 282
+  },
+  {
+   "i": 4,
+   "speaker": "narrator",
+   "text": "Sounds good?",
+   "from": 285,
+   "to": 299
+  }
+ ],
+ "captions": [
+  {
+   "from": 0,
+   "to": 25,
+   "text": "Viking or"
+  },
+  {
+   "from": 25,
+   "to": 47,
+   "text": "Roman."
+  },
+  {
+   "from": 47,
+   "to": 62,
+   "text": "Choose your"
+  },
+  {
+   "from": 62,
+   "to": 84,
+   "text": "daily life."
+  },
+  {
+   "from": 84,
+   "to": 95,
+   "text": "Pick the"
+  },
+  {
+   "from": 95,
+   "to": 115,
+   "text": "Viking,"
+  },
+  {
+   "from": 115,
+   "to": 128,
+   "text": "and your"
+  },
+  {
+   "from": 128,
+   "to": 143,
+   "text": "workplace"
+  },
+  {
+   "from": 143,
+   "to": 161,
+   "text": "is right"
+  },
+  {
+   "from": 161,
+   "to": 179,
+   "text": "outside your"
+  },
+  {
+   "from": 179,
+   "to": 197,
+   "text": "house."
+  },
+  {
+   "from": 197,
+   "to": 207,
+   "text": "Pick the"
+  },
+  {
+   "from": 207,
+   "to": 225,
+   "text": "Roman,"
+  },
+  {
+   "from": 225,
+   "to": 234,
+   "text": "and your"
+  },
+  {
+   "from": 234,
+   "to": 247,
+   "text": "base has"
+  },
+  {
+   "from": 247,
+   "to": 257,
+   "text": "a heated"
+  },
+  {
+   "from": 257,
+   "to": 285,
+   "text": "bathhouse."
+  },
+  {
+   "from": 285,
+   "to": 301,
+   "text": "Sounds good?"
+  }
+ ],
+ "words": {
+  "narrator": [
+   [
+    0,
+    11
+   ],
+   [
+    11,
+    25
+   ],
+   [
+    25,
+    38
+   ],
+   [
+    47,
+    54
+   ],
+   [
+    54,
+    62
+   ],
+   [
+    62,
+    68
+   ],
+   [
+    68,
+    80
+   ],
+   [
+    84,
+    89
+   ],
+   [
+    89,
+    95
+   ],
+   [
+    95,
+    106
+   ],
+   [
+    115,
+    123
+   ],
+   [
+    123,
+    128
+   ],
+   [
+    128,
+    143
+   ],
+   [
+    143,
+    153
+   ],
+   [
+    153,
+    161
+   ],
+   [
+    161,
+    171
+   ],
+   [
+    171,
+    179
+   ],
+   [
+    179,
+    188
+   ],
+   [
+    197,
+    202
+   ],
+   [
+    202,
+    207
+   ],
+   [
+    207,
+    217
+   ],
+   [
+    225,
+    230
+   ],
+   [
+    230,
+    234
+   ],
+   [
+    234,
+    242
+   ],
+   [
+    242,
+    247
+   ],
+   [
+    247,
+    251
+   ],
+   [
+    251,
+    257
+   ],
+   [
+    257,
+    277
+   ],
+   [
+    285,
+    291
+   ],
+   [
+    291,
+    297
+   ]
+  ]
+ },
+ "mouth": {
+  "narrator": "57877731566431100777789987631102789887475421000346777887336774387887886578888875210044676312763218887631566554210000068888864566326799521215667763110777333369888889852338977735786467888765210110000637631156545999866655554210004886668632898856422733555235664663118889942555664311110000000876642158885520000000000000000000000"
+ }
+}

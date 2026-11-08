@@ -1,0 +1,44 @@
+{
+  "title": "Why the Thames Kept Bringing Parliament's Stink Back",
+  "topic": "Why the Thames kept bringing Parliament's stink back (1858 Great Stink, tide)",
+  "mechanism": "At Westminster the Thames is tidal, so sewage poured into it is carried down on the ebb and back up on the flood, past Parliament, whatever lime is added; Bazalgette's intercepting sewers carried it east to a reservoir of twenty-seven million gallons whose gates opened at high tide so the ebb took it to sea.",
+  "beats": {
+    "hook": "A sack stencilled LIME tumbles off a barge and splashes brown water at the lens; the MP holds his nose; Parliament's river front in the heat haze; a sewer arch gushing.",
+    "story": "London, summer 1858, thirty degrees: the sewers pour into the Thames under Parliament's windows and members flee their own library.",
+    "rise": "The MP orders lime into every sewer mouth; barges tip it in, the ebb carries the brown water away; he throws the window open, breathes, shouts good riddance and flings his stinking hat into the departing river.",
+    "twist": "The tide turns: the water rises and runs backward, his hat floats right back to the window and slaps his face, with everything else; the committee stampedes for the door.",
+    "mechanism": "A glass TANK of the THAMES with a model PARLIAMENT at one end and a SEA plunger at the other: the TIDE dial swings IN/OUT and brown blobs slosh up and down past the model; a LIME sack changes nothing. Bazalgette in a brick sewer: an INTERCEPTOR pipe running beside the river, an 82 MILES plaque, flow going EAST; at Crossness a RESERVOIR gauge counting to 27,000,000 GALLONS; when the dial reads HIGH TIDE the SLUICE wheel opens the gate and the ebb carries it TO THE SEA.",
+    "ending": "In the Commons a calendar gets a stamp: 18 DAYS. The hat bobs on the tide and the last frames run back into the opening splash."
+  },
+  "seed": {
+    "what": "The MP's hat (on his head from the hook, flung into the river on line 9) and the tide gauge on the embankment wall, visible from line 3",
+    "first_line": 3
+  },
+  "locations": [
+    { "id": "river-day", "set": "ThamesSet day: Parliament river front, brown water, sewer arches, barge with lime", "colour": "olive brown-green" },
+    { "id": "committee", "set": "Committee room: oak panels, Gothic river window, green table, thermometer, wet curtain", "colour": "amber yellow" },
+    { "id": "library", "set": "Library: red-brown leather, shelves, members holding noses", "colour": "red brown" },
+    { "id": "sewer-mouth", "set": "ThamesSet close on an embankment arch, lime cloud", "colour": "chalk white grey" },
+    { "id": "river-dusk", "set": "ThamesSet dusk: tide turning, water rising and running backward", "colour": "violet orange" },
+    { "id": "committee-panic", "set": "Committee room re-lit sickly green", "colour": "sick green" },
+    { "id": "tank", "set": "Mechanism: Thames in a glass tank on a table, TIDE dial, SEA plunger", "colour": "cold blue" },
+    { "id": "sewer-tunnel", "set": "Brick intercepting sewer, lanterns, INTERCEPTOR pipe, 82 MILES plaque", "colour": "orange brick" },
+    { "id": "crossness", "set": "Crossness reservoir and sluice, red-green ironwork, gauge", "colour": "steel blue" },
+    { "id": "commons", "set": "Commons chamber: green benches, calendar 18 DAYS", "colour": "deep green" }
+  ],
+  "characters": [
+    { "id": "mp", "look": "plump Victorian MP: mutton-chop whiskers, dark frock coat, waistcoat, wide-brimmed hat (the hat he throws)" },
+    { "id": "member-a", "look": "thin committee member, grey hair, beard, black coat" },
+    { "id": "member-b", "look": "young committee member, red waistcoat" },
+    { "id": "bargeman", "look": "bargeman in shirt sleeves, kerchief, braces, wide hat" },
+    { "id": "bazalgette", "look": "Joseph Bazalgette: dark hair, big dark moustache and beard, dark coat (illustrative)" },
+    { "id": "clerk", "look": "Commons clerk with white wig, black gown" }
+  ],
+  "gags": [
+    { "line": 6, "what": "The bargeman tips a sack, the lime cloud puffs up into his face, he sneezes and falls back onto the sacks." },
+    { "line": 11, "what": "The returning hat rides the rising water to the window and slaps onto the MP's face." },
+    { "line": 12, "what": "The committee stampedes; chairs topple and three men jam in the doorway." }
+  ],
+  "story_numbers": [],
+  "format_note": "The MP is a composite, unnamed character; Hansard records the lime as the government's step, dramatised here as his order. The returning hat is story. The hat and lime sacks are drawn larger than life so they read on a phone. The glass tank is an explanatory model, not a historical object. The wet curtain in the committee room is set dressing (London Museum documents curtains soaked in chloride of lime in London generally)."
+}

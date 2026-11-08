@@ -1,0 +1,108 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a comic disaster with a twist, brisk and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.4
+    },
+    "mp": {
+      "voice": "Eric",
+      "instruct": "Pompous Victorian gentleman politician, loud, triumphant and very pleased with himself.",
+      "seed": 11,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "He just dumped a hundred tons of lime into the Thames."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And the river is about to send it back."
+    },
+    {
+      "speaker": "narrator",
+      "text": "London, eighteen fifty-eight. Thirty degrees, and the heat won't break."
+    },
+    {
+      "speaker": "narrator",
+      "text": "London's sewers empty into the river, right under Parliament's windows."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Members flee their own library."
+    },
+    {
+      "speaker": "mp",
+      "text": "Lime! Pour it into every sewer mouth!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Barges tip lime at the sewer mouths, and the brown water slides away."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He throws open the window and breathes in."
+    },
+    {
+      "speaker": "mp",
+      "text": "Gone! Good riddance, filthy river!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "He flings his stinking hat after it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then the tide turns.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "The river runs backward, and his hat floats right back."
+    },
+    {
+      "speaker": "narrator",
+      "text": "With everything else. The committee runs for the door."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Here's the catch. At Westminster, the Thames is tidal."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The sea pushes in, then drags out, over and over."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Whatever you pour in sloshes up and down under your nose. Lime can't fix that."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So engineer Joseph Bazalgette catches the sewage before the river."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Eighty-two miles of sewers carry it east, past the city."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Into a reservoir holding twenty-seven million gallons."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The gates open at high tide, and the ebb drags it out to sea."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Parliament passed the law in just eighteen days."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And the hat? It's still riding the tide."
+    }
+  ]
+}

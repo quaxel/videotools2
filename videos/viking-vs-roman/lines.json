@@ -1,0 +1,18 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Excited, warm, gripping documentary-comedy narrator opening a big story. Lively and punchy, a smile in the voice, no long pauses.",
+      "seed": 7,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "Viking or Roman." },
+    { "speaker": "narrator", "text": "Choose your daily life." },
+    { "speaker": "narrator", "text": "Pick the Viking, and your workplace is right outside your house." },
+    { "speaker": "narrator", "text": "Pick the Roman, and your base has a heated bathhouse." },
+    { "speaker": "narrator", "text": "Sounds good?" }
+  ]
+}

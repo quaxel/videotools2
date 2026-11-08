@@ -1,0 +1,44 @@
+{
+  "title": "The Coin That Wrote a Warning on Its Edge",
+  "topic": "The Coin That Wrote a Warning on Its Edge",
+  "mechanism": "Hand-hammered silver coins had ragged edges, so a clipped sliver went unseen; machine-struck coins carry a lettered edge (DECUS ET TUTAMEN), so one cut breaks the sentence and any thumb can feel the theft.",
+  "beats": {
+    "hook": "Scissors bite into a silver coin's rim, a sliver of silver flies at the lens; the clipper grins; the sliver drops into a jar with a clink.",
+    "story": "A 1690s London clipper snips slivers off ragged hammered coins in his candlelit garret and spends the coins at full value.",
+    "rise": "His jar of silver grows; he even jokes to a customer; the crier calls in the old coins, and he plans the same trick on the shiny new machine-struck ones.",
+    "twist": "The baker's thumb runs around the edge of his clipped new coin and stops at a gap: the lettering reads DECUS ET TUT. The door bangs open: men from the Mint. In the Tower, Isaac Newton waits.",
+    "mechanism": "Inside the Mint: an OLD HAMMERED coin with a ragged rim next to the MILL press and the EDGE DIE rolling DECUS ET TUTAMEN round the rim; a cut sliver leaves the sentence broken; thumbs become guards; the recoinage done in three years.",
+    "ending": "Today a modern ridged coin rolls out of a pocket and spins to a stop; final word: Safeguard. The last frames run back into the scissors of the first shot."
+  },
+  "seed": {
+    "what": "The Tower of London (where the Mint is) seen through the clipper's window, and the shiny new coin's lettered edge",
+    "first_line": 1
+  },
+  "locations": [
+    { "id": "garret", "set": "Room brick/wood, candle, window with painted Tower skyline", "colour": "amber" },
+    { "id": "table-macro", "set": "garret table macro (scissors, coin, jar)", "colour": "gold" },
+    { "id": "street", "set": "Room plaster/concrete daylight, timber facades, crier", "colour": "teal" },
+    { "id": "mint", "set": "Room stone/tile, furnace glow, screw press", "colour": "red" },
+    { "id": "bakery", "set": "Room wallpaper/tile, sun bars, bread counter", "colour": "cream yellow" },
+    { "id": "doorway", "set": "bakery re-lit cold as the Mint men burst in", "colour": "steel blue" },
+    { "id": "newton", "set": "Room panel/carpet, night, desk and scales in the Tower", "colour": "deep blue" },
+    { "id": "mechanism", "set": "Room plain/plain dream mood, giant coin on a turntable with labels", "colour": "purple" },
+    { "id": "today", "set": "Room tile/carpet modern bedroom, neon", "colour": "magenta" }
+  ],
+  "characters": [
+    { "id": "clipper", "look": "thin crook, dark stubble, brown coat, wide-brimmed hat" },
+    { "id": "crier", "look": "red coat, wide hat, white beard, bell" },
+    { "id": "baker", "look": "woman, long hair, apron and kerchief, flour-white sleeves" },
+    { "id": "customer", "look": "plump merchant in a green vest" },
+    { "id": "mintman", "look": "Mint officers in dark blue coats and hats" },
+    { "id": "newton", "look": "Isaac Newton: long white curled wig (long hair), dark coat, plain collar" },
+    { "id": "kid", "look": "modern kid in a hoodie (ending)" }
+  ],
+  "gags": [
+    { "line": 3, "what": "The jar overflows and silver dust puffs into the clipper's face; he sneezes." },
+    { "line": 9, "what": "The scissors skid off the ridged edge and snap shut on the clipper's thumb." },
+    { "line": 13, "what": "The door bangs open; the clipper dives under the counter and knocks over a tray of loaves." }
+  ],
+  "story_numbers": [],
+  "format_note": "Coins are drawn about 2-3x real size in macro shots so the edge lettering reads on a phone. The catch at the bakery is a dramatisation of why the lettered edge works, not a documented arrest."
+}

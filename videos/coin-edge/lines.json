@@ -1,0 +1,116 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a heist with a twist, brisk and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.3
+    },
+    "clipper": {
+      "voice": "Aiden",
+      "instruct": "Cocky, sly London crook, pleased with himself, quick and cheeky.",
+      "seed": 11,
+      "tempo": 1.15
+    },
+    "crier": {
+      "voice": "Dylan",
+      "instruct": "Loud town crier shouting across a market, booming and proud.",
+      "seed": 5,
+      "tempo": 1.15
+    },
+    "baker": {
+      "voice": "Vivian",
+      "instruct": "Sharp market baker, suspicious and then loudly outraged.",
+      "seed": 3,
+      "tempo": 1.15
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "He's cutting silver off the King's money."
+    },
+    {
+      "speaker": "narrator",
+      "text": "London. Coins are hammered by hand, so every edge is ragged."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So he snips a sliver off each one. Nobody notices a rough edge."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The clippings go in a jar. The coins go back out at full value."
+    },
+    {
+      "speaker": "clipper",
+      "text": "A little off the top, sir?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "His jar of silver gets heavier every week."
+    },
+    {
+      "speaker": "crier",
+      "text": "Bring in your old coins! By order of the Mint!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "It's sixteen ninety-six. In the Tower of London, the Mint strikes new coins by machine."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Shiny, round and perfect. Now picture a clipper who tries it anyway."
+    },
+    {
+      "speaker": "clipper",
+      "text": "New coin, same old scissors."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He trims one, and pays the baker."
+    },
+    {
+      "speaker": "narrator",
+      "text": "She runs her thumb around the edge, and stops."
+    },
+    {
+      "speaker": "baker",
+      "text": "Decus et tut? Where is the rest of it?",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "The door bangs open. Men from the Mint. And in the Tower, Isaac Newton waits."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Here's the trick. The new coins carry words around the rim."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Decus et tutamen. An ornament and a safeguard."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Cut one sliver, and the sentence breaks. Every thumb in London becomes a guard."
+    },
+    {
+      "speaker": "narrator",
+      "text": "A ragged coin hides a theft. A written edge confesses it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The Mint swapped out the old coins in just three years."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Feel the edge of a coin in your pocket. It's still standing guard."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Safeguard."
+    }
+  ]
+}

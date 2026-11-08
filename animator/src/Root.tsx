@@ -16,15 +16,22 @@ import { TransitionPreview } from "./scenes/TransitionPreview";
 import { VIDEOS } from "./videos";
 import { DESIGN_FRAMES, DogNoseDesign } from "./videos/dog-nose/Design";
 import { DESIGN_FRAMES as EAGLE_DESIGN_FRAMES, EagleVisionDesign } from "./videos/eagle-vision/Design";
+import { SHEET_FRAMES as VR_SHEET_FRAMES, VikingRomanSheet } from "./videos/viking-vs-roman/ModelSheet";
+import { GATE_FRAMES as VR_GATE_FRAMES, VikingRomanGate, VikingRomanGateStates, VikingRomanLit } from "./videos/viking-vs-roman/Tests";
 
 // Every video in src/videos/ becomes a composition named after its slug.
 export const Root: React.FC = () => (
   <>
     {VIDEOS.map((v) => (
-      <Composition key={v.slug} id={v.slug} component={v.Scene} durationInFrames={v.frames} fps={30} width={1080} height={1920} />
+      <Composition key={v.slug} id={v.slug} component={v.Scene} durationInFrames={v.frames} fps={30} width={v.size?.[0] ?? 1080} height={v.size?.[1] ?? 1920} />
     ))}
     <Composition id="DogNoseDesign" component={DogNoseDesign} durationInFrames={DESIGN_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="EagleVisionDesign" component={EagleVisionDesign} durationInFrames={EAGLE_DESIGN_FRAMES} fps={30} width={1080} height={1920} />
+    {/* viking-vs-roman (16:9 long form): design stills */}
+    <Composition id="VikingRomanSheet" component={VikingRomanSheet} durationInFrames={VR_SHEET_FRAMES} fps={30} width={1920} height={1080} />
+    <Composition id="VikingRomanLit" component={VikingRomanLit} durationInFrames={2} fps={30} width={1920} height={1080} />
+    <Composition id="VikingRomanGate" component={VikingRomanGate} durationInFrames={VR_GATE_FRAMES} fps={30} width={1920} height={1080} />
+    <Composition id="VikingRomanGateStates" component={VikingRomanGateStates} durationInFrames={3} fps={30} width={1920} height={1080} />
     <Composition id="FaceTour" component={FaceTour} durationInFrames={FACE_TOUR_STEP * 15} fps={30} width={1080} height={1920} />
     <Composition id="GestureTour" component={GestureTour} durationInFrames={GESTURE_TOUR_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="MoveTour" component={MoveTour} durationInFrames={MOVE_TOUR_FRAMES} fps={30} width={1080} height={1920} />
