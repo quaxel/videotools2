@@ -30,6 +30,16 @@ from urllib.parse import urlparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+
+# The Google client libraries live only in animator/.venv. Started with another python (e.g. `python3 server.py`),
+# re-run under the venv so "YouTube'a bağlan" doesn't fail later with "No module named 'google'".
+VENV_PY = os.path.join(ROOT, "animator", ".venv", "bin", "python")
+try:
+    import google_auth_oauthlib  # noqa: F401
+except ImportError:
+    if os.path.isfile(VENV_PY) and os.path.realpath(sys.executable) != os.path.realpath(VENV_PY):
+        os.execv(VENV_PY, [VENV_PY, os.path.abspath(__file__), *sys.argv[1:]])
+    sys.exit(f"Google kütüphaneleri yok: {VENV_PY} ile çalıştırın (README'ye bakın).")
 SECRETS = os.path.join(HERE, "secrets")
 CLIENT_SECRET = os.path.join(SECRETS, "client_secret.json")
 TOKEN = os.path.join(SECRETS, "token.json")
