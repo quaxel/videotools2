@@ -27,6 +27,18 @@
         "PORT=4310 npm --prefix ideation run dev"
       ],
       "port": 5173
+    },
+    {
+      "name": "salon-3d",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4320",
+        "--directory",
+        "salon-3d"
+      ],
+      "port": 4320
     }
   ]
 }

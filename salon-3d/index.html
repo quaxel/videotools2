@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Salon 3D</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1c1f; overflow: hidden; font-family: system-ui, sans-serif; }
+  canvas { display: block; }
+  #ui { position: fixed; left: 16px; top: 16px; display: flex; flex-wrap: wrap; gap: 6px; max-width: calc(100vw - 32px); }
+  #ui button { background: rgba(20,20,22,.72); color: #eee; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: 7px 11px; font-size: 13px; cursor: pointer; }
+  #ui button.on, #ui button:hover { background: rgba(255,255,255,.88); color: #111; }
+  #hint { position: fixed; left: 16px; bottom: 14px; color: rgba(255,255,255,.55); font-size: 12px; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="ui">
+  <button data-view="inside" class="on">İçeriden</button>
+  <button data-view="tv">TV duvarı</button>
+  <button data-view="dining">Yemek masası</button>
+  <button data-view="window">Pencere</button>
+  <button data-view="west">Kanepe duvarı</button>
+  <button data-view="door">Kapı</button>
+  <button data-view="top">Kuşbakışı</button>
+  <button data-view="doll">Maket</button>
+  <button id="lights">Lambalar</button>
+</div>
+<div id="hint">Sürükle: döndür · Sağ tık: kaydır · Tekerlek: yakınlaş</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { buildSalon, ROOM } from './salon.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1b1c1f);
+// soft studio environment so chrome and lacquer have something to reflect
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const salon = buildSalon();
+scene.add(salon.group);
+
+// ---- lighting: daylight through the south window + soft bounce
+scene.add(new THREE.HemisphereLight(0xf4f1ea, 0x8a6a4a, 0.55));
+const sun = new THREE.DirectionalLight(0xfff3e0, 2.6);
+sun.position.set(-1.5, 5.5, 9);
+sun.target.position.set(0, 0, 0);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -5; sun.shadow.camera.right = 5;
+sun.shadow.camera.top = 5; sun.shadow.camera.bottom = -5;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 20;
+sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.02;
+scene.add(sun, sun.target);
+// window glow (soft fill spreading off the sheers)
+const fill = new THREE.PointLight(0xf6f3ee, 4, 7, 1.6);
+fill.position.set(0.2, 1.6, ROOM.D / 2 - 0.5);
+scene.add(fill);
+const ambient = new THREE.AmbientLight(0xffffff, 0.0);
+scene.add(ambient);
+
+// interior lamps (toggle)
+const lamps = [];
+const ch = new THREE.PointLight(0xffe2b8, 0, 7, 1.8);
+ch.position.set(-0.2, ROOM.H - 0.4, 0.0); ch.castShadow = true; ch.shadow.mapSize.set(1024, 1024);
+lamps.push(ch);
+const fl1 = new THREE.PointLight(0xffd9a8, 0, 4, 2); fl1.position.set(ROOM.W / 2 - 0.28, 2.1, -ROOM.D / 2 + 0.18); lamps.push(fl1);
+const fl2 = new THREE.PointLight(0xffd9a8, 0, 4, 2); fl2.position.set(-ROOM.W / 2 + 0.75, 1.5, ROOM.D / 2 - 0.38); lamps.push(fl2);
+lamps.forEach((l) => scene.add(l));
+let lampsOn = false;
+document.getElementById('lights').onclick = (e) => {
+  lampsOn = !lampsOn;
+  e.target.classList.toggle('on', lampsOn);
+  ch.intensity = lampsOn ? 6 : 0; fl1.intensity = fl2.intensity = lampsOn ? 3 : 0;
+  sun.intensity = lampsOn ? 0.6 : 2.6; fill.intensity = lampsOn ? 0.8 : 4;
+  salon.materials.screen.emissiveIntensity = lampsOn ? 0.7 : 0.35;
+};
+
+// ---- camera + controls
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.05, 100);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+
+const { W, D, H } = ROOM;
+const VIEWS = {
+  inside: { pos: [-1.3, 1.55, 1.1], target: [1.0, 1.1, -1.6] },
+  tv:     { pos: [0.3, 1.5, 1.3], target: [0.3, 1.0, -D / 2] },
+  dining: { pos: [-1.3, 1.6, -0.3], target: [W / 2, 0.8, -0.4] },
+  window: { pos: [-0.2, 1.5, -1.2], target: [0.2, 1.1, D / 2] },
+  west:   { pos: [1.4, 1.5, -0.2], target: [-W / 2, 1.0, 0.0] },
+  door:   { pos: [0.8, 1.5, 1.0], target: [-1.6, 1.1, -D / 2] },
+  top:    { pos: [0.01, 10.5, 0.3], target: [0, 0, 0] },
+  doll:   { pos: [5.8, 6.2, 6.0], target: [0, 0.6, 0] },
+};
+let tween = null;
+function go(name, instant = false) {
+  const v = VIEWS[name];
+  const to = { pos: new THREE.Vector3(...v.pos), target: new THREE.Vector3(...v.target) };
+  if (instant) { camera.position.copy(to.pos); controls.target.copy(to.target); controls.update(); return; }
+  tween = { from: { pos: camera.position.clone(), target: controls.target.clone() }, to, t: 0 };
+  document.querySelectorAll('#ui [data-view]').forEach((b) => b.classList.toggle('on', b.dataset.view === name));
+}
+document.querySelectorAll('#ui [data-view]').forEach((b) => (b.onclick = () => go(b.dataset.view)));
+go(new URLSearchParams(location.search).get('view') || 'inside', true);
+window.salonView = (n) => go(n, true); // for screenshots / debugging
+window.salon = salon; window.camera = camera; window.controls = controls; window.THREE = THREE;
+
+// ---- hide walls (and ceiling) that stand between the camera and the room
+const inward = { N: new THREE.Vector3(0, 0, 1), S: new THREE.Vector3(0, 0, -1), E: new THREE.Vector3(-1, 0, 0), W: new THREE.Vector3(1, 0, 0) };
+const planeAt = { N: -D / 2, S: D / 2, E: W / 2, W: -W / 2 };
+function cullWalls() {
+  const p = camera.position;
+  salon.walls.N.visible = p.z > planeAt.N - 0.05;
+  salon.walls.S.visible = p.z < planeAt.S + 0.05;
+  salon.walls.E.visible = p.x < planeAt.E + 0.05;
+  salon.walls.W.visible = p.x > planeAt.W + 0.05;
+  for (const o of salon.overhead) o.visible = p.y < H;
+}
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+  if (tween) {
+    tween.t = Math.min(1, tween.t + dt / 1.1);
+    const e = tween.t < 0.5 ? 4 * tween.t ** 3 : 1 - (-2 * tween.t + 2) ** 3 / 2;
+    camera.position.lerpVectors(tween.from.pos, tween.to.pos, e);
+    controls.target.lerpVectors(tween.from.target, tween.to.target, e);
+    if (tween.t >= 1) tween = null;
+  }
+  controls.update();
+  cullWalls();
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
