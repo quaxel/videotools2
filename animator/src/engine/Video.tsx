@@ -21,7 +21,11 @@ export type Timing = {
 // `framing`: the smoothed head-framing corrections written by `pipeline.py framing` (public/videos/<slug>/framing.json),
 // per shot start, then per shot frame (from that shot's first logged frame `f0`).
 export type FramingTable = Record<string, { f0: number; d: FramingDelta[] }>;
-const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean; post: boolean; framing: FramingTable | null } | null>(null);
+const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boolean; post: boolean | Partial<PostParts>; framing: FramingTable | null } | null>(null);
+
+// The look (lighting, post chain) for compositions that are not a Video: design boards and tests of a production
+// wrap their shots in it so their stills match the video without --props.
+export const LookContext = createContext<{ lighting?: boolean; post?: boolean | Partial<PostParts> } | null>(null);
 
 // The framing table for this video, if the pipeline wrote one (null while loading or when there is none).
 const useFramingTable = (slug: string) => {
@@ -46,9 +50,10 @@ const useFramingTable = (slug: string) => {
 // `voiceVolume` (default 1) lifts or lowers the narration when the mix lands outside the loudness target.
 // `score` (default off): play the video's own score (public/videos/<slug>/music.wav, written by `pipeline.py music`)
 // instead of the `music` cues; the `score` input prop overrides it for an A/B of the soundtrack.
+// `captions` (default on): the burned-in Shorts captions; long-form 16:9 videos turn them off.
 // `post` (default off): the post chain (engine/post: depth of field, bloom, colour grade) on every
-// Stage. Videos made before it existed leave it off to keep their look.
-export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean; score?: boolean; voiceVolume?: number }> = ({
+// Stage; `true`, or the parts to change, e.g. `{ lens: false }`. Videos made before it existed leave it off to keep their look.
+export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean | Partial<PostParts>; score?: boolean; voiceVolume?: number; captions?: boolean }> = ({
   slug,
   timing,
   shots,
@@ -58,6 +63,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   post = false,
   score = false,
   voiceVolume = 1,
+  captions = true,
 }) => {
   const framing = useFramingTable(slug);
   // `soundOnly` (input prop, scripts/sound.mjs): the soundtrack alone, without mounting a single 3D shot.
@@ -79,7 +85,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
     {/* `stem` (input prop, `pipeline.py mix`): one part of the soundtrack alone, at its mix gain (the stems sum to the mix) */}
     {(!stem || stem === "voice") && <Audio src={staticFile(`videos/${slug}/voice.wav`)} volume={voiceVolume} />}
     <SoundTrack sfx={!stem || stem === "sfx" ? sfx : []} music={!stem || stem === "music" ? bed : []} captions={timing.captions} total={timing.totalFrames} />
-    <Captions chunks={timing.captions} />
+    {captions && <Captions chunks={timing.captions} />}
   </AbsoluteFill>
   );
 };
@@ -98,7 +104,8 @@ export const useFramingFor = (start: number, f: number): FramingDelta | undefine
 export const useLighting = () => {
   const override = (getInputProps() as { lighting?: boolean }).lighting;
   const video = useContext(VideoContext);
-  return override ?? video?.lighting ?? false;
+  const look = useContext(LookContext);
+  return override ?? video?.lighting ?? look?.lighting ?? false;
 };
 
 // Which parts of the post chain this video's Stages run, or null for none. The `post` input prop overrides the
@@ -108,8 +115,9 @@ export const useLighting = () => {
 export const usePost = (): PostParts | null => {
   const props = getInputProps() as { post?: boolean | Partial<PostParts>; framingPass?: boolean; soundOnly?: boolean; collide?: boolean };
   const video = useContext(VideoContext);
+  const look = useContext(LookContext);
   if (props.framingPass || props.soundOnly || props.collide) return null;
-  const on = props.post ?? video?.post ?? false;
+  const on = props.post ?? video?.post ?? look?.post ?? false;
   return on ? { ...ALL_PARTS, ...(typeof on === "object" ? on : {}) } : null;
 };
 

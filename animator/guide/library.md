@@ -249,8 +249,8 @@ already 2× supersampled). The sets keep only their own hull outlines:
   infinity = `blur` × 3 px), focused on the nearest puppet's head (else the camera target); no `blur`, no lens.
 - **Bloom**: only on emissives brighter than white (threshold 1.0, so white labels never glow). Lit puppets are
   capped at white in `PuppetBillboard.tsx`'s shader, so faces never bloom; fire, lamps and headlights do.
-- **Grade** (`grade.ts`): a strong S-curve, rich mids and highlights, cool shadows against warm highlights and the oval vignette,
-  at `GRADE_STRENGTH` 1.6 (×1.6 the base preset's distance from neutral; the vignette is not scaled); it replaces
+- **Grade** (`grade.ts`): a strong S-curve, rich mids and highlights, cool shadows against warm highlights and the oval vignette
+  (strength 0.3, halved on 2026-11-06; `{ vignette: k }` in `post` scales it per video), at `GRADE_STRENGTH` 1.6 (×1.6 the base preset's distance from neutral; the vignette is not scaled); it replaces
   Stage's CSS `saturate/contrast` filter and radial vignette. Paper grain, `truth` and `flash` stay as they were.
 - Off in the framing pre-pass, `collide` and the soundtrack render. Renders are ~2-3× slower with it on.
 - A/B stills: `POST=0 pipeline.py stills <slug>` (or `POST=1` for an older video), `POST='{"lens":false}'` to switch

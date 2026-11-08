@@ -303,7 +303,7 @@ export const surfaceY = (x: number, z: number, frame: number, w: WaterState) => 
   return y;
 };
 
-const RiverWater: React.FC<{ frame: number; m: Mood; w: WaterState; debris: boolean }> = ({ frame, m, w, debris }) => {
+export const RiverWater: React.FC<{ frame: number; m: Mood; w: WaterState; debris: boolean }> = ({ frame, m, w, debris }) => {
   const width = RIVER.half * 2 + 3;
   const geo = useOwned(() => {
     const g = new THREE.PlaneGeometry(width, 150, 70, 300);

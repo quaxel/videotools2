@@ -85,7 +85,7 @@ export const Grade: React.FC<{ truth?: number; flash?: number; vignette?: boolea
   <>
     <AbsoluteFill style={{ backgroundImage: GRAIN, backgroundSize: "256px 256px", mixBlendMode: "overlay", opacity: 0.35 }} />
     {truth > 0 && <AbsoluteFill style={{ backgroundColor: `rgba(30,70,180,${0.45 * truth})`, mixBlendMode: "multiply" }} />}
-    {vignette && <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(10,0,4,0.55) 100%)" }} />}
+    {vignette && <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(10,0,4,0.275) 100%)" }} />}
     {flash > 0 && <AbsoluteFill style={{ backgroundColor: `rgba(255,250,235,${flash})` }} />}
   </>
 );

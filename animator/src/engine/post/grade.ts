@@ -94,7 +94,7 @@ const BASE: GradeParams = {
   tintS: [0.04, 0.006],
   tintM: [0, 0],
   tintH: [-0.02, 0.014],
-  vig: [0.6, 0.45],
+  vig: [0.3, 0.45], // half the original 0.6: edges half as dark (user, 2026-11-06)
 };
 
 /** `p` pushed `k` times as far from neutral: the curve's distance from the diagonal, saturation above 1 and the
@@ -114,6 +114,9 @@ export const scaleGrade = (p: GradeParams, k: number): GradeParams => {
 // How strong the grade is, relative to BASE (1.6 chosen on the post-compare stills, 2026-11-02).
 export const GRADE_STRENGTH = 1.6;
 export const GRADE: GradeParams = scaleGrade(BASE, GRADE_STRENGTH);
+
+/** The same grade with its vignette strength scaled by `k` (0.5 = half as dark at the edges). */
+export const withVignette = (p: GradeParams, k: number): GradeParams => (k === 1 ? p : { ...p, vig: [p.vig[0] * k, p.vig[1]] });
 
 export class GradeEffect extends Effect {
   constructor(p: GradeParams = GRADE) {

@@ -11,9 +11,10 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { BlendFunction, BloomEffect, EffectComposer, EffectPass, RenderPass } from "postprocessing";
 import { InkPass } from "./ink";
 import { LensBlur } from "./lens";
-import { GradeEffect } from "./grade";
+import { GRADE, GradeEffect, withVignette } from "./grade";
 
-export type PostParts = { ink: boolean; lens: boolean; bloom: boolean; grade: boolean };
+// `vignette` scales the grade's edge darkening (default 1 = the approved look, already half the original).
+export type PostParts = { ink: boolean; lens: boolean; bloom: boolean; grade: boolean; vignette?: number };
 export const ALL_PARTS: PostParts = { ink: false, lens: true, bloom: true, grade: true };
 
 // Bloom for emissive sources only (threshold 1.0: white label boards and screens must not glow). Its mip chain is sized from a 1920-high frame whatever the buffer, so the glow
@@ -40,7 +41,7 @@ export const Post: React.FC<{ parts: PostParts; focus: number; cInf: number; ink
     const composer = new EffectComposer(gl, { frameBufferType: THREE.HalfFloatType, multisampling: 0 });
     const ink = parts.ink ? new InkPass(scene, camera) : null;
     const lens = parts.lens ? new LensBlur() : null;
-    const effects = [parts.bloom ? makeBloom() : null, parts.grade ? new GradeEffect() : null].filter((e) => e !== null);
+    const effects = [parts.bloom ? makeBloom() : null, parts.grade ? new GradeEffect(withVignette(GRADE, parts.vignette ?? 1)) : null].filter((e) => e !== null);
     composer.addPass(new RenderPass(scene, camera));
     if (ink) composer.addPass(ink);
     if (lens) {
@@ -51,7 +52,7 @@ export const Post: React.FC<{ parts: PostParts; focus: number; cInf: number; ink
     // Set now, not in an effect: Remotion draws the first frame before this component's effects run.
     fitToRenderer(composer);
     return { composer, ink, lens };
-  }, [gl, scene, camera, parts.ink, parts.lens, parts.bloom, parts.grade]);
+  }, [gl, scene, camera, parts.ink, parts.lens, parts.bloom, parts.grade, parts.vignette]);
   // Free every render target with the shot: a render tab keeps finished shots' contexts alive.
   useEffect(() => () => chain.composer.dispose(), [chain]);
   useEffect(() => fitToRenderer(chain.composer), [chain, size.width, size.height]);

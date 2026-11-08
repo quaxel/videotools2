@@ -53,16 +53,26 @@ export type PuppetLook = {
   beard?: string; // full short beard round the jaw (the mouth shows over it)
   vest?: string; // waistcoat over the shirt (the outfit colour shows down the front)
   suspenders?: string; // braces over the shoulders
-  hatStyle?: "wide" | "bowler" | "boater" | "helmet" | "stahl" | "crown" | "shako"; // shape of `hat`: wide felt brim (default), round bowler, flat straw boater, WWII M1 steel helmet, flared coal-scuttle helmet, a king's gold crown (sits on the hair), a palace guard's tall plumed shako
+  hatStyle?: "wide" | "bowler" | "boater" | "helmet" | "stahl" | "crown" | "shako" | "galea"; // shape of `hat`: wide felt brim (default), round bowler, flat straw boater, WWII M1 steel helmet, flared coal-scuttle helmet, a king's gold crown (sits on the hair), a palace guard's tall plumed shako, a Roman auxiliary helmet (bowl, brow guard, cheek pieces, neck guard)
   shorts?: string; // athletic shorts to mid-thigh (runners)
   bib?: string; // race number on a white cloth bib, front and back (e.g. "31")
   pants?: string; // trouser colour: a coloured leg inside the ink outline (default: plain ink legs)
   shoes?: string; // shoe colour: a coloured sneaker inside the ink outline
   iris?: string; // iris colour: a coloured ring round the pupil (default: plain black dots); pose `gold` turns it glowing gold
+  // Early-medieval and Roman dress (Viking farmer, Roman auxiliary). All opt-in.
+  build?: "broad" | "narrow"; // torso and shoulder width: a broad, barrel-chested build or a narrow, upright one
+  tunic?: boolean; // knee-length tunic below the body, in the outfit colour, with a darker hem band
+  patch?: string; // a mended patch on the tunic (needs `tunic`)
+  belt?: string; // narrow leather belt at the waist with a pouch and a sheathed work knife
+  wraps?: string; // cloth leg wraps round the shins
+  mail?: string; // mail shirt (metal colour) to the hips, with doubled shoulder flaps
+  cloak?: string; // wool cloak hanging behind the shoulders, pinned with a brooch at the puppet's L shoulder
+  tied?: boolean; // hair tied back in a short tail at the nape
+  stubble?: string; // a faint short-stubble shadow round the jaw
 };
 
 // Pants and shoe colours reach every Leg and Foot through context, so the front, side and back views share them.
-const WearCtx = React.createContext<{ pants?: string; shoes?: string }>({});
+const WearCtx = React.createContext<{ pants?: string; shoes?: string; wraps?: string }>({});
 
 export type PuppetPose = {
   expression: Expression;
@@ -225,6 +235,7 @@ const HatFront: React.FC<{ color: string; uid: string; style?: PuppetLook["hatSt
   if (style === "stahl") return <Helmet color={color} uid={uid} d={STAHL_FRONT_D} rim="M -214 -902 Q 0 -936 214 -902" />;
   if (style === "crown") return <Crown color={color} uid={uid} />;
   if (style === "shako") return <Shako color={color} uid={uid} />;
+  if (style === "galea") return <GaleaFront color={color} uid={uid} />;
   const crown = style === "bowler" ? BOWLER_CROWN_D : style === "boater" ? BOATER_CROWN_D : HAT_CROWN_D;
   const brim = style === "bowler" ? 222 : style === "boater" ? 262 : 292;
   return (
@@ -254,6 +265,165 @@ const Bib: React.FC<{ text: string; x?: number; w?: number }> = ({ text, x = 0, 
 
 const SHORTS_D = "M -128 -310 L 128 -310 L 140 -168 L 22 -168 L 0 -226 L -22 -168 L -140 -168 Z";
 const SIDE_SHORTS_D = "M -112 -310 L 112 -310 L 126 -176 L -108 -176 Z";
+
+// ---------- Early-medieval and Roman dress ----------
+
+// Body width factor for `build`.
+const buildW = (look: PuppetLook) => (look.build === "broad" ? 1.14 : look.build === "narrow" ? 0.9 : 1);
+
+// Knee-length tunic skirt: from the waist, flaring a little, hem at `hem` (knees are at about -147).
+const TUNIC_D = (hem: number, w = 1) =>
+  `M ${-150 * w} -390 C ${-170 * w} -320 ${-188 * w} ${hem - 50} ${-198 * w} ${hem} Q 0 ${hem + 20} ${198 * w} ${hem} C ${188 * w} ${hem - 50} ${170 * w} -320 ${150 * w} -390 Z`;
+const SIDE_TUNIC_D = (hem: number, w = 1) =>
+  `M ${-122 * w} -390 C ${-142 * w} -320 ${-160 * w} ${hem - 50} ${-170 * w} ${hem} Q 8 ${hem + 18} ${178 * w} ${hem} C ${166 * w} ${hem - 50} ${148 * w} -320 ${128 * w} -390 Z`;
+
+const Tunic: React.FC<{ look: PuppetLook; uid: string; hem: number; side?: boolean; back?: boolean }> = ({ look, uid, hem, side, back }) => {
+  const w = buildW(look);
+  const d = side ? SIDE_TUNIC_D(hem, w) : TUNIC_D(hem, w);
+  const band = side ? 168 * w : 192 * w;
+  return (
+    <g>
+      <Inked d={d} fill={look.outfit} uid={uid} name="tunic" />
+      {/* a woven band along the hem */}
+      <path d={`M ${-band + (side ? 4 : 0)} ${hem - 22} Q ${side ? 8 : 0} ${hem - 2} ${band} ${hem - 22}`} fill="none" stroke={SHADE} strokeWidth={14} opacity={0.32} />
+      {/* fold lines falling from the belt */}
+      <path d={`M ${-60 * w} -320 L ${-80 * w} ${hem + 2} M ${50 * w} -320 L ${74 * w} ${hem + 4}`} fill="none" stroke={SHADE} strokeWidth={6} opacity={0.22} strokeLinecap="round" />
+      {look.patch && !back && (
+        <g transform={`translate(${side ? 70 : -96 * w} ${hem - 74}) rotate(-6)`}>
+          <rect x={-38} y={-30} width={76} height={58} rx={8} fill={look.patch} stroke={INK} strokeWidth={7} />
+          <rect x={-28} y={-20} width={56} height={38} rx={5} fill="none" stroke={INK} strokeWidth={4} strokeDasharray="7 7" opacity={0.6} />
+        </g>
+      )}
+    </g>
+  );
+};
+
+// Narrow leather belt with a small buckle, a pouch hanging on the L side and a work knife in its sheath on the R.
+const Belt: React.FC<{ color: string; w: number; side?: boolean; back?: boolean }> = ({ color, w, side, back }) => {
+  const x = side ? 132 * w : 160 * w;
+  const xl = side ? -128 * w : -160 * w;
+  return (
+    <g>
+      <Strap d={`M ${xl} -338 Q ${side ? 0 : 0} ${side ? -326 : -322} ${x} -338`} color={color} w={20} />
+      {!back && !side && <rect x={-20} y={-352} width={40} height={30} rx={5} fill="#c9a24a" stroke={INK} strokeWidth={6} />}
+      {!side && (
+        <g transform={`translate(${(back ? 1 : -1) * 104 * w} -322)`}>
+          <path d="M -34 0 L 34 0 L 30 70 Q 0 84 -30 70 Z" fill={color} stroke={INK} strokeWidth={7} strokeLinejoin="round" />
+          <path d="M -34 0 Q 0 30 34 0" fill="none" stroke={INK} strokeWidth={5} />
+        </g>
+      )}
+      <g transform={`translate(${side ? -60 : (back ? -1 : 1) * 108 * w} -330) rotate(${side ? 18 : (back ? 14 : -14)})`}>
+        <rect x={-9} y={-40} width={18} height={34} rx={4} fill="#5a3a24" stroke={INK} strokeWidth={6} />
+        <path d="M -16 -6 L 16 -6 L 10 104 Q 0 120 -10 104 Z" fill={color} stroke={INK} strokeWidth={7} strokeLinejoin="round" />
+        <path d="M -6 10 L 6 10" stroke={INK} strokeWidth={4} opacity={0.5} />
+      </g>
+    </g>
+  );
+};
+
+// Mail shirt: a ring texture you can read at a distance (rows of small arcs), doubled shoulder flaps, hip-length hem.
+const MAIL_D = "M -160 -586 C -186 -440 -182 -300 -158 -214 Q 0 -196 158 -214 C 182 -300 186 -440 160 -586 C 122 -652 -122 -652 -160 -586 Z";
+const SIDE_MAIL_D = "M -130 -586 C -154 -440 -150 -300 -130 -220 Q 0 -206 132 -220 C 152 -300 160 -440 136 -586 C 100 -654 -100 -654 -130 -586 Z";
+const MailPattern: React.FC<{ id: string; color: string }> = ({ id, color }) => (
+  <pattern id={id} width={28} height={22} patternUnits="userSpaceOnUse">
+    <rect width={28} height={22} fill={color} />
+    <path d="M 2 8 Q 8 16 14 8 M 16 19 Q 22 27 28 19 M -12 19 Q -6 27 0 19" fill="none" stroke={INK} strokeWidth={3} opacity={0.32} />
+    <path d="M 4 7 Q 8 4 12 7" fill="none" stroke="#fff" strokeWidth={2.5} opacity={0.35} />
+  </pattern>
+);
+const Mail: React.FC<{ color: string; uid: string; side?: boolean }> = ({ color, uid, side }) => {
+  const d = side ? SIDE_MAIL_D : MAIL_D;
+  const pid = `${uid}-mailtex`;
+  return (
+    <g>
+      <defs>
+        <MailPattern id={pid} color={color} />
+      </defs>
+      <path d={d} fill={`url(#${pid})`} stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
+      <Cel uid={uid} name="mail" d={d} />
+      {/* a slight shine down the chest */}
+      <path d={side ? "M 60 -560 Q 96 -440 84 -300" : "M -70 -560 Q -96 -440 -84 -300"} fill="none" stroke="#fff" strokeWidth={26} strokeLinecap="round" opacity={0.14} />
+      {/* doubled shoulder flaps */}
+      {side ? (
+        <path d="M -70 -648 Q 40 -676 120 -630 L 126 -548 Q 30 -566 -80 -556 Z" fill={`url(#${pid})`} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
+      ) : (
+        [-1, 1].map((s) => (
+          <path key={s} d={`M ${s * 40} -640 Q ${s * 150} -660 ${s * 178} -588 L ${s * 170} -536 Q ${s * 110} -556 ${s * 50} -560 Z`} fill={`url(#${pid})`} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
+        ))
+      )}
+    </g>
+  );
+};
+
+// Wool cloak hanging behind the shoulders (front and side: it shows round the edges of the body; back: it covers it).
+const CloakBehind: React.FC<{ color: string; uid: string; w: number; hem: number; side?: boolean }> = ({ color, uid, w, hem, side }) => {
+  const d = side
+    ? `M -60 -640 C -150 -600 -200 -420 -226 ${hem} Q -150 ${hem + 16} -40 ${hem - 6} C -60 -400 -70 -520 -60 -640 Z`
+    : `M ${-140 * w} -640 C ${-200 * w} -560 ${-224 * w} -380 ${-232 * w} ${hem} Q 0 ${hem + 26} ${232 * w} ${hem} C ${224 * w} -380 ${200 * w} -560 ${140 * w} -640 Z`;
+  return <Inked d={d} fill={color} uid={uid} name="cloakb" />;
+};
+const CLOAK_BACK_D = (w: number, hem: number) =>
+  `M ${-150 * w} -628 C ${-210 * w} -560 ${-236 * w} -380 ${-244 * w} ${hem} Q 0 ${hem + 30} ${244 * w} ${hem} C ${236 * w} -380 ${210 * w} -560 ${150 * w} -628 Q 0 -662 ${-150 * w} -628 Z`;
+// The cloak's pinned edge over the L shoulder, with a round brooch.
+const CloakPin: React.FC<{ color: string; w: number }> = ({ color, w }) => (
+  <g>
+    <path d={`M ${-176 * w} -580 Q ${-150 * w} -650 ${-40 * w} -628 L ${-60 * w} -560 Q ${-130 * w} -560 ${-176 * w} -520 Z`} fill={color} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
+    <circle cx={-82 * w} cy={-596} r={24} fill="#c9a24a" stroke={INK} strokeWidth={7} />
+    <circle cx={-82 * w} cy={-596} r={9} fill={INK} opacity={0.5} />
+  </g>
+);
+
+// Roman auxiliary helmet: a rounded bowl with a brow guard, hinged cheek pieces and a flared neck guard.
+const GALEA_FRONT_D = "M -222 -878 C -232 -1010 -146 -1078 0 -1080 C 146 -1078 232 -1010 222 -878 Q 0 -910 -222 -878 Z";
+const GaleaFront: React.FC<{ color: string; uid: string; back?: boolean }> = ({ color, uid, back }) => (
+  <g>
+    {/* the neck guard flares out below the bowl */}
+    {back && <path d="M -236 -870 Q 0 -900 236 -870 L 258 -790 Q 0 -760 -258 -790 Z" fill={color} stroke={INK} strokeWidth={9} strokeLinejoin="round" />}
+    <Inked d={GALEA_FRONT_D} fill={color} uid={uid} name="galea" />
+    {/* brow guard and the knob on the crown */}
+    <path d="M -214 -906 Q 0 -944 214 -906" fill="none" stroke={INK} strokeWidth={9} opacity={0.5} strokeLinecap="round" />
+    <path d="M -150 -1006 Q 0 -1046 150 -1006" fill="none" stroke={INK} strokeWidth={6} opacity={0.3} />
+    <circle cx={0} cy={-1086} r={20} fill={color} stroke={INK} strokeWidth={7} />
+    <path d="M -110 -1030 Q -40 -1062 40 -1058" fill="none" stroke="#fff" strokeWidth={20} strokeLinecap="round" opacity={0.25} />
+    {/* cheek pieces down the sides of the face */}
+    {!back &&
+      [-1, 1].map((s) => (
+        <path key={s} d={`M ${s * 152} -900 L ${s * 222} -896 Q ${s * 226} -780 ${s * 192} -690 Q ${s * 166} -676 ${s * 148} -706 Q ${s * 160} -790 ${s * 152} -900 Z`} fill={color} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
+      ))}
+    {!back && [-1, 1].map((s) => <circle key={`r${s}`} cx={s * 186} cy={-780} r={7} fill={INK} opacity={0.5} />)}
+  </g>
+);
+const GALEA_SIDE_D = "M -200 -872 C -206 -1024 -108 -1084 30 -1084 C 172 -1082 238 -1006 232 -880 Q 20 -908 -200 -872 Z";
+const GaleaSide: React.FC<{ color: string; uid: string }> = ({ color, uid }) => (
+  <g>
+    <path d="M -196 -884 L -292 -800 Q -250 -780 -186 -812 Z" fill={color} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
+    <Inked d={GALEA_SIDE_D} fill={color} uid={uid} name="galea" />
+    <path d="M 224 -900 Q 20 -936 -190 -896" fill="none" stroke={INK} strokeWidth={9} opacity={0.5} strokeLinecap="round" />
+    <circle cx={30} cy={-1090} r={20} fill={color} stroke={INK} strokeWidth={7} />
+    <path d="M -100 -1036 Q -20 -1068 80 -1060" fill="none" stroke="#fff" strokeWidth={20} strokeLinecap="round" opacity={0.25} />
+  </g>
+);
+// Drawn after the ear: the cheek piece over the side of the face.
+const GaleaCheek: React.FC<{ color: string }> = ({ color }) => (
+  <g>
+    <path d="M 20 -900 L 120 -898 Q 130 -790 104 -690 Q 70 -668 40 -700 Q 30 -800 20 -900 Z" fill={color} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
+    <circle cx={72} cy={-790} r={7} fill={INK} opacity={0.5} />
+  </g>
+);
+
+// Hair tied back: a short tail at the nape with a cord round it.
+const TiedTail: React.FC<{ hair: string; side?: boolean }> = ({ hair, side }) =>
+  side ? (
+    <g>
+      <path d="M -170 -860 C -230 -840 -250 -760 -236 -690 C -214 -700 -196 -740 -184 -790 Z" fill={hair} stroke={INK} strokeWidth={10} strokeLinejoin="round" />
+      <path d="M -196 -840 L -170 -812" stroke="#5a3a24" strokeWidth={16} strokeLinecap="round" />
+    </g>
+  ) : (
+    <g>
+      <path d="M -40 -760 C -50 -700 -30 -640 0 -620 C 30 -640 50 -700 40 -760 Z" fill={hair} stroke={INK} strokeWidth={10} strokeLinejoin="round" />
+      <path d="M -36 -742 L 36 -742" stroke="#5a3a24" strokeWidth={16} strokeLinecap="round" />
+    </g>
+  );
 
 // How loose hair hangs for `hair`: it swings from the crown and its ends float up (or drop) with `lift`.
 const hairMove = (h: PuppetPose["hair"], k = 1) => {
@@ -359,23 +529,41 @@ const knee = (hx: number, hy: number, fx: number, fy: number, kx: number, ky: nu
   return cand.sort((p, q) => (q[0] - hx) * kx + (q[1] - hy) * ky - ((p[0] - hx) * kx + (p[1] - hy) * ky))[0];
 };
 const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number }> = ({ pts, foot, footScale }) => {
-  const { pants } = React.useContext(WearCtx);
+  const { pants, wraps } = React.useContext(WearCtx);
   const d = pts.map((p) => p.join(",")).join(" ");
+  // Leg wraps: the shin (knee to ankle) a little thicker, in the wrap colour, with bands where the cloth overlaps.
+  const shin = pts.length > 2 ? `${lerp2(pts[1], pts[2], 0.08).join(",")} ${lerp2(pts[1], pts[2], 0.9).join(",")}` : "";
   return (
     <g>
       <polyline points={d} fill="none" stroke={INK} strokeWidth={LIMB} strokeLinecap="round" strokeLinejoin="round" />
       {pants && <polyline points={d} fill="none" stroke={pants} strokeWidth={LIMB - 10} strokeLinecap="round" strokeLinejoin="round" />}
+      {wraps && shin && (
+        <g>
+          <polyline points={shin} fill="none" stroke={INK} strokeWidth={LIMB + 12} strokeLinecap="round" />
+          <polyline points={shin} fill="none" stroke={wraps} strokeWidth={LIMB - 2} strokeLinecap="round" />
+          <polyline points={shin} fill="none" stroke={INK} strokeWidth={LIMB - 2} strokeDasharray="4 18" opacity={0.35} />
+        </g>
+      )}
       <Foot x={foot[0]} y={foot[1]} scale={footScale} />
     </g>
   );
 };
 // Straight back-view leg (a line from the hip), with the pants colour inside the outline.
 const BackLeg: React.FC<{ x1: number; y1: number; x2: number; y2: number }> = ({ x1, y1, x2, y2 }) => {
-  const { pants } = React.useContext(WearCtx);
+  const { pants, wraps } = React.useContext(WearCtx);
+  const [mx, my] = lerp2([x1, y1], [x2, y2], 0.54);
+  const [ex, ey] = lerp2([x1, y1], [x2, y2], 0.95);
   return (
     <>
       <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={INK} strokeWidth={LIMB} strokeLinecap="round" />
       {pants && <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={pants} strokeWidth={LIMB - 10} strokeLinecap="round" />}
+      {wraps && (
+        <>
+          <line x1={mx} y1={my} x2={ex} y2={ey} stroke={INK} strokeWidth={LIMB + 12} strokeLinecap="round" />
+          <line x1={mx} y1={my} x2={ex} y2={ey} stroke={wraps} strokeWidth={LIMB - 2} strokeLinecap="round" />
+          <line x1={mx} y1={my} x2={ex} y2={ey} stroke={INK} strokeWidth={LIMB - 2} strokeDasharray="4 18" opacity={0.35} />
+        </>
+      )}
     </>
   );
 };
@@ -947,14 +1135,15 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
   const sh = -280 + (-265 + slump * 22) * k; // shoulder height
   const headDrop = slump * 34 + 520 * (1 - k);
   const head = `translate(0 ${headDrop}) rotate(${pose.headTilt ?? 0} 0 -640) translate(0 -800) scale(${1 + 0.18 * bend}) translate(0 800)`;
-  const torso = `translate(0 -280) scale(${1 + 0.06 * bend} ${k}) translate(0 280)`;
+  const bw = buildW(look);
+  const torso = `translate(0 -280) scale(${(1 + 0.06 * bend) * bw} ${k}) translate(0 280)`;
   const seat = pose.sit ? 1 : Math.max(0, Math.min(1, pose.seat ?? 0));
   const arm = (side: "L" | "R") => {
     const s = side === "L" ? -1 : 1;
     const held = pose.hold?.hand === side;
     return (
       <Arm
-        x={s * 130}
+        x={s * 130 * bw}
         y={sh}
         side={s}
         angles={side === "L" ? armL : armR}
@@ -1020,7 +1209,9 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             <Cel uid={patternId} name="hairb" d={FRONT_LONG_D} />
           </g>
         )}
+        {look.cloak && <CloakBehind color={look.cloak} uid={patternId} w={bw} hem={-300} />}
         {look.shorts && <Inked d={SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
+        {look.tunic && <Tunic look={look} uid={patternId} hem={-176} />}
         {/* A long skirt hangs from the waist over the legs (behind the arms, so hanging hands stay in sight) */}
         {look.skirt && <Inked d={SKIRT_D(-66 - drop)} fill={look.outfit} uid={patternId} name="skirt" />}
         {/* Arms behind the body */}
@@ -1042,6 +1233,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           />
         )}
         <Cel uid={patternId} name="body" d={BODY_D} />
+        {look.mail && <Mail color={look.mail} uid={patternId} />}
         {look.vest && <VestFront shirt={look.outfit} />}
         {look.suspenders && (
           <g>
@@ -1051,8 +1243,10 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         )}
         {look.apron && <ApronFront color={look.apron} hem={look.skirt ? -110 - drop : -300} uid={patternId} />}
         {look.bib && <Bib text={look.bib} />}
-        {/* Collar */}
-        <path d="M -48 -622 L 0 -575 L 48 -622" fill="#fff" stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+        {look.belt && <Belt color={look.belt} w={1} />}
+        {/* Collar (with a tunic: the linen undershirt at the neck) */}
+        <path d="M -48 -622 L 0 -575 L 48 -622" fill={look.tunic ? "#e4d6b4" : "#fff"} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+        {look.cloak && <CloakPin color={look.cloak} w={1} />}
         <g transform={`rotate(${pose.swing ?? 0} 0 -615)`}>
         {look.chain && (
           <path
@@ -1087,6 +1281,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             d={circD(0, -800, 205)}
             extra={<path d={BANGS_D} transform="translate(0 30)" fill={SHADE} opacity={0.22} filter={`url(#${patternId}-soft)`} />}
           />
+          {look.stubble && <path d={BEARD_D} fill={look.stubble} opacity={0.2} />}
           {look.beard && <Inked d={BEARD_D} fill={look.beard} uid={patternId} name="beard" />}
           {/* Messy hair */}
           <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "crown"}>
@@ -1300,11 +1495,17 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
       <LeafPattern look={look} id={patternId} />
       <g transform={`translate(0 ${-(pose.air ?? 0)})`}>{[leg(swing, "far", crawling ? -cyc : 1), leg(-swing, "near", crawling ? cyc : -1)]}</g>
       <g transform={`translate(${back} ${bob + drop - (pose.air ?? 0)}) rotate(${tip + Math.sin(seat * Math.PI) * 18} 0 -280)`}>
+        {look.cloak && <CloakBehind color={look.cloak} uid={patternId} w={1} hem={-210} side />}
         <Arm x={-6} y={-552} side={1} angles={farArm} />
         {look.shorts && <Inked d={SIDE_SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
+        <g transform={look.build ? `scale(${0.5 + 0.5 * buildW(look)} 1)` : undefined}>
         <path d={SIDE_BODY} fill={look.vest ?? look.outfit} stroke={INK} strokeWidth={STROKE} />
         {look.pattern && !look.vest && <path d={SIDE_BODY} fill={`url(#${patternId})`} />}
         <Cel uid={patternId} name="body" d={SIDE_BODY} />
+        {look.tunic && <Tunic look={{ ...look, build: undefined }} uid={patternId} hem={-176} side />}
+        {look.mail && <Mail color={look.mail} uid={patternId} side />}
+        {look.belt && <Belt color={look.belt} w={1} side />}
+        </g>
         {look.skirt && <Inked d={SIDE_SKIRT_D(-66 - drop)} fill={look.outfit} uid={patternId} name="skirt" />}
         {look.vest && <path d="M 96 -622 L 136 -560 C 146 -480 146 -400 136 -330 L 100 -330 Z" fill={look.outfit} stroke={INK} strokeWidth={8} strokeLinejoin="round" />}
         {look.suspenders && <Strap d="M 30 -628 L 22 -272" color={look.suspenders} />}
@@ -1323,7 +1524,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
             <path d="M -124 -388 Q 20 -372 150 -388" fill="none" stroke={INK} strokeWidth={4} opacity={0.5} />
           </g>
         )}
-        <path d="M 46 -628 L 86 -592 L 108 -626" fill="#fff" stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+        <path d="M 46 -628 L 86 -592 L 108 -626" fill={look.tunic ? "#e4d6b4" : "#fff"} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
         {look.chain && (
           <path d="M 18 -618 Q 92 -520 132 -604" fill="none" stroke={look.chain} strokeWidth={16} strokeLinecap="round" strokeDasharray="1 20" />
         )}
@@ -1336,7 +1537,9 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         <g transform={`rotate(${pose.headTilt ?? 0} 0 -640)`}>
           <path d={SIDE_HEAD_D} fill={look.skin} stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
           <Cel uid={patternId} name="head" d={SIDE_HEAD_D} />
+          {look.stubble && <path d="M 40 -760 C 30 -670 90 -600 150 -596 C 196 -600 222 -640 228 -700 C 200 -672 160 -664 132 -680 C 100 -700 70 -730 40 -760 Z" fill={look.stubble} opacity={0.2} />}
           {look.beard && <Inked d={SIDE_BEARD_D} fill={look.beard} uid={patternId} name="beard" />}
+          {look.tied && <TiedTail hair={look.hair} side />}
           {/* Long hair is one piece: over the top, the back of the head and the nape, down to the shoulders */}
           <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "crown"}>
           <g transform={look.long ? hairMove(pose.hair, 0.6) : ""}>
@@ -1367,7 +1570,8 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           )}
           {look.hat && look.hatStyle === "crown" && <Crown color={look.hat} uid={patternId} dx={26} />}
           {look.hat && look.hatStyle === "shako" && <Shako color={look.hat} uid={patternId} dx={26} />}
-          {look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl" && look.hatStyle !== "crown" && look.hatStyle !== "shako" && (
+          {look.hat && look.hatStyle === "galea" && <GaleaSide color={look.hat} uid={patternId} />}
+          {look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl" && look.hatStyle !== "crown" && look.hatStyle !== "shako" && look.hatStyle !== "galea" && (
             <g>
               <Inked d={look.hatStyle === "bowler" ? BOWLER_CROWN_D : look.hatStyle === "boater" ? BOATER_CROWN_D : SIDE_HAT_CROWN_D} fill={look.hat} uid={patternId} name="hat" />
               <path d="M -152 -968 Q 26 -984 202 -968 L 200 -932 Q 26 -948 -150 -932 Z" fill={INK} opacity={0.55} />
@@ -1381,6 +1585,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
             </g>
           )}
           <circle cx={-12} cy={-790} r={32} fill={look.skin} stroke={INK} strokeWidth={10} />
+          {look.hat && look.hatStyle === "galea" && <GaleaCheek color={look.hat} />}
           <SideFace pose={pose} skin={look.skin} uid={patternId} />
           {look.glasses && <circle cx={166} cy={-804} r={50} fill="none" stroke={INK} strokeWidth={10} />}
         </g>
@@ -1396,6 +1601,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   const armR = pose.armR ?? [12, 10];
   const patternId = `leaf-back-${id}`;
   const body = BODY_D;
+  const bw = buildW(look);
   const backHair = look.long
     ? "M -215 -740 C -235 -960 -100 -1040 0 -1036 C 120 -1040 235 -960 215 -740 C 228 -640 228 -580 218 -500 C 140 -470 -140 -470 -218 -500 C -228 -580 -228 -640 -215 -740 Z"
     : "M -205 -740 C -230 -960 -100 -1040 0 -1036 C 120 -1040 232 -960 205 -740 C 140 -690 -140 -690 -205 -740 Z";
@@ -1419,10 +1625,16 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
       )}
       <g transform={`translate(0 ${bob})`}>
         {look.skirt && <Inked d={SKIRT_D(-66)} fill={look.outfit} uid={patternId} name="skirt" />}
+        {look.tunic && <Tunic look={look} uid={patternId} hem={-176} back />}
         {look.shorts && <Inked d={SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
+        <g transform={look.build ? `scale(${bw} 1)` : undefined}>
         <path d={body} fill={look.vest ?? look.outfit} stroke={INK} strokeWidth={STROKE} />
         {look.pattern && !look.vest && <path d={body} fill={`url(#${patternId})`} />}
         <Cel uid={patternId} name="body" d={body} />
+        {look.mail && <Mail color={look.mail} uid={patternId} />}
+        {look.belt && <Belt color={look.belt} w={1} back />}
+        </g>
+        {look.cloak && <Inked d={CLOAK_BACK_D(bw, -300)} fill={look.cloak} uid={patternId} name="cloak" />}
         {look.suspenders && <path d="M -92 -612 L 0 -440 L 92 -612 M 0 -440 L 0 -272" fill="none" stroke={look.suspenders} strokeWidth={22} />}
         {look.bib && <Bib text={look.bib} />}
         {look.apron && (
@@ -1434,8 +1646,8 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         {(look.lanyard || look.chain) && (
           <path d="M -70 -616 Q 0 -596 70 -616" fill="none" stroke={look.lanyard ?? look.chain} strokeWidth={12} strokeLinecap="round" />
         )}
-        <Arm x={-130} y={-545} side={-1} angles={armL} item={pose.hold?.hand === "L" ? pose.hold.item : undefined} />
-        <Arm x={130} y={-545} side={1} angles={armR} item={pose.hold?.hand === "R" ? pose.hold.item : undefined} />
+        <Arm x={-130 * bw} y={-545} side={-1} angles={armL} item={pose.hold?.hand === "L" ? pose.hold.item : undefined} />
+        <Arm x={130 * bw} y={-545} side={1} angles={armR} item={pose.hold?.hand === "R" ? pose.hold.item : undefined} />
         <g transform={`rotate(${pose.headTilt ?? 0} 0 -640)`}>
           <circle cx={-204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
           <circle cx={204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
@@ -1444,6 +1656,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <UnderHat id={patternId} on={!!look.hat && look.hatStyle !== "helmet" && look.hatStyle !== "stahl" && look.hatStyle !== "crown"}>
             <path d={backHair} fill={look.hair} stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
             <Cel uid={patternId} name="hair" d={backHair} />
+            {look.tied && <TiedTail hair={look.hair} />}
           </UnderHat>
           {look.kerchief && (
             <g>
@@ -1451,7 +1664,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
               <path d="M 0 -760 L -50 -690 L -12 -680 Z M 0 -760 L 46 -686 L 10 -678 Z" fill={look.kerchief} stroke={INK} strokeWidth={9} strokeLinejoin="round" />
             </g>
           )}
-          {look.hat && <HatFront color={look.hat} uid={patternId} style={look.hatStyle} />}
+          {look.hat && (look.hatStyle === "galea" ? <GaleaFront color={look.hat} uid={patternId} back /> : <HatFront color={look.hat} uid={patternId} style={look.hatStyle} />)}
           {look.cap && (
             <g stroke={INK} strokeWidth={STROKE} strokeLinejoin="round">
               <path d="M -206 -850 Q -196 -1058 0 -1062 Q 196 -1058 206 -850 Q 0 -900 -206 -850 Z" fill={look.cap} />
@@ -1481,7 +1694,7 @@ const Zzz: React.FC<{ x: number; y: number; t: number }> = ({ x, y, t }) => (
 export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> = (props) => {
   const { pose } = props;
   const inner = pose.view === "side" ? <SidePuppet {...props} /> : pose.view === "back" ? <BackPuppet {...props} /> : <FrontPuppet {...props} />;
-  const body = <WearCtx.Provider value={{ pants: props.look.pants, shoes: props.look.shoes }}>{inner}</WearCtx.Provider>;
+  const body = <WearCtx.Provider value={{ pants: props.look.pants, shoes: props.look.shoes, wraps: props.look.wraps }}>{inner}</WearCtx.Provider>;
   // Squash and stretch about the contact point (the feet, or the middle of the body in the air); sy * sx^2 = 1.
   const sq = Math.max(-0.45, Math.min(0.45, pose.squash ?? 0));
   const sy = 1 - sq;
