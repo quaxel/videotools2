@@ -615,6 +615,7 @@ void loop() {
   static bool screenOn = true, swallow = false;
   bool anyPress = M5.BtnA.wasPressed() || M5.BtnB.wasPressed() || M5.BtnPWR.wasClicked();
   if (anyPress) {
+    Serial.printf("press A%d B%d P%d\n", M5.BtnA.wasPressed(), M5.BtnB.wasPressed(), M5.BtnPWR.wasClicked());
     lastInput = millis();
     if (!screenOn) {
       M5.Display.wakeup();
