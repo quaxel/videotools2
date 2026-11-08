@@ -40,3 +40,6 @@ videos/*/build/*
 !videos/*/build/check.ok
 !videos/*/build/score.md
 !videos/*/build/timings.jsonl
+
+# ModelPreview sample, regenerated from animator/guide/sand3d/car.py (sand3d-model skill)
+animator/public/models/preview/

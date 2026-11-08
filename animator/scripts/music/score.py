@@ -1,7 +1,7 @@
 # Helpers for a video's own score, videos/<slug>/music.py (run by `pipeline.py music <slug>`). The composition
 # itself is written per video, the way animated-short composes each short (templates/audio/music.py); this file
 # holds what every score needs:
-#   Video    the picture's timeline from build/cues.json + timing.json: cuts, whips, dissolves, impacts, spoken lines,
+#   Video    the picture's timeline from build/cues.json + timing.json: cuts, whips, dissolves, dips, impacts, spoken lines,
 #            in seconds
 #   Grid     a beat grid; Grid.fit puts as many cuts as it can on beats
 #   Band     named stereo tracks + a cue list (time, what the music does there)
@@ -38,6 +38,7 @@ class Video:
         self.cuts = [a for a, _, _ in self.shots[1:]]
         self.whips = [a for a, _, t in self.shots[1:] if t is True]
         self.dissolves = [a for a, _, t in self.shots[1:] if t == "dissolve"]
+        self.dips = [a for a, _, t in self.shots[1:] if t == "dip"]
         self.sfx = [{**e, "t": s(e["at"])} for e in cues["sfx"]]
         self.impacts = sorted({round(e["t"], 3) for e in self.sfx if any(k in e["src"] for k in IMPACTS)})
         self.lines = [(s(l["from"]), s(l["to"]), l["text"]) for l in timing.get("lines", [])]

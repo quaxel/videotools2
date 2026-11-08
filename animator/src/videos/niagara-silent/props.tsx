@@ -9,10 +9,10 @@ type Vec3 = [number, number, number];
 // A chestnut horse in the inked cel style, built facing +x, hooves on y = 0. `phase` drives a trot (diagonal leg
 // pairs), `rear` 0..1 lifts it onto its hind legs, `run` scales the stride. Saddle top at HORSE.saddle.
 export const HORSE = { saddle: 1.24 };
-const COAT = "#a8623a";
+const COAT_DEFAULT = "#a8623a";
 const DARK = "#3a2418";
 
-const Leg: React.FC<{ at: Vec3; swing: number; bend: number; color?: string }> = ({ at, swing, bend, color = COAT }) => (
+const Leg: React.FC<{ at: Vec3; swing: number; bend: number; color?: string }> = ({ at, swing, bend, color = COAT_DEFAULT }) => (
   <group position={at} rotation={[0, 0, swing]}>
     <InkCylinder radius={0.065} height={0.42} position={[0, -0.21, 0]} color={color} ink={0.012} />
     <group position={[0, -0.42, 0]} rotation={[0, 0, bend]}>
@@ -22,7 +22,8 @@ const Leg: React.FC<{ at: Vec3; swing: number; bend: number; color?: string }> =
   </group>
 );
 
-export const Horse: React.FC<{ phase: number; rear?: number; run?: number; saddle?: string }> = ({ phase, rear = 0, run = 1, saddle = "#7a2a22" }) => {
+export const Horse: React.FC<{ phase: number; rear?: number; run?: number; saddle?: string; bare?: boolean; coat?: string; scale?: number }> = ({ phase, rear = 0, run = 1, saddle = "#7a2a22", bare = false, coat, scale = 1 }) => {
+  const COAT = coat ?? COAT_DEFAULT;
   const s = Math.sin(phase);
   const c = Math.cos(phase);
   const bob = Math.abs(c) * 0.04 * run;
@@ -30,12 +31,13 @@ export const Horse: React.FC<{ phase: number; rear?: number; run?: number; saddl
   const knee = (p: number) => Math.max(0, Math.sin(phase + p + 0.8)) * 0.9 * run;
   return (
     // rear: pivot round the hind hooves
+    <group scale={scale}>
     <group position={[-0.45, 0, 0]} rotation={[0, 0, rear * 0.75]}>
       <group position={[0.45, bob, 0]}>
         {/* legs: front pair at x 0.38, hind pair at x -0.42; diagonal pairs move together */}
-        <Leg at={[0.38, 0.84, 0.12]} swing={leg(0) - rear * 1.2} bend={-knee(0) - rear * 1.2} />
+        <Leg at={[0.38, 0.84, 0.12]} swing={leg(0) - rear * 1.2} bend={-knee(0) - rear * 1.2} color={COAT} />
         <Leg at={[0.38, 0.84, -0.12]} swing={leg(Math.PI) - rear * 0.9} bend={-knee(Math.PI) - rear * 1.4} color="#965632" />
-        <Leg at={[-0.42, 0.84, 0.12]} swing={leg(Math.PI) * 0.8 - rear * 0.75} bend={knee(Math.PI) * 0.6} />
+        <Leg at={[-0.42, 0.84, 0.12]} swing={leg(Math.PI) * 0.8 - rear * 0.75} bend={knee(Math.PI) * 0.6} color={COAT} />
         <Leg at={[-0.42, 0.84, -0.12]} swing={leg(0) * 0.8 - rear * 0.75} bend={knee(0) * 0.6} color="#965632" />
         {/* barrel, chest and rump */}
         <Blob position={[0, 0.98, 0]} scale={[0.62, 0.27, 0.24]} color={COAT} ink={0.05} />
@@ -70,9 +72,10 @@ export const Horse: React.FC<{ phase: number; rear?: number; run?: number; saddl
           <Blob position={[0, -0.25, 0]} scale={[0.07, 0.3, 0.06]} color={DARK} ink={0.03} detail={0} />
         </group>
         {/* saddle blanket and saddle */}
-        <InkBox size={[0.5, 0.05, 0.52]} position={[-0.02, 1.22, 0]} color="#3a5a7a" ink={0.012} />
-        <InkBox size={[0.36, 0.08, 0.34]} position={[-0.02, 1.27, 0]} color={saddle} ink={0.012} />
+        {!bare && <InkBox size={[0.5, 0.05, 0.52]} position={[-0.02, 1.22, 0]} color="#3a5a7a" ink={0.012} />}
+        {!bare && <InkBox size={[0.36, 0.08, 0.34]} position={[-0.02, 1.27, 0]} color={saddle} ink={0.012} />}
       </group>
+    </group>
     </group>
   );
 };

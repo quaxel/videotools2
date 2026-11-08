@@ -42,6 +42,8 @@ const toonOf = (src: THREE.Material): THREE.MeshToonMaterial => {
     emissiveMap: s.emissiveMap ?? null,
     transparent: s.transparent,
     opacity: s.opacity,
+    // Glass must not hide what is behind it (a puppet card inside a car is drawn after the glass in depth order).
+    depthWrite: !s.transparent,
     side: s.side,
     gradientMap: toonRamp,
   });
@@ -75,6 +77,9 @@ export type PartPose = { position?: Vec3; rotation?: Vec3; scale?: number | Vec3
 // `parts`: per-frame pose for named Blender objects (spin "Wheel_FL", open "Door_L"), relative to the exported rest
 // pose: position is added, rotation (Euler, in the part's own axes) turns it from rest, scale multiplies.
 // Apply rotation and scale in Blender and put the origin on the pivot, so a part's own axes are the model's.
+// `joints`: per-frame value for joints declared in a sand3d model (s3d.joint), by joint name: degrees for revolute and
+// continuous, metres for prismatic, from rest. The GLB carries each joint as a node on its pivot with its axis.
+// Don't pose the same node through `parts` and `joints`.
 export const BlenderModel: React.FC<{
   src: string;
   position?: Vec3;
@@ -83,7 +88,8 @@ export const BlenderModel: React.FC<{
   ink?: number;
   shadows?: boolean;
   parts?: Record<string, PartPose>;
-}> = ({ src, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, ink = 0.015, shadows = true, parts }) => {
+  joints?: Record<string, number>;
+}> = ({ src, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, ink = 0.015, shadows = true, parts, joints }) => {
   const [gltf, setGltf] = useState<GLTF | null>(null);
   const [handle] = useState(() => delayRender(`Loading model ${src}`));
   useEffect(() => {
@@ -117,6 +123,20 @@ export const BlenderModel: React.FC<{
       node.scale.copy(rest.scale);
       if (pose.scale !== undefined) node.scale.multiply(typeof pose.scale === "number" ? new THREE.Vector3().setScalar(pose.scale) : new THREE.Vector3(...pose.scale));
       node.visible = pose.visible ?? true;
+    }
+  }
+
+  if (root && joints) {
+    for (const [name, value] of Object.entries(joints)) {
+      const node = root.getObjectByName(name);
+      const j = node?.userData.s3d_joint as { type: string; axis: Vec3 } | undefined;
+      if (!node || !j) throw new Error(`Model ${src} has no sand3d joint "${name}"`);
+      const rest = node.userData.rest as { position: THREE.Vector3; quaternion: THREE.Quaternion; scale: THREE.Vector3 };
+      const axis = new THREE.Vector3(...j.axis).normalize();
+      node.position.copy(rest.position);
+      node.quaternion.copy(rest.quaternion);
+      if (j.type === "prismatic") node.position.add(axis.applyQuaternion(rest.quaternion).multiplyScalar(value));
+      else node.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(axis, THREE.MathUtils.degToRad(value)));
     }
   }
 

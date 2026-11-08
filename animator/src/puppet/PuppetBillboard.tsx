@@ -304,6 +304,11 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
         : null,
     [texture, !!light],
   );
+  // three's shadow pass copies `map` and `alphaTest` from the mesh's own material onto the depth material; a
+  // ShaderMaterial has neither, so without these the lit card cast its whole rectangle as a shadow.
+  if (litMaterial && !(litMaterial as unknown as { map?: THREE.Texture }).map) {
+    Object.assign(litMaterial, { map: texture, alphaTest: 0.5 });
+  }
   // Lights flicker per frame: refresh the uniforms without rebuilding the material.
   if (litMaterial && light) {
     for (const [k, v] of Object.entries(litUniforms(light))) litMaterial.uniforms[k].value = v;

@@ -1,0 +1,94 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling an amazing piece of history, brisk and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.3
+    },
+    "villager": {
+      "voice": "Vivian",
+      "instruct": "Outraged village woman, loud and indignant, comic disbelief.",
+      "seed": 5,
+      "tempo": 1.15
+    },
+    "merchant": {
+      "voice": "Dylan",
+      "instruct": "Startled merchant tumbling off his horse, shouting in protest.",
+      "seed": 11,
+      "tempo": 1.15
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "Marco Polo wrote that the Khan's letters raced two hundred miles in a day. Yet no single horse made the trip."
+    },
+    {
+      "speaker": "narrator",
+      "text": "His riders went bound in tight bands, their belts jingling with bells."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But a horse at full gallop tires long before sunset."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So every twenty-five miles, the Khan built a station called a Yam."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Some kept four hundred horses, half saddled, half out at grass."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Polo counted over ten thousand stations and three hundred thousand horses."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And who supplied all those horses? The villages next door."
+    },
+    {
+      "speaker": "villager",
+      "text": "Four hundred horses? I have three goats!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Every rider also carried a paiza, a metal tablet with a falcon."
+    },
+    {
+      "speaker": "narrator",
+      "text": "If his horse broke down, anyone he met had to hand over theirs."
+    },
+    {
+      "speaker": "merchant",
+      "text": "Hey! That's my horse!",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, no horse ran far. Only the letter did."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The bells rang out long before the rider arrived."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So the next station saddled a fresh horse, and a clerk wrote down the time."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The letter changed hands at a gallop and never stopped."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Fruit picked one morning in the capital reached the Khan the next evening, ten days' journey away."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Every horse got tired. The letter never did."
+    }
+  ]
+}

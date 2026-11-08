@@ -10,16 +10,17 @@ import TIMING_JSON from "./timing.json";
 const TIMING = TIMING_JSON as Timing;
 export const SLUG = "<slug>";
 export const timing = TIMING;
-const SHOTS: Shot[] = [ [from, to, ShotComponent, dissolveIn], ... ]; // final frames, contiguous, first from 0, last to TIMING.totalFrames
+const SHOTS: Shot[] = [ [from, to, ShotComponent, transitionIn], ... ]; // final frames, contiguous, first from 0, last to TIMING.totalFrames
 const SFX: Sfx[] = [...];
 const MUSIC: MusicCue[] = [...];
-export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} post />;
+export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={SHOTS} sfx={SFX} music={MUSIC} post steady />;
 ```
 
-- New videos pass `post` (the post chain, below); older ones leave it off and keep their look.
+- New videos pass `post` (the post chain, below) and `steady` (the camera glides: no settle after a cut and a fifth of
+  the hand-held drift, guide/rules.md → Camera speed); older ones leave them off and keep their look.
 
 - Write each SHOTS entry on one line as `[123, 456, Name, false]` (numbers or `TIMING.totalFrames`); `pipeline.py check` parses it.
-- **Seamless loop** (Shorts replay): end the video on the opening shot just before its frame 0. Write the first shot
+- **Seamless loop** (older videos only; new ones end on their closing line, guide/rules.md → Story): end the video on the opening shot just before its frame 0. Write the first shot
   as a factory over a clock offset (`const shotAt = (offset) => () => { const f = useShotFrame() + offset; ... }`),
   use `shotAt(0)` first and `shotAt(-N)` as the last N frames (whip `true` from the shot before), with `energy={0}`
   in it so the hand-held drift matches, and repeat its sound under the last N frames. Example: `src/videos/olympic-car`.
@@ -38,7 +39,9 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 | `CameraShot = { position, target, fov }` | Every set must receive the camera and contain `<CameraRig>` (the kit's `Room` does this). |
 | `lerp3, ramp, clamp01, breathe, talk, walk` | Animation helpers. `ramp(f, a, b)` 0→1 between frames a and b. `...walk(f)` inside a pose while walking. |
 | `Easing, interpolate` | From `remotion`. |
-| `FADE` | Location-change transition length (8 frames): the old shot whips out left, the new one in from the right. |
+| `"dip"` (shot list, in place of `true`) | `DIP` (12 frames, 0.4 s): a dip through cream (`DIP_COLOUR`) at every change of location. The old shot plays on while the cream rises, the new one takes over under full cream at the midpoint, the cream clears by the cut. `src/scenes/TransitionPreview.tsx` shows it. |
+| `FADE` | Whip transition length (8 frames, `true` in the shot list): the old shot whips out left, the new one in from the right. Older videos only; new ones change location with `"dip"`. |
+| `beatPath(keys, f, fov?)`, `warpU(beats, f)` | A camera that travels through key views `{ at, position, target, fov? }` and reaches each at its shot frame `at` (the frame the narrator names that subject: the line's span from `timing.json`, the word placed by its position in the line). A monotone cubic time warp: eases out of the first key, glides through the middle ones without stopping or overshooting, comes to rest at the last; the path is a smooth curve through the keys. `const camera = beatPath([{ at: 0, position: [0, 1.6, 6], target: [0, 1, 0] }, { at: 70, position: [2, 1.4, 4], target: [2, 1, 0] }], f);` |
 | `"dissolve"` (shot list, in place of `true`) | `DISSOLVE` (12) frames: the new shot fades in over the old one, which plays on to the cut. For a change of time in one place (night to dawn, before and after), not for a change of place. Ported from animated-short's `XFADE`; `src/scenes/TransitionPreview.tsx` shows it. |
 | `Stage` `foreground`, `frameSpot(cam, aspect, x, y, dist)`, `Foliage` | Framing objects between the lens and the subject (a branch, a railing, a crate corner), ported from animated-short's `FOREGROUND`. `frameSpot` gives the world point at screen position x, y (-1..1, +y up) `dist` metres in front of a camera: place from the shot's first camera so the object stays put and the camera moves past it. Keep them at 0.3-0.5 x the focus distance over 10-25 % of one frame edge, never on a face (the framing audit still flags a hidden face). Drawn over the cast and left out of `collide`; the post chain's depth of field blurs them, without it they get a canvas of their own blurred 3 x `blur`. `Foliage` is a leafy clump for it. |
 | `sfx("stamp")`, `MUSIC_FILES.lounge / .mystery / .upbeat / .tension` | Sound file paths. |
@@ -81,8 +84,11 @@ Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `Interio
 
 ### Blender models (`src/three/model.tsx`, also exported from the engine)
 
-For props the kit primitives cannot make read (car, bicycle, boat, animal, instrument). One bpy script per model in
-`../videos/<slug>/blender/<name>.py`; `guide/blender/car.py` is a worked example to copy. Build it:
+For props the kit primitives cannot make read (car, bicycle, boat, animal, instrument). Default: a sand3d program in
+`../videos/<slug>/sand3d/<name>.py` (`guide/sand3d/car.py` to copy; the **sand3d-model** skill has the rules, export
+command and check). Its joints come through in the GLB, posed with `joints`. `ModelPreview` (props `src`, `size`,
+`joints` per frame) orbits one model in a plain room to check it. Fallback for what sand3d can't express: one bpy
+script per model in `../videos/<slug>/blender/<name>.py`; `guide/blender/car.py` is a worked example to copy. Build it:
 
 ```bash
 /Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P ../videos/<slug>/blender/<name>.py -- public/videos/<slug>/models/<name>.glb
@@ -93,12 +99,15 @@ For props the kit primitives cannot make read (car, bicycle, boat, animal, instr
   one Principled material per colour with only Base Color set (textures are allowed, roughness and metal are ignored).
   Every part that moves (wheel, door, propeller, jaw) is its own object with a name without dots or spaces, rotation
   and scale applied and its origin on the pivot; children follow their parent. Keep it under ~50k triangles.
-- `BlenderModel({ src, position?, rotation?, scale?, ink?, shadows?, parts? })` — `src` under public/
+- `BlenderModel({ src, position?, rotation?, scale?, ink?, shadows?, parts?, joints? })` — `src` under public/
   (`"videos/<slug>/models/car.glb"`). Every material becomes the kit's toon material (colour and texture kept) with
   an ink hull of `ink` metres (default 0.015, like `InkBox`; a mesh named `..._noink` gets none). The frame waits for
   the file. `parts` poses named objects per frame relative to their rest pose:
   `{ Wheel_FL: { rotation: [-f * 0.2, 0, 0] }, Door_L: { rotation: [0, open * 1.2, 0] } }` (`position` added,
   `rotation` Euler in the part's own axes, `scale` multiplied, `visible`). An unknown part name throws.
+  `joints` poses a sand3d model's joints by name from rest: `{ spin_FL: deg, door_hinge: deg, drawer: metres }`
+  (degrees for revolute and continuous, metres for prismatic, about the axis the program gave it). An unknown joint
+  throws; don't pose one node through both `parts` and `joints`.
 - A model that drives or flies through a shot moves as a whole with the group `position`; spin its wheels from the
   distance travelled (`distance / radius`) so they do not skid.
 
@@ -121,6 +130,18 @@ For props the kit primitives cannot make read (car, bicycle, boat, animal, instr
   each layer is carried sideways by its own share of the camera's x: sky and sun group at `camX`, far ridge
   `shift={camX * 0.55}`, middle ridge 0, near hills `shift={-camX * 1.1}` (camX = `camera.position[0]`). Give shots in
   front of a backdrop a sideways truck (0.8-1.4 m) so the layers slide apart.
+
+### Western main street at sunset (`src/three/WesternTownSet.tsx`)
+
+Notes: `guide/references/western-street.md`. Used by `src/scenes/DuelPreview.tsx` (`DuelPreview` still, `DuelAnim` 5 s).
+- `WesternTownSet({ camera, frame, children })` — dirt street along -z (x within ±`STREET.half`, floor y = 0), plank
+  boardwalks and false-front buildings (fronts at x = ±`STREET.front`) with porch roofs, hitching rails, a trough,
+  barrels, a water tower and telegraph poles; the low sun sits over the street's vanishing point and every shadow
+  runs toward the camera. Distant scenery is painted with Codex image generation (`public/backdrops/western/`:
+  `sky.png` the sky and mesas, `rocks.png` a rock/cactus/windmill strip on pure green, keyed in the set).
+  `Tumbleweed({ position, size, spin })`. Light puppets with `duskLight()`.
+- Stage `focus` (metres along the view axis) overrides the post chain's focus on the nearest puppet, for a soft
+  foreground figure in front of a sharp subject.
 
 ### Moon base (`src/three/SpaceBaseSet.tsx`)
 
@@ -389,8 +410,8 @@ gripping; a calm read makes the video feel slow.
 
 Effects (`public/sfx/*.wav`, synthesised by `scripts/sfx_generate.py`): `reel-spin` (loop), `reel-stop`, `near-miss` (sad wah),
 `chime`, `button`, `bill-whirr`, `credit-blip`, `whoosh`, `tape-stop`, `hum` (loop), `stamp`, `tick`, `boom`, `paper`, `ambience` (loop),
-`pop` (a sign popping in), `drawer` (cash drawer out + stop), `card` (card slid or swiped), `door` (creak + shut), `sting` (twist hit:
-put it on the twist line), `riser` (1.6 s build; start it so it ends on the twist), `wind` (outdoor breeze, loop), `plop`
+`pop` (a sign popping in), `drawer` (cash drawer out + stop), `card` (card slid or swiped), `door` (creak + shut), `sting` (pivot hit:
+put it on the "You see" line), `riser` (1.6 s build; start it so it ends on the pivot), `wind` (outdoor breeze, loop), `plop`
 (a small soft lump landing on grass), `crackle` (small wood fire, loop), `chew` (two squishy chews),
 `crowd` (stadium cheering, loop), `engine` (early motor car chugging, loop), `honk` (bulb horn), `hiss` (steam burst),
 `steps` (running on dirt, loop), `rumble` (earthquake roar, loop), `river` (rushing water, loop), `falls` (waterfall roar,
@@ -455,7 +476,7 @@ music tables `Video` logs, fully resolved (spreads and constants included), in `
 `sync` checks them against the picture and writes `build/sync.txt`. Errors (the stage fails): a cue outside the
 video or looping past its end, a missing file, the narration running past the end, no music at all. Warnings (look,
 some are on purpose): a looped effect that ends 1-6 frames off a cut, whips with no whoosh in their pan, gaps in the
-music, and the loop seam: the music and looped effects under the last frame should be the ones under frame 0. The
+music. The
 frame QA also checks that the muxed audio is as long as the picture (`AV SYNC` in `build/qa/qa.md`).
 
 ### The video's own score (`../videos/<slug>/music.py`, `pipeline.py music <slug>`)

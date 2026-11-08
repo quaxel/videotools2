@@ -787,6 +787,24 @@ def bolt():
     return out
 
 
+def jingle():
+    # A courier's belt of small brass bells shaken by a galloping horse: a cluster of bright inharmonic tinks on
+    # every stride (about 5 a second), with a soft rattle; 1.4 s.
+    sec = 1.4
+    out = np.zeros(int(sec * SR))
+    k = 0
+    at = 0.01
+    while at < sec - 0.3:
+        for j in range(4 + int(rng.random() * 3)):
+            hz = 2400 + rng.random() * 2200
+            ring = tone(hz, 0.3, (1.0,)) + 0.5 * tone(hz * 2.76, 0.3, (1.0,)) + 0.25 * tone(hz * 5.4, 0.3, (1.0,))
+            place(out, ring * env(0.3, 0.0008, 0.05 + rng.random() * 0.06) * (0.35 + rng.random() * 0.3), at + j * 0.012 + rng.random() * 0.02)
+        place(out, band(noise(0.06), 3000, 9000) * env(0.06, 0.001, 0.015) * 0.25, at)
+        at += 0.17 + rng.random() * 0.05
+        k += 1
+    return out
+
+
 if __name__ == "__main__":
     for name, fn in [
         ("reel-spin", reel_spin),
@@ -826,3 +844,4 @@ if __name__ == "__main__":
     save("sfx/munch.wav", munch())
     for name, fn in [("scrape", scrape), ("snore", snore), ("clink", clink), ("bolt", bolt)]:
         save(f"sfx/{name}.wav", fn())
+    save("sfx/jingle.wav", jingle())

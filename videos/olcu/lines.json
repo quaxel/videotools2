@@ -1,0 +1,46 @@
+{
+  "fps": 30,
+  "voices": {
+    "bart": {
+      "voice": "Eric",
+      "instruct": "Gravelly, slow, menacing old gunslinger. Low voice, very few words, every word a threat.",
+      "seed": 5,
+      "tempo": 1.0
+    },
+    "tex": {
+      "voice": "Aiden",
+      "instruct": "Young cowboy trying hard to sound tough, a little defensive and proud.",
+      "seed": 11,
+      "tempo": 1.05
+    },
+    "pruitt": {
+      "voice": "Dylan",
+      "instruct": "Dry, polite, deadpan undertaker. Unhurried, precise and quietly businesslike, as if nothing is unusual.",
+      "seed": 3,
+      "tempo": 1.0
+    },
+    "pianist": {
+      "voice": "Uncle_Fu",
+      "instruct": "A sharp, sudden yelp of pain.",
+      "seed": 2,
+      "tempo": 1.0
+    }
+  },
+  "lines": [
+    { "speaker": "bart", "text": "Rule's simple. When the piano stops, we draw.", "pauseAfter": 9.5 },
+    { "speaker": "bart", "text": "Not now.", "pauseAfter": 0.3 },
+    { "speaker": "pruitt", "text": "Won't take a minute, sir.", "pauseAfter": 2.0 },
+    { "speaker": "pruitt", "text": "Six foot one.", "pauseAfter": 0.5 },
+    { "speaker": "tex", "text": "Six foot three.", "pauseAfter": 0.5 },
+    { "speaker": "pruitt", "text": "Six foot one.", "pauseAfter": 3.0 },
+    { "speaker": "bart", "text": "Which one's mine?" },
+    { "speaker": "pruitt", "text": "The pine, sir." },
+    { "speaker": "bart", "text": "Why does his have handles?" },
+    { "speaker": "pruitt", "text": "He paid in advance.", "pauseAfter": 3.5 },
+    { "speaker": "pianist", "text": "Ow!", "pauseAfter": 2.5 },
+    { "speaker": "pruitt", "text": "One moment, gentlemen. For the newspaper.", "pauseAfter": 2.5 },
+    { "speaker": "bart", "text": "So. Do we start the piano again?" },
+    { "speaker": "tex", "text": "His fingers are still in the lid.", "pauseAfter": 9.0 },
+    { "speaker": "pruitt", "text": "Pine, I suppose.", "pauseAfter": 2.0 }
+  ]
+}

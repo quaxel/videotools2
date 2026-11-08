@@ -1,0 +1,40 @@
+{
+  "title": "",
+  "topic": "THE MEASURE: a western duel comedy sequence",
+  "mechanism": "One sentence: the hidden real-world system this video reveals.",
+  "beats": {
+    "hook": "",
+    "but": "",
+    "then": "",
+    "conflict": "",
+    "pivot": "You see ...",
+    "so": "So ...",
+    "closing": ""
+  },
+  "seed": {
+    "what": "The object or person the twist depends on",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "",
+      "set": "existing component or new file",
+      "colour": "dominant colour family"
+    }
+  ],
+  "characters": [
+    {
+      "id": "",
+      "look": ""
+    }
+  ],
+  "gags": [
+    {
+      "line": 0,
+      "what": ""
+    }
+  ],
+  "story_numbers": [
+    "Numbers that belong to the story, not to a factual claim (e.g. 'two' in 'two sevens')"
+  ]
+}
