@@ -3257,7 +3257,8 @@ input::placeholder, textarea::placeholder { color: #7d828a; }
 .candidate-hook { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; }
 .candidate-hook > span { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--accent); font-weight: 600; }
 .candidate-hook p { font-size: 17px; color: #f2f5f9; margin: 4px 0; line-height: 1.5; }
-.candidate-hook small { color: #b0b4ba; font-size: 12.5px; }
+.candidate-hook small { display: block; color: #b0b4ba; font-size: 12.5px; }
+.candidate-hook small + small { margin-top: 3px; }
 .candidate-facts { display: grid; grid-template-columns: 110px 1fr; gap: 8px 16px; margin: 0; font-size: 14px; }
 .candidate-facts dt { color: #9a9fa7; font-size: 12.5px; padding-top: 2px; }
 .candidate-facts dd { margin: 0; color: #edeef0; line-height: 1.6; }

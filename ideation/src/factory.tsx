@@ -292,6 +292,7 @@ function Candidate({
         <section className="candidate-hook">
           <span>Hook</span>
           <p>“{hook.text}”</p>
+          {hook.onScreen && <small>Ekran metni: {hook.onScreen}</small>}
           {hook.firstImage && <small>İlk görüntü: {hook.firstImage}</small>}
         </section>
       )}

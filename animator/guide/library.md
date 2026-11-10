@@ -286,7 +286,9 @@ already 2× supersampled). The sets keep only their own hull outlines:
 - `Headline({ f, text, at?, out?, y?, size? })` (`src/ui/Headline.tsx`, HTML over the shot) — a short title in heavy
   newspaper type on a cream strip, high in the frame above the captions; drops in at `at`, fades at `out`. To keep
   one headline across several shots, render it in each with `at` = minus the shot's offset (no re-pop). Use it for
-  the hook question and short on-screen facts ("NO CLOUDS. NO STORM."), at most 6 words.
+  the hook question and short on-screen facts ("NO CLOUDS. NO STORM."), at most 6 words on at most 2 lines.
+  Shot 1 always has one (rules.md → Story, triple hook): `at` ≤ 9 so it is fully in by frame 12, `out` near the end
+  of the hook, text that is not the words of the first sentence.
 
 ### Sunbeams through a window (`src/three/godrays.tsx`)
 

@@ -14,6 +14,19 @@ percentages of the runtime).
    as a paradox, something that sounds impossible; the hook is 5-23 words (aim 16) and ends at about 4-5 s. The
    picture is one continuous camera move onto the strange thing (the visual hook: what moves or changes on screen),
    not a burst of cuts. Put the hero object close to the camera so it fills part of the frame.
+   **Triple hook:** by frame 15 (0.5 s) all three channels are live at once, each doing a different job:
+   - *Visual — "what is happening?"*: the strange thing is in frame and already moving or changing at frame 0
+     (a streak in the sky, something falling, a thing in the wrong place); the camera move carries onto it, it does
+     not arrive late.
+   - *Verbal — "why should I care?"*: the first sentence, from frame 0, a question or a claim that sounds impossible,
+     tied to the viewer where it can be ("you", a cost, a loss, a near miss).
+   - *Text — "what is this about?"*: a `Headline` in shot 1, fully in by frame 12: the video's label, question or a
+     contrasting angle, 2-6 words on at most 2 lines. Never the words of the spoken sentence (the captions already
+     show those); "WHAT IF IT HIT ELSEWHERE?" over "The asteroid that killed the dinosaurs may have hit the unluckiest
+     spot on Earth" is right, the same sentence in caps is not.
+   - Test: cover any one channel and the other two still pull; if two channels say the same thing, rewrite one.
+   - Balance: when the picture alone is startling, keep the headline short (2-3 words) and let the picture lead.
+   - Nothing waits: no fade from black, no title card, no slow reveal before the three are on screen.
 2. **But (shot 4):** the obstacle.
 3. **Then (shot 5):** what was tried, or what happened next.
 4. **Conflict (shot 6):** the complaint, the cost, who is unhappy.

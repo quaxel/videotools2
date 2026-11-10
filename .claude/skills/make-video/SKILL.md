@@ -33,8 +33,9 @@ approvals and outputs, for the user to follow or drive the pipeline.
 ## 2. Research → `../videos/<slug>/research.md`
 
 If the user gave no topic or only a broad one, first list the topics already made (`ls ../videos/`, the uploader's
-database) and propose 5 new ones that are not among them: a title, the visual hook (what moves or changes on screen),
-the escalation (but / then / so) and 2-3 hard numbers or names each, checked with a quick search. Ask which one;
+database) and propose 5 new ones that are not among them: a title, the triple hook (the visual: what moves or
+changes on screen at frame 0; the verbal: the first sentence; the text: the shot-1 headline), the escalation
+(but / then / so) and 2-3 hard numbers or names each, checked with a quick search. Ask which one;
 then scaffold.
 
 Use web search. Open the pages you cite. Write one paragraph on the mechanism, then a `## Claims` list:
@@ -46,7 +47,9 @@ do not creep back into the script.
 ## 3. Plan → `../videos/<slug>/plan.json`
 
 Fill every field: title, mechanism (one sentence), the seven beats (hook, but, then, conflict, pivot, so, closing;
-guide/rules.md → Story), the seed (what, and the index of the first
+guide/rules.md → Story), the `triple_hook` (rules.md → Story, triple hook: `visual` what is in frame and moving at
+frame 0, `verbal` the first sentence, `text` the shot-1 headline; three different jobs, none repeating another),
+the seed (what, and the index of the first
 line where it appears on screen), at least 8 locations (id, set, dominant colour; no two neighbours share a
 colour), at least 4 characters with looks, at least 2 physical gags, and `story_numbers`.
 For each mechanism idea, name the labelled physical prop that shows it.
@@ -56,7 +59,7 @@ For each mechanism idea, name the labelled physical prop that shows it.
 180-210 words, one line per sentence pair, dialogue as separate speakers (add the voice under `voices`; Qwen
 English voices: Ryan, Aiden, Eric, Dylan, Uncle_Fu male; Vivian, Serena female). No ellipses, no repeated
 one-word sentences. Only the line before the pivot ("You see ...") may carry `"pauseAfter": 0.4`. End sentences where the shots will
-change: 9-12 shots, one per location.
+change: 9-12 shots, one per location. The first line is the plan's `triple_hook.verbal`.
 
 ```bash
 .venv/bin/python scripts/pipeline.py voice <slug>
@@ -77,7 +80,9 @@ wear, wrong scale, flat light) before fixing it.
 Reuse existing sets where they fit (`LakeSet`, `SpaceBaseSet`, `AlleySet`, `GreatWallSet`).
 
 Open with one continuous camera move onto the strange thing while the first sentence states the paradox
-(guide/rules.md → Story, Hook). On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters use
+(guide/rules.md → Story, Hook). Build shot 1 as the triple hook (rules.md → Story, triple hook): the strange thing
+in frame and already moving at frame 0, and the plan's `triple_hook.text` as a `Headline` with `at` ≤ 9 and `out`
+near the end of the hook. On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters use
 the costume options (library.md → Puppets), never `cap`.
 
 Pass `post` and `steady` to `Video` (library.md → Post chain: depth of field, bloom, colour grade; `steady`: the
@@ -161,7 +166,9 @@ measures low: give it more volume rather than reading it as buried.
 
 It also prints a framing audit (saved to `../videos/<slug>/build/stills/framing.txt`): faces or signs cut by the frame edge, under
 the captions, or hidden behind the set. Fix every hit on a key face or sign; background signs and crowd extras at the edge can stay.
-Read `../videos/<slug>/build/stills/contact.jpg` (one frame per second). Check: faces in frame and not cut,
+Read `../videos/<slug>/build/stills/contact.jpg` (one frame per second, the first tile is frame 15 = 0.5 s). The
+first tile must show the triple hook: the strange thing moving in frame, the first line's caption and the headline
+fully in, whole and not covering each other; fix it before anything else. Then check: faces in frame and not cut,
 labels readable, no empty or black frames, over-the-shoulder head ≤ 25 %, colour varies, gags read, Blender models
 read at a glance in the toon look (ink outline, flat bands, right way round and on the floor). Also (guide/rules.md →
 Picture): camera inside geometry or something through the lens, a pole or prop crossing a face, floating props or

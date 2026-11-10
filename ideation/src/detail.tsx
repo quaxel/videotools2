@@ -17,6 +17,7 @@ import {
   FileText,
   AlertCircle,
   Image,
+  Type,
 } from "lucide-react";
 import { useWorkspace, api } from "./api";
 import { useQuery } from "@tanstack/react-query";
@@ -611,6 +612,16 @@ function Hooks({ idea }: { idea: Idea }) {
                 </p>
               </div>
             </div>
+            <div className="hook-image">
+              <Type size={17} />
+              <div>
+                <strong>Ekran metni</strong>
+                <p>
+                  {h.onScreen ||
+                    "İlk karedeki başlık (2–6 kelime, konuşulanı tekrar etmez). Henüz eklenmedi."}
+                </p>
+              </div>
+            </div>
             {h.note && <p className="muted">{h.note}</p>}
             <div className="hook-actions">
               <button
@@ -693,11 +704,12 @@ function HookModal({
   onDelete?: () => void;
 }) {
   const [form, setForm] = useState<Hook>(
-    hook || {
+    hook ? { ...hook, onScreen: hook.onScreen ?? "" } : {
       id: crypto.randomUUID(),
       text: "",
       language: "tr",
       firstImage: "",
+      onScreen: "",
       note: "",
       selected: false,
     },
@@ -730,6 +742,14 @@ function HookModal({
             value={form.firstImage}
             onChange={(e) => setForm({ ...form, firstImage: e.target.value })}
             placeholder="İlk karede göreceğimiz somut sahne"
+          />
+        </label>
+        <label>
+          Ekran metni
+          <input
+            value={form.onScreen}
+            onChange={(e) => setForm({ ...form, onScreen: e.target.value })}
+            placeholder="İlk karedeki başlık, 2–6 kelime"
           />
         </label>
         <label>

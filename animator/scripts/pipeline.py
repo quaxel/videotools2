@@ -133,6 +133,11 @@ PLAN_TEMPLATE = {
     "topic": "",
     "mechanism": "One sentence: the hidden real-world system this video reveals.",
     "beats": {"hook": "", "but": "", "then": "", "conflict": "", "pivot": "You see ...", "so": "So ...", "closing": ""},
+    "triple_hook": {
+        "visual": "What is in frame and already moving at frame 0 (answers: what is happening?)",
+        "verbal": "The first sentence, from frame 0 (answers: why should I care?)",
+        "text": "The shot-1 Headline, 2-6 words, not the spoken words (answers: what is this about?)",
+    },
     "seed": {"what": "The object or person the twist depends on", "first_line": 0},
     "locations": [{"id": "", "set": "existing component or new file", "colour": "dominant colour family"}],
     "characters": [{"id": "", "look": ""}],
