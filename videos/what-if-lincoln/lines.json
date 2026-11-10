@@ -1,0 +1,85 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, urgent storyteller telling a true and serious history what-if, brisk and tense, never calm, never jokey.",
+      "seed": 7,
+      "tempo": 1.5
+    },
+    "barman": {
+      "voice": "Eric",
+      "instruct": "A friendly nineteenth-century saloon barman greeting a regular customer, warm and casual.",
+      "seed": 5,
+      "tempo": 1.25
+    },
+    "actor": {
+      "voice": "Aiden",
+      "instruct": "A stage actor in an old comedy, booming a ridiculous insult to the back row for a big laugh, theatrical and loud.",
+      "seed": 11,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "The night Abraham Lincoln was shot, the policeman guarding his door wasn't there."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Washington, April fourteenth, eighteen sixty-five. The war is all but over. Lincoln is at Ford's Theatre, watching a comedy from a private box."
+    },
+    {
+      "speaker": "narrator",
+      "text": "His guard: police officer John Parker. At intermission, Parker reportedly heads to the saloon next door."
+    },
+    {
+      "speaker": "barman",
+      "text": "What'll it be, officer?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nobody knows if he came back. He wasn't at the door."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Three days earlier, Lincoln had backed voting rights for some Black men. Famous actor John Wilkes Booth was reportedly in the crowd."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Just after ten, Booth climbs the stairs. He shows the footman a card, slips into the passage, and bars the door with a wooden plank."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then he waits for the biggest laugh."
+    },
+    {
+      "speaker": "actor",
+      "text": "You sockdologizing old man-trap!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "One shot, hidden in the laughter."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Lincoln dies the next morning."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Now, what if Parker had stayed? Maybe Booth is turned away. Maybe he tries another night."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Instead, Andrew Johnson took over. He pardoned thousands of Confederates and vetoed bills protecting freed slaves. Many historians think Lincoln would have protected those rights better. Others say Congress mattered more."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And Parker? Charged with neglect of duty. The charge was dropped."
+    },
+    {
+      "speaker": "narrator",
+      "text": "One empty chair, and a country took a different road."
+    }
+  ]
+}

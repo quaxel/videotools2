@@ -1,0 +1,45 @@
+{
+  "title": "What If Napoleon's Marshal Had Marched to the Guns?",
+  "topic": "What if Napoleon's marshal had marched to the guns? (Waterloo, 18 June 1815)",
+  "mechanism": "Sent on 17 June with over thirty thousand men to keep the beaten Prussians away, Grouchy kept to his orders when the guns of Waterloo were heard (at breakfast, the story goes, eating strawberries), chased a rear guard at Wavre while most Prussians marched west and broke Napoleon's flank; but most historians think even a win that day would not have saved Napoleon from the Austrian and Russian armies already marching on France.",
+  "beats": {
+    "hook": "Napoleon's best chance at Waterloo may have been sitting at breakfast eating strawberries: a slow push past a candlestick onto Grouchy's strawberry bowl while gunfire flickers in the window.",
+    "but": "Belgium, 18 June 1815: Napoleon on his grey before his columns, Wellington's red lines on the far ridge, the Prussians beaten two days earlier somewhere east.",
+    "then": "A day earlier Napoleon sent Grouchy and over thirty thousand men after the Prussians; rain all night, Napoleon waits for the mud to dry.",
+    "conflict": "Grouchy at breakfast; the rumble from the west; Gerard: 'Marshal, we must march to the guns!' Grouchy: 'My orders are to follow the Prussians.'",
+    "pivot": "Now, what if Grouchy had turned around? The sand table: the GROUCHY block turns toward WATERLOO while the hourglass runs out: TOO LATE? (some historians say he would have arrived too late anyway).",
+    "so": "So the strawberries probably didn't change the war: Austrian and Russian armies were already marching on France.",
+    "closing": "Just which village gave us 'meet your Waterloo': one strawberry on a wall, the village sign WATERLOO at sunset."
+  },
+  "seed": { "what": "Grouchy and his bowl of strawberries at breakfast", "first_line": 0 },
+  "locations": [
+    { "id": "breakfast-dawn", "set": "Room (warm), the notary's breakfast room at Walhain, candle, window with distant flashes", "colour": "amber and red" },
+    { "id": "ridges", "set": "FieldSet morning / valley (this folder): two ridges, French columns, British lines, hero field gun", "colour": "green and gold with blue and red" },
+    { "id": "road", "set": "FieldSet overcast / plain: the road east, the column marching off", "colour": "grey olive" },
+    { "id": "bivouac", "set": "FieldSet storm / plain with mud, rain, campfire, the gun sunk in mud; night drifting to grey dawn", "colour": "blue-grey" },
+    { "id": "breakfast-day", "set": "Room (daylight) with sunbeams through the window, the strawberries hop", "colour": "cream yellow" },
+    { "id": "garden", "set": "FieldSet garden / plain: garden wall, pear tree, smoke over the western horizon", "colour": "fresh green and sky blue" },
+    { "id": "wavre", "set": "FieldSet smoke / river: the Dyle bridge, barricade, rear guard, Prussian columns on the hills", "colour": "smoky olive" },
+    { "id": "crest", "set": "FieldSet golden / slope: Blucher rears, the Prussian columns pour over the crest", "colour": "gold and black" },
+    { "id": "ridge-dusk", "set": "FieldSet dusk / valley: Wellington, the Guard climbs into the volley smoke and breaks", "colour": "dusk orange-red" },
+    { "id": "sand-table", "set": "Room (dream): the what-if sand table with labelled blocks and an hourglass", "colour": "violet" },
+    { "id": "frontier", "set": "FieldSet frost / plain: Austrian and Russian columns behind the FRANCE post", "colour": "pale ice blue and white" },
+    { "id": "waterloo", "set": "FieldSet sunset / plain: the domed chapel, cottages, the village sign, a strawberry on a wall", "colour": "rose and violet" }
+  ],
+  "characters": [
+    { "id": "grouchy", "look": "Marshal Grouchy: grey hair, blue coat, black hat" },
+    { "id": "napoleon", "look": "Napoleon: dark hair, grey greatcoat, black hat, on a grey horse" },
+    { "id": "gerard", "look": "General Gerard: dark hair and beard, blue coat" },
+    { "id": "blucher", "look": "Blucher: white hair and whiskers, dark blue coat, black hat, on a black horse" },
+    { "id": "wellington", "look": "Wellington: brown hair, dark blue coat, black hat, on a chestnut horse" },
+    { "id": "gunner", "look": "A French gunner with a beard in a blue coat" },
+    { "id": "historian", "look": "A historian with glasses and grey hair in a plum jacket" }
+  ],
+  "gags": [
+    { "line": 3, "what": "The gunner shoves the cannon stuck in the mud, slips and lands on his backside with a splash" },
+    { "line": 4, "what": "The cannon rumble makes the strawberries hop; one bounces out of the bowl and plops into Grouchy's coffee" },
+    { "line": 8, "what": "Blucher's black charger rears as he roars 'Forward! Faster!'" }
+  ],
+  "story_numbers": ["one (strawberry)", "two (armies on screen)"],
+  "format_note": "Strawberries are drawn about twice their real size so they read on a phone. The armies are toy-like instanced battalions at cartoon scale; looks of all characters are illustrative. The sand table is a what-if illustration, not a real map."
+}

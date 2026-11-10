@@ -1,0 +1,41 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true Cold War thriller, brisk and tense, never calm.",
+      "seed": 7,
+      "tempo": 1.38
+    },
+    "officer": {
+      "voice": "Aiden",
+      "instruct": "A young Soviet duty officer in a bunker, panicked and urgent, almost shouting over an alarm.",
+      "seed": 11,
+      "tempo": 1.15
+    },
+    "petrov": {
+      "voice": "Eric",
+      "instruct": "A calm, firm military officer under huge pressure, steady and decisive, quietly certain.",
+      "seed": 5,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "In nineteen eighty-three, a computer told one Soviet officer that American missiles were coming. He decided the computer was wrong." },
+    { "speaker": "narrator", "text": "September twenty-sixth, just after midnight. A secret bunker outside Moscow." },
+    { "speaker": "narrator", "text": "Lieutenant Colonel Stanislav Petrov is on watch. Weeks earlier, Soviet jets shot down a Korean airliner. Moscow fears an American first strike." },
+    { "speaker": "narrator", "text": "Then the siren. One American missile, launched. Then another. Then five." },
+    { "speaker": "officer", "text": "Comrade Petrov! What do we report?" },
+    { "speaker": "narrator", "text": "His job: pass it up the chain. Moscow would have minutes to decide." },
+    { "speaker": "narrator", "text": "You see, a real first strike wouldn't be five missiles. It would be hundreds." },
+    { "speaker": "narrator", "text": "And ground radar had nothing to confirm yet." },
+    { "speaker": "petrov", "text": "False alarm. Report a system fault." },
+    { "speaker": "narrator", "text": "Then he waits. Minutes pass." },
+    { "speaker": "officer", "text": "Still nothing, sir." },
+    { "speaker": "narrator", "text": "The satellite had mistaken sunlight glinting off high clouds for rocket fire.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "Now, what if he'd reported an attack? His warning would have climbed to the Kremlin." },
+    { "speaker": "narrator", "text": "Would they have fired? Some say other checks would have stopped it. Nobody wants to find out." },
+    { "speaker": "narrator", "text": "His reward? No medal back then. A reprimand, he said, over paperwork. The story stayed secret for fifteen years." },
+    { "speaker": "narrator", "text": "Petrov later called it fifty-fifty. He bet the computer was wrong. And he was right." }
+  ]
+}

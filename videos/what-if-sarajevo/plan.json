@@ -1,0 +1,50 @@
+{
+  "title": "What If the Archduke's Driver Had Known the Way?",
+  "topic": "What if Archduke Franz Ferdinand's driver had known the route? (Sarajevo, 28 June 1914)",
+  "mechanism": "A route change nobody passed to the drivers sent the Archduke's car into a wrong turn at the Latin Bridge; reversing, it stood still right beside Gavrilo Princip, and the killing set off the alliance chain (Austria-Serbia-Russia-Germany-France) into World War One.",
+  "beats": {
+    "hook": "A driver took one wrong turn, and stopped right in front of an assassin: one continuous push from the river wall onto the green open car standing at the corner, a young man at the delicatessen door.",
+    "but": "That morning a bomb is thrown; it bounces off the folded top and blows up under the next car.",
+    "then": "The plot seems dead; Princip drifts to a street corner; the Archduke changes plans to visit the wounded.",
+    "conflict": "Nobody tells the drivers: the lead car turns down the old route, his driver follows, the governor shouts 'Wrong way! Stop!'; the car stops a few steps from Princip; two shots.",
+    "pivot": "You see, Austria blamed Serbia and declared war one month later; Russia, Germany and France fall in line like labelled dominoes on a map table.",
+    "so": "Within a week most of Europe was at war; a counter turns toward twenty million and four crowns topple. Now, what if the driver had known? The car speeds past the corner.",
+    "closing": "Would war have come anyway? Many historians think so, but not that day; it came down to one wrong turn."
+  },
+  "seed": {
+    "what": "Gavrilo Princip standing at the delicatessen corner by the Latin Bridge, and the green open car",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "corner", "set": "SarajevoSet (new, guide/references/sarajevo-1914.md): the Latin Bridge corner, golden morning", "colour": "warm gold and cream" },
+    { "id": "quay", "set": "SarajevoSet: Appel Quay with crowds, flags and the river", "colour": "sky blue and river green" },
+    { "id": "bomb", "set": "SarajevoSet: further along the quay, the bomb and its smoke", "colour": "smoke grey and flash orange" },
+    { "id": "deli", "set": "SarajevoSet: the side street pavement in the shade of the green deli awning", "colour": "cool teal green" },
+    { "id": "townhall", "set": "Room: Town Hall reception room, Moorish stripes, map on a table", "colour": "red and gold" },
+    { "id": "drivers", "set": "SarajevoSet: the striped Town Hall facade with the cars waiting", "colour": "ochre and terracotta" },
+    { "id": "bridge", "set": "SarajevoSet: high over the Latin Bridge corner, the cars turning", "colour": "pale stone and blue water" },
+    { "id": "stop", "set": "SarajevoSet: the side street at the deli, the car stopped, cold grade", "colour": "cold blue-grey" },
+    { "id": "maproom", "set": "Room: dark map room, labelled domino blocks on a map table, wall calendar", "colour": "night blue" },
+    { "id": "crowns", "set": "Room: crimson velvet hall, a big mechanical counter and four crowns", "colour": "crimson and purple" },
+    { "id": "whatif", "set": "SarajevoSet: the corner in a violet dream light, the car speeding past", "colour": "violet" },
+    { "id": "dusk", "set": "SarajevoSet: the corner at dusk, a lamplighter lights the gas lamp", "colour": "orange dusk" }
+  ],
+  "characters": [
+    { "id": "archduke", "look": "Franz Ferdinand: light blue general's tunic, big moustache, a dark green general's hat with a tall green plume" },
+    { "id": "sophie", "look": "Sophie: long white dress, white wide hat" },
+    { "id": "driver", "look": "Leopold Lojka (unnamed on screen): dark grey chauffeur's coat, peaked cap-free, moustache" },
+    { "id": "governor", "look": "Oskar Potiorek: dark blue-grey general's tunic, grey hair" },
+    { "id": "princip", "look": "Gavrilo Princip: thin young man, dark suit, small dark hat" },
+    { "id": "bomber", "look": "A young man in a brown jacket (Čabrinović, not named in the script)" },
+    { "id": "crowd", "look": "Townsfolk along the kerb: fez, shirts, women in long skirts" },
+    { "id": "lamplighter", "look": "Lamplighter in a blue work jacket with a long pole" }
+  ],
+  "gags": [
+    { "line": 4, "what": "The bomb bounces off the folded-back top like a ball and rolls back under the next car" },
+    { "line": 7, "what": "The drivers wait outside the Town Hall: the driver dozes with a newspaper over his face that flutters as he snores" },
+    { "line": 13, "what": "Four crowns topple off their cushions one after another" },
+    { "line": 14, "what": "The car speeds past the corner and the draught blows Princip's hat off" }
+  ],
+  "story_numbers": ["one (wrong turn)", "two (shots)", "a few (steps)", "one (month)"],
+  "format_note": "The car is drawn at cartoon scale next to 1.3 m puppets. The governor rides in the front seat beside the driver so he can shout at him in one frame (illustrative)."
+}

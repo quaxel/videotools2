@@ -1,0 +1,40 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling an astonishing true sea adventure, brisk and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.45
+    },
+    "sailor": {
+      "voice": "Aiden",
+      "instruct": "A rough, exhausted fifteenth-century sailor at sea, angry and desperate, shouting at his captain.",
+      "seed": 11,
+      "tempo": 1.15
+    },
+    "lookout": {
+      "voice": "Dylan",
+      "instruct": "A young sailor high in the rigging at night, suddenly seeing land, bursting with joy, shouting at the top of his lungs.",
+      "seed": 5,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "Columbus lied to his own crew about how far they'd sailed. It still almost wasn't enough." },
+    { "speaker": "narrator", "text": "September, fourteen ninety-two. Three small ships sail west from the Canary Islands.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "You see, Columbus keeps two counts of distance: a true one, and a shorter one for the crew, so they won't panic." },
+    { "speaker": "narrator", "text": "Weeks pass. No land." },
+    { "speaker": "narrator", "text": "October tenth. The crew has had enough." },
+    { "speaker": "sailor", "text": "Admiral, turn back!" },
+    { "speaker": "narrator", "text": "His log, known only from a friar's summary, says he calmed them. Some later writers say he made a deal: three more days." },
+    { "speaker": "narrator", "text": "Next day, the sea sends clues. A carved stick. A branch with berries." },
+    { "speaker": "sailor", "text": "Look! Someone carved this!" },
+    { "speaker": "narrator", "text": "Two in the morning, October twelfth, a lookout shouts." },
+    { "speaker": "lookout", "text": "Land! Land!" },
+    { "speaker": "narrator", "text": "Now, what if they had turned back? Someone else would almost certainly have crossed. Portugal reached Brazil in fifteen hundred." },
+    { "speaker": "narrator", "text": "But this crossing started the great swap. Potatoes and chocolate went east. Smallpox went west, and with war and slavery, killed most of the Americas' native people." },
+    { "speaker": "narrator", "text": "A lie, one tense night, and a few twigs. That's how close they came to turning around." },
+    { "speaker": "narrator", "text": "And the lookout's reward? Columbus said he'd seen a light first, and kept it." }
+  ]
+}

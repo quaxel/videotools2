@@ -1,0 +1,42 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling an astonishing true science story, brisk and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.5
+    },
+    "dino": {
+      "voice": "Eric",
+      "instruct": "A big, gentle, slow-witted dinosaur looking up at the sky, puzzled and a little worried, deep and slow.",
+      "seed": 5,
+      "tempo": 1.05
+    },
+    "mammal": {
+      "voice": "Vivian",
+      "instruct": "A tiny nervous furry animal peeking out of its burrow, whispering quickly, timid and hopeful.",
+      "seed": 9,
+      "tempo": 1.15
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "The asteroid that killed the giant dinosaurs may have hit one of the unluckiest spots on Earth." },
+    { "speaker": "narrator", "text": "Sixty-six million years ago, a rock six miles wide or more slams into what is now Mexico." },
+    { "speaker": "dino", "text": "Why is the sky so bright?" },
+    { "speaker": "narrator", "text": "It lands in a shallow sea, on rock packed with sulfur and buried oil.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "You see, the blast flung dust and sulfur high into the sky. Some scientists add soot from burning oil. Sunlight dimmed. The planet went cold." },
+    { "speaker": "narrator", "text": "Plants died. Then the plant eaters. Then the meat eaters." },
+    { "speaker": "narrator", "text": "About three quarters of all species vanished." },
+    { "speaker": "narrator", "text": "In two thousand seventeen, two Japanese scientists mapped that oily rock worldwide." },
+    { "speaker": "narrator", "text": "They found it covers only about thirteen percent of Earth's surface." },
+    { "speaker": "narrator", "text": "Anywhere in the other eighty-seven percent, their model says, the cooling is far milder." },
+    { "speaker": "narrator", "text": "The giant dinosaurs might have made it through." },
+    { "speaker": "narrator", "text": "Other scientists say the dust and sulfur alone were enough. Nobody can rerun the test." },
+    { "speaker": "narrator", "text": "Our ancestors? Small furry animals, most no bigger than a rat." },
+    { "speaker": "mammal", "text": "Is it safe yet?" },
+    { "speaker": "narrator", "text": "With the giants gone, mammals got the planet. They grew. They spread." },
+    { "speaker": "narrator", "text": "Today, one of their descendants is watching this video." },
+    { "speaker": "narrator", "text": "Unlucky spot for the dinosaurs. Lucky for you." }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a dramatic true history what-if, brisk, punchy and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.55
+    },
+    "gerard": {
+      "voice": "Aiden",
+      "instruct": "A young army general bursting into a room, urgent and pleading, almost shouting at his commander.",
+      "seed": 11,
+      "tempo": 1.3
+    },
+    "grouchy": {
+      "voice": "Eric",
+      "instruct": "A stiff, stubborn army marshal refusing an argument, firm, cold and final.",
+      "seed": 5,
+      "tempo": 1.4
+    },
+    "blucher": {
+      "voice": "Uncle_Fu",
+      "instruct": "A fierce old cavalry general on horseback roaring at his troops, gruff and fired up.",
+      "seed": 2,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "Napoleon's best chance at Waterloo may have been sitting at breakfast, eating strawberries."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Belgium, June eighteenth, eighteen fifteen. Napoleon, back from exile, has a new army. In front of him, Wellington. Somewhere east, the Prussians, beaten two days earlier."
+    },
+    {
+      "speaker": "narrator",
+      "text": "A day earlier, Napoleon sent Marshal Grouchy and over thirty thousand men after the Prussians, to keep them away."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It rains all night. Napoleon waits for the mud to dry, giving the Prussians time."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Miles away, Grouchy is at breakfast. Strawberries, the story goes. Then a low rumble, from the west. Cannons."
+    },
+    {
+      "speaker": "gerard",
+      "text": "Marshal, we must march to the guns!"
+    },
+    {
+      "speaker": "grouchy",
+      "text": "My orders are to follow the Prussians."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So he keeps chasing, into a rear guard at Wavre. Most Prussians have already slipped away toward Waterloo."
+    },
+    {
+      "speaker": "blucher",
+      "text": "Forward! Faster!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "By late afternoon, they crash into Napoleon's side."
+    },
+    {
+      "speaker": "narrator",
+      "text": "His last attack breaks. His army runs."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Wellington called it the nearest run thing you ever saw."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Now, what if Grouchy had turned around? Some historians say he'd have arrived too late anyway."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Even winning that day probably wouldn't have saved Napoleon. Austrian and Russian armies were already marching on France."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Most historians think he'd still have lost, just somewhere else."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So the strawberries probably didn't change the war. Just which village gave us \"meet your Waterloo.\""
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true history mystery with a twist, brisk, excited and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.38
+    },
+    "fleming": {
+      "voice": "Eric",
+      "instruct": "A quiet Scottish scientist in his forties peering at a dish, mildly puzzled and intrigued, dry and understated.",
+      "seed": 5,
+      "tempo": 1.0
+    },
+    "oxford": {
+      "voice": "Aiden",
+      "instruct": "A young scientist in a lab bursting with joy at a breakthrough, breathless and thrilled.",
+      "seed": 11,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "Before penicillin, an infected scratch could kill you. Then one scientist left a messy bench and went on holiday." },
+    { "speaker": "narrator", "text": "London, nineteen twenty-eight. Alexander Fleming grows the germs that cause boils and blood poisoning." },
+    { "speaker": "narrator", "text": "That August he goes on holiday, leaving his germ dishes on the bench, not in the warm incubator." },
+    { "speaker": "narrator", "text": "September third, he's back." },
+    { "speaker": "fleming", "text": "That's funny." },
+    { "speaker": "narrator", "text": "A blue-green mould has landed on one dish. And all around it, the germs are dead.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "You see, the mould was making a chemical that kills bacteria. He called it penicillin." },
+    { "speaker": "narrator", "text": "But Fleming couldn't turn it into a usable medicine." },
+    { "speaker": "narrator", "text": "Twelve years later, a team at Oxford finally did, in tiny amounts." },
+    { "speaker": "oxford", "text": "It works!" },
+    { "speaker": "narrator", "text": "Then American factories scaled it up. By D-Day, there were over two million doses." },
+    { "speaker": "narrator", "text": "Now, what if he'd tidied them into the incubator?" },
+    { "speaker": "narrator", "text": "One expert argued the germs would have grown first, and the mould would have done nothing." },
+    { "speaker": "narrator", "text": "Maybe someone else finds it, but not in time for the war." },
+    { "speaker": "narrator", "text": "By some estimates, penicillin and the antibiotics it inspired have saved hundreds of millions of lives." },
+    { "speaker": "narrator", "text": "Maybe someone in your family tree. All thanks to one messy bench." }
+  ]
+}

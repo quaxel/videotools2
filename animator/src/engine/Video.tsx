@@ -55,7 +55,7 @@ const useFramingTable = (slug: string) => {
 // Stage; `true`, or the parts to change, e.g. `{ lens: false }`. Videos made before it existed leave it off to keep their look.
 // `steady` (default off): the camera glides (rules.md → camera): no settle after a cut, a fifth of the hand-held drift.
 // New videos pass it; older ones leave it off and keep their hand-held look.
-export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean | Partial<PostParts>; steady?: boolean; score?: boolean; voiceVolume?: number; captions?: boolean }> = ({
+export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx: Sfx[]; music: MusicCue[]; lighting?: boolean; post?: boolean | Partial<PostParts>; steady?: boolean; score?: boolean; voiceVolume?: number; captions?: boolean; dip?: string }> = ({
   slug,
   timing,
   shots,
@@ -67,6 +67,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   score = false,
   voiceVolume = 1,
   captions = true,
+  dip,
 }) => {
   const framing = useFramingTable(slug);
   // `soundOnly` (input prop, scripts/sound.mjs): the soundtrack alone, without mounting a single 3D shot.
@@ -82,7 +83,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
     {!soundOnly && (
       <VideoContext.Provider value={{ timing, sfx, lighting, post, steady, framing }}>
-        <ShotList shots={shots} />
+        <ShotList shots={shots} dip={dip} />
       </VideoContext.Provider>
     )}
     {/* `stem` (input prop, `pipeline.py mix`): one part of the soundtrack alone, at its mix gain (the stems sum to the mix) */}

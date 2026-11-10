@@ -1,0 +1,46 @@
+{
+  "title": "The Gentleman Bandit Caught by His Laundry",
+  "topic": "The Gentleman Bandit Caught by His Laundry",
+  "mechanism": "City laundries stamped a private code on every customer's linen and kept a book of who owned each code, so one marked handkerchief (F.X.O.7) dropped at a robbery led the detectives straight to the bandit's name.",
+  "beats": {
+    "hook": "He robbed twenty-eight stagecoaches, and he was finally caught by his laundry: the camera glides down a dusty road onto a halted coach and a gentleman with a sack over his head.",
+    "but": "He never fired a shot, left poems, and nobody ever saw his face; the detectives had nothing.",
+    "then": "By day he was Charles Bolton, a gentleman in mining with fine white shirts.",
+    "conflict": "In 1883 a young man fires at him; he is barely grazed, flees, and drops a handkerchief in the bushes.",
+    "pivot": "You see, every city laundry stamped its own code on your linen and kept a book of codes and customers.",
+    "so": "So the detectives carry the handkerchief from laundry to laundry until a clerk reads the code: Mister Bolton.",
+    "closing": "Twenty-eight robberies without a single shot, undone by one dirty handkerchief."
+  },
+  "seed": {
+    "what": "Bart's white handkerchief, tucked in his breast pocket from the first shot",
+    "first_line": 1
+  },
+  "locations": [
+    { "id": "road", "set": "GoldCountrySet (new, day)", "colour": "golden ochre" },
+    { "id": "ridge", "set": "GoldCountrySet hilltop with pines (day)", "colour": "pine green and sky blue" },
+    { "id": "office", "set": "Room: detectives' office, lamplight", "colour": "dark bottle green" },
+    { "id": "hotel", "set": "Room: Bolton's hotel room, morning light", "colour": "cream and powder blue" },
+    { "id": "funkhill", "set": "GoldCountrySet (dusk)", "colour": "sunset red-orange" },
+    { "id": "bush", "set": "GoldCountrySet macro on the ground (dusk)", "colour": "olive green" },
+    { "id": "laundry", "set": "Room: laundry workroom, steam", "colour": "white and teal" },
+    { "id": "street", "set": "WesternTownSet as a foggy city street", "colour": "grey-blue fog" },
+    { "id": "counter", "set": "Room: laundry front counter", "colour": "warm yellow" },
+    { "id": "door", "set": "Room: hotel corridor", "colour": "deep red" },
+    { "id": "closing", "set": "Room: detectives' office at night", "colour": "violet night" }
+  ],
+  "characters": [
+    { "id": "bart", "look": "Grey hair, white moustache and beard, black derby, long dark coat; as the bandit a flour sack over his head with eye holes and a shotgun" },
+    { "id": "driver", "look": "Stage driver: wide hat, beard, red kerchief, buckskin jacket" },
+    { "id": "hume", "look": "Detective: bowler, brown suit, moustache" },
+    { "id": "morse", "look": "Detective: grey suit, bowler, beard" },
+    { "id": "laundryman", "look": "Clerk: white shirt, sleeve garters, apron" },
+    { "id": "rolleri", "look": "Young man: straw boater, suspenders, rifle" }
+  ],
+  "gags": [
+    { "line": 2, "what": "The driver throws the heavy strongbox down; it lands on Bart's foot, he hops politely" },
+    { "line": 7, "what": "The shot goes off, Bart leaps out of the bushes, his derby flies off and he scrambles away on all fours" },
+    { "line": 10, "what": "The laundry stamp slams down, a puff of steam blasts a shirt into the clerk's face" },
+    { "line": 15, "what": "Bart, in his dressing gown, opens the door with a teacup; the cup rattles off the saucer" }
+  ],
+  "story_numbers": ["four (tiny marks)", "one (handkerchief)"]
+}

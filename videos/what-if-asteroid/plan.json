@@ -1,0 +1,49 @@
+{
+  "title": "What If the Dinosaur Asteroid Had Hit Somewhere Else?",
+  "topic": "What if the dinosaur-killing asteroid had hit somewhere else? (Chicxulub, Kaiho & Oshima 2017)",
+  "mechanism": "The Chicxulub asteroid struck a shallow sea on rock rich in sulfur and hydrocarbons; the blast lofted dust, sulfate and (some scientists add) soot from the burning oil, which dimmed the sun and froze the planet. Kaiho and Oshima's 2017 map and model say only about 13 % of Earth's surface has rock oily enough to make that much soot, so almost anywhere else the cooling would have been far milder; other scientists say the dust and sulfur alone were enough.",
+  "beats": {
+    "hook": "The asteroid that killed the giant dinosaurs may have hit one of the unluckiest spots on Earth: one push through the Cretaceous valley onto the T. rex while a bright streak crosses the sky.",
+    "but": "Sixty-six million years ago a rock six miles wide or more slams into what is now Mexico; the dinosaur asks why the sky is so bright.",
+    "then": "It lands in a shallow sea on rock packed with sulfur and buried oil (the cut-away seabed with SULFUR and OIL).",
+    "conflict": "Dust, sulfur and soot darken the sky, the planet goes cold; plants, plant eaters and meat eaters die; three quarters of species vanish.",
+    "pivot": "You see ... (the blast flung dust and sulfur high; soot from the burning oil). Then the 2017 globe: the oily rock covers only about 13 % of the surface; anywhere in the other 87 % their model's cooling is far milder.",
+    "so": "So the giant dinosaurs might have made it through; other scientists say the dust and sulfur alone were enough; nobody can rerun the test. Our tiny furry ancestors got the planet, grew and spread.",
+    "closing": "Today one of their descendants is watching this video. Unlucky spot for the dinosaurs. Lucky for you."
+  },
+  "seed": {
+    "what": "The little furry mammal peeking from its burrow under the ferns (the survivor the ending depends on), and the OIL seam under the seabed",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "valley", "set": "CretaceousSet day: river floodplain, conifers, ferns, cycads", "colour": "warm green and gold" },
+    { "id": "space", "set": "Space: the Earth from orbit with the asteroid streaking toward the Gulf of Mexico", "colour": "black and deep blue" },
+    { "id": "shore-flash", "set": "CretaceousSet at the shore, sky blown white-yellow by the fireball", "colour": "white yellow" },
+    { "id": "seabed", "set": "Cut-away shallow sea: turquoise water over layered rock with SULFUR and OIL seams", "colour": "turquoise" },
+    { "id": "dark-sky", "set": "CretaceousSet after the impact: dust and soot, the sun a dim red disc", "colour": "brown grey and red" },
+    { "id": "cold", "set": "CretaceousSet frozen: frost, falling ash-snow, brown ferns", "colour": "cold blue grey" },
+    { "id": "lab-2017", "set": "Room: a Japanese university lab, desk, maps, monitor", "colour": "cream and wood" },
+    { "id": "globe", "set": "Room: a big globe on a stand with the 13 % oily rock painted dark, labelled", "colour": "navy and sea blue" },
+    { "id": "dream", "set": "CretaceousSet re-lit as a purple what-if dream: dinosaurs alive and munching", "colour": "purple" },
+    { "id": "debate", "set": "Room: a lecture desk with a RERUN button under glass", "colour": "red and amber" },
+    { "id": "burrow", "set": "Cut-away burrow under the ferns, then up into a green new world full of mammals", "colour": "earth brown then fresh green" },
+    { "id": "living-room", "set": "Room: modern living room at night, a viewer on the couch with a phone", "colour": "teal and lamp orange" }
+  ],
+  "characters": [
+    { "id": "dino", "look": "Friendly green T. rex (sand3d model), big eyes, tiny arms" },
+    { "id": "sauropod", "look": "Friendly blue long-neck plant eater (sand3d model)" },
+    { "id": "mammal", "look": "Small brown furry shrew-like mammal with big ears (sand3d model)" },
+    { "id": "kaiho", "look": "Japanese professor: grey hair, glasses, white lab coat" },
+    { "id": "oshima", "look": "Japanese climate scientist: black hair, navy jacket" },
+    { "id": "critic", "look": "Geophysicist: brown hair, beard, field vest" },
+    { "id": "viewer", "look": "Modern young viewer in a hoodie, on a couch with a phone" }
+  ],
+  "gags": [
+    { "line": 0, "what": "The little mammal pops out of its burrow, sees the T. rex foot stomp beside it and ducks back in (dust)" },
+    { "line": 6, "what": "A row of four snowy dinosaur statues: three topple over into the snow one after another (dust puffs)" },
+    { "line": 11, "what": "The critic slaps the RERUN button under glass: the glass lid snaps shut on his hand / the button pops off with a spark" },
+    { "line": 13, "what": "The mammal peeks out asking 'Is it safe yet?', a frost clump drops on its nose, it shakes it off and climbs out" }
+  ],
+  "format_note": "The mammal is drawn about 3x real size in close shots so it reads on a phone (real size: no bigger than a rat). The asteroid is not to scale in the space shot.",
+  "story_numbers": ["one of (the unluckiest spots)", "two (Japanese scientists)", "three of four statues"]
+}

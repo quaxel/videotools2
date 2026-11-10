@@ -1,0 +1,42 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true history what-if, brisk and tense, never calm.",
+      "seed": 7,
+      "tempo": 1.45
+    },
+    "crowd": {
+      "voice": "Eric",
+      "instruct": "A man in a street crowd shouting a sudden alarm, loud and frightened.",
+      "seed": 5,
+      "tempo": 1.1
+    },
+    "governor": {
+      "voice": "Uncle_Fu",
+      "instruct": "An alarmed army general shouting at his driver, sharp and urgent.",
+      "seed": 2,
+      "tempo": 1.15
+    }
+  },
+  "lines": [
+    { "speaker": "narrator", "text": "A driver took one wrong turn, and stopped right in front of an assassin." },
+    { "speaker": "narrator", "text": "Sarajevo, June twenty-eighth, nineteen fourteen. Archduke Franz Ferdinand, heir to the throne, rides in an open car." },
+    { "speaker": "narrator", "text": "That morning, a young man throws a bomb." },
+    { "speaker": "crowd", "text": "Bomb!" },
+    { "speaker": "narrator", "text": "It bounces off and blows up under the next car." },
+    { "speaker": "narrator", "text": "The plot seems dead. Another plotter, nineteen-year-old Gavrilo Princip, drifts to a street corner." },
+    { "speaker": "narrator", "text": "The Archduke changes plans. He'll visit the wounded in hospital." },
+    { "speaker": "narrator", "text": "But nobody tells the drivers." },
+    { "speaker": "narrator", "text": "The car in front turns down the old route. His driver follows." },
+    { "speaker": "governor", "text": "Wrong way! Stop!" },
+    { "speaker": "narrator", "text": "The driver brakes to reverse. It stops, a few steps from Princip." },
+    { "speaker": "narrator", "text": "Two shots. The Archduke and his wife Sophie are killed.", "pauseAfter": 0.4 },
+    { "speaker": "narrator", "text": "You see, Austria blamed Serbia, and declared war one month later. Russia backed Serbia. Germany backed Austria. France backed Russia." },
+    { "speaker": "narrator", "text": "Within a week, most of Europe was at war. About twenty million would die. Four empires would fall." },
+    { "speaker": "narrator", "text": "Now, what if the driver had known? The car speeds past, and Princip probably never gets his shot." },
+    { "speaker": "narrator", "text": "Would war have come anyway? Many historians think so. But not that day, and not from that spark." },
+    { "speaker": "narrator", "text": "And that spark came down to one wrong turn." }
+  ]
+}

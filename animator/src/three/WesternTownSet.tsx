@@ -19,8 +19,8 @@ type Vec3 = [number, number, number];
 export const STREET = { half: 3.0, walk: 1.25, front: 4.35, end: -34 };
 export const SUN_POS: Vec3 = [0.25, 3.0, -30]; // the shadow light (low, slightly left of the street axis)
 export const DUSK_BG = "#3a1d2a";
-export type TownMode = "sunset" | "dusk" | "night";
-export const TOWN_BG: Record<TownMode, string> = { sunset: "#3a1d2a", dusk: "#2a2040", night: "#0e1220" };
+export type TownMode = "sunset" | "dusk" | "night" | "fog" | "day";
+export const TOWN_BG: Record<TownMode, string> = { sunset: "#3a1d2a", dusk: "#2a2040", night: "#0e1220", fog: "#9aa4b0", day: "#7aa8e0" };
 // The undertaker's blade sign hangs under his porch roof on two chains (right side of the street).
 export const SIGN = { x: 3.35, y: 1.9, z: -0.9 };
 
@@ -29,6 +29,8 @@ export const townLight = (mode: TownMode, lantern?: Vec3): PuppetLight => {
   const lamp = lantern ? [{ position: lantern, color: "#ffb860", strength: 2.6, range: 2.2 }] : [];
   if (mode === "dusk")
     return { tint: "#b8a0e0", tintAmount: 0.12, shadow: 0.3, points: lamp, distant: [{ direction: [-0.08, 0.2, -1], color: "#ff8a70", strength: 1.2 }, { direction: [0.3, 0.6, 1], color: "#7a70d8", strength: 0.5 }] };
+  if (mode === "day") return { tint: "#fff4e0", tintAmount: 0.06, shadow: 0.16, points: lamp, distant: [{ direction: [-0.6, 0.8, 0.5], color: "#fff2d8", strength: 1.1 }] };
+  if (mode === "fog") return { tint: "#e0e8f0", tintAmount: 0.1, shadow: 0.16, points: lamp, distant: [{ direction: [-0.5, 0.8, 0.5], color: "#f4f8ff", strength: 0.9 }] };
   if (mode === "night")
     return { tint: "#7088c8", tintAmount: 0.22, shadow: 0.45, points: lamp, distant: [{ direction: [-0.4, 0.6, -0.7], color: "#9ab4ff", strength: 1.4 }] };
   return { ...duskLight(), points: lamp };
@@ -52,7 +54,7 @@ const rand = (i: number) => {
 // ---------- painted backdrops (Codex image generation) ----------
 
 const loader = new THREE.TextureLoader();
-const useImage = (src: string, key?: string) => {
+export const useImage = (src: string, key?: string) => {
   const [tex, setTex] = useState<THREE.Texture | null>(null);
   const [handle] = useState(() => delayRender(`Loading backdrop ${src}`));
   const advance = useThree((s) => s.advance);
@@ -100,16 +102,18 @@ const useImage = (src: string, key?: string) => {
   return tex;
 };
 
-const SKY: Record<TownMode, { sky: string; rocks: string; tint?: string; horizon: number }> = {
+const SKY: Record<TownMode, { sky: string; rocks?: string; tint?: string; horizon: number }> = {
   sunset: { sky: "backdrops/western/sky.png", rocks: "backdrops/western/rocks.png", horizon: 0.8 },
   dusk: { sky: "backdrops/western/dusk.png", rocks: "backdrops/western/rocks.png", tint: "#8a78b0", horizon: 0.97 },
   night: { sky: "backdrops/western/night.png", rocks: "backdrops/western/rocks_night.png", horizon: 0.97 },
+  fog: { sky: "backdrops/goldcountry/sf_fog.png", horizon: 0.98 },
+  day: { sky: "backdrops/northfield/day.png", horizon: 0.91 }, // a Minnesota river town on a late-summer afternoon (Northfield) // a foggy city morning: the town as a San Francisco street
 };
 
 const Backdrops: React.FC<{ camX: number; mode: TownMode }> = ({ camX, mode }) => {
   const m = SKY[mode];
   const sky = useImage(m.sky);
-  const rocks = useImage(m.rocks, "green");
+  const rocks = useImage(m.rocks ?? m.sky, "green");
   return (
     <>
       {sky && (
@@ -119,7 +123,7 @@ const Backdrops: React.FC<{ camX: number; mode: TownMode }> = ({ camX, mode }) =
           <meshBasicMaterial map={sky} fog={false} toneMapped={false} depthWrite={false} />
         </mesh>
       )}
-      {rocks && (
+      {rocks && m.rocks && (
         // the strip's ground line (93 % down) on the desert floor
         <mesh position={[camX * 0.5 - 1, 0.43 * 40, -62]} renderOrder={-8}>
           <planeGeometry args={[60, 40]} />
@@ -559,6 +563,8 @@ const Motes: React.FC<{ count?: number }> = ({ count = 220 }) => {
 const LIGHTS: Record<TownMode, { fog: string; fogNear: number; ambient: [number, string]; hemi: [string, string, number]; key: [number, string]; keyPos: Vec3 }> = {
   sunset: { fog: "#f0a06a", fogNear: 18, ambient: [1.0, "#ffd0b8"], hemi: ["#9a86e0", "#b0603a", 0.55], key: [3.4, "#ffa858"], keyPos: SUN_POS },
   dusk: { fog: "#8a6aa8", fogNear: 16, ambient: [0.8, "#c8b0e8"], hemi: ["#7a6ad8", "#6a4a5a", 0.5], key: [1.3, "#ff9a80"], keyPos: SUN_POS },
+  fog: { fog: "#b8c2cc", fogNear: 6, ambient: [1.25, "#e8eef4"], hemi: ["#c8d4e0", "#7a7a80", 0.5], key: [1.0, "#f0f4ff"], keyPos: [-6, 10, 6] },
+  day: { fog: "#c8dcec", fogNear: 24, ambient: [1.2, "#ffffff"], hemi: ["#cfe4ff", "#8a7a4a", 0.55], key: [2.6, "#fff2dc"], keyPos: [-8, 12, 6] },
   night: { fog: "#1a2238", fogNear: 12, ambient: [0.42, "#8aa0e0"], hemi: ["#3a5aa8", "#1a1a26", 0.35], key: [1.1, "#a8c0ff"], keyPos: [-8, 10, -22] },
 };
 
@@ -615,7 +621,7 @@ export const WesternTownSet: React.FC<{ camera: CameraShot; frame: number; mode?
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, -60]} receiveShadow>
         <planeGeometry args={[200, 120]} />
-        <meshToonMaterial color="#c0845a" gradientMap={toonRamp} />
+        <meshToonMaterial color={mode === "day" ? "#9aa04a" : "#c0845a"} gradientMap={toonRamp} />
       </mesh>
 
       <Boardwalk side={-1} />
