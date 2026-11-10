@@ -1,0 +1,106 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true Wild West mystery, brisk and playful, never calm.",
+      "seed": 7,
+      "tempo": 1.36
+    },
+    "bart": {
+      "voice": "Eric",
+      "instruct": "An extremely polite, soft-spoken gentleman robber, calm and courteous, almost apologetic.",
+      "seed": 5,
+      "tempo": 1.1
+    },
+    "hume": {
+      "voice": "Dylan",
+      "instruct": "A frustrated, tired detective, gruff and exasperated.",
+      "seed": 3,
+      "tempo": 1.15
+    },
+    "laundryman": {
+      "voice": "Aiden",
+      "instruct": "A cheerful, chatty laundry clerk, proud of his customers, quick and friendly.",
+      "seed": 11,
+      "tempo": 1.15
+    },
+    "morse": {
+      "voice": "Uncle_Fu",
+      "instruct": "A dry, confident detective, quietly amused, savouring the moment.",
+      "seed": 2,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "He robbed twenty-eight stagecoaches, and he was finally caught by his laundry."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Meet Black Bart. A sack over his head, a shotgun he never fired."
+    },
+    {
+      "speaker": "bart",
+      "text": "Throw down the box, please."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He took the strongbox, left a poem, and vanished into the hills."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nobody ever saw his face. Detectives James Hume and Harry Morse had nothing."
+    },
+    {
+      "speaker": "hume",
+      "text": "No name, no face, no trail."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Because by day, Black Bart was Charles Bolton, a gentleman in mining with fine white shirts."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then, in eighteen eighty-three, a young man by the road fires at the running bandit."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Bart is barely grazed. But in the bushes, he leaves something behind. A handkerchief."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In one corner, four tiny marks. F, X, O, seven.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, every city laundry stamped its own code on your linen, so your shirts came back to you."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And each laundry kept a book. Code on one side, customer on the other."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So the detectives carried one handkerchief from laundry to laundry."
+    },
+    {
+      "speaker": "laundryman",
+      "text": "F, X, O, seven? That's Mister Bolton. Very clean man."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The detectives knock on the gentleman's door."
+    },
+    {
+      "speaker": "morse",
+      "text": "Good morning, Mister Bolton. Or should we say, Bart?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Twenty-eight robberies without a single shot, undone by one dirty handkerchief."
+    }
+  ]
+}

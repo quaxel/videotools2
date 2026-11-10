@@ -70,21 +70,22 @@ const Dissolve: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // Dips through cream over the DIP lead: the cream rises over the previous shot, this shot appears under it at the
 // midpoint (when the cream is opaque) and the cream clears by the cut. Same tree before, during and after.
-const Dip: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Dip: React.FC<{ children: React.ReactNode; colour?: string }> = ({ children, colour = DIP_COLOUR }) => {
   const p = Math.min(1, (useCurrentFrame() + 1) / (DIP + 1));
   const k = Math.min(1, (1 - Math.abs(2 * p - 1)) * 1.25); // holds full cream for a frame or two round the midpoint
   const cream = k * k * (3 - 2 * k);
   return (
     <AbsoluteFill>
       <AbsoluteFill style={p < 0.5 ? { opacity: 0 } : undefined}>{children}</AbsoluteFill>
-      <AbsoluteFill style={{ backgroundColor: DIP_COLOUR, opacity: p < 1 ? cream : 0 }} />
+      <AbsoluteFill style={{ backgroundColor: colour, opacity: p < 1 ? cream : 0 }} />
     </AbsoluteFill>
   );
 };
 
 // `soundOnly` (input prop: the soundtrack render, the cue dump) mounts no shot, so a preview composition's sound
 // renders as fast as a Video's.
-export const ShotList: React.FC<{ shots: Shot[] }> = ({ shots }) =>
+// `dip` (optional): the colour the "dip" transitions pass through (default cream; a dark film can dip through black).
+export const ShotList: React.FC<{ shots: Shot[]; dip?: string }> = ({ shots, dip }) =>
   (getInputProps() as { soundOnly?: boolean }).soundOnly === true ? null : (
   <>
     {shots.map(([from, to, ShotComponent, fade], i) => {
@@ -94,7 +95,7 @@ export const ShotList: React.FC<{ shots: Shot[] }> = ({ shots }) =>
       if (exits) shot = <Whip side="out" start={to - from + lead - FADE} id={`whip-out-${from}`}>{shot}</Whip>;
       if (fade === true) shot = <Whip side="in" start={0} id={`whip-in-${from}`}>{shot}</Whip>;
       if (fade === "dissolve") shot = <Dissolve>{shot}</Dissolve>;
-      if (fade === "dip") shot = <Dip>{shot}</Dip>;
+      if (fade === "dip") shot = <Dip colour={dip}>{shot}</Dip>;
       return (
         <Sequence key={from} from={from - lead} durationInFrames={to - from + lead} layout="none">
           <ShotClock.Provider value={{ from, lead, dur: to - from }}>

@@ -1,0 +1,147 @@
+{
+  "title": "What If Lincoln's Guard Had Stayed at His Door?",
+  "topic": "What if Lincoln's guard had stayed at his door? (Ford's Theatre, 14 April 1865)",
+  "mechanism": "The one policeman posted at the State Box, John Parker, was reportedly next door in the Star Saloon, so John Wilkes Booth walked up the stairs, showed a card, barred the passage door and fired under the cover of the play's biggest laugh; Andrew Johnson's presidency (pardons, vetoes of the Freedmen's Bureau and Civil Rights bills) followed.",
+  "beats": {
+    "hook": "The night Abraham Lincoln was shot, the policeman guarding his door wasn't there: a slow push down the gaslit passage onto an empty wooden chair beside the white box door.",
+    "but": "Washington, 14 April 1865, the war all but over; a crane over the packed, gaslit house up to the flag-draped State Box where Lincoln rocks beside Mary.",
+    "then": "His guard, officer John Parker, sits by the door; at intermission he reportedly heads to the saloon next door, where the barman asks 'What'll it be, officer?'; nobody knows if he came back.",
+    "conflict": "Three days earlier Lincoln backed votes for some Black men, with Booth reportedly in the crowd; just after ten Booth climbs the stairs, shows the footman a card, bars the passage door with a plank and waits for the laugh.",
+    "pivot": "Now, what if Parker had stayed? In violet what-if light Parker rises from the chair and Booth is turned away; maybe he tries another night.",
+    "so": "Instead Andrew Johnson stamps PARDON on a stack of papers and VETO on two bills; a balance weighs LINCOLN against CONGRESS as historians disagree.",
+    "closing": "Parker's neglect charge is stamped DISMISSED; one empty chair in the grey dawn passage, and a country took a different road."
+  },
+  "seed": {
+    "what": "Parker's empty wooden chair beside the white door of the State Box passage",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "passage-night",
+      "set": "PassageSet (this video's folder; guide/references/fords-theatre-1865.md): the dress circle passage, white door, empty chair, one gas bracket",
+      "colour": "dark teal"
+    },
+    {
+      "id": "house",
+      "set": "FordsSet: the gaslit auditorium, stage with footlights, the flag-draped State Box (sand3d statebox + rocker)",
+      "colour": "amber gold with red-white-blue"
+    },
+    {
+      "id": "dress-circle",
+      "set": "FordsSet: the back of the dress circle at intermission, Parker's chair by the passage door",
+      "colour": "warm cream and red"
+    },
+    {
+      "id": "saloon",
+      "set": "Room: the Star Saloon, bar, bottles, lamp; the blue street and the theatre through the window",
+      "colour": "olive green-brown"
+    },
+    {
+      "id": "white-house",
+      "set": "Room-free night set: the White House north front, Lincoln at the window with a candle, the crowd with lanterns",
+      "colour": "night blue"
+    },
+    {
+      "id": "stairs",
+      "set": "PassageSet: the crimson stairs to the dress circle, Booth backlit",
+      "colour": "crimson"
+    },
+    {
+      "id": "vestibule",
+      "set": "PassageSet: the passage door and the narrow vestibule from above, the pine bar",
+      "colour": "deep red-black"
+    },
+    {
+      "id": "stage",
+      "set": "FordsSet: the stage, footlights, the laughing house, the flash at the box, the gas going down",
+      "colour": "amber then black"
+    },
+    {
+      "id": "passage-whatif",
+      "set": "PassageSet in violet what-if light: Parker stays, Booth is turned away",
+      "colour": "violet"
+    },
+    {
+      "id": "johnson",
+      "set": "Room: Johnson's office, PARDON and VETO stamps, a balance LINCOLN / CONGRESS",
+      "colour": "bottle green"
+    },
+    {
+      "id": "hearing",
+      "set": "Room: the police board room, the charge paper stamped DISMISSED",
+      "colour": "slate blue-grey"
+    },
+    {
+      "id": "passage-dawn",
+      "set": "PassageSet at grey dawn: the empty chair, the box door ajar",
+      "colour": "grey-blue"
+    }
+  ],
+  "characters": [
+    {
+      "id": "lincoln",
+      "look": "Abraham Lincoln: black suit, dark hair, chin beard without moustache; his tall stovepipe hat on the box ledge"
+    },
+    {
+      "id": "mary",
+      "look": "Mary Todd Lincoln: long dark plum dress, dark hair"
+    },
+    {
+      "id": "parker",
+      "look": "Officer John Parker: dark navy police frock coat, brown hair, moustache-free"
+    },
+    {
+      "id": "barman",
+      "look": "The Star Saloon barman: white shirt, waistcoat, apron"
+    },
+    {
+      "id": "forbes",
+      "look": "Charles Forbes, the footman: grey livery coat"
+    },
+    {
+      "id": "booth",
+      "look": "John Wilkes Booth: black suit, black low hat, dark hair; shown mostly as a backlit silhouette"
+    },
+    {
+      "id": "actor",
+      "look": "Harry Hawk as Asa Trenchard: checked country suit, tall light hat"
+    },
+    {
+      "id": "johnson",
+      "look": "Andrew Johnson: black coat, grey-dark hair, clean-shaven"
+    },
+    {
+      "id": "audience",
+      "look": "The house: rows of theatregoers in dark coats and coloured dresses (set dressing)"
+    },
+    {
+      "id": "crowd",
+      "look": "The White House crowd with lanterns and umbrellas"
+    }
+  ],
+  "gags": [
+    {
+      "line": 3,
+      "what": "The barman slides a glass down the bar; it stops right at Parker's hand"
+    },
+    {
+      "line": 6,
+      "what": "Booth wedges the plank between the door and the wall and stamps it tight with his heel"
+    },
+    {
+      "line": 9,
+      "what": "The whole house rocks back laughing, hats bobbing, as the actor throws up his arms"
+    },
+    {
+      "line": 12,
+      "what": "Johnson's PARDON stamp slams down again and again on a growing stack of papers"
+    }
+  ],
+  "story_numbers": [
+    "one (shot)",
+    "one (empty chair)",
+    "three (days earlier)",
+    "ten (just after ten)"
+  ],
+  "format_note": "Illustrative re-enactment: faces and costumes are cartoon approximations. The pine bar and the card are drawn larger than life so they read on a phone. The White House crowd and the lantern light are illustrative of the 11 April evening."
+}

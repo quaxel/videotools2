@@ -33,8 +33,9 @@ approvals and outputs, for the user to follow or drive the pipeline.
 ## 2. Research → `../videos/<slug>/research.md`
 
 If the user gave no topic or only a broad one, first list the topics already made (`ls ../videos/`, the uploader's
-database) and propose 5 new ones that are not among them: a title, the visual hook (what moves or changes on screen),
-the escalation (but / then / so) and 2-3 hard numbers or names each, checked with a quick search. Ask which one;
+database) and propose 5 new ones that are not among them: a title, the triple hook (the visual: what moves or
+changes on screen at frame 0; the verbal: the first sentence; the text: the shot-1 headline), the escalation
+(but / then / so) and 2-3 hard numbers or names each, checked with a quick search. Ask which one;
 then scaffold.
 
 Use web search. Open the pages you cite. Write one paragraph on the mechanism, then a `## Claims` list:
@@ -46,24 +47,34 @@ do not creep back into the script.
 ## 3. Plan → `../videos/<slug>/plan.json`
 
 Fill every field: title, mechanism (one sentence), the seven beats (hook, but, then, conflict, pivot, so, closing;
-guide/rules.md → Story), the seed (what, and the index of the first
+guide/rules.md → Story), the `triple_hook` (rules.md → Story, triple hook: `visual` what is in frame and moving at
+frame 0, `verbal` the first sentence, `text` the shot-1 headline; three different jobs, none repeating another),
+the seed (what, and the index of the first
 line where it appears on screen), at least 8 locations (id, set, dominant colour; no two neighbours share a
 colour), at least 4 characters with looks, at least 2 physical gags, and `story_numbers`.
 For each mechanism idea, name the labelled physical prop that shows it.
+Set `year`: the year the story is set in (negative for BC, `[from, to]` for a span, `null` for a present-day story).
+For a story set in the past, decide each character's whole costume here, from the research: head, body, legs, feet
+and anything they carry, as worn in that year and place by that rank or trade (an 1815 marshal: bicorne, braided
+coat, breeches, boots; no bowler, no sneakers). Write it into the character's look. The scene step builds it; it
+does not choose it.
 
 ## 4. Script → `../videos/<slug>/lines.json`
 
 180-210 words, one line per sentence pair, dialogue as separate speakers (add the voice under `voices`; Qwen
 English voices: Ryan, Aiden, Eric, Dylan, Uncle_Fu male; Vivian, Serena female). No ellipses, no repeated
 one-word sentences. Only the line before the pivot ("You see ...") may carry `"pauseAfter": 0.4`. End sentences where the shots will
-change: 9-12 shots, one per location.
+change: 9-12 shots, one per location. The first line is the plan's `triple_hook.verbal`.
 
 ```bash
 .venv/bin/python scripts/pipeline.py voice <slug>
 ```
 
-It prints duration, words, wpm and each line's frame span. If duration or wpm misses, edit the lines and
-run `voice` again (unchanged lines are cached). Then show the user the script and the numbers in one short
+It prints duration, words, wpm, each line's frame span, and `speech_cover` and `long_pauses` measured on the voice
+track (target ≥ 82 % there: the final mix measures 1-2 points lower; four what-if videos missed 80 % in the report
+because nobody looked until the end). If any of them misses, edit the lines now (a few more words, a shorter
+`pauseAfter`, `tempo` +0.05 on a slow speaker) and run `voice` again (unchanged lines are cached): after the scene
+is built a re-voice moves every cut. `pipeline.py pace <slug>` re-measures without re-voicing. Then show the user the script and the numbers in one short
 message and continue unless they object; record it with `pipeline.py approve <slug> script` (after their OK, or
 once they have seen it and not objected).
 
@@ -77,8 +88,13 @@ wear, wrong scale, flat light) before fixing it.
 Reuse existing sets where they fit (`LakeSet`, `SpaceBaseSet`, `AlleySet`, `GreatWallSet`).
 
 Open with one continuous camera move onto the strange thing while the first sentence states the paradox
-(guide/rules.md → Story, Hook). On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters use
-the costume options (library.md → Puppets), never `cap`.
+(guide/rules.md → Story, Hook). Build shot 1 as the triple hook (rules.md → Story, triple hook): the strange thing
+in frame and already moving at frame 0, and the plan's `triple_hook.text` as a `Headline` with `at` ≤ 9 and `out`
+near the end of the hook. On-screen titles use `Headline` (library.md → Birds, on-screen headlines). Period characters wear
+the costume from the plan. Run the period check (library.md → Puppets, Period check) on every look: every field it
+sets, every held item and every piece the video adds, from head to feet. When the kit lacks a piece the period needs,
+build it in the video's own folder, as `src/videos/what-if-waterloo/hats.tsx` does for bicornes, rather than taking
+the nearest kit piece.
 
 Pass `post` and `steady` to `Video` (library.md → Post chain: depth of field, bloom, colour grade; `steady`: the
 camera glides, almost no hand-held drift).
@@ -95,6 +111,12 @@ sharp, the background soft. Use `Room` + kit props for new locations, and a diff
 Write each repeated action (a bite, a knock, a wave) with its own path, timing and body acting every time, and let
 rhythmic motion (chewing, walking) drift in pace and size (guide/rules.md → No action twice the same way). A seated
 puppet behind a table: top ≤ 0.45 m, hands above it.
+A puppet seated on a sofa, chair, bench or stool takes the sitting pose (`sit: true`, or `sitDown`) and sits on it,
+never stands in it with its legs inside the seat: build the seat top at `HIP_HEIGHT` (0.34 m) and place the puppet
+(`at`) at the seat's front edge, 1-3 cm in front of it, so the bent knees and shins are drawn in front of the seat and
+the feet rest on the floor. A sofa or chair placed behind the puppet's `at` hides the legs and reads as a figure
+standing inside the furniture (the user caught this on the microwave-candy-bar sofa). Check it on the first still of
+every seated shot, and keep a coffee table or desk in front clear of the feet.
 Puppets are lit by the set (library.md → Puppet lighting): leave `lighting` on. Ambient room colour does not
 change them; where a shot has a strong source (fire, lamp, headlights) pass a Stage `light` with that point or distant light. Outdoors, reuse `LakeSet` or its pieces (`Campfire`,
 `SmokePlume`, `Pine`, `Ridge` + `Haze` with parallax) and truck the camera sideways in front of distant backdrops.
@@ -103,7 +125,12 @@ change them; where a shot has a strong source (fire, lamp, headlights) pass a St
 .venv/bin/python scripts/pipeline.py check <slug>
 ```
 
-Fix until it passes (tsc + contiguous shots + no shot over 4 s). Then check the sound cues against the picture:
+Fix until it passes (tsc + contiguous shots + no shot over 4 s + costume). The costume part tests every look in
+`src/videos/<slug>/` and every held item against the plan's `year` and fails on a piece from another era (a `cap`
+before 1900, a bowler before 1850, a `lanyard`, a `phone`, a `tunic` or `mail` in modern times). It only knows the
+kit fields, so the period check in the scene step still covers colours, slug-built pieces and what is missing. A
+look that is right on purpose (a present-day historian in an 1815 story) gets `// period-ok: <why>` on its line.
+Then check the sound cues against the picture:
 
 ```bash
 .venv/bin/python scripts/pipeline.py sync <slug>
@@ -159,20 +186,48 @@ measures low: give it more volume rather than reading it as buried.
 .venv/bin/python scripts/pipeline.py stills <slug>
 ```
 
-It also prints a framing audit (saved to `../videos/<slug>/build/stills/framing.txt`): faces or signs cut by the frame edge, under
-the captions, or hidden behind the set. Fix every hit on a key face or sign; background signs and crowd extras at the edge can stay.
-Read `../videos/<slug>/build/stills/contact.jpg` (one frame per second). Check: faces in frame and not cut,
+It renders one still per second plus the start, middle and end of every shot (camera moves are where heads and
+signs leave the frame; the per-second stills alone missed cut faces in the published Petrov video). It also prints
+a framing audit (saved to `../videos/<slug>/build/stills/framing.txt`): faces, heads (people, animals, crowd figures,
+hats included) or text cut by the frame edge, under the captions, or hidden behind the set. **Every hit is a fix**,
+background figures and signs included: the user's rule is that nothing is half visible. A crowd edge is fixed by
+reframing, a foreground element that bleeds cleanly off the edge, dropping the edge figures, or deep shadow.
+Read `../videos/<slug>/build/stills/contact.jpg` (in time order; the frame numbers are the file names in that folder). The
+first tile must show the triple hook: the strange thing moving in frame, the first line's caption and the headline
+fully in, whole and not covering each other; fix it before anything else. Then check: faces in frame and not cut,
 labels readable, no empty or black frames, over-the-shoulder head ≤ 25 %, colour varies, gags read, Blender models
 read at a glance in the toon look (ink outline, flat bands, right way round and on the floor). Also (guide/rules.md →
 Picture): camera inside geometry or something through the lens, a pole or prop crossing a face, floating props or
 black voids, puppets too small to act (40-60 % of the frame height in a medium shot), the main event shown in steps,
-the light following the story, and every date, name and number on screen spelled as in the script.
+the light following the story, every date, name and number on screen spelled as in the script, and every costume
+right for the year, piece by piece from head to feet, plus what each character holds.
 Every puppet using a tool (playing, hammering, driving, strumming, drinking, sawing…) has its hands ON the tool and
 moving in every shot and every camera angle: no hanging or frozen arms, no prop floating beside the hand. Check two
 stills a few frames apart for each such shot. Build these with `puppet/tools.ts` (guide/library.md → tool motions); when the tool is a 3D prop, send the hand to it with
 `worldR` / `worldL` (arms and legs are 3D by default) so it stays in the hand as the camera moves.
+**Before the first `stills` run, go through the mistakes every recent video made** (all found late, each one cost a
+full extra round). Look for each of these in your own scene code and on the first sheet:
+1. a foreground object near the lens (console, bottle, pole, rope, crate, curtain) that crosses a face or fills a third
+   of the frame during the move (Petrov 5×, Fleming 7×, Columbus 4×): keep foreground at the frame edge, or drop it;
+2. a sign, label or headline cut by the edge at the end of a track or push, or a face or label inside the caption band
+   (lower third);
+3. bloom, god rays or a point light blowing a table or cloth out to white;
+4. one hue over 40 % (a yellow grade on grass gave 71 %): measure it on the first sheet, not in the report;
+5. costumes wrong for the year (bowler hats on 1815 marshals): check every hat against plan.json `year`;
+6. troops, crowds or walks timed on the video frame instead of the shot frame (they have marched off by the shot);
+7. a crowd, an animal or a hat cut by the edge, which the audit now reports too;
+8. z-depth: two flat surfaces at the same depth (a sign or decal flush on a wall, a floor patch on the floor, two boxes
+   sharing a face) flicker between frames (z-fighting): lift the front one 1-2 cm off the surface (or `polygonOffset`);
+   a shot without depth layers (subject against a wall filling the frame) reads flat: give it a background layer
+   behind the subject and keep any foreground to the frame edge. The audit reports z-fighting pairs and an oversized foreground as faults; frames with no background layer go to
+   `depth-notes.txt` as notes (most interiors have only a back wall: fine when the wall is lit, dressed and not flat).
+
 Write what you find to `build/mistakes_<round>.md` (rules.md → Process) and fix high severity first.
-For a closer look pass frames: `pipeline.py stills <slug> 120,480,900`. Fix and repeat, at most 3 rounds.
+Work in rounds. Write every finding of the round down, apply all the fixes, then check only the shots you changed:
+`pipeline.py stills <slug> --shots 3,7` renders every 15 frames through those shots (camera moves included) and
+re-measures only their head framing (about 10-30 s a shot), into `build/stills-check/`; a frame list
+(`stills <slug> 120,480,900`) works the same way. Neither touches the full sheet in `build/stills/`, which comes back
+only for the approval (step 7). At most 3 rounds.
 
 Then check that no character walks or stands through a set object (every 5th frame, tiny scale):
 
@@ -183,6 +238,9 @@ Then check that no character walks or stands through a set object (every 5th fra
 Fix every hit (saved to `../videos/<slug>/build/collide/collide.txt`): move the puppet's spot or route a walk around the counter,
 desk or prop (`stroll` goes in a straight line, so split it into two strolls around the obstacle). Smoke, held props and effects
 that may overlap a character go under `<group userData={{ ghost: true }}>`. Run `collide` again until it prints "collisions: none".
+A full run renders every 5th frame of the whole video in three tabs (about 3-4 min); after fixing hits, re-check only
+those shots with `pipeline.py collide <slug> --shots 4,9` (seconds, into `build/collide-shots/`), and run the full
+pass once more before the approval.
 
 Then check motion without a full render (30 % draft, ~2 min):
 
@@ -195,14 +253,15 @@ net travel (up to 40 % of the frame width) or more puppet and secondary action; 
 the camera travelling (push, crane, track) and eases out to rest.
 
 When the hardest shot is new (a new set, a physics gag, the main event), look at it moving before the full render:
-render those few seconds as a clip (`TMPDIR=$D npx remotion render <slug> $D/hard.mp4 --frames=<a>-<b>
+render those few seconds as a clip (`npx remotion render "$(node scripts/bundle.mjs)" <slug> $D/hard.mp4 --frames=<a>-<b>
 --props='{"post":true}' --gl=angle`, `$D` a scratch folder) and look at frames from it for stiff acting, outline
 flicker, popping and camera clipping.
 
 ## 7. Render once, then report
 
-When stills, collide and motion all pass (a collide or motion fix re-renders the stills, so approve after the last
-one), record it: `pipeline.py approve <slug> stills`. `go` renders only with this approval in place.
+When stills, collide and motion all pass, run `pipeline.py stills <slug>` once more without a frame list (after the
+last collide or motion fix) and look at the full sheet. Then record it: `pipeline.py approve <slug> stills`. `go`
+renders only with this approval in place.
 
 ```bash
 .venv/bin/python scripts/pipeline.py render <slug> --2k
@@ -258,6 +317,25 @@ uploader's database (after this, only `../output/<slug>.mp4` is needed; `../vide
 ```bash
 .venv/bin/python ../uploader/server.py --import <slug>
 ```
+
+## Handing a video to an agent
+
+The coordinator reviews early, not after the render. Brief the agent to stop after its first full stills sheet that
+passes its own checks (before collide, motion and render) and report the sheet's path; look at it at once (and at
+the stills of every camera move), send all findings in one message, and let it continue. Then review each finished
+video as soon as its agent reports, not when the batch is done: in the first what-if batch, finished agents waited
+55-155 min for a review, and every finding after the 2K render cost a full stills, collide and render round.
+
+Two agents at once is the limit. The heavy stages (framing pass, collide, motion, render) share one machine-wide lock
+(`out/heavy.lock`), so a second agent's heavy stage waits for the first one's ("waiting for the heavy-stage lock:
+… is running"); that is expected, not a hang. Start the second agent's video a few minutes later so their research
+and scene writing overlap each other's renders instead of their renders colliding.
+
+When you brief a subagent to make a video with this skill, put in the brief what the skill cannot know:
+- the story's year and place, and each named character's whole costume (head to feet, plus what they carry),
+  checked against references before the agent starts. Napoleon and his marshals in bowlers instead of bicornes cost a whole extra stills,
+  collide and render round after the first render.
+- no extra check runs beyond step 6's rounds: extra frames for a moving shot go into that round's one `stills` run.
 
 ## Short clips and stills outside the pipeline
 

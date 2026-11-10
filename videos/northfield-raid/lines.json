@@ -1,0 +1,96 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true Wild West heist, brisk and tense, never calm.",
+      "seed": 7,
+      "tempo": 1.36
+    },
+    "outlaw": {
+      "voice": "Eric",
+      "instruct": "A rough, impatient bank robber, menacing and loud.",
+      "seed": 5,
+      "tempo": 1.1
+    },
+    "heywood": {
+      "voice": "Dylan",
+      "instruct": "A calm, stubborn bank cashier, quiet and steady, hiding his fear.",
+      "seed": 3,
+      "tempo": 1.1
+    },
+    "townsman": {
+      "voice": "Uncle_Fu",
+      "instruct": "A shopkeeper shouting an alarm in the street, urgent and loud.",
+      "seed": 2,
+      "tempo": 1.15
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "He told eight armed outlaws the bank safe was locked. It wasn't."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Northfield, Minnesota, eighteen seventy-six. The James-Younger gang rides into a quiet town."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Inside the bank sits acting cashier Joseph Heywood."
+    },
+    {
+      "speaker": "outlaw",
+      "text": "Open the safe! Now!"
+    },
+    {
+      "speaker": "heywood",
+      "text": "I can't. It's on a time lock."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The outlaws believe him. One steps into the vault, and Heywood throws the heavy door on him."
+    },
+    {
+      "speaker": "outlaw",
+      "text": "My arm! Get me out!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "In the chaos, teller Alonzo Bunker bolts out the back door. A bullet hits his shoulder, but he keeps running."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Outside, the town has noticed. A hardware merchant grabs his rifle."
+    },
+    {
+      "speaker": "townsman",
+      "text": "Get your guns, boys! They're robbing the bank!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "And inside, the outlaws are still waiting on a lock they think will never open.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, a time lock is a clock inside the safe door. Once it's set, nobody can open it until the hour comes."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But Heywood's clock had never been set. The safe was unlocked the whole time. One turn of the handle."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Bullets fill the street. The gang flees with twenty-six dollars and seventy cents."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Three outlaws were killed and three captured. The gang never recovered."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Heywood paid for his bluff with his life. But the bank's money never left the safe."
+    }
+  ]
+}

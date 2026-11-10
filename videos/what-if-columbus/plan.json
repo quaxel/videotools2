@@ -1,0 +1,47 @@
+{
+  "title": "What If Columbus's Crew Had Turned Back?",
+  "topic": "What if Columbus's crew had turned back? (October 1492)",
+  "mechanism": "Columbus kept a shorter distance count for his crew (as Las Casas's summary of his log tells it); after the 10 October complaint and, some later writers say, a three-day deal, floating clues and a 2 a.m. sighting kept the ships going, and the crossing started the Columbian exchange, which someone else would almost certainly have started soon anyway.",
+  "beats": {
+    "hook": "Columbus lied to his own crew about distance, and it almost wasn't enough: one continuous push past the lantern onto Columbus writing in two logbooks at once in his cabin.",
+    "but": "Three small ships sail west from the Canaries into an empty ocean: the voyage is longer than anyone aboard has known.",
+    "then": "He keeps two counts of distance, a true one and a shorter one for the crew (two labelled logbooks).",
+    "conflict": "Weeks pass, no land; on October tenth the crew has had enough: 'Admiral, turn back!'",
+    "pivot": "You see, Columbus keeps two counts of distance: the TRUE log is slammed under the FOR THE CREW log as a sailor bursts in (the pivot comes early here: the approved script states the trick first).",
+    "so": "Clues in the water, a 2 a.m. cry of 'Land!'; what if they had turned back? Portugal reached Brazil in 1500 anyway; but this crossing started the great swap, potatoes and chocolate east, smallpox west.",
+    "closing": "A lie, one tense night, a few twigs; and Columbus claimed the lookout's reward, saying he had seen a light first."
+  },
+  "seed": {
+    "what": "The two logbooks on Columbus's desk (TRUE / FOR THE CREW), and Columbus himself in period dress",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "cabin", "set": "CabinSet (new, this folder): Columbus's stern cabin, lantern, chart, two logbooks, stern windows; warm lamp", "colour": "amber and honey wood" },
+    { "id": "departure", "set": "SeaSet (new, this folder, guide/references/atlantic-1492.md): open Atlantic at golden morning, the volcanic Canary island behind, the three ships (sand3d nao + caravel)", "colour": "gold and sea blue" },
+    { "id": "cabin-night", "set": "CabinSet at night, cold blue moonlight through the stern windows, one candle", "colour": "cold blue" },
+    { "id": "deck-dusk", "set": "DeckSet (new): the Santa María's waist, mast, rail, barrels; noon light drifting to orange dusk", "colour": "orange and terracotta" },
+    { "id": "scriptorium", "set": "Room: a friar's study, red-brown panelling, two writing desks (the summary, the later writer)", "colour": "red-brown and crimson" },
+    { "id": "clues", "set": "SeaSet low at the waterline beside the hull, teal water with the carved stick and the berry branch", "colour": "teal green" },
+    { "id": "night", "set": "SeaSet + rigging: the Pinta's crow's nest at 2 a.m. under the moon, a pale cliff on the horizon", "colour": "indigo and silver" },
+    { "id": "whatif", "set": "SeaSet in a violet dream light: the three ships turn back, a Portuguese caravel sails on", "colour": "violet" },
+    { "id": "swap", "set": "Room: a long trading table spanning EAST and WEST, crates POTATOES / CACAO / SMALLPOX, lanterns on the west end", "colour": "warm wood then grey" },
+    { "id": "dawn", "set": "SeaSet at dawn: the three ships before the island, rose-pink sky", "colour": "rose pink" },
+    { "id": "quarterdeck", "set": "DeckSet in bright morning with the green island behind: the reward purse", "colour": "fresh green and white" }
+  ],
+  "characters": [
+    { "id": "columbus", "look": "Columbus: long grey-white hair, dark red doublet with a black vest and a wide black hat (period costume, no cap)" },
+    { "id": "sailor", "look": "A bearded sailor in a faded blue smock and a red kerchief" },
+    { "id": "sailor2", "look": "A young sailor in an ochre smock with a brown vest" },
+    { "id": "lookout", "look": "Rodrigo de Triana (the lookout): young, dark hair, white shirt, green kerchief" },
+    { "id": "friar", "look": "Las Casas: a Dominican friar in a white habit with a black cloak" },
+    { "id": "writer", "look": "A later chronicler (Oviedo, unnamed on screen) in a dark green doublet and a hat" },
+    { "id": "people", "look": "Indigenous villagers on the west end of the swap table, shown plainly and respectfully, no caricature" }
+  ],
+  "gags": [
+    { "line": 2, "what": "A sailor bursts into the cabin and Columbus slams the TRUE logbook shut and shoves it under the other one" },
+    { "line": 7, "what": "A sailor leans out over the rail to scoop the berry branch and nearly topples over; his mate grabs his belt" },
+    { "line": 14, "what": "The lookout holds out his hand for the 10,000 MARAVEDIS purse; Columbus points at the sky ('a light!') and pockets it" }
+  ],
+  "story_numbers": ["one (tense night)", "a few (twigs)", "two (logbooks on screen)"],
+  "format_note": "The ships are drawn at cartoon scale; the carved stick and the berry branch are drawn about twice their real size so they read on a phone. Columbus's looks are illustrative. The logbooks show words only, no league numbers."
+}

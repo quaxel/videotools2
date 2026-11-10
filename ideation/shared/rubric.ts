@@ -50,7 +50,7 @@ export const criteria: Criterion[] = [
     key: "hook",
     label: "Hook",
     question:
-      "There is a strange, concrete first image for 0–3 s that starts mid-action and makes a viewer stop scrolling.",
+      "The first hook is a triple hook, all three live within 0.5 s and each doing a different job: a strange, concrete first image already in motion (what is happening?), an opening line that makes the viewer care (why should I care?), and a 2–6 word on-screen headline that labels the video without repeating the line (what is this about?).",
     weight: 3,
   },
   {

@@ -7,7 +7,7 @@
 // STILL_SCALE=1 renders full-size stills (default 0.4). COLLIDE=1 only checks puppets walking through the set.
 // LIGHTING=1 renders with puppet lighting on (LIGHTING=0 off), whatever the video sets. POST works the same for the
 // post chain (engine/post), INK_DEBUG=1 shows its ink mask.
-import { bundle } from "@remotion/bundler";
+import { sharedBundle } from "./bundle.mjs";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -21,7 +21,7 @@ if (!slug || !outDir) {
   process.exit(2);
 }
 
-const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
+const serveUrl = await sharedBundle();
 const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
 // COLLIDE=1: a fast pass every 5 frames at tiny scale that only reports puppets inside set objects (no post chain).
 const collide = process.env.COLLIDE === "1";
@@ -46,7 +46,11 @@ const frames = list
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
 const issues = [];
-for (const frame of frames.filter((f) => f < composition.durationInFrames)) {
+// Frames render in STILLS_CONCURRENCY tabs of one browser at once (default 3, like remotion.config.ts); a crashed tab
+// fails only its frame, which is tried once more on its own.
+const CONC = Number(process.env.STILLS_CONCURRENCY ?? 3);
+const todo = frames.filter((f) => f < composition.durationInFrames);
+const one = async (frame) => {
   const seen = new Set();
   await renderStill({
     inputProps,
@@ -65,7 +69,23 @@ for (const frame of frames.filter((f) => f < composition.durationInFrames)) {
     chromiumOptions: { gl: "angle" },
   });
   process.stdout.write(".");
-}
+};
+let next = 0;
+const failed = [];
+await Promise.all(
+  Array.from({ length: Math.max(1, CONC) }, async () => {
+    while (next < todo.length) {
+      const frame = todo[next++];
+      try {
+        await one(frame);
+      } catch (e) {
+        failed.push(frame);
+      }
+    }
+  }),
+);
+for (const frame of failed) await one(frame); // a second failure stops the run with its error
+issues.sort((a, b) => Number(a.slice(0, 5)) - Number(b.slice(0, 5)));
 await browser.close({ silent: true });
 
 if (collide) {
@@ -76,8 +96,15 @@ if (collide) {
 
 execFileSync("ffmpeg", [
   "-v", "error", "-y", "-pattern_type", "glob", "-i", path.join(outDir, "*.jpg"),
-  "-vf", "scale=216:-1,tile=10x7:padding=3:color=white", "-frames:v", "1", path.join(outDir, "contact.jpg"),
+  "-vf", `scale=216:-1,tile=10x${Math.max(1, Math.ceil(todo.length / 10))}:padding=3:color=white`, "-frames:v", "1", path.join(outDir, "contact.jpg"),
 ]);
-console.log(`\n${frames.length} stills -> ${path.join(outDir, "contact.jpg")}`);
-fs.writeFileSync(path.join(outDir, "framing.txt"), issues.join("\n") + (issues.length ? "\n" : ""));
-console.log(issues.length ? `framing: ${issues.length} issue(s) (frame  problem)\n${issues.join("\n")}` : "framing: no issues");
+console.log(`\n${todo.length} stills -> ${path.join(outDir, "contact.jpg")}`);
+// "depth: no background layer" fires on most interiors (a back wall behind the subject): a note to look at, not a
+// fault to fix. Every other line is a fix.
+const isNote = (l) => l.includes("depth: no background layer");
+const notes = issues.filter(isNote);
+const faults = issues.filter((l) => !isNote(l));
+fs.writeFileSync(path.join(outDir, "framing.txt"), faults.join("\n") + (faults.length ? "\n" : ""));
+fs.writeFileSync(path.join(outDir, "depth-notes.txt"), notes.join("\n") + (notes.length ? "\n" : ""));
+console.log(faults.length ? `framing: ${faults.length} issue(s) (frame  problem)\n${faults.join("\n")}` : "framing: no issues");
+if (notes.length) console.log(`depth notes: ${notes.length} frame(s) with no background layer (depth-notes.txt; flat if the wall fills the frame)`);

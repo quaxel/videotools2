@@ -29,3 +29,4 @@
 {"stage": "stills", "start": "2026-11-10 20:16:13", "seconds": 367.7, "result": "ok", "args": []}
 {"stage": "collide", "start": "2026-11-10 20:22:22", "seconds": 615.5, "result": "ok", "args": []}
 {"stage": "render", "start": "2026-11-10 20:32:38", "seconds": 427.7, "result": "ok", "args": ["--2k"]}
+{"stage": "report", "start": "2026-11-10 20:39:46", "seconds": 70.4, "result": "ok", "args": []}

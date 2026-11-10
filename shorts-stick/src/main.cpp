@@ -571,18 +571,29 @@ void render() {
 
 // ---------- main ----------
 
-void connectWifi() {
-  if (WiFi.status() == WL_CONNECTED) return;
-  status = "Wi-Fi baglaniyor";
+bool tryWifi(const char* ssid, const char* pass) {
+  status = String("Wi-Fi: ") + ssid;
   render();
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  WiFi.disconnect(true);
+  delay(100);
+  WiFi.begin(ssid, pass);
   uint32_t t0 = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - t0 < 20000) {
     M5.update();
     delay(200);
   }
-  status = WiFi.status() == WL_CONNECTED ? "" : "Wi-Fi yok";
+  Serial.printf("WiFi %s: %s\n", ssid, WiFi.status() == WL_CONNECTED ? "OK" : "fail");
+  return WiFi.status() == WL_CONNECTED;
+}
+
+void connectWifi() {
+  if (WiFi.status() == WL_CONNECTED) return;
+  WiFi.mode(WIFI_STA);
+  bool ok = tryWifi(WIFI_SSID, WIFI_PASS);
+#ifdef WIFI_SSID2
+  if (!ok) ok = tryWifi(WIFI_SSID2, WIFI_PASS2);
+#endif
+  status = ok ? "" : "Wi-Fi yok";
 }
 
 void setup() {

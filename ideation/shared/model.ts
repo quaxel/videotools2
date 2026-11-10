@@ -66,6 +66,7 @@ export const hookSchema = z.object({
   text: z.string().max(5000),
   language: z.enum(["tr", "en"]),
   firstImage: z.string().max(5000),
+  onScreen: z.string().max(500).default(""),
   note: z.string().max(5000),
   selected: z.boolean(),
 });

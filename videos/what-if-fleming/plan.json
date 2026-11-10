@@ -1,0 +1,151 @@
+{
+  "title": "What If Fleming Had Cleaned Up His Lab?",
+  "topic": "What if Fleming had cleaned up his lab? (discovery of penicillin, 1928)",
+  "mechanism": "Penicillin only kills bacteria while they grow, so it was found only because Fleming left his staphylococcus dishes on a cool bench instead of in the warm incubator: a blue-green mould got going first and cleared the germs around it.",
+  "beats": {
+    "hook": "Before penicillin an infected scratch could kill you; then one scientist left a messy bench and went on holiday. The camera glides along the cluttered bench of stacked Petri dishes onto Fleming grabbing his hat.",
+    "but": "Fleming grows the germs behind boils and blood poisoning in London, 1928.",
+    "then": "In August he goes on holiday, leaving the dishes on the bench, not in the warm incubator; on 3 September he is back: 'That's funny.'",
+    "conflict": "A blue-green mould has landed on one dish and all around it the germs are dead.",
+    "pivot": "You see, the mould was making a chemical that kills bacteria: penicillin. But Fleming could not make it a medicine; twelve years later Oxford did, in tiny amounts; American factories scaled it up, over two million doses by D-Day.",
+    "so": "What if he had tidied them into the incubator? One expert argued the germs would have grown first and the mould would have done nothing; maybe someone else finds it, but not in time for the war.",
+    "closing": "Penicillin and the antibiotics it inspired have saved hundreds of millions of lives by some estimates. Maybe someone in your family tree. All thanks to one messy bench."
+  },
+  "format_note": "Petri dishes, the mould spot and the germ colonies are drawn about 2x real size so they read on a phone; the Oxford culture vessels and penicillin vials likewise.",
+  "seed": {
+    "what": "The stack of Petri dishes on Fleming's messy bench",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "bench-hook",
+      "set": "St Mary's lab 1928: cluttered bench, stacked Petri dishes, microscope, bottles, shut sash window",
+      "colour": "amber"
+    },
+    {
+      "id": "microscope",
+      "set": "St Mary's lab, window corner: microscope, culture rack, calendar 1928, London rooftops",
+      "colour": "teal green"
+    },
+    {
+      "id": "holiday",
+      "set": "Suffolk country garden in August: lawn, cottage, deckchair, river, low hills",
+      "colour": "bright green and sky blue"
+    },
+    {
+      "id": "incubator-night",
+      "set": "The lab at dusk: dishes left on the bench, the warm glowing INCUBATOR cabinet",
+      "colour": "deep red-orange"
+    },
+    {
+      "id": "return",
+      "set": "The lab on a September morning: Fleming and Pryce at the bench, the mouldy dish",
+      "colour": "cream"
+    },
+    {
+      "id": "pivot",
+      "set": "Truth room: giant Petri dish on a stand, mould clearing a ring of dead germs, a PENICILLIN flask that foams over and pops its cork",
+      "colour": "cold blue violet"
+    },
+    {
+      "id": "oxford",
+      "set": "Oxford 1940 lab: dark wood, rows of flat culture vessels, a mouse cage, a tiny vial",
+      "colour": "brown wood"
+    },
+    {
+      "id": "d-day",
+      "set": "WWII field hospital tent by the beach: a medic stacks a PENICILLIN crate, a BY D-DAY / DOSES board counts up, a soldier resting on a cot",
+      "colour": "olive khaki"
+    },
+    {
+      "id": "what-if",
+      "set": "Dream lab: Fleming tidies the dishes into the incubator; inside the germs overgrow the mould",
+      "colour": "purple then hot orange"
+    },
+    {
+      "id": "too-late",
+      "set": "Grey lab years later: another scientist with a mould dish, a wall clock racing",
+      "colour": "slate grey"
+    },
+    {
+      "id": "ward",
+      "set": "Sunny hospital ward: patients sitting up well, a nurse, a medicine shelf",
+      "colour": "white and sunny yellow"
+    },
+    {
+      "id": "family",
+      "set": "Living room at dusk: a family tree of portraits on the wall, grandmother and child",
+      "colour": "rose gold"
+    }
+  ],
+  "characters": [
+    {
+      "id": "fleming",
+      "look": "Alexander Fleming, 47: grey-brown hair, white lab coat over a dark vest; a straw hat on holiday"
+    },
+    {
+      "id": "pryce",
+      "look": "Merlin Pryce, young assistant: dark hair, grey suit"
+    },
+    {
+      "id": "oxford",
+      "look": "Young Oxford scientist: fair hair, white coat, glasses"
+    },
+    {
+      "id": "medic",
+      "look": "US Army medic: olive uniform"
+    },
+    {
+      "id": "soldier",
+      "look": "Soldier resting at the field hospital: olive uniform, white neckerchief (no wound shown)"
+    },
+    {
+      "id": "scientist",
+      "look": "Another scientist years later: woman, long dark hair, grey coat"
+    },
+    {
+      "id": "nurse",
+      "look": "Ward nurse: white dress and apron"
+    },
+    {
+      "id": "grandma",
+      "look": "Grandmother: white hair, rose cardigan"
+    },
+    {
+      "id": "grandson",
+      "look": "Grandson: brown hair, yellow jumper"
+    },
+    {
+      "id": "chain",
+      "look": "Oxford colleague: black hair and beard, white coat"
+    },
+    {
+      "id": "patients",
+      "look": "Two ward patients in pale blue, sitting up"
+    }
+  ],
+  "gags": [
+    {
+      "line": 2,
+      "what": "The lab door bangs shut behind Fleming; the jolt slides the lid off the dish"
+    },
+    {
+      "line": 7,
+      "what": "The PENICILLIN flask foams over and its cork pops off"
+    },
+    {
+      "line": 9,
+      "what": "The Oxford scientist jumps for joy shouting 'It works!'; the mice scatter in their cage"
+    },
+    {
+      "line": 11,
+      "what": "Fleming crams the dishes into the incubator and leans in to shut the door"
+    }
+  ],
+  "story_numbers": [
+    "one scientist",
+    "one dish",
+    "one expert",
+    "one messy bench"
+  ]
+}

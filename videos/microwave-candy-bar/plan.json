@@ -1,0 +1,129 @@
+{
+  "title": "The Melted Candy Bar That Invented the Microwave",
+  "topic": "Percy Spencer, 1945: a candy bar melts in his pocket next to a radar magnetron; popcorn, an egg, and the first microwave oven",
+  "year": [
+    1945,
+    1967
+  ],
+  "mechanism": "A radar magnetron sends out microwaves that make the water in food twist back and forth; the friction between molecules is heat, so food cooks with no flame, and a self-taught radar engineer turned that into the microwave oven.",
+  "beats": {
+    "hook": "The story goes: a candy bar melted in an engineer's pocket, and nothing in the room was hot. The camera pushes along a radar bench past a humming MAGNETRON onto Spencer's coat pocket oozing chocolate.",
+    "but": "He was Percy Spencer, who never finished grammar school and taught himself the science; in the war his method built 2,600 magnetrons a day.",
+    "then": "He tests it: raw popcorn kernels held by the tube pop all over the lab.",
+    "conflict": "Next an egg: it shakes and bursts across the bench, a colleague flinches: 'Percy!'",
+    "pivot": "You see, the tube sends out microwaves; they make the water in food twist back and forth, and that rubbing is heat, right inside the food. No flame at all.",
+    "so": "So a patent was filed on 8 October 1945, and the first oven of 1947 stood six feet tall and weighed 750 pounds; twenty years later, in 1967, a countertop model cost 495 dollars.",
+    "closing": "Every bag of microwave popcorn goes back to one melted candy bar."
+  },
+  "triple_hook": {
+    "visual": "Chocolate already dripping from the pocket of Spencer's suit jacket in a thick brown string, beside a glowing copper MAGNETRON tube that hums and flickers; the camera is already pushing in.",
+    "verbal": "The story goes, this man's candy bar melted in his pocket, and nothing in the room was hot.",
+    "text": "WHO INVENTED THE MICROWAVE?"
+  },
+  "format_note": "The magnetron, the candy bar, the popcorn kernels and the water molecule model are drawn about 2x real size so they read on a phone. The candy bar has a plain paper wrapper with no brand.",
+  "seed": {
+    "what": "The labelled MAGNETRON tube on the radar bench",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "radar-lab",
+      "set": "Radar lab 1945 (Room + props): metal bench, the glowing MAGNETRON on its stand, cables, a radar scope, steel shelving",
+      "colour": "steel teal with orange tube glow"
+    },
+    {
+      "id": "study",
+      "set": "Spencer's kitchen table at night: oil-cloth table, stacked textbooks, a desk lamp, a window with night",
+      "colour": "amber"
+    },
+    {
+      "id": "factory",
+      "set": "Wartime tube factory: long bench of identical magnetrons, a worker, a wall counter 2,600 A DAY",
+      "colour": "brick taupe"
+    },
+    {
+      "id": "popcorn-lab",
+      "set": "The radar lab by day, warm light: Spencer holds a paper bag of kernels by the tube, popcorn flies",
+      "colour": "butter yellow"
+    },
+    {
+      "id": "egg-bench",
+      "set": "Test bench by the lab window, afternoon: a kettle with an egg under the tube, the colleague leaning in",
+      "colour": "cream and red-brown"
+    },
+    {
+      "id": "truth-room",
+      "set": "Truth room: a giant ball-and-stick WATER molecule on a stand rocking back and forth beside a big MAGNETRON, a HEAT thermometer rising",
+      "colour": "cold blue violet"
+    },
+    {
+      "id": "patent-office",
+      "set": "Patent office: wooden desk, filing cabinets, a big rubber stamp OCT 8 1945 on a form",
+      "colour": "bottle green"
+    },
+    {
+      "id": "restaurant-kitchen",
+      "set": "1947 restaurant kitchen: white and red tile, the six-foot FIRST OVEN cabinet on a platform scale reading 750 LB, a cook",
+      "colour": "tomato red"
+    },
+    {
+      "id": "home-1967",
+      "set": "1967 home kitchen: pastel cabinets, a countertop microwave with a $495 tag, a mother and her son",
+      "colour": "pastel turquoise"
+    },
+    {
+      "id": "living-room",
+      "set": "Present-day living room at night: a microwave glowing in the kitchen nook, a bowl of popcorn on the sofa",
+      "colour": "plum and rose"
+    }
+  ],
+  "characters": [
+    {
+      "id": "spencer",
+      "look": "Percy Spencer, about 51, in 1945: grey-brown hair, round wire glasses, grey-brown wool suit jacket over a waistcoat, matching trousers, dark leather shoes; holds a paper bag of corn kernels in the popcorn shot"
+    },
+    {
+      "id": "colleague",
+      "look": "Young lab engineer, 1945: dark side-parted hair, white shirt with rolled sleeves, brown suspenders, grey trousers, dark leather shoes"
+    },
+    {
+      "id": "worker",
+      "look": "Wartime factory worker, 1944: woman, hair under a red head scarf (kerchief), blue work coverall, dark work shoes"
+    },
+    {
+      "id": "clerk",
+      "look": "Patent office clerk, 1945: grey hair, glasses, dark grey suit with waistcoat, dark leather shoes"
+    },
+    {
+      "id": "cook",
+      "look": "Restaurant cook, 1947: bare dark hair, white cook's jacket, white apron, dark trousers and leather shoes"
+    },
+    {
+      "id": "mom",
+      "look": "Mother, 1967: shoulder-length flipped brown hair, pastel yellow shift dress, pale flat shoes"
+    },
+    {
+      "id": "son",
+      "look": "Boy, 1967: short fair hair, striped red T-shirt, blue jeans, sneakers"
+    },
+    {
+      "id": "kid",
+      "look": "Present-day child: dark hair, purple hoodie, jeans, sneakers // period-ok: closing is present day"
+    }
+  ],
+  "gags": [
+    {
+      "line": 4,
+      "what": "Popcorn kernels burst from the bag and pelt Spencer's glasses and the bench; a piece lands on the colleague's head"
+    },
+    {
+      "line": 5,
+      "what": "The egg in the kettle shakes, then bursts; yolk splats on the bench and the colleague flinches back"
+    },
+    {
+      "line": 9,
+      "what": "The first oven is wheeled onto a platform scale; the needle slams round to 750 LB and the floor boards creak"
+    }
+  ],
+  "story_numbers": []
+}

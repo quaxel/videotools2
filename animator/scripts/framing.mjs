@@ -3,8 +3,10 @@
 // input prop, collects the raw correction Stage logs for every shot frame, and smooths it per shot: each frame takes
 // the strongest correction within ±HOLD frames (so the camera starts easing before a head arrives and holds while it
 // is needed), then a gaussian blur. The render reads the result from public/videos/<slug>/framing.json.
-//   node scripts/framing.mjs <slug>
-import { bundle } from "@remotion/bundler";
+//   node scripts/framing.mjs <slug>                 every shot
+//   node scripts/framing.mjs <slug> 120-300,900-1010 only those frame spans (whole shots), merged into the existing
+//                                                    table; pipeline.py stills <frames> uses this for the shots it looks at
+import { sharedBundle } from "./bundle.mjs";
 import { openBrowser, renderMedia, selectComposition } from "@remotion/renderer";
 import fs from "node:fs";
 import os from "node:os";
@@ -16,22 +18,31 @@ const SIGMA = 6; // frames
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const slug = process.argv[2];
+const spans = process.argv[3] ? process.argv[3].split(",").map((r) => r.split("-").map(Number)) : null;
 if (!slug) {
   console.error("usage: node scripts/framing.mjs <slug>");
   process.exit(2);
 }
 
-const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
+const serveUrl = await sharedBundle();
 const inputProps = { framingPass: true };
 const shots = {}; // shot start -> { f -> delta }
 // Rendered in segments, each in a fresh browser: a render tab keeps every finished shot's WebGL context alive, so a
 // long video with heavy sets runs the GPU out of memory in one pass ("Error creating WebGL context").
 const SEGMENT = Number(process.env.FRAMING_SEGMENT ?? 400);
 let total = null;
-for (let start = 0; total === null || start < total; start += SEGMENT) {
+{
+  const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
+  total = (await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps })).durationInFrames;
+  await browser.close({ silent: true });
+}
+// The frame ranges to render: whole video in SEGMENT pieces, or the requested spans (each cut to SEGMENT pieces).
+const ranges = [];
+for (const [a, b] of spans ?? [[0, total - 1]])
+  for (let s = a; s <= Math.min(b, total - 1); s += SEGMENT) ranges.push([s, Math.min(b, total - 1, s + SEGMENT - 1)]);
+for (const [start, end] of ranges) {
   const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
   const composition = await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps });
-  total = composition.durationInFrames;
   const tmp = path.join(os.tmpdir(), `framing-${slug}-${process.pid}-${start}.mp4`);
   await renderMedia({
     serveUrl,
@@ -41,7 +52,7 @@ for (let start = 0; total === null || start < total; start += SEGMENT) {
     inputProps,
     scale: 0.1,
     muted: true,
-    frameRange: [start, Math.min(total, start + SEGMENT) - 1],
+    frameRange: [start, end],
     puppeteerInstance: browser,
     chromiumOptions: { gl: "angle" },
     onBrowserLog: ({ text }) => {
@@ -56,7 +67,13 @@ for (let start = 0; total === null || start < total; start += SEGMENT) {
 
 const ID = [0, 0, 0, 0, 0, 0, 1];
 const size = (d) => Math.hypot(d[0], d[1], d[2], d[3], d[4], d[5], (d[6] - 1) * 10);
-const table = {};
+const out = path.join(root, "public", "videos", slug, "framing.json");
+// A partial pass keeps the other shots' corrections from the last table and replaces the shots it measured.
+const table = spans && fs.existsSync(out) ? JSON.parse(fs.readFileSync(out, "utf8")) : {};
+const inSpans = (s) => !spans || spans.some(([a, b]) => +s >= a && +s <= b);
+// A neighbouring shot seen only through a dissolve was measured for a few frames: keep its old entry.
+for (const s of Object.keys(shots)) if (!inSpans(s)) delete shots[s];
+for (const s of Object.keys(table)) if (inSpans(s) && spans) delete table[s];
 let corrected = 0;
 for (const [s, byF] of Object.entries(shots)) {
   const fs_ = Object.keys(byF).map(Number);
@@ -86,7 +103,6 @@ for (const [s, byF] of Object.entries(shots)) {
   table[s] = { f0, d: smooth };
   corrected++;
 }
-const out = path.join(root, "public", "videos", slug, "framing.json");
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify(table));
-console.log(`framing: ${Object.keys(shots).length} shots measured, ${corrected} with smoothed corrections -> ${path.relative(root, out)}`);
+console.log(`framing${spans ? " (partial)" : ""}: ${Object.keys(shots).length} shots measured, ${corrected} with smoothed corrections -> ${path.relative(root, out)}`);

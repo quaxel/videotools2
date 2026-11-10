@@ -3,17 +3,25 @@
 #
 #   .venv/bin/python scripts/pipeline.py new <slug> "<topic>"   scaffold videos/<slug>/ and src/videos/<slug>/
 #   .venv/bin/python scripts/pipeline.py voice <slug>           Qwen TTS -> fitted track -> timing.json + pace check
+#   .venv/bin/python scripts/pipeline.py pace <slug>            speech_cover + long_pauses on the voice track (voice runs it)
 #   .venv/bin/python scripts/pipeline.py physics <slug>         bake videos/<slug>/physics.mjs (Rapier, scripts/physics.mjs)
 #                                                              -> src/videos/<slug>/physics.json (run by check/stills when stale)
 #   .venv/bin/python scripts/pipeline.py register               regenerate src/videos/index.ts
-#   .venv/bin/python scripts/pipeline.py check <slug>           tsc + rule checks on the scene's shot list
+#   .venv/bin/python scripts/pipeline.py check <slug>           tsc + rule checks on the scene's shot list + costume pieces
+#                                                              out of period for plan.json `year`
 #   .venv/bin/python scripts/pipeline.py sync <slug>            sound cues vs the picture (scripts/cues.mjs dump) -> build/sync.txt
 #   .venv/bin/python scripts/pipeline.py music <slug>           the video's own score: videos/<slug>/music.py (scripts/music)
 #                                                              -> public/videos/<slug>/music.wav + build/score.md
 #   .venv/bin/python scripts/pipeline.py mix <slug>             voice / music / effects stems -> voice over the bed per section
 #                                                              and per line (scripts/mixreport.py) -> build/mix/mix.md
-#   .venv/bin/python scripts/pipeline.py stills <slug> [frames] one still per second (or given frames) + contact sheet
-#   .venv/bin/python scripts/pipeline.py collide <slug>         every 5th frame: puppets walking/standing inside set objects
+#   .venv/bin/python scripts/pipeline.py stills <slug> [frames] [--shots 3,5]
+#                                                              one still per second + the start, middle and end of every
+#                                                              shot (or given frames, or every 15 frames through the chosen
+#                                                              shots) + contact sheet; a few frames or shots re-measure only
+#                                                              their shots' head framing (-> build/stills-check/)
+#   .venv/bin/python scripts/pipeline.py collide <slug> [--shots 3,5]
+#                                                              every 5th frame (of the chosen shots): puppets walking or
+#                                                              standing inside set objects (--shots -> build/collide-shots/)
 #   .venv/bin/python scripts/pipeline.py motion <slug>          fast 30 % draft render + motion per shot (stillest first)
 #   .venv/bin/python scripts/pipeline.py framing <slug>         head-framing pre-pass -> public/videos/<slug>/framing.json
 #                                                              (run by stills/motion/render when the scene changed)
@@ -34,7 +42,9 @@
 #                                                              stopping at an approval the files have outgrown
 #   .venv/bin/python scripts/pipeline.py web [--port 8766]      browser panel: every video's stages, run / stop, live log, outputs
 # voice, physics, check, sync, music, stills, collide, motion, render and report append their run time to
-# videos/<slug>/build/timings.jsonl.
+# videos/<slug>/build/timings.jsonl. Every script renders from one shared bundle (scripts/bundle.mjs, out/bundles/),
+# and the heavy stages (framing pass, collide, motion, render) take a machine-wide lock (out/heavy.lock) so two videos
+# made at once queue their GPU work instead of halving each other's speed.
 #
 # Targets come from guide/rules.md (mirrored in TARGETS below); the report marks every miss.
 import json
@@ -131,8 +141,14 @@ LINES_TEMPLATE = {
 PLAN_TEMPLATE = {
     "title": "",
     "topic": "",
+    "year": "The year the story is set in: a number (negative for BC), [from, to] for a span, or null for a present-day story. `check` tests the costumes against it.",
     "mechanism": "One sentence: the hidden real-world system this video reveals.",
     "beats": {"hook": "", "but": "", "then": "", "conflict": "", "pivot": "You see ...", "so": "So ...", "closing": ""},
+    "triple_hook": {
+        "visual": "What is in frame and already moving at frame 0 (answers: what is happening?)",
+        "verbal": "The first sentence, from frame 0 (answers: why should I care?)",
+        "text": "The shot-1 Headline, 2-6 words, not the spoken words (answers: what is this about?)",
+    },
     "seed": {"what": "The object or person the twist depends on", "first_line": 0},
     "locations": [{"id": "", "set": "existing component or new file", "colour": "dominant colour family"}],
     "characters": [{"id": "", "look": ""}],
@@ -169,9 +185,29 @@ def cmd_voice(slug):
     print(f"\n{dur:.1f}s, {words} words, {wpm:.0f} wpm")
     for key, val in (("duration", dur), ("words", words), ("wpm", wpm)):
         print(("  ok   " if within(key, val) else "  MISS ") + f"{key} = {val:.0f} (target {mark(key, val)[0].split('|')[3].strip()})")
+    pace_check(slug)
     print("\nline frames (cut shots to these):")
     for l in t["lines"]:
         print(f"  {l['i']:02d} {l['from']:5d}-{l['to']:5d} {l['speaker']:8s} {l['text']}")
+
+
+# The report measures speech_cover and long_pauses on the final mix; measured on the bare voice track whisper finds
+# about 1-1.5 points more cover (music and effects hide word edges), so the voice stage asks for this much margin.
+VOICE_COVER_MARGIN = 0.02
+
+
+def pace_check(slug):
+    """speech_cover and long_pauses measured on the voice track right after `voice`, so a miss is fixed in
+    lines.json (more words, shorter pauses, a faster tempo) before any scene work, not found by the report."""
+    m = audio_metrics(os.path.join(ROOT, "public", "videos", slug, "voice.wav"))
+    lo = TARGETS["speech_cover"][0] + VOICE_COVER_MARGIN
+    cover_ok = m["speech_cover"] >= lo
+    print(("  ok   " if cover_ok else "  MISS ") + f"speech_cover = {m['speech_cover']:.0%} on the voice track (target ≥ {lo:.0%} here: "
+          f"the final mix measures ~1-2 points lower)")
+    print(("  ok   " if within("long_pauses", m["long_pauses"]) else "  MISS ") + f"long_pauses = {m['long_pauses']} (target ≤ {TARGETS['long_pauses'][1]})")
+    if not cover_ok or not within("long_pauses", m["long_pauses"]):
+        print("  fix it now in lines.json (a few more words, a shorter pauseAfter, tempo +0.05 on a slow speaker), "
+              "then voice again: after the scene is built a re-voice moves every cut")
 
 
 # ---------- register ----------
@@ -259,8 +295,17 @@ def cmd_check(slug):
     if cuts > TARGETS["hard_cuts"][1]:
         problems.append(f"{cuts} hard cuts (at most {TARGETS['hard_cuts'][1]}): change location with \"dip\", stay in one with a camera move")
     print(f"{len(shots)} shots, average {avg:.2f}s, longest {longest:.2f}s, hard cuts {cuts}")
+    out_of_period = 0
+    try:
+        costume, summary, out_of_period = costume_problems(slug)
+        print(summary)
+        problems += costume
+    except Exception as e:  # a bug in this lint must never block a video
+        print(f"  WARN costume check failed: {e!r}")
     for p in problems:
         print("  MISS", p)
+    if out_of_period:
+        print("  A look that is right on purpose (a present-day historian in an 1815 story) gets `// period-ok: <why>` on one of its lines.")
     marker = vdir(slug, "build", "check.ok")
     if res.returncode or problems:
         if os.path.exists(marker):
@@ -270,10 +315,240 @@ def cmd_check(slug):
     open(marker, "w").write(time.strftime("%Y-%m-%d %H:%M:%S\n"))
 
 
+# ---------- period costume (part of check) ----------
+# The years each costume piece belongs to (None = open-ended), checked against plan.json `year`. Coarse on purpose and
+# only for pieces that read as one era whatever their colour (a bowler at Waterloo, a lanyard on an 1880s lawman);
+# `vest`, `suspenders` and `shoes` pass for older dress in the right colours, so the plan and the stills review judge
+# those and the rest of the costume. A look that is right on purpose carries `// period-ok: <why>` on one of its lines.
+COSTUME_ERAS = {  # PuppetLook field -> (from, until, what it is)
+    "cap": (1900, None, "a backwards baseball cap"),
+    "lanyard": (1950, None, "an ID lanyard"),
+    "shorts": (1900, None, "athletic shorts"),
+    "bib": (1900, None, "a race number bib"),
+    "glasses": (1300, None, "glasses"),
+    "tunic": (None, 1500, "the early-medieval / Roman tunic"),
+    "mail": (None, 1600, "a mail shirt"),
+}
+HAT_ERAS = {  # hatStyle -> (from, until)
+    "bowler": (1850, None), "boater": (1860, None), "shako": (1790, 1920),
+    "stahl": (1916, None), "helmet": (1941, None), "galea": (-200, 400),
+}
+ITEM_ERAS = {"phone": (1990, None, "a mobile phone")}  # pose `hold.item` -> (from, until, what it is)
+YEAR_HELP = "write the year the story is set in (a number, negative for BC, or [from, to]), or null for a present-day story"
+UNSET = ("undefined", "false", "null", "")
+
+
+def _year(y):
+    return f"{-y} BC" if y < 0 else str(y)
+
+
+def _era(a, b):
+    return f"from {_year(a)}" if b is None else f"until {_year(b)}" if a is None else f"{_year(a)}-{_year(b)}"
+
+
+def _scan(code, i, quote):
+    """One step of a string-aware walk over TS source: (next index, quote state, whether code[i] is code)."""
+    c = code[i]
+    if quote:
+        if c == "\\":
+            return i + 2, quote, False
+        if c == quote or (c == "\n" and quote != "`"):  # a ' or " string never spans lines: a JSX apostrophe stays local
+            return i + 1, None, False
+        return i + 1, quote, False
+    if c in "\"'`":
+        return i + 1, c, False
+    return i + 1, None, True
+
+
+def _blank_comments(src):
+    """The source with comments turned into spaces; newlines stay, so offsets and line numbers still match."""
+    out, i, quote = list(src), 0, None
+    while i < len(src):
+        if not quote and src.startswith("//", i):
+            j = src.find("\n", i)
+            j = len(src) if j < 0 else j
+            out[i:j] = " " * (j - i)
+            i = j
+        elif not quote and src.startswith("/*", i):
+            j = src.find("*/", i + 2)
+            j = len(src) if j < 0 else j + 2
+            out[i:j] = [ch if ch == "\n" else " " for ch in src[i:j]]
+            i = j
+        else:
+            i, quote, _ = _scan(src, i, quote)
+    return "".join(out)
+
+
+def _objects(code):
+    """(start, end) of every {...} in comment-free code, braces inside strings skipped."""
+    spans, stack, i, quote = [], [], 0, None
+    while i < len(code):
+        c = code[i]
+        i, quote, is_code = _scan(code, i, quote)
+        if is_code and c == "{":
+            stack.append(i - 1)
+        elif is_code and c == "}" and stack:
+            spans.append((stack.pop(), i - 1))
+    return spans
+
+
+def _entries(code, start, end):
+    """Top-level entries of the object code[start..end] as (offset, key, value); a spread has key '...'."""
+    out, depth, quote, piece, i = [], 0, None, start + 1, start + 1
+
+    def flush(a, b):
+        text = code[a:b]
+        s = text.strip()
+        off = a + len(text) - len(text.lstrip())
+        if s.startswith("..."):
+            out.append((off, "...", s[3:].strip()))
+        elif re.fullmatch(r"\w+", s):  # shorthand `{ skin, hair }`
+            out.append((off, s, s))
+        elif (m := re.match(r"(\w+)\s*\??\s*:\s*(.*)\Z", s, re.S)):
+            out.append((off, m.group(1), m.group(2).strip()))
+
+    while i < end:
+        c = code[i]
+        i, quote, is_code = _scan(code, i, quote)
+        if not is_code:
+            continue
+        if c in "([{":
+            depth += 1
+        elif c in ")]}":
+            depth -= 1
+        elif c == "," and depth == 0:
+            flush(piece, i - 1)
+            piece = i
+    flush(piece, end)
+    return out
+
+
+def costume_problems(slug, year=None):
+    """Costume pieces in the video's looks (and held items) that do not fit the story's year, as check MISS lines.
+    Returns (problems, summary line, number of out-of-period pieces). `year` overrides plan.json's."""
+    if year is None:
+        plan = vdir(slug, "plan.json")
+        data = json.load(open(plan)) if os.path.exists(plan) else {}
+        if "year" not in data:  # videos made before the check
+            return [], "costume: plan.json has no `year`, not checked", 0
+        if data["year"] is None:
+            return [], "costume: present-day story (`year` null), not checked", 0
+        year = data["year"]
+    whole = lambda y: isinstance(y, int) and not isinstance(y, bool)
+    if not (whole(year) or (isinstance(year, list) and len(year) == 2 and all(whole(y) for y in year))):
+        return [f"plan.json `year`: {YEAR_HELP}"], "costume: plan.json `year` is not a year", 0
+    lo, hi = (year, year) if whole(year) else (min(year), max(year))
+    story = _year(lo) if lo == hi else f"{_year(lo)}-{_year(hi)}"
+    clash = lambda a, b: (a is not None and hi < a) or (b is not None and lo > b)
+    found, looks = [], 0
+    for dirpath, _, files in os.walk(sdir(slug)):
+        for name in sorted(files):
+            if not name.endswith((".ts", ".tsx")):
+                continue
+            path = os.path.join(dirpath, name)
+            src = open(path, encoding="utf-8").read()
+            lines, code, rel = src.split("\n"), _blank_comments(src), os.path.relpath(path, ROOT)
+            line_of = lambda off: code.count("\n", 0, off) + 1
+
+            def excused(a, b):  # `period-ok` on the look's own lines, or on a comment line right above it
+                if any("period-ok" in lines[k] for k in range(a - 1, min(len(lines), b))):
+                    return True
+                prev = lines[a - 2].strip() if a >= 2 else ""
+                return prev.startswith("//") and "period-ok" in prev
+
+            def assigned(start):  # the const an object literal is assigned to, if any
+                m = re.search(r"(?:const|let|var)\s+(\w+)\s*(?::[^=;{}]*)?=\s*$", code[max(0, start - 200):start])
+                return m.group(1) if m else None
+
+            parsed = [(s, _entries(code, *s)) for s in _objects(code)]
+            names = set(re.findall(r"(?:const|let|var)\s+(\w+)\s*:\s*PuppetLook\b", code))
+            names |= {assigned(s[0]) for s, ents in parsed if any(k == "skin" for _, k, _ in ents)} - {None}
+            for (start, end), ents in parsed:
+                if not any(k == "skin" or (k == "..." and v in names) for _, k, v in ents):
+                    continue
+                looks += 1
+                if excused(line_of(start), line_of(end)):
+                    continue
+                who = assigned(start) or "a look"
+                for off, k, v in ents:
+                    if v in UNSET:
+                        continue
+                    if k == "hatStyle":
+                        for style in re.findall(r"[\"'](\w+)[\"']", v):
+                            if style in HAT_ERAS and clash(*HAT_ERAS[style]):
+                                found.append(f'{rel}:{line_of(off)} {who}: hatStyle "{style}" ({_era(*HAT_ERAS[style])}) in a story set in {story}')
+                    elif k in COSTUME_ERAS and clash(*COSTUME_ERAS[k][:2]):
+                        a, b, what = COSTUME_ERAS[k]
+                        found.append(f"{rel}:{line_of(off)} {who}: `{k}` is {what} ({_era(a, b)}) in a story set in {story}")
+            for m in re.finditer(r"\bhold\s*:\s*\{[^{}]*?\bitem\s*:\s*[\"'](\w+)[\"']", code):
+                item, ln = m.group(1), line_of(m.start())
+                if item in ITEM_ERAS and clash(*ITEM_ERAS[item][:2]) and not excused(ln, ln):
+                    a, b, what = ITEM_ERAS[item]
+                    found.append(f'{rel}:{ln} hold item "{item}" is {what} ({_era(a, b)}) in a story set in {story}')
+    return found, f"costume: story set in {story}, {looks} looks checked, {len(found)} pieces out of period", len(found)
+
+
 # ---------- stills / render ----------
 
-def framing_stale(slug):
-    """The framing table is missing or older than the scene, its timing, the shared engine, puppets or sets."""
+# ---------- shared bundle, heavy-stage lock ----------
+
+def bundle_dir():
+    """The shared Remotion bundle for the current src/ (scripts/bundle.mjs builds it when src/ changed)."""
+    return run("node", "scripts/bundle.mjs", capture=True).stdout.strip().splitlines()[-1]
+
+
+class heavy_lock:
+    """One heavy stage (framing pass, collide, motion draft, render) at a time on this machine, across videos and
+    shells: two at once share the GPU and each runs well under half speed, and the 3D tabs run out of GPU memory.
+    A waiting stage prints who holds the lock. NO_HEAVY_LOCK=1 skips it."""
+
+    PATH = os.path.join(ROOT, "out", "heavy.lock")
+
+    def __init__(self, slug, stage):
+        self.tag = f"{slug} {stage} (pid {os.getpid()})"
+
+    def __enter__(self):
+        if os.environ.get("NO_HEAVY_LOCK") == "1" or os.environ.get("HEAVY_LOCK_HELD") == "1":
+            self.fh = None
+            return self
+        import fcntl
+
+        os.makedirs(os.path.dirname(self.PATH), exist_ok=True)
+        self.fh = open(self.PATH, "a+")
+        try:
+            fcntl.flock(self.fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            self.fh.seek(0)
+            holder = self.fh.read().strip() or "another stage"
+            print(f"waiting for the heavy-stage lock: {holder} is running", flush=True)
+            began = time.time()
+            fcntl.flock(self.fh, fcntl.LOCK_EX)
+            print(f"got the lock after {time.time() - began:.0f} s", flush=True)
+        self.fh.seek(0)
+        self.fh.truncate()
+        self.fh.write(self.tag)
+        self.fh.flush()
+        os.environ["HEAVY_LOCK_HELD"] = "1"  # nested stages (render -> framing) don't wait on themselves
+        return self
+
+    def __exit__(self, *exc):
+        if self.fh:
+            import fcntl
+
+            os.environ.pop("HEAVY_LOCK_HELD", None)
+            self.fh.seek(0)
+            self.fh.truncate()
+            fcntl.flock(self.fh, fcntl.LOCK_UN)
+            self.fh.close()
+
+
+def framing_partial_path(slug):
+    """Written by a partial framing pass (stills of a few shots): which frame spans framing.json is fresh for."""
+    return vdir(slug, "build", "framing.partial.json")
+
+
+def framing_outdated(slug):
+    """framing.json is missing or older than the scene, its timing, the shared engine, puppets or sets."""
     out = os.path.join(ROOT, "public", "videos", slug, "framing.json")
     if not os.path.exists(out):
         return True
@@ -285,24 +560,101 @@ def framing_stale(slug):
     return os.path.getmtime(out) < newest
 
 
-def cmd_framing(slug, force=True):
+def framing_stale(slug):
+    """The whole framing table needs a pass: outdated, or only some shots were measured since the last change."""
+    return framing_outdated(slug) or os.path.exists(framing_partial_path(slug))
+
+
+def cmd_framing(slug, force=True, spans=None):
+    """The head-framing pre-pass (scripts/framing.mjs). With `spans` [(a, b), ...] (whole shots) it measures only
+    those, when they are not already fresh, and records them in build/framing.partial.json; a later full stage
+    (collide, motion, render, stills of the whole video) then runs the full pass."""
     cmd_physics(slug, force=False)
+    marker = framing_partial_path(slug)
+    if spans:
+        outdated = framing_outdated(slug)
+        fresh = [] if outdated else (json.load(open(marker))["spans"] if os.path.exists(marker) else None)
+        if fresh is None or (fresh and all(any(a >= x and b <= y for x, y in fresh) for a, b in spans)):
+            return  # the full table is fresh, or these shots were measured since the last change
+        cmd_register()
+        with heavy_lock(slug, "framing"):
+            run("node", "scripts/framing.mjs", slug, ",".join(f"{a}-{b}" for a, b in spans))
+        os.makedirs(os.path.dirname(marker), exist_ok=True)
+        json.dump({"spans": sorted(set(map(tuple, fresh + list(spans))))}, open(marker, "w"))
+        return
     if force or framing_stale(slug):
         cmd_register()
-        run("node", "scripts/framing.mjs", slug)
+        with heavy_lock(slug, "framing"):
+            run("node", "scripts/framing.mjs", slug)
+        if os.path.exists(marker):
+            os.remove(marker)
 
 
-def cmd_stills(slug, frames=None):
+def pick_shots(slug, spec):
+    """`--shots 3,5` (1-based shot numbers) or shot names -> [(start, end), ...] in frames (end exclusive)."""
+    shots = shot_list(slug)
+    chosen = []
+    for tok in spec.split(","):
+        tok = tok.strip()
+        hit = [s for i, s in enumerate(shots, 1) if tok == str(i) or tok == s[2]]
+        if not hit:
+            sys.exit(f"--shots: no shot '{tok}' (1-{len(shots)} or one of {', '.join(s[2] for s in shots)})")
+        chosen += [(a, b) for a, b, _, _ in hit]
+    return chosen
+
+
+def default_frames(slug, spans=None):
+    """The frames stills renders: one per second plus the start, middle and end of every shot (camera moves are
+    where heads and signs leave the frame), or, for chosen shots, every 15 frames through them plus their ends."""
+    total = json.load(open(sdir(slug, "timing.json")))["totalFrames"]
+    if spans:
+        frames = {f for a, b in spans for f in list(range(a + 2, b - 2, 15)) + [b - 3]}
+    else:
+        edges = set()
+        for a, b, _, _ in shot_list(slug):
+            edges |= {a + 2, (a + b) // 2, b - 3}
+        frames = sorted(edges)
+        # a per-second still within 6 frames of a shot-edge still shows the same picture
+        for f in range(15, total, FPS):
+            if all(abs(f - e) >= 6 for e in edges):
+                frames.append(f)
+    return sorted(f for f in frames if 0 <= f < total)
+
+
+def spans_of(slug, frames):
+    """The whole shots [(start, end_inclusive)] that contain the given frames."""
+    shots = shot_list(slug)
+    return sorted({(a, b - 1) for a, b, _, _ in shots for f in frames if a <= f < b})
+
+
+def cmd_stills(slug, frames=None, shots=None):
     cmd_register()
-    cmd_framing(slug, force=False)
-    run("node", "scripts/stills.mjs", slug, vdir(slug, "build", "stills"), *([frames] if frames else []))
+    spans = pick_shots(slug, shots) if shots else None
+    if frames:
+        frame_list = [int(f) for f in frames.split(",")]
+    else:
+        frame_list = default_frames(slug, spans)
+    if frames or shots:
+        cmd_framing(slug, force=False, spans=spans_of(slug, frame_list))
+    else:
+        cmd_framing(slug, force=False)
+    # A few frames or shots go to build/stills-check/, so build/stills/ stays the whole-video sheet the stills
+    # approval and `go` look at.
+    out = vdir(slug, "build", "stills-check" if frames or shots else "stills")
+    run("node", "scripts/stills.mjs", slug, out, ",".join(map(str, frame_list)))
 
 
-def cmd_collide(slug):
+def cmd_collide(slug, shots=None):
+    """Every 5th frame (of the chosen shots with --shots): puppets walking or standing inside set objects."""
     cmd_physics(slug, force=False)
     cmd_register()
-    print("$ COLLIDE=1 node scripts/stills.mjs", slug, flush=True)
-    subprocess.run(["node", "scripts/stills.mjs", slug, vdir(slug, "build", "collide")], cwd=ROOT, check=True, env={**os.environ, "COLLIDE": "1"})
+    args = []
+    if shots:
+        args = [",".join(str(f) for a, b in pick_shots(slug, shots) for f in range(a, b, 5))]
+    print("$ COLLIDE=1 node scripts/stills.mjs", slug, *args, flush=True)
+    with heavy_lock(slug, "collide"):
+        subprocess.run(["node", "scripts/stills.mjs", slug, vdir(slug, "build", "collide" if not shots else "collide-shots"), *args],
+                       cwd=ROOT, check=True, env={**os.environ, "COLLIDE": "1"})
 
 
 # ---------- sync: the sound cues against the picture ----------
@@ -579,6 +931,7 @@ def render_video(slug, out, *args):
     began = time.time()
 
     cuts = sorted({s[0] for s in shot_list(slug)} | {total})
+    serve = bundle_dir()  # one bundle for every segment, instead of the CLI bundling src/ + public/ per segment
 
     def segment(start, end, split=True):
         # A tab can die with "Page crashed!" (a V8 fatal check while copying an object literal, seen in kings-sticks
@@ -586,7 +939,7 @@ def render_video(slug, out, *args):
         # time, so no tab crosses a cut.
         part = f"{out}.part{start}.mp4"
         for attempt in range(RENDER_RETRIES + 1):
-            ok = run("npx", "remotion", "render", slug, part, f"--frames={start}-{end}", "--muted", *args,
+            ok = run("npx", "remotion", "render", serve, slug, part, f"--frames={start}-{end}", "--muted", *args,
                      check=False).returncode == 0
             clean_remotion_temp(began)
             if not ok:
@@ -626,7 +979,8 @@ def cmd_motion(slug):
     cmd_framing(slug, force=False)
     draft = os.path.join(OUT, "drafts", f"{slug}.mp4")
     os.makedirs(os.path.dirname(draft), exist_ok=True)
-    render_video(slug, draft, "--scale=0.3", "--log=error")
+    with heavy_lock(slug, "motion"):
+        render_video(slug, draft, "--scale=0.3", "--log=error")
     _, d = frame_diffs(draft)
     med, still = float(np.median(d)), float((d < 2).mean())
     for key, val in (("motion", med), ("still_share", still)):
@@ -646,7 +1000,8 @@ def cmd_render(slug, hd=False):
     os.makedirs(OUT, exist_ok=True)
     out = os.path.join(OUT, f"{slug}.mp4")
     picture, sound = f"{out}.picture.mp4", f"{out}.sound.wav"
-    render_video(slug, picture, "--log=error", *([f"--scale={HD_SCALE}"] if hd else []))
+    with heavy_lock(slug, "render"):
+        render_video(slug, picture, "--log=error", *([f"--scale={HD_SCALE}"] if hd else []))
     cmd_cues(slug)  # bakes the effects' spaces the soundtrack plays
     run("node", "scripts/sound.mjs", slug, sound)
     run("ffmpeg", "-v", "error", "-y", "-i", picture, "-i", sound, "-c:v", "copy", "-c:a", "aac", "-b:a", "320k", "-shortest", out)
@@ -1094,6 +1449,7 @@ if __name__ == "__main__":
     cmd, args = sys.argv[1], sys.argv[2:]
     given = list(args)
     hd = flag(args, "--2k")
+    shots = option(args, "--shots", None)
     started = time.time()
     # Remotion bundles (with their copy of public/) go to a temp folder of this command's own, so a cleanup never
     # deletes the bundle of a render running at the same time in another shell (its public files then 404 mid-render).
@@ -1102,11 +1458,12 @@ if __name__ == "__main__":
         call = {
             "new": lambda: cmd_new(args[0], args[1]),
             "voice": lambda: cmd_voice(args[0]),
+            "pace": lambda: pace_check(args[0]),
             "register": cmd_register,
             "physics": lambda: cmd_physics(args[0]),
             "check": lambda: cmd_check(args[0]),
-            "stills": lambda: cmd_stills(args[0], args[1] if len(args) > 1 else None),
-            "collide": lambda: cmd_collide(args[0]),
+            "stills": lambda: cmd_stills(args[0], args[1] if len(args) > 1 and not args[1].startswith("--") else None, shots),
+            "collide": lambda: cmd_collide(args[0], shots),
             "motion": lambda: cmd_motion(args[0]),
             "framing": lambda: cmd_framing(args[0]),
             "render": lambda: cmd_render(args[0], hd),

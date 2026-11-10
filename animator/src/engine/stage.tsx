@@ -7,10 +7,11 @@ import { HEAD_Y, PuppetBillboard, PuppetLight, PuppetPlacement } from "../puppet
 import { Vec3 } from "./anim";
 import { useShotDuration, useShotFrame, useShotStart } from "./clock";
 import { lightForBackground, puppetTint } from "../three/moods";
-import { livenCamera, livenPose } from "./liven";
+import { livenCamera, livenPose, REACH } from "./liven";
 import { useFramingFor, useImpact, useLighting, usePost, useSpeech, useSteady } from "./Video";
 import { Post } from "./post/Post";
 import { applyFramingDelta, framingDelta, keepHeadsInFrame } from "./framing";
+import { auditing, SceneAudit } from "./audit";
 import { getInputProps } from "remotion";
 import { WebGPURenderer } from "three/webgpu";
 
@@ -52,9 +53,11 @@ const shake = (cam: CameraShot, hit: number, f: number): CameraShot => {
   if (hit <= 0) return cam;
   const d = Math.hypot(cam.position[0] - cam.target[0], cam.position[1] - cam.target[1], cam.position[2] - cam.target[2]);
   const a = hit * hit * 0.03 * d;
+  // The camera's own jitter stops growing past REACH m (liven.ts); the aim's is an angle and keeps the full distance.
+  const p = d > REACH ? (a * REACH) / d : a;
   const j = (k: number) => Math.sin(f * 2.9 + k) * 0.6 + Math.sin(f * 5.3 + k * 2.1) * 0.4;
   return {
-    position: [cam.position[0] + j(0) * a, cam.position[1] + j(1.3) * a, cam.position[2]],
+    position: [cam.position[0] + j(0) * p, cam.position[1] + j(1.3) * p, cam.position[2]],
     target: [cam.target[0] + j(2.6) * a * 0.5, cam.target[1] + j(3.9) * a * 0.5, cam.target[2]],
     fov: cam.fov * (1 - 0.04 * hit),
   };
@@ -161,6 +164,8 @@ export const Stage: React.FC<{
   });
   // Rendered after the set, this rig wins over the set's own and applies the livened camera.
   const rig = <CameraRig {...camera} />;
+  // Framing audit of the set's crowds, model heads and words (engine/audit.ts), in every canvas that draws the set.
+  const audit = auditing() ? <SceneAudit focus={focus ?? focusDistance(camera, puppets)} shot={start} /> : null;
   const front = foreground ? <group userData={{ ghost: true }}>{foreground}</group> : null;
   const usedPost = usePost();
   const post = GPU_TRIAL ? null : usedPost;
@@ -173,6 +178,7 @@ export const Stage: React.FC<{
           {rig}
           {cast}
           {front}
+          {audit}
           <Post parts={post} focus={focus ?? focusDistance(camera, puppets)} cInf={(blur ?? 0) * LENS_PER_BLUR} inkDebug={inkDebug} />
         </ThreeCanvas>
         <Grade truth={truth} flash={flash} vignette={!post.grade} />
@@ -187,6 +193,7 @@ export const Stage: React.FC<{
             <ThreeCanvas width={width} height={height} flat shadows dpr={SUPERSAMPLE} gl={gpuGl}>
               {set}
               {rig}
+              {audit}
             </ThreeCanvas>
           </AbsoluteFill>
           <AbsoluteFill>
@@ -202,6 +209,7 @@ export const Stage: React.FC<{
                 <CameraRig {...camera} />
                 <hemisphereLight args={["#ffffff", "#5a5a66", 1.6]} />
                 {front}
+                {audit && <SceneAudit shot={start} />}
               </ThreeCanvas>
             </AbsoluteFill>
           )}
@@ -212,6 +220,7 @@ export const Stage: React.FC<{
           {rig}
           {cast}
           {front}
+          {audit}
         </ThreeCanvas>
       )}
       <Grade truth={truth} flash={flash} />

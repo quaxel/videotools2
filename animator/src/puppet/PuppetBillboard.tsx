@@ -206,25 +206,67 @@ export const turnToCamera = (pose: PuppetPose, yaw: number): PuppetPose => {
 // Seen from high above, an upright card flattens to a sliver; past ~17° of elevation it leans its top away from
 // the camera, pivoting on the feet, so it stays square to the line of sight and the figure keeps its full body.
 // Radians the card leans back (applied as a rotation of -tilt about its own x axis).
-export const cardTilt = (cam: [number, number, number], at: [number, number]) => {
-  const elevation = Math.atan2(cam[1] - HEAD_Y * 0.7, Math.hypot(cam[0] - at[0], cam[2] - at[1]));
+// `lift` (metres, = pose.air * K): a puppet raised off the floor (a theatre box, a saddle, a stage) is measured from
+// its own raised head and leans about its raised feet. Measured from the floor instead, a camera level with a puppet
+// in a box 2 m up read as a steep high angle once it came within ~4 m, and the card swung back through the set
+// behind it (the puppet vanished). Lifts under LIFT_PIVOT (a car seat, a saddle) keep the old floor pivot exactly,
+// so slug overlays that rebuild the card with the two-argument call (what-if-waterloo's bicornes on riders) still fit.
+export const LIFT_PIVOT = 1.0;
+export const pivotLift = (lift: number) => (lift >= LIFT_PIVOT ? lift : 0);
+export const cardTilt = (cam: [number, number, number], at: [number, number], lift = 0) => {
+  const elevation = Math.atan2(cam[1] - HEAD_Y * 0.7 - pivotLift(lift), Math.hypot(cam[0] - at[0], cam[2] - at[1]));
   return Math.min(0.95, Math.max(0, elevation - 0.3) * 1.1);
 };
 
 // For held props (a paddle, a cup in a world-space prop): where a hand at `reach` lands in the scene.
 // Where a puppet's hand is in the world: `reach` (puppet units, as in reachR) on the card standing at `at`,
-// which turns to face the camera and, from high up, leans back (cardTilt). `lift` (puppet units) is how far the body
-// is raised: pass the pose's `air` (a car seat, a jump) minus its `bob`, since reach points move with the body.
-export const handWorld = (at: [number, number], reach: [number, number], camera: { position: [number, number, number] }, lift = 0): [number, number, number] => {
+// which turns to face the camera and, from high up, leans back (cardTilt).
+// `air`: the pose's air (puppet units) for a puppet lifted LIFT_PIVOT or more, whose card leans about its raised feet;
+// `reach` is relative to the lifted body as in the pose, so the hand comes out `air` higher. With air = 0 it is the
+// old behaviour exactly (callers that added the air themselves keep doing so). For a seated or jumping puppet pass the pose's `air` minus its `bob`.
+export const handWorld = (at: [number, number], reach: [number, number], camera: { position: [number, number, number] }, air = 0): [number, number, number] => {
   const dx = camera.position[0] - at[0];
   const dz = camera.position[2] - at[1];
   const l = Math.hypot(dx, dz) || 1;
   const fwd: [number, number] = [dx / l, dz / l];
   const right: [number, number] = [dz / l, -dx / l];
-  const t = cardTilt(camera.position, at);
-  const h = (lift - reach[1]) * K;
+  const lift = pivotLift(air * K);
+  const t = cardTilt(camera.position, at, lift);
+  const h = (air - reach[1]) * K - lift; // the hand's height above the card's pivot (the body is drawn `air` up)
   const back = -h * Math.sin(t);
-  return [at[0] + right[0] * reach[0] * K + fwd[0] * back, h * Math.cos(t), at[1] + right[1] * reach[0] * K + fwd[1] * back];
+  return [at[0] + right[0] * reach[0] * K + fwd[0] * back, lift + h * Math.cos(t), at[1] + right[1] * reach[0] * K + fwd[1] * back];
+};
+
+// Where the head centre of a puppet standing at `at` (lifted by `air` puppet units) is in the world, on its card as
+// PuppetBillboard draws it: turned to the camera and leaning back by cardTilt. For the framing audit and keepHeads.
+export const headWorld = (at: [number, number], air: number, camera: [number, number, number]): [number, number, number] => {
+  const dx = camera[0] - at[0];
+  const dz = camera[2] - at[1];
+  const l = Math.hypot(dx, dz) || 1;
+  const lift = pivotLift(air * K);
+  const t = cardTilt(camera, at, lift);
+  const h = HEAD_Y + air * K - lift; // head above the card's pivot
+  const back = -h * Math.sin(t);
+  return [at[0] + (dx / l) * back, lift + h * Math.cos(t), at[1] + (dz / l) * back];
+};
+
+// The drawn hat's box on the card, in metres from the head centre (x across the card, y up): brims are wider than
+// the head and crowns, shakos and plumes rise above it. null without a hat. From the hat shapes in Puppet.tsx.
+const HAT_BOX: Record<NonNullable<PuppetLook["hatStyle"]>, [number, number]> = {
+  wide: [300, 1110],
+  bowler: [232, 1100],
+  boater: [272, 1045],
+  helmet: [232, 1085],
+  stahl: [222, 1085],
+  crown: [190, 1160],
+  shako: [195, 1272],
+  galea: [235, 1120],
+};
+export const hatBox = (look: PuppetLook, pose: PuppetPose): { x0: number; x1: number; y0: number; y1: number } | null => {
+  if (!look.hat) return null;
+  const [half, top] = HAT_BOX[look.hatStyle ?? "wide"];
+  const side = pose.view === "side" ? (pose.facing ?? 1) * 26 : 0; // the side view draws the hat 26 units forward
+  return { x0: (side - half) * K, x1: (side + half) * K, y0: (920 - 800) * K, y1: (top - 800) * K };
 };
 
 export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff", light: lightIn, mask, fixedYaw, limbs = "3d" }) => {
@@ -235,7 +277,9 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   const yaw = fixedYaw ?? Math.atan2(camera.position.x - x, camera.position.z - z);
   const pose = turnToCamera(authored, yaw);
   const lying = (pose.lie ?? 0) > 0;
-  const tilt = lying || fixedYaw !== undefined ? 0 : cardTilt([camera.position.x, camera.position.y, camera.position.z], at);
+  // The card leans about the raised feet of a lifted puppet (cardTilt), so the drawing stays where it was authored.
+  const liftM = pivotLift((pose.air ?? 0) * K);
+  const tilt = lying || fixedYaw !== undefined ? 0 : cardTilt([camera.position.x, camera.position.y, camera.position.z], at, liftM);
   // The card must grow with the puppet: a puppet lifted off the floor (`air`: a car seat, a jump), bobbed up or
   // stretched (negative `squash`) rises above the standing box, and whatever leaves the box is cut off in a hard
   // straight line (a "half head"). Extend the top by the lift, in steps so the canvas is not rebuilt every frame.
@@ -253,8 +297,18 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
     return extra ? { ...base, y: base.y - extra, h: base.h + extra } : base;
   }, [lying, crawling, extra, hatSide]);
   const root = useRef<THREE.Group>(null);
+  const card = useRef<THREE.Group>(null);
   const headY = HEAD_Y + (pose.air ?? 0) * K; // a puppet lifted onto a seat (a car bench) carries its head up too
-  usePuppetAudit(root, () => root.current?.parent?.localToWorld(new THREE.Vector3(x, headY, z)) ?? new THREE.Vector3(x, headY, z), 205 * K, id, !!pose.sit);
+  // The head as drawn: on the card (turned to the camera, leaning back by cardTilt about the raised feet), where the
+  // drawing has it at headY - liftM above the card's pivot. The audit also takes the hat (`look.hat`) into the head.
+  usePuppetAudit(
+    root,
+    () => card.current?.localToWorld(new THREE.Vector3(0, headY - liftM, 0)) ?? root.current?.parent?.localToWorld(new THREE.Vector3(x, headY, z)) ?? new THREE.Vector3(x, headY, z),
+    205 * K,
+    id,
+    !!pose.sit,
+    { card, headOnCard: headY - liftM, hat: hatBox(look, pose) },
+  );
   const advance = useThree((s) => s.advance);
   const gl = useThree((s) => s.gl);
   const screenH = useThree((s) => s.size.height);
@@ -360,8 +414,9 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   }, [markup, canvas, texture, advance, gl, id]);
 
   // A world point in the card's frame (inside the yaw and tilt groups below).
+  // The tilt pivots about the raised feet (liftM); the limbs sit in a group shifted back down by liftM.
   const toCard = (w: [number, number, number]) =>
-    new THREE.Vector3(w[0] - x, w[1], w[2] - z).applyAxisAngle(new THREE.Vector3(0, 1, 0), -yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
+    new THREE.Vector3(w[0] - x, w[1] - liftM, w[2] - z).applyAxisAngle(new THREE.Vector3(0, 1, 0), -yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt).add(new THREE.Vector3(0, liftM, 0));
   return (
     <group ref={root} position={[x, 0, z]} userData={{ puppet: true }}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} scale={[1, 0.42, 1]} visible={!mask}>
@@ -369,20 +424,22 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
         <meshBasicMaterial color="#000" transparent opacity={0.3} depthWrite={false} />
       </mesh>
       <group rotation={[0, yaw, 0]}>
-        <group rotation={[-tilt, 0, 0]}>
+        <group ref={card} position={[0, liftM, 0]} rotation={[-tilt, 0, 0]}>
           {limbMode === "markers" && (
-            <CardLimbs
-              joints={joints}
-              K={K}
-              profile={pose.view === "side"}
-              facing={pose.facing ?? 1}
-              pants={look.pants}
-              shoes={look.shoes}
-              reachL={pose.worldL && toCard(pose.worldL)}
-              reachR={pose.worldR && toCard(pose.worldR)}
-            />
+            <group position={[0, -liftM, 0]}>
+              <CardLimbs
+                joints={joints}
+                K={K}
+                profile={pose.view === "side"}
+                facing={pose.facing ?? 1}
+                pants={look.pants}
+                shoes={look.shoes}
+                reachL={pose.worldL && toCard(pose.worldL)}
+                reachR={pose.worldR && toCard(pose.worldR)}
+              />
+            </group>
           )}
-          <mesh position={[(VB.x + VB.w / 2) * K, -(VB.y + VB.h / 2) * K, 0]} castShadow customDepthMaterial={depthMaterial} material={litMaterial ?? undefined}>
+          <mesh position={[(VB.x + VB.w / 2) * K, -(VB.y + VB.h / 2) * K - liftM, 0]} castShadow customDepthMaterial={depthMaterial} material={litMaterial ?? undefined}>
             <planeGeometry args={[VB.w * K, VB.h * K]} />
             {!litMaterial && <meshBasicMaterial map={texture} color={tint} transparent alphaTest={0.02} toneMapped={false} fog={false} />}
           </mesh>

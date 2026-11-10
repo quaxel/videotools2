@@ -120,6 +120,7 @@ export function importResearch(store: Store) {
         text: m[1],
         language: "tr",
         firstImage: "",
+        onScreen: "",
         note: "Araştırma taslağından aktarıldı.",
         selected: n === 0,
       }));

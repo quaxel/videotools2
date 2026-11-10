@@ -1,0 +1,121 @@
+{
+  "title": "The Day a Bank Teller's Bluff Beat the James Gang",
+  "topic": "Northfield, 1876: the time-lock bluff",
+  "mechanism": "A time lock is a clockwork in a safe door that keeps the bolts from moving until the hour it is set to; Heywood's had never been set, so the safe was unlocked, but the outlaws believed his bluff and never tried the handle while the town armed itself outside.",
+  "beats": {
+    "hook": "He told eight armed outlaws the bank safe was locked. It wasn't: the camera glides through a dark vault onto an iron safe with a little TIME LOCK window and an outlaw's revolver.",
+    "but": "The James-Younger gang rides into quiet Northfield; inside the bank sits acting cashier Joseph Heywood.",
+    "then": "An outlaw orders him to open the safe; Heywood says it's on a time lock; one outlaw steps into the vault and Heywood throws the heavy door on him.",
+    "conflict": "Teller Bunker bolts out the back, shot in the shoulder; outside a hardware merchant grabs his rifle: 'Get your guns, boys!'",
+    "pivot": "You see, a time lock is a clock in the safe door: once set, nobody opens it until the hour comes. But Heywood's clock had never been set.",
+    "so": "Bullets fill the street; the gang flees with $26.70; three killed, three captured.",
+    "closing": "Heywood paid for his bluff with his life; the bookkeeper turns the handle and the safe swings open on the untouched money."
+  },
+  "seed": {
+    "what": "The small TIME LOCK window on the safe door, its clock hands stopped, and the brass handle nobody tries",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "safe",
+      "set": "Room: the vault, iron-lined, lamp",
+      "colour": "dark iron green"
+    },
+    {
+      "id": "street",
+      "set": "WesternTownSet day mode (new; Codex Minnesota backdrop)",
+      "colour": "sky blue and tan"
+    },
+    {
+      "id": "lobby",
+      "set": "Room: bank lobby, counter with teller grille",
+      "colour": "cream and brass"
+    },
+    {
+      "id": "vault",
+      "set": "Room: the vault doorway with the swinging iron door",
+      "colour": "dark iron green"
+    },
+    {
+      "id": "backdoor",
+      "set": "Room: brick back wall and door, cold daylight",
+      "colour": "cold blue and brick red"
+    },
+    {
+      "id": "hardware",
+      "set": "Room: hardware store with rifles in the window",
+      "colour": "warm orange wood"
+    },
+    {
+      "id": "waiting",
+      "set": "Room: the vault, outlaws round the safe",
+      "colour": "dark iron green, red lantern"
+    },
+    {
+      "id": "cutaway",
+      "set": "Black void: the safe door cut open, clock, block and bolts",
+      "colour": "black and brass"
+    },
+    {
+      "id": "notset",
+      "set": "The same cutaway in warm light, NOT SET",
+      "colour": "gold"
+    },
+    {
+      "id": "flight",
+      "set": "WesternTownSet day with gunsmoke",
+      "colour": "smoke grey-white"
+    },
+    {
+      "id": "evening",
+      "set": "Room: the bank lobby at evening",
+      "colour": "violet and amber"
+    }
+  ],
+  "characters": [
+    {
+      "id": "heywood",
+      "look": "Acting cashier: dark suit, waistcoat, moustache, sleeve garters"
+    },
+    {
+      "id": "outlaw",
+      "look": "Long dust coat (duster), wide hat, beard, revolver"
+    },
+    {
+      "id": "outlaw2",
+      "look": "Duster, wide hat, red kerchief"
+    },
+    {
+      "id": "bunker",
+      "look": "Teller: young, white shirt, waistcoat"
+    },
+    {
+      "id": "merchant",
+      "look": "Hardware merchant: apron, shirt sleeves, rifle"
+    },
+    {
+      "id": "wilcox",
+      "look": "Bookkeeper: spectacles, grey suit"
+    }
+  ],
+  "gags": [
+    {
+      "line": 6,
+      "what": "The iron door slams on the outlaw's arm; he hops and shakes it"
+    },
+    {
+      "line": 7,
+      "what": "Bunker bursts through the back door so fast his hat flies off"
+    },
+    {
+      "line": 10,
+      "what": "Waiting outlaw kicks the safe and grabs his foot"
+    }
+  ],
+  "story_numbers": [
+    "eight (outlaws)",
+    "eighteen seventy-six",
+    "twenty-six dollars and seventy cents",
+    "three killed, three captured"
+  ]
+}

@@ -69,8 +69,12 @@ Turkish for `title`, `summary`, `question`, `mechanism` and `limitations` (the a
 - `mechanism` — the hidden mechanism in one or two sentences, with the key number.
 - `summary` — the six beats in a few sentences: hook image, the one character and situation, the rise (they
   think they are winning), the twist **event**, the mechanism behind the scenes, the ending/loop.
-- `hooks` — 1–3 English opening lines; first word "He", "It's" or "You"; `firstImage` says what the first 1 s
-  shows. The first hook is the preferred one.
+- `hooks` — 1–3 triple hooks (rules.md → Story, triple hook), each live within the first 0.5 s and each doing a
+  different job. `text` is the English opening line (the verbal hook: why should I care?); first word "He", "It's"
+  or "You". `firstImage` is the visual hook: what is in frame and already moving or changing at frame 0 (what is
+  happening?), not a still establishing view. `onScreen` is the text hook: the English shot-1 headline, 2–6 words,
+  the video's label, question or a contrasting angle (what is this about?), never the words of `text`. The first
+  hook is the preferred one.
 - `visualNotes` — the labelled props that show the mechanism (UPPERCASE labels), 3+ locations and 2 physical
   gags.
 - `limitations` — what could make it fail: thin evidence, a contested number, sensitivity.
@@ -105,7 +109,9 @@ Do not grade your own drafts in the same breath. Write the drafts (everything ab
 > [{"key", "verdict", "evidence": "<short quote from the draft or source note, max 160 chars>", "reason": "<one
 > short Turkish sentence>"}], "dupes": [{"kind": "video"|"idea", "ref": "<slug or idea id>", "title", "score":
 > <0-1>, "why": "Anlamsal: <Turkish, short>"}], "rubricSummary": "<two Turkish sentences: strongest point, biggest
-> risk>"}. Only list dupes with score ≥ 0.4. Write it to `<scratchpad>/scores.json` and also return it.
+> risk>"}. Only list dupes with score ≥ 0.4.
+> - `hook`: judge the first hook as a triple hook (rules.md → Story, triple hook); fail it if its `firstImage` is a
+>   still view, its `onScreen` is missing or repeats `text`, or two of the three do the same job. Write it to `<scratchpad>/scores.json` and also return it.
 
 Do not give numeric scores; the app computes the score from the verdicts. A failed gate makes a candidate
 ineligible whatever the rest says, and each gate left `unknown` costs points. Keep gate failures in the batch:
@@ -119,7 +125,8 @@ The drafts file is an array of candidates in this shape (the scorer adds `rubric
 [{
   "title": "...", "titleEn": "...", "question": "...", "mechanism": "...", "summary": "...",
   "category": "Gündelik sistemler", "tags": ["..."], "effort": "medium",
-  "hooks": [{ "text": "It's the button everyone presses ...", "language": "en", "firstImage": "...", "note": "" }],
+  "hooks": [{ "text": "It's the button everyone presses ...", "language": "en", "firstImage": "...",
+              "onScreen": "THE BUTTON DOES NOTHING", "note": "" }],
   "visualNotes": "...", "limitations": "...",
   "sources": [{ "url": "https://...", "title": "...", "publisher": "...", "type": "official", "note": "key number" }]
 }]
