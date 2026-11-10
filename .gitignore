@@ -30,6 +30,11 @@ uploader/uploader.db*
 output/
 tts/model/
 
+# Leftovers from before per-video work, renders and the uploader moved to the repository root
+animator/out/
+animator/videos/
+animator/uploader/
+
 # Effects baked into a space (scripts/foley.py space), made on demand
 animator/public/space/
 
