@@ -73,7 +73,10 @@ percentages of the runtime).
   move type, foreground / midground / background objects and the in-world labels.
 - **Depth in every shot:** a foreground object close to the lens (blurred), the subject sharp in the midground, the
   background softly blurred (Stage `foreground` + `frameSpot`, the post chain's depth of field focused on the subject).
-  The foreground never covers a face or a label.
+  The foreground never covers a face or a label, and never fills more than a third of the frame.
+- **Z-depth:** no two surfaces at the same depth (a sign, decal or poster flush on a wall, a patch on a floor, boxes
+  sharing a face): they z-fight and flicker. Lift the front one 1-2 cm off, or give its material `polygonOffset`.
+  The framing audit reports `z-fighting:` pairs and shots missing a depth layer (`depth:`).
 - **Explanation shots:** one idea per shot, readable in one second, at most 6 words of readable text per frame.
 - **Characters touch the world:** they sit, hold, push, open, walk in profile. Not every shot is front-on.
 - **No action twice the same way:** an action a character repeats (a bite, a knock, a wave, a sip) differs each time
@@ -90,9 +93,15 @@ percentages of the runtime).
   and a clear camera move (track the subject, tilt, crane). Sky shots are the stillest in `motion`; fix them first.
 - **Effects must not show through props:** smoke from a fire under a pot, steam in front of a hero object; check
   the macro stills for grey blobs over the subject.
-- **No half heads:** a head is either whole in the frame or wholly out. Stage enforces it (library.md → `keepHeads`);
-  the framing audit in `stills` should list only intended back-view crops. A head sliced off in a straight line inside
+- **Nothing half visible:** a head (people, animals, crowd figures, the hat included) and every piece of text (signs,
+  labels, headlines, boards) is either whole in the frame or wholly out, through the whole shot, camera moves
+  included. Stage keeps puppet heads whole (library.md → `keepHeads`); the framing audit in `stills` reports the rest,
+  and every hit is a fix. The audit should list only intended back-view crops. A head sliced off in a straight line inside
   the picture is the puppet's card, not the camera (the audit says "card of X cuts the drawing").
+  The audit sees puppets, their hats (drawn or a 3D overlay), instanced crowds, model heads (horses, dinosaurs) and
+  every word drawn on a canvas texture; a crowd running off the edge on purpose takes `userData.audit = false`.
+  It also reports z-fighting (two coplanar surfaces that flicker) and a frame with no background layer or a
+  foreground over a third of it (library.md → Framing audit).
 - **No camera jumps:** the camera never snaps between two frames of one shot except on an impact sound. Head framing
   is smoothed per shot by the framing pre-pass; animate camera moves with eased ramps, not steps.
 - **Painted, not rendered:** flat colour fills with soft cel bands; no grain, gloss, bevels or reflections. Big
@@ -151,5 +160,18 @@ percentages of the runtime).
   fix high first, one shot at a time, and look at the new frame of each fix before calling it fixed.
 - Facts on screen: every date, name and number in a label, sign or `Headline` matches the script and is spelled
   right.
-- `pipeline.py` deletes the Remotion temp bundles each command leaves behind (~190 MB per still/render run). If you
-  call `npx remotion` directly, delete `$TMPDIR/remotion-*` from that run afterwards, or the disk fills up.
+- Every pipeline script renders from one shared bundle (`scripts/bundle.mjs` → `out/bundles/`, rebuilt in seconds when
+  `src/` changes, `public/` symlinked). To render a clip by hand, use it too: `npx remotion render "$(node
+  scripts/bundle.mjs)" <slug> <out.mp4> --frames=a-b`. A bare `npx remotion render <slug>` still copies `public/`
+  (~340 MB) into `$TMPDIR/remotion-*`; delete that afterwards, or the disk fills up.
+- **Headless Chrome V8 crash** ("Fatal error ... object-literal boilerplate migration", the tab dies mid-render): seen in
+  a shot with hundreds of instanced soldiers, horses and flags (what-if-waterloo shot 11). V8 builds each object
+  literal (a JSX props object, `{ x, z, yaw }` per figure, a `joints` record) from a per-call-site template; when the same
+  site sees a field as a small integer on one frame and a fraction on the next, the template's field type is
+  widened, and under heavy load that migration can crash. The literals are written at the call sites in the
+  slug's own code, so the engine cannot wrap them. Workaround that held: keep values that change per frame from
+  ever being whole numbers at one call site (`const dbl = (v: number) => v + 1e-7` on positions, sizes, joint
+  angles and placement fields; write sizes as `1.04`, not `1`). `render` retries a crashed segment shot by shot;
+  if one shot keeps crashing, apply `dbl` to the numbers built per frame in that shot.
+- Check what you changed, not the whole video: `stills --shots` and `collide --shots` after a fix, the full runs once
+  before the approval.

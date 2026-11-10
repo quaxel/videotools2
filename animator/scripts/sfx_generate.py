@@ -805,6 +805,14 @@ def jingle():
     return out
 
 
+def kernel():
+    # One popcorn kernel popping: a short dry puff with a woody knock, its pitch drawn per take (foley takes).
+    f0 = float(rng.uniform(500, 1100))
+    knock = sweep(f0 * 1.6, f0, 0.035) * env(0.035, 0.0005, 0.012) * 0.7
+    puff = band(noise(0.05), 900, 5000) * env(0.05, 0.0005, 0.014)
+    return mix(knock, puff * 0.8, click(0.006, 2500, 7000) * 0.3)
+
+
 if __name__ == "__main__":
     for name, fn in [
         ("reel-spin", reel_spin),

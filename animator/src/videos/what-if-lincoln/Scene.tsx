@@ -276,68 +276,83 @@ const S6: React.FC = () => {
 
 // ---------- 7. The passage and the vestibule (809-974): the card, the door, the pine bar, the wait ----------
 
+// Seen from inside the vestibule, by the box door: through the opening passage door Booth shows the footman his
+// card, steps in, shuts the door, takes the pine bar from the wall and wedges it between the door and a notch in
+// the wall, then turns and waits in the dark.
 const S7: React.FC = () => {
   const f = useShotFrame(); // 0..165
   const camera = beatPath(
     [
-      { at: 0, position: [0.35, 1.35, 3.4], target: [1.15, 1.0, -0.4], fov: 44 },
-      { at: 40, position: [0.6, 1.6, 3.0], target: [0.9, 1.0, -0.6], fov: 44 },
-      { at: 66, position: [0.68, 2.3, 1.6], target: [0.78, 0.9, -0.9], fov: 44 },
-      { at: 92, position: [0.75, 3.55, -0.85], target: [0.72, 0.6, -1.5], fov: 44 },
-      { at: 164, position: [0.78, 3.35, -1.0], target: [0.72, 0.6, -1.95], fov: 44 },
+      { at: 0, position: [0.7, 1.12, -4.5], target: [0.7, 1.05, -0.5], fov: 46 },
+      { at: 80, position: [0.69, 1.08, -4.25], target: [0.68, 1.0, -0.5], fov: 46 },
+      { at: 164, position: [0.7, 1.04, -4.0], target: [0.68, 0.98, -0.5], fov: 46 },
     ],
     f,
   );
-  const walkIn = stroll(f, 0, 12, [0.3, 0.25], [1.0, 0.25]);
-  const toDoor = stroll(f, 38, 20, [1.0, 0.25], [PASS.door, -0.55]);
-  const through = stroll(f, 58, 10, [PASS.door, -0.55], [PASS.door + 0.05, -1.45]);
-  const toBox = stroll(f, 116, 26, [PASS.door + 0.05, -1.45], [0.68, -2.05]);
-  const door = f < 40 ? 0 : f < 68 ? ease(f, 42, 54) : 1 - ease(f, 68, 76);
-  const cardOut = f >= 14 && f < 40;
+  const OUT: [number, number] = [0.5, -0.66]; // in the passage, just outside the door
+  const IN: [number, number] = [0.76, -2.0];
+  const BRACE: [number, number] = [0.62, -1.6];
+  const WAIT: [number, number] = [0.64, -1.8];
+  const door = 1 - ease(f, 58, 70);
+  const stepIn = stroll(f, 40, 16, OUT, IN);
+  const toBrace = stroll(f, 74, 8, IN, BRACE);
+  const toWait = stroll(f, 118, 14, BRACE, WAIT);
+  const push = ease(f, 84, 104);
   let bAt: [number, number];
   let bPose: PuppetPose;
-  if (f < 12) {
-    bAt = walkIn.at;
-    bPose = { ...walkIn.pose, expression: "determined" };
-  } else if (f < 40) {
-    bAt = [1.0, 0.25];
-    bPose = { view: "front", expression: "smug", lookX: 0.8, reachR: [100, -440], handR: "open" };
-  } else if (f < 58) {
-    bAt = toDoor.at;
-    bPose = { ...toDoor.pose, view: "back", expression: "determined" };
-  } else if (f < 68) {
-    bAt = through.at;
-    bPose = { ...through.pose, view: "back", expression: "determined" };
-  } else if (f < 120) {
-    bAt = [PASS.door + 0.05, -1.45];
-    const push = ease(f, 80, 100);
-    bPose = { view: "back", expression: "determined", reachR: [140, -560 + push * 60], reachL: [-140, -540], handR: "fist", handL: "fist", lean: push * 6 };
+  if (f < 40) {
+    bAt = OUT;
+    bPose = { view: "front", expression: "smug", lookX: -0.8, reachL: [-150, -500], handL: "open", frontL: true };
+  } else if (f < 56) {
+    bAt = stepIn.at;
+    bPose = { ...stepIn.pose, view: "front", expression: "determined" };
+  } else if (f < 74) {
+    bAt = IN;
+    bPose = { view: "back", expression: "determined", reachR: [120, -520 + ease(f, 58, 68) * 40], handR: "open" };
+  } else if (f < 118) {
+    bAt = f < 82 ? toBrace.at : BRACE;
+    bPose = { view: "back", expression: "determined", reachR: [150, -560 + push * 70], reachL: [-130, -500 + push * 60], handR: "fist", handL: "fist", lean: push * 7 };
   } else {
-    bAt = toBox.at;
-    bPose = f < 146 ? { ...toBox.pose, view: "back", expression: "determined" } : { view: "back", expression: "determined", crouch: 0.25 * ease(f, 146, 158), lean: 8 * ease(f, 146, 158) };
+    bAt = toWait.at;
+    bPose = f < 132 ? { ...toWait.pose, view: "back", expression: "determined" } : { view: "back", expression: "determined", crouch: 0.18 * ease(f, 136, 150), lean: 6 * ease(f, 136, 150) };
   }
-  const booth: PuppetPlacement = { id: "booth", look: f < 68 ? BOOTH : BOOTH_BARE, at: bAt, pose: bPose };
-  const hidden = f >= 68 && f < 84; // wholly behind the closed door while the camera rises over the wall
-  const forbes: PuppetPlacement = { id: "forbes", look: FORBES, at: [1.95, -0.6], pose: { sit: true, view: "front", ...faceChange([[0, "neutral"], [20, "confused"], [34, "neutral"]], f), lookX: -0.8, reachL: cardOut ? [-200, -520] : [-70, -420], handL: "open" } };
-  const card = f >= 14 && f < 40 ? handWorld([1.0, 0.25], [100, -440], camera) : null;
-  // the pine bar: lifted into place from f 80, wedged by 100
-  const bar = ease(f, 80, 100);
-  const barFrom: [number, number, number] = [PASS.door - 0.15, 0.95 - (1 - bar) * 0.2, PASS.back - 0.08 - (1 - bar) * 0.25];
-  const barTo: [number, number, number] = [PASS.vx1 - 0.02, 0.62 + (1 - bar) * 0.1, PASS.back - 0.75];
+  const booth: PuppetPlacement = { id: "booth", look: BOOTH, at: bAt, pose: bPose };
+  const forbes: PuppetPlacement = { id: "forbes", look: FORBES, at: [0.86, -0.3], pose: { sit: true, view: "front", ...faceChange([[0, "neutral"], [20, "confused"], [34, "neutral"]], f), lookX: 0.8, reachR: f >= 16 && f < 40 ? [140, -480] : [70, -420], handR: "open" } };
+  const card = f >= 14 && f < 38 ? handWorld(OUT, [-150, -500], camera) : null;
+  // the pine bar: leaning on the right wall, lifted at f 74, pressed between the door and the left-wall notch by 104
+  const lean = { a: [1.04, 0.03, -2.25] as [number, number, number], b: [1.05, 1.0, -2.0] as [number, number, number] };
+  const set = { a: [0.72, 0.9, PASS.back - 0.08] as [number, number, number], b: [PASS.vx1 - 0.03, 0.24, -1.85] as [number, number, number] };
+  const lift = ease(f, 74, 86);
+  const lerp = (u: [number, number, number], v: [number, number, number], t: number): [number, number, number] => [u[0] + (v[0] - u[0]) * t, u[1] + (v[1] - u[1]) * t, u[2] + (v[2] - u[2]) * t];
+  const mid = { a: [0.7, 1.15, -1.3] as [number, number, number], b: [0.95, 0.6, -1.9] as [number, number, number] };
+  const barA = lift < 1 ? lerp(lean.a, mid.a, lift) : lerp(mid.a, set.a, push);
+  const barB = lift < 1 ? lerp(lean.b, mid.b, lift) : lerp(mid.b, set.b, push);
+  const boothLight: PuppetLight = {
+    tint: "#e0b0b0",
+    tintAmount: 0.18,
+    shadow: 0.5,
+    points: [
+      { position: [0.7, 1.7, door > 0.05 ? 0.2 : -1.3], color: "#ffb060", strength: door > 0.05 ? 2.8 : 1.4, range: 4 },
+      { position: [0.7, 1.3, -4.6], color: "#ff9a50", strength: 1.0, range: 3 },
+    ],
+  };
   return (
     <Stage
       set={
-        <PassageSet camera={camera} frame={f + 400} mode="booth" doorOpen={door} chair={false} boxDoor={0.12}>
-          {card && <CallingCard position={card} rotation={[0, -0.4, 0.2]} />}
-          {f >= 78 && <Plank from={barFrom} to={barTo} />}
-          <HazeCard position={[(PASS.vx0 + PASS.vx1) / 2, 1.0, PASS.vend + 0.2]} size={[1.2, 2.2]} color="#ff9a50" opacity={0.25} />
+        <PassageSet camera={camera} frame={f + 400} mode="booth" doorOpen={door} chair={false} boxDoor={0}>
+          {card && <CallingCard position={card} rotation={[0, 0.3, 0.2]} />}
+          <Plank from={barA} to={barB} />
+          {/* the notch cut in the wall where the bar ends */}
+          <InkBox size={[0.03, 0.08, 0.08]} position={[PASS.vx1 - 0.01, 0.24, -1.85]} color="#1a0a08" ink={0} />
+          <pointLight position={[0.7, 1.4, -4.6]} intensity={0.9} distance={4} color="#ff9a50" />
+          <HazeCard position={[0.7, 1.4, -0.9]} size={[1.0, 2.0]} color="#ffb060" opacity={0.18 * door + 0.04} />
         </PassageSet>
       }
       camera={camera}
       bg="#0c0406"
-      blur={1.8}
-      puppets={hidden ? [forbes] : [booth, forbes]}
-      light={passLight("booth")}
+      blur={1.4}
+      puppets={f < 52 ? [booth, forbes] : [booth]}
+      light={boothLight}
     />
   );
 };
@@ -349,10 +364,9 @@ const S8: React.FC = () => {
   const f = useShotFrame(); // 0..149
   const camera = beatPath(
     [
-      { at: 0, position: [0.5, 1.4, 4.2], target: [1.85, 1.5, -0.7], fov: 42 },
-      { at: 50, position: [0.6, 1.55, 4.3], target: [2.2, 1.8, -0.3], fov: 42 },
-      { at: FIRE, position: [0.7, 1.9, 4.6], target: [3.4, 2.55, 0.6], fov: 42 },
-      { at: 148, position: [0.85, 2.0, 4.35], target: [3.65, 2.65, 0.7], fov: 42 },
+      { at: 0, position: [-2.3, 1.95, 4.5], target: [2.46, 2.2, 0.85], fov: 46 },
+      { at: FIRE, position: [-2.1, 2.0, 4.4], target: [2.62, 2.25, 0.78], fov: 46 },
+      { at: 148, position: [-1.9, 2.05, 4.3], target: [2.8, 2.3, 0.7], fov: 46 },
     ],
     f,
   );
@@ -362,7 +376,7 @@ const S8: React.FC = () => {
   const actor: PuppetPlacement = {
     id: "actor",
     look: ACTOR,
-    at: [1.85, -0.75],
+    at: [2.55, -0.7],
     pose: {
       view: "front",
       air: standAir(STAGE.top),
@@ -448,8 +462,8 @@ const S10: React.FC = () => {
   const camera = beatPath(
     [
       { at: 0, position: [-0.15, 1.3, 2.9], target: [-0.05, 0.85, -0.6], fov: 40 },
-      { at: 100, position: [0.0, 1.27, 2.62], target: [0.05, 0.83, -0.6], fov: 40 },
-      { at: 150, position: [0.08, 1.26, 2.5], target: [0.08, 0.83, -0.6], fov: 40 },
+      { at: 100, position: [0.08, 1.27, 2.7], target: [0.1, 0.83, -0.6], fov: 40 },
+      { at: 150, position: [0.12, 1.26, 2.6], target: [0.12, 0.83, -0.6], fov: 40 },
       { at: 185, position: [0.36, 1.35, 3.4], target: [0.36, 0.95, -0.6], fov: 40 },
       { at: 286, position: [0.38, 1.3, 3.15], target: [0.38, 0.95, -0.6], fov: 40 },
     ],
@@ -482,13 +496,12 @@ const S10: React.FC = () => {
           <PaperStack position={[-0.38, DESK.y + 0.01, DESK.z + 0.08]} n={sheets} seed={3} />
           {f < 100 && <Label text="PARDON" position={[-0.38, DESK.y + 0.2, DESK.z + 0.32]} width={0.3} appear={f - PARDON_HITS[0]} />}
           {/* the two bills, stood up on a book rest */}
-          <Sheet position={[0.34, DESK.y + 0.012, DESK.z + 0.05]} rotY={0.1} seed={21} />
           {f >= 100 && f < 152 && (
             <>
-              <Label text={"FREEDMEN'S\nBUREAU"} position={[0.2, DESK.y + 0.24, DESK.z + 0.3]} width={0.28} rotation={[-0.15, 0, 0]} appear={f - 100} />
-              <Label text={"CIVIL\nRIGHTS"} position={[0.48, DESK.y + 0.24, DESK.z + 0.3]} width={0.24} rotation={[-0.15, 0.1, 0]} appear={f - 103} />
-              <Label text="VETO" position={[0.2, DESK.y + 0.4, DESK.z + 0.31]} width={0.2} bg="#c8202a" fg="#fff6dc" rotation={[-0.15, 0, -0.12]} appear={f - VETO_HITS[0]} />
-              <Label text="VETO" position={[0.48, DESK.y + 0.4, DESK.z + 0.31]} width={0.2} bg="#c8202a" fg="#fff6dc" rotation={[-0.15, 0.1, 0.1]} appear={f - VETO_HITS[1]} />
+              <Label text={"FREEDMEN'S\nBUREAU"} position={[0.14, DESK.y + 0.24, DESK.z + 0.3]} width={0.28} bg="#f4ead0" fg="#1a1410" rotation={[-0.15, 0, 0]} appear={f - 100} />
+              <Label text={"CIVIL\nRIGHTS"} position={[0.42, DESK.y + 0.24, DESK.z + 0.3]} width={0.24} bg="#f4ead0" fg="#1a1410" rotation={[-0.15, 0.1, 0]} appear={f - 103} />
+              <Label text="VETO" position={[0.14, DESK.y + 0.4, DESK.z + 0.31]} width={0.2} bg="#c8202a" fg="#fff6dc" rotation={[-0.15, 0, -0.12]} appear={f - VETO_HITS[0]} />
+              <Label text="VETO" position={[0.42, DESK.y + 0.4, DESK.z + 0.31]} width={0.2} bg="#c8202a" fg="#fff6dc" rotation={[-0.15, 0.1, 0.1]} appear={f - VETO_HITS[1]} />
             </>
           )}
           <HandStamp position={[hand[0], Math.max(DESK.y + 0.02, hand[1] - 0.16), hand[2] + 0.02]} />
@@ -498,7 +511,8 @@ const S10: React.FC = () => {
       }
       camera={camera}
       bg="#06180c"
-      blur={1.8}
+      blur={1.5}
+      focus={3.7 - 0.9 * (ease(f, 90, 104) - ease(f, 150, 164))}
       puppets={[johnson]}
       light={officeLight}
     />

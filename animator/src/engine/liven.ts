@@ -15,19 +15,28 @@ const len = (a: Vec3) => Math.hypot(a[0], a[1], a[2]);
 // f = shot frame (negative during a dissolve), dur = shot length.
 // `steady` (Video prop): the camera glides instead of being hand-held: no settle after the cut and a fifth of the
 // drift, so the authored move and the push are the motion.
+// The camera moves (push, settle, drift, shake) scale with the camera-to-target distance, but only up to REACH
+// metres: past it they stay the size they are at REACH. An aim at a ridge 40 m off otherwise turned the 10 % push into
+// a 4-5 m dolly (the camera ran up to, and past, the people in front of it) and the drift into a 1 m sway. Shots aimed
+// within REACH are exactly as before; a far aim moves like one at REACH along the same line of sight.
+export const REACH = 7;
+
 export const livenCamera = (cam: CameraShot, f: number, dur: number, energy: number, steady = false): CameraShot => {
   if (energy <= 0) return cam;
   const p = Math.min(1, Math.max(0, f / Math.max(1, dur)));
   const back = sub(cam.position, cam.target);
   const dist = len(back);
-  // 1. Constant push toward the subject across the shot (on top of the authored move).
+  const k = dist > REACH ? REACH / dist : 1; // share of `back` the distance-scaled moves use
+  // 1. Constant push toward the subject across the shot (on top of the authored move): 10 % of the distance, at most
+  // 10 % of REACH (0.7 m).
   const push = 0.1 * energy * (1 - Math.pow(1 - p, 1.6));
   // 2. Settle after the cut: start a little wide and ease in over the first 10 frames.
   const settle = (steady ? 0 : 0.06) * energy * Math.max(0, 1 - Math.max(0, f) / 10) ** 2;
-  const position = add(cam.target, scale(back, 1 - push + settle));
-  // 3. Hand-held drift: slow, smooth, proportional to the distance, on both camera and aim.
+  const position = add(cam.target, scale(back, 1 - (push - settle) * k));
+  // 3. Hand-held drift: slow, smooth, proportional to the distance (up to REACH), on both camera and aim. The aim's
+  // sway is an angle, so it keeps the full distance.
   const a = (steady ? 0.0045 : 0.022) * energy * dist;
-  const drift: Vec3 = [Math.sin(f / 23) * a + Math.sin(f / 9.1) * a * 0.35, Math.sin(f / 29 + 1.3) * a * 0.6, 0];
+  const drift: Vec3 = [(Math.sin(f / 23) * a + Math.sin(f / 9.1) * a * 0.35) * k, Math.sin(f / 29 + 1.3) * a * 0.6 * k, 0];
   const aim: Vec3 = [Math.sin(f / 31 + 0.7) * a * 0.5, Math.sin(f / 17 + 2.1) * a * 0.3, 0];
   return { ...cam, position: add(position, drift), target: add(cam.target, aim) };
 };

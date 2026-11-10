@@ -318,3 +318,36 @@ export const beatPath = (keys: BeatKey[], f: number, fov = 40) => {
     fov: keys.length < 2 ? fovs[0] : fovs[i] + (fovs[i + 1] - fovs[i]) * (s - i),
   };
 };
+
+// A block of `rows` x `cols` figures (a battalion, a queue, a crowd walking off) for an instanced crowd's `place(i)`.
+// Shot-relative by construction: `at` is where the block's centre stands at the shot's frame 0, and it travels `speed`
+// metres per frame along `yaw` (0 = +z) from there, driven by `shotFrame`, which must be the shot frame (`useShotFrame()`),
+// never the video frame: the video frame put Waterloo's columns 10-20 m down the road before their shot began.
+// Looping motion (flags, smoke) is what takes the video frame. Returns per figure its ground spot, heading and a walk
+// phase (`stride`, radians-like, grows with distance) with `swing` 1 while it moves.
+export type FormationSpot = { x: number; z: number; yaw: number; stride: number; swing: number };
+export const formation =
+  (at: [number, number], rows: number, cols: number, yaw: number, opts: { shotFrame: number; speed?: number; gap?: number; jitter?: number; seed?: number }) =>
+  (i: number): FormationSpot => {
+    const gap = opts.gap ?? 0.55;
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    const h = (k: number) => {
+      const v = Math.sin((i * 3 + k + (opts.seed ?? 0)) * 127.1 + 311.7) * 43758.5453;
+      return v - Math.floor(v) - 0.5;
+    };
+    const j = opts.jitter ?? 0.08;
+    const lx = (c - (cols - 1) / 2) * gap + h(0) * j;
+    const lz = (r - (rows - 1) / 2) * gap * 1.15 + h(1) * j;
+    const travel = (opts.speed ?? 0) * opts.shotFrame;
+    const sn = Math.sin(yaw);
+    const cs = Math.cos(yaw);
+    const moving = (opts.speed ?? 0) !== 0;
+    return {
+      x: at[0] + lx * cs + lz * sn + sn * travel,
+      z: at[1] - lx * sn + lz * cs + cs * travel,
+      yaw,
+      stride: moving ? travel * 7 + (h(2) + 0.5) * 0.4 : 0,
+      swing: moving ? 1 : 0,
+    };
+  };

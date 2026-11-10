@@ -26,6 +26,13 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
   in it so the hand-held drift matches, and repeat its sound under the last N frames. Example: `src/videos/olympic-car`.
 - Cut points come from `timing.json` → `lines[i].from / to` and `captions[k].from`.
 - Inside a shot: `const f = useShotFrame();` (0 at the cut; negative while the shot whips in). `useFinalFrame()` gives the video frame.
+- **Two clocks, never mixed:** anything that *travels* through a shot (a march, a walk, a column on a road, a cart, a
+  pan of positions) runs on the shot frame `f`, so it starts where it is placed at the cut. Only looping, place-less
+  motion (flag ripple, smoke, rain, fire flicker, a set's `frame` prop) takes the video frame (`useFinalFrame()`, or
+  `f + <shot start>`), so the loop does not restart at every cut. Feeding the video frame to a march put Waterloo's
+  troops 10-20 m down the road before their shot began. For blocks and columns of figures use `formation(at, rows,
+  cols, yaw, { shotFrame: f, speed? })` (`engine/anim.ts`): `at` is where the block stands at the shot's frame 0,
+  `speed` metres per frame along its heading; it returns `(i) => { x, z, yaw, stride, swing }` per figure.
 - Mouth sync is automatic: a puppet in a `Stage` whose `id` equals a speaker in `lines.json` opens its mouth from the voice (`timing.json` → `mouth`) while that speaker talks, over any authored `mouthOpen`. So give the talking puppet the speaker's name as its id. `voice` writes the tracks; `voice_assemble.py <slug> --mouth` adds them to an older video.
 - Acting is automatic too: a talking puppet makes a beat gesture (nod, arm or lean) on stressed syllables; every puppet breathes, blinks at its own rhythm and glances to a spot and holds there. Author big actions in the pose; leave the small life to `Stage`.
 - Impacts shake the camera automatically: a `boom`, `reel-stop` or `stamp` cue in the effect list gives a short jolt and punch-in, scaled by its volume. For the prop that takes the hit, spread `squash(f, hitFrame, 0.25)` into its group `scale` (squashes, springs back, settles).
@@ -34,8 +41,9 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 
 | Export | Use |
 | --- | --- |
-| `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy?, light? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. `light` = how the set's lights fall on the puppets (see Puppet lighting); default: a rig derived from the mood of `bg`. |
+| `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy?, light? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. The push (10 % of the camera-to-target distance over the shot), the settle after the cut, the camera's drift and impact shake scale with that distance only up to `REACH` (7 m, `engine/liven.ts`): aim at a ridge 40 m off freely, the push stays 0.7 m instead of a 4 m dolly into whoever stands in front of the lens. No need for a slug-local clamp on the target any more. `light` = how the set's lights fall on the puppets (see Puppet lighting); default: a rig derived from the mood of `bg`. |
 | `keepHeads` (Stage, default on) | No half heads, ever: every frame Stage checks each puppet's head; one cut by a frame edge makes the camera pan just enough to bring it in, then widen (≤ 25 %), then step back (≤ 3×); if heads still cannot all fit, the outer ones are panned wholly out. Heads wholly off-screen, back-view (over-the-shoulder) puppets and placements with `crop: true` are left alone. So frame shots loosely and let it settle; for a macro on an object, leave the people out of `puppets` rather than half in. Solved frame by frame it would jump, so `pipeline.py framing` (run automatically by `stills`, `motion` and `render` when the scene changed) renders a tiny pass, logs the correction per frame, holds it ±24 frames and eases it per shot into `public/videos/<slug>/framing.json`, which the render applies: the camera starts drifting before a head reaches the edge instead of snapping. (`engine/framing.ts`, `scripts/framing.mjs`) |
+| Framing audit (`stills`) | `pipeline.py stills` renders with the `audit` prop and prints `framing:` lines (`engine/audit.ts`). It covers: puppet faces (cut by the edge, under the captions, hidden behind the set, the body inside a set object, the card cutting the drawing) and their hats (`hat of X cut by the frame edge`: the drawn hat, and any small solid mesh under a `ghost` group sitting on the head, such as a 3D hat overlay in `foreground`; tag one with `userData.hatOf = "<puppet id>"` to be sure); instanced crowd figures (`face of a crowd figure at (x, y, z) cut...`, one line per crowd): heads instanced as their own sphere next to an instanced body (the theatre audiences), merged vertex-coloured figures (the skin near the axis in the upper half is the face, the axis above it the hat), or any InstancedMesh with `userData.heads = { y, r, top? }` in instance space (set it on new crowds); heads wholly out, hidden behind something or sunk in near-black shadow are not reported; model heads (BlenderModel `heads`); and every word drawn on a canvas with `fillText`/`strokeText` that shows on a plane or box face (kit `Label`, `Screen`, a set's shop sign, a slug's own board): any letter outside the frame is a cut (`sign "X" cut by the frame edge (N% of its text outside)`), plus under the captions and hidden behind the set. Kit signs are checked on their words, so a cropped card border with whole words is fine. Z depth, from a grid of 14 x 25 rays per frame (instanced meshes of more than 64 are left out): `z-fighting: "A" and "B" coplanar at (x, y, z)` when two different solid objects meet a ray within the depth buffer's resolution with parallel faces on at least 2 rays and different colours (a poster flat on its wall, a floor patch on the floor, two boxes sharing a face; lift the top one a few mm or give it `polygonOffset`), once per pair per shot, ignoring transparent, depthWrite-off and polygonOffset materials and pieces of one small group or one model; `depth: no background layer` when nothing in the frame lies past 1.6 x the subject's distance (Stage's focus: the nearest puppet head, else the aim), and `depth: foreground fills N% of the frame` when upright surfaces nearer than half the subject's distance cover over a third of it (a floor running to the lens does not count; no foreground at all is fine). With `blur` and no post chain the foreground has its own canvas and is not measured. To leave an object out on purpose: `userData.audit = false` on it or a group above it (puppets: `crop`, models: `heads={false}`). |
 | `CameraShot = { position, target, fov }` | Every set must receive the camera and contain `<CameraRig>` (the kit's `Room` does this). |
 | `lerp3, ramp, clamp01, breathe, talk, walk` | Animation helpers. `ramp(f, a, b)` 0→1 between frames a and b. `...walk(f)` inside a pose while walking. |
 | `Easing, interpolate` | From `remotion`. |
@@ -108,6 +116,10 @@ script per model in `../videos/<slug>/blender/<name>.py`; `guide/blender/car.py`
   `joints` poses a sand3d model's joints by name from rest: `{ spin_FL: deg, door_hinge: deg, drawer: metres }`
   (degrees for revolute and continuous, metres for prismatic, about the axis the program gave it). An unknown joint
   throws; don't pose one node through both `parts` and `joints`.
+  `heads` (framing audit): the nodes that make the model's head. Default: nodes named `head` or `skull` (any case; the
+  outermost when a joint holds a group of that name) with the head parts beside them (ears, eyes, muzzle, nostrils,
+  jaw, horns...), so the sand3d horse, T. rex, mammal and sauropod need nothing. `heads={["Bonnet", "Face"]}` names
+  them; `heads={false}` for a model without a head or one meant to be cropped.
 - A model that drives or flies through a shot moves as a whole with the group `position`; spin its wheels from the
   distance travelled (`distance / radius`) so they do not skid.
 
@@ -350,10 +362,31 @@ Instanced, seeded and closed-form (gravity with air drag), so any frame renders 
 `PuppetPlacement = { id, look, pose, at: [x, z] }` — feet on the floor at (x, z); always faces the camera.
 Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HIP_HEIGHT` ≈ 0.34 m.
 
-- `PuppetLook`: `skin, hair, outfit, pattern?` (leaf print colour), `lanyard?`, `cap?`, `chain?`, `glasses?`, `long?` (long hair to the shoulders; use it for women).
-  Period dress (each a colour unless noted): `skirt?: true` (ankle-length, in the outfit colour), `apron?`, `kerchief?`,
-  `hat?` (wide-brimmed, low crown; hair is clipped under the brim), `beard?`, `vest?`, `suspenders?`. Never use `cap`
-  (a backwards baseball cap) for anyone before the 20th century. `CostumePreview` shows them in all three views.
+- `PuppetLook` (each a colour unless noted): `skin, hair, outfit, pattern?` (leaf print colour), `lanyard?`, `cap?`
+  (a backwards baseball cap), `chain?` (neck chain), `glasses?: true`, `long?: true` (long hair to the shoulders; use it
+  for women), `iris?`, `pants?` (trouser colour; default plain ink legs), `shoes?` (coloured sneakers; default plain
+  ink feet), `shorts?` (athletic shorts), `bib?` (race number text).
+  Period dress (19th-century farm folk): `skirt?: true` (ankle-length, in the outfit colour), `apron?`, `kerchief?`,
+  `hat?` (hair is clipped under the brim), `beard?`, `vest?`, `suspenders?`.
+  `hatStyle?` sets the hat's shape: `wide` (default: felt, wide brim, low crown), `bowler` (from the 1850s), `boater`
+  (flat straw, late 19th and early 20th century), `shako` (tall plumed military drum: 19th-century infantry, palace
+  guards), `crown`, `galea` (Roman auxiliary helmet), `stahl` (German steel helmet, WWI onward), `helmet` (US M1,
+  WWII onward).
+  Early-medieval and Roman dress: `build?: "broad" | "narrow"`, `tunic?: true` (knee-length, in the outfit colour),
+  `patch?` (on the tunic), `belt?` (with pouch and knife), `wraps?` (leg wraps), `mail?` (mail shirt), `cloak?`,
+  `tied?: true` (hair tied back), `stubble?`.
+  `CostumePreview` shows them in all three views.
+- **Period check, for the whole costume.** For a story set in the past, go through every field each look sets, every
+  `hold` item and every piece the video adds itself, from head to feet, not only the hat. Each piece must fit the
+  year, the place and the character's rank or trade. Modern pieces: `cap` (never before the 20th century), `lanyard`,
+  `shorts`, `bib`, a `phone`. `shoes` adds a pale sole: before the 20th century only in dark leather colours. The
+  period sets are narrow too: the farm dress is 19th-century rural wear and the tunic set is early-medieval and
+  Roman, so an 1815 marshal gets neither. Drop or replace what does not fit. When the kit lacks a piece the period
+  needs (a bicorne, a top hat, a uniform coat), build it in the video's own folder, as
+  `src/videos/what-if-waterloo/hats.tsx` does for bicornes, rather than taking the nearest kit piece.
+  `pipeline.py check` does the coarse part automatically against plan.json `year` (`COSTUME_ERAS`, `HAT_ERAS`,
+  `ITEM_ERAS` in `scripts/pipeline.py`): a kit piece from another era fails it, unless the look carries
+  `// period-ok: <why>`. Colours, the pieces a video builds itself and what is missing stay with you.
 - `PuppetPose`:
   - `expression`: `neutral | excited | skeptical | smug | shocked | angry | sad | confused | worried | awkward | happy | thinking | disgusted | bored | determined` (each has its own eyelids, brows and mouth; neutral is a gentle smile; confused shows a "?", worried and awkward a sweat drop, awkward and happy blush, disgusted squeezes the eyes shut with the tongue out); `blink`, `lookX` (-1..1), `headTilt` (deg), `mouthOpen` (0..1)
   - Micro-expressions are automatic: in a `Stage` every held face keeps moving a little (brow flicks, lid droop, lip twitch, mouth width, searching eyes), tuned per expression in `engine/liven.ts`. `face` (`FaceMicro`) adds your own offsets on top; `energy: 0` turns it off. Preview all faces with the `FacePreview` composition.
@@ -378,7 +411,14 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   straight line, which no camera move can fix).
 - From high cameras the card leans back on its feet (`cardTilt`), so a puppet seen from above keeps its full body
   instead of flattening to a sliver; nothing to do in the shot. For a world-space prop held in a hand (a paddle, a
-  rope), `handWorld(at, reach, camera)` gives the 3D point of a hand at `reachR`/`reachL` (it follows the tilt).
+  rope), `handWorld(at, reach, camera, air?)` gives the 3D point of a hand at `reachR`/`reachL` (it follows the tilt).
+  A puppet lifted 1 m or more with `air` (`LIFT_PIVOT`: a theatre box, a balcony, a stage) leans about its raised feet
+  and measures the camera height from its raised head (`cardTilt(cam, at, lift)`, lift = air in metres): before, a
+  camera level with a puppet in a box 2 m up read as a steep high angle within ~4 m and swung the card back into the
+  set (the puppet vanished), which is why what-if-lincoln lowered whole sets. Raised floors need no `drop` any more.
+  Smaller lifts (a car seat, a saddle) keep the floor pivot exactly as before. A slug-local overlay that rebuilds the
+  card (a 3D hat) on a puppet lifted 1 m or more must pass the same `lift` to `cardTilt` and `air` to `handWorld`;
+  `headWorld(at, air, camera)` gives the head centre on the card.
 - Vertical frame is narrow: at fov 40 the visible half-width is only about 0.23 × camera distance (1.5 m away → ±0.35 m).
   Keep props and puppets that must share a shot within that width, stack mechanism props vertically, and keep key
   text above the caption band (lower ~30 % of the frame). Puppets behind a counter need it ≤ 0.65 m tall to show their torso.
@@ -440,7 +480,7 @@ recordings, and any sound repeated wants several takes, or a run of it sounds st
   --from <sfx_generate function>` makes takes of a synthesised sound with different seeds. A licence with BY needs
   the author in the video description (the manifest says so). Present: `chomp` (a soft bite: recorded crunches
   low-passed, CC0, 7), `crunch` (a crisp bite, CC0, 7), `fork-plate` (CC0, 5), `munch` (a wet chew, synthesised, 6),
-  `thud` (wooden knocks, CC BY 3.0 Ogrebane, 6). An eating puppet: `fork-plate` as the fork leaves the plate,
+  `thud` (wooden knocks, CC BY 3.0 Ogrebane, 6). `kernel` (one popcorn kernel popping, synthesised by `sfx_generate.py kernel()`, own, 8; spread the pops of a burst over its frames with `foleyCues`). An eating puppet: `fork-plate` as the fork leaves the plate,
   `chomp` on the bite, `munch` on each jaw close after it (`SunlitLunch.tsx`).
 - **Cues.** `foleyCues(name, frames, volume, { space?, hit?, jitter? })` puts a different take on each frame (never
   the same twice in a row) at ±2 dB. Take the frames from the motion, not typed numbers, so the sound moves with it:

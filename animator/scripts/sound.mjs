@@ -2,7 +2,7 @@
 // renders the picture in segments and muxes this track over it. (The CLI applies remotion.config.ts's CRF, which an
 // audio codec refuses, so this goes through the API.)
 //   node scripts/sound.mjs <slug> <out.wav>
-import { bundle } from "@remotion/bundler";
+import { sharedBundle } from "./bundle.mjs";
 import { renderMedia, selectComposition } from "@remotion/renderer";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,7 +13,7 @@ if (!slug || !out) {
   console.error("usage: node scripts/sound.mjs <slug> <out.wav>");
   process.exit(2);
 }
-const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
+const serveUrl = await sharedBundle();
 // SCORE=1 / SCORE=0 plays the video's own score (public/videos/<slug>/music.wav) or the scene's library cues, for an A/B.
 // STEM=voice|music|sfx renders that part alone (pipeline.py mix).
 const inputProps = { soundOnly: true, ...(process.env.SCORE ? { score: process.env.SCORE === "1" } : {}), ...(process.env.STEM ? { stem: process.env.STEM } : {}) };

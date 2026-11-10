@@ -3,7 +3,7 @@
 // `cueDump` input prop and keeps what Video logs; no 3D shot is mounted. A composition that is not a Video (a preview
 // with its own SoundTrack) gives its effect and music tables and no shots.
 //   node scripts/cues.mjs <slug | composition> <out.json>
-import { bundle } from "@remotion/bundler";
+import { sharedBundle } from "./bundle.mjs";
 import { renderStill, selectComposition } from "@remotion/renderer";
 import fs from "node:fs";
 import os from "node:os";
@@ -16,7 +16,7 @@ if (!slug || !out) {
   console.error("usage: node scripts/cues.mjs <slug> <out.json>");
   process.exit(2);
 }
-const serveUrl = await bundle({ entryPoint: path.join(root, "src", "index.ts") });
+const serveUrl = await sharedBundle();
 const inputProps = { soundOnly: true, cueDump: true };
 const composition = await selectComposition({ serveUrl, id: slug, inputProps });
 let cues = null;

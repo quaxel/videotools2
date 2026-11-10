@@ -37,6 +37,11 @@
   "source": "synthesised, scripts/sfx_generate.py jingle()",
   "license": "own"
  },
+ "kernel": {
+  "count": 8,
+  "source": "synthesised, scripts/sfx_generate.py kernel()",
+  "license": "own"
+ },
  "munch": {
   "count": 6,
   "source": "synthesised, scripts/sfx_generate.py munch()",

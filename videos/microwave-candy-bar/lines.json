@@ -1,0 +1,76 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true invention story with a funny twist, brisk, excited and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.34
+    },
+    "colleague": {
+      "voice": "Aiden",
+      "instruct": "A young engineer in 1945 jumping back as an egg explodes next to him, startled and half laughing.",
+      "seed": 11,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "The story goes, this man's candy bar melted in his pocket, and nothing in the room was hot."
+    },
+    {
+      "speaker": "narrator",
+      "text": "His name was Percy Spencer. He never finished grammar school, and taught himself the science from books."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In the war he worked on radar tubes called magnetrons. His method made two thousand six hundred a day."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But standing next to a running magnetron, he found sticky chocolate all over his pocket."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He grabbed raw popcorn kernels and held them by the tube. They popped all over the lab."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Next, an egg in a kettle. It shook, and then it burst."
+    },
+    {
+      "speaker": "colleague",
+      "text": "Percy, look out!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "So how does a radar tube cook without any fire?",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, the tube sends out microwaves. They make the water inside food twist back and forth."
+    },
+    {
+      "speaker": "narrator",
+      "text": "All that rubbing between molecules turns into heat, right inside the food. No flame at all."
+    },
+    {
+      "speaker": "narrator",
+      "text": "On October eighth, nineteen forty-five, a patent was filed for cooking with microwaves."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The first oven, in nineteen forty-seven, stood six feet tall and weighed seven hundred and fifty pounds."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Twenty years later, in nineteen sixty-seven, a countertop model cost four hundred ninety-five dollars."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So every bag of microwave popcorn goes back to one melted candy bar."
+    }
+  ]
+}

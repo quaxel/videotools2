@@ -231,9 +231,9 @@ export const FordsSet: React.FC<{
       {Array.from({ length: 13 }, (_, i) => (
         <InkBox key={i} size={[7.4, 0.42, 0.05]} position={[-0.2, 0.21, 1.35 + i * 0.58 + 0.24]} color="#4a2a1a" ink={0.006} />
       ))}
-      <Audience seats={HOUSE_SEATS} frame={frame} laugh={laugh} />
-      <Audience seats={GALLERY_SEATS} frame={frame + 40} laugh={laugh} />
-      <Audience seats={LEFT_GALLERY} frame={frame + 80} laugh={laugh} />
+      <Audience seats={HOUSE_SEATS} frame={frame} laugh={laugh} yOff={-drop} />
+      <Audience seats={GALLERY_SEATS} frame={frame + 40} laugh={laugh} yOff={-drop} />
+      <Audience seats={LEFT_GALLERY} frame={frame + 80} laugh={laugh} yOff={-drop} />
 
       {/* the stage: platform, boards, apron, footlights, proscenium, curtain, the painted drawing room */}
       <InkBox size={[6.8, STAGE.top, 4.4]} position={[0, STAGE.top / 2, -2.2]} color="#3a2414" ink={0.01} />
@@ -351,7 +351,7 @@ export const boxLight = (dark = 0, drop = 0): PuppetLight => ({
 
 // ---------- the dress circle passage, the vestibule and the stairs ----------
 
-export const PASS = { back: -1, front: 1.2, x0: -1.6, x1: 2.6, h: 2.6, door: 0.7, vx0: 0.3, vx1: 1.1, vend: -3.2 };
+export const PASS = { back: -1, front: 1.2, x0: -1.6, x1: 2.6, h: 2.6, door: 0.7, vx0: 0.3, vx1: 1.1, vend: -4.8 };
 export const CHAIR_AT: Vec3 = [-0.05, 0, -0.66];
 export const STAIR = { steps: 12, run: 0.28, rise: 0.17 }; // down toward -x from x0
 
@@ -397,11 +397,11 @@ export const PassageSet: React.FC<{ camera: CameraShot; frame: number; mode: Pas
         <InkBox size={[0.62, 1.85, 0.04]} position={[0.31, 0.925, 0]} color="#f2ece0" ink={0.008} />
       </group>
       {/* the white passage door, hinged on its left, opening inward (toward -z) */}
-      <InkBox size={[0.98, 2.08, 0.06]} position={[PASS.door, 1.04, PASS.back + 0.005]} color="#f4efe2" ink={0} />
-      <mesh position={[PASS.door, 0.97, PASS.back - 0.02]}>
-        <planeGeometry args={[0.82, 1.92]} />
-        <meshBasicMaterial color={mode === "dawn" ? "#2a2a30" : mode === "whatif" ? "#3a2a5a" : "#2a1410"} />
-      </mesh>
+      {/* the door frame: two jambs and a header round an open doorway onto the vestibule */}
+      {[-1, 1].map((sx) => (
+        <InkBox key={sx} size={[0.08, 2.08, 0.08]} position={[PASS.door + sx * 0.45, 1.04, PASS.back]} color="#f4efe2" ink={0.006} />
+      ))}
+      <InkBox size={[0.98, 0.1, 0.08]} position={[PASS.door, 2.03, PASS.back]} color="#f4efe2" ink={0.006} />
       <group position={[PASS.door - 0.41, 0, PASS.back - 0.03]} rotation={[0, doorOpen * 1.5, 0]}>
         <InkBox size={[0.82, 1.92, 0.05]} position={[0.41, 0.96, 0]} color="#f8f4ea" ink={0.01} />
         <InkBox size={[0.6, 0.7, 0.01]} position={[0.41, 1.36, 0.03]} color="#ece4d4" ink={0.004} />
@@ -641,7 +641,7 @@ export const WhiteHouseSet: React.FC<{ camera: CameraShot; frame: number; drop?:
           <pointLight position={[x, 2.5, 0.4]} intensity={1.5} distance={3.5} color="#ffb860" />
         </group>
       ))}
-      <Audience seats={crowd} frame={frame} />
+      <Audience seats={crowd} frame={frame} yOff={-drop} />
       {[[-1.9, 1.35, 1.2], [1.3, 1.4, 2.0], [-0.6, 1.38, 3.1], [2.6, 1.36, 3.4]].map(([x, y, z], i) => (
         <Umbrella key={i} position={[x, y, z]} color={["#1a1a22", "#2a2030", "#1a2420", "#30201a"][i]} tilt={(rand(i) - 0.5) * 0.3} />
       ))}
@@ -688,7 +688,7 @@ export const OfficeSet: React.FC<{ camera: CameraShot; frame: number; children?:
       </mesh>
       <Halo position={[0, 0.34, 0.1]} size={0.9} color="#ffd890" strength={0.5} />
     </group>
-    <HazeCard position={[-0.4, 1.3, -0.6]} size={[3, 1.6]} color="#ffe0a0" opacity={0.06} />
+    <HazeCard position={[-0.4, 1.75, -1.2]} size={[3, 0.8]} color="#ffe0a0" opacity={0.05} />
     <Motes center={[-0.2, 1.2, -0.3]} size={[2.2, 1.5, 1]} frame={frame} count={50} color="#ffe8b0" seed={17} />
     {children}
   </>

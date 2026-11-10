@@ -1,4 +1,5 @@
 import React from "react";
+import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { BlenderModel, canvasTexture, Halo, InkBox, InkCylinder, Label, toonRamp, Vec3 } from "../../engine";
 import { useOwned } from "../../three/BalloonSets";
@@ -342,8 +343,26 @@ export const makeSeats = (rows: { z: number; y: number; x0: number; x1: number; 
   return out;
 };
 
-export const Audience: React.FC<{ seats: Seat[]; frame: number; laugh?: number; facing?: number }> = ({ seats, frame, laugh = 0, facing = 0 }) => {
+// Heads that would be sliced by the frame edge sink into deep shadow: each figure is darkened by how close its head
+// comes to the nearest frame edge (in head radii), smoothly, so a figure at the edge reads as part of a dark mass
+// rather than a cut head, and nothing pops as the camera moves. `yOff` = the set's vertical shift (a dropped set).
+export const Audience: React.FC<{ seats: Seat[]; frame: number; laugh?: number; facing?: number; yOff?: number }> = ({ seats, frame, laugh = 0, facing = 0, yOff = 0 }) => {
   const n = seats.length;
+  const camera = useThree((st) => st.camera) as THREE.PerspectiveCamera;
+  camera.updateMatrixWorld();
+  const tanHalf = Math.tan((camera.fov * Math.PI) / 360);
+  const v = new THREE.Vector3();
+  const edgeShade = (x: number, y: number, z: number) => {
+    v.set(x, y + yOff, z);
+    const dist = v.distanceTo(camera.position);
+    v.project(camera);
+    if (v.z > 1 || v.z < -1) return 1;
+    const ry = 0.16 / (dist * tanHalf);
+    const rx = ry / camera.aspect;
+    const d = Math.min((1 - Math.abs(v.x)) / rx, (1 + v.y) / ry, (1 - v.y) / ry);
+    const t = Math.min(1, Math.max(0, (d - 2.6) / 3.0));
+    return 0.03 + 0.97 * t * t * (3 - 2 * t);
+  };
   const parts = useOwned(() => {
     const mk = (geo: THREE.BufferGeometry) => {
       const m = new THREE.InstancedMesh(geo, new THREE.MeshToonMaterial({ gradientMap: toonRamp }), n);
@@ -370,7 +389,9 @@ export const Audience: React.FC<{ seats: Seat[]; frame: number; laugh?: number; 
     o.scale.setScalar(s.s);
     o.updateMatrix();
     parts.body.setMatrixAt(i, o.matrix);
-    parts.body.setColorAt(i, c.set(s.coat));
+    const hy0 = by + 0.32 * s.s + shake * 0.03;
+    const k = edgeShade(s.p[0], hy0, s.p[2] + Math.sin(lean) * 0.3);
+    parts.body.setColorAt(i, c.set(s.coat).multiplyScalar(k));
     o.scale.setScalar(s.s * 1.05);
     o.updateMatrix();
     parts.bodyInk.setMatrixAt(i, o.matrix);
@@ -381,14 +402,14 @@ export const Audience: React.FC<{ seats: Seat[]; frame: number; laugh?: number; 
     o.scale.setScalar(s.s);
     o.updateMatrix();
     parts.head.setMatrixAt(i, o.matrix);
-    parts.head.setColorAt(i, c.set(s.skin));
+    parts.head.setColorAt(i, c.set(s.skin).multiplyScalar(k));
     // hair from behind (the camera mostly sees the backs of heads): a cap tilted back; bonnets bigger
     o.position.set(s.p[0], hy + 0.01, hz - 0.012);
     o.rotation.set(lean * 1.4 - 0.5 - shake * 0.2, 0, 0);
     o.scale.setScalar(s.s * (s.bonnet ? 1.22 : 1.02));
     o.updateMatrix();
     parts.hair.setMatrixAt(i, o.matrix);
-    parts.hair.setColorAt(i, c.set(s.bonnet ? s.coat : s.hair));
+    parts.hair.setColorAt(i, c.set(s.bonnet ? s.coat : s.hair).multiplyScalar(k));
     o.position.set(s.p[0], hy, hz);
     o.scale.setScalar(s.s * 1.08);
     o.updateMatrix();

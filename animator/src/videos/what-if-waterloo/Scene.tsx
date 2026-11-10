@@ -77,6 +77,7 @@ import {
   VillageSign,
   WindowView,
 } from "./props";
+import { Bicornes } from "./hats";
 import TIMING_JSON from "./timing.json";
 
 // "What if Napoleon's marshal had marched to the guns?" (Waterloo, 18 June 1815). Sets in this folder
@@ -110,13 +111,26 @@ const aim = (c: CameraShot, d = 7): CameraShot => {
   return { ...c, target: [c.position[0] + v[0] * k, c.position[1] + v[1] * k, c.position[2] + v[2] * k] };
 };
 
+// Every Stage in this video, with the officers' 1815 bicornes riding on their heads (hats.tsx).
+const HStage: React.FC<React.ComponentProps<typeof Stage>> = (p) => (
+  <Stage
+    {...p}
+    foreground={
+      <>
+        {p.foreground}
+        <Bicornes cast={p.puppets ?? []} energy={p.energy} />
+      </>
+    }
+  />
+);
+
 // ---------- cast ----------
 
-const NAPOLEON: PuppetLook = { skin: "#f2cfae", hair: "#2a1e16", outfit: "#8e8e88", hat: "#161414" };
-const GROUCHY: PuppetLook = { skin: "#f0c8a6", hair: "#b8b0a4", outfit: "#2a3f8a", hat: "#161414" };
+const NAPOLEON: PuppetLook = { skin: "#f2cfae", hair: "#2a1e16", outfit: "#8e8e88" };
+const GROUCHY: PuppetLook = { skin: "#f0c8a6", hair: "#b8b0a4", outfit: "#2a3f8a" };
 const GERARD: PuppetLook = { skin: "#eec4a0", hair: "#3a2214", outfit: "#34508f", beard: "#3a2214" };
-const BLUCHER: PuppetLook = { skin: "#f0c8a8", hair: "#ece8e0", outfit: "#1e2440", beard: "#ece8e0", hat: "#161414" };
-const WELLINGTON: PuppetLook = { skin: "#f2cdb0", hair: "#8a6a4a", outfit: "#2a2c3a", hat: "#161414" };
+const BLUCHER: PuppetLook = { skin: "#f0c8a8", hair: "#ece8e0", outfit: "#1e2440", beard: "#ece8e0" };
+const WELLINGTON: PuppetLook = { skin: "#f2cdb0", hair: "#8a6a4a", outfit: "#2a2c3a" };
 const GUNNER: PuppetLook = { skin: "#e8b890", hair: "#3a2416", outfit: "#2a3f8a", beard: "#3a2416" };
 const HISTORIAN: PuppetLook = { skin: "#f2cdb0", hair: "#9a948c", outfit: "#6a3a5a", vest: "#e8dcc0", glasses: true };
 
@@ -183,14 +197,14 @@ const Breakfast: React.FC<{ camera: CameraShot; frame: number; warm: boolean; fl
   </Room>
 );
 
-const S1_CAM0: CameraShot = { position: [-0.55, 1.12, 2.2], target: [0.0, 0.76, -0.9], fov: 38 };
+const S1_CAM0: CameraShot = { position: [-0.55, 1.2, 2.35], target: [0.0, 0.95, -0.9], fov: 38 };
 const S1: React.FC = () => {
   const f = useShotFrame(); // 0..81
   const camera = aim(beatPath(
     [
       { at: 0, ...S1_CAM0 },
-      { at: 40, position: [-0.32, 0.98, 1.55], target: [0.0, 0.72, -0.95], fov: 38 },
-      { at: 80, position: [-0.18, 0.9, 1.15], target: [-0.02, 0.7, -1.0], fov: 38 },
+      { at: 40, position: [-0.32, 1.06, 1.75], target: [0.0, 0.92, -0.95], fov: 38 },
+      { at: 80, position: [-0.18, 0.98, 1.4], target: [-0.02, 0.9, -1.0], fov: 38 },
     ],
     f,
   ));
@@ -199,7 +213,7 @@ const S1: React.FC = () => {
   const lift = ease(f, 50, 66) - ease(f, 72, 80) * 0.4;
   return (
     <>
-      <Stage
+      <HStage
         set={<Breakfast camera={camera} frame={f} warm flash={flash} />}
         camera={camera}
         bg={moodBackground("warm")}
@@ -258,7 +272,7 @@ const S2: React.FC = () => {
   const british = (k: number) => blockPlace([-9 + k * 6, -46.5 - (k % 2) * 1.2], 2, 10, 0, f, { seed: k * 17 });
   return (
     <>
-      <Stage
+      <HStage
         set={
           <FieldSet camera={camera} frame={fr} mode="morning" terrain="valley">
             {[0, 1, 2].map((k) => (
@@ -334,7 +348,7 @@ const S3: React.FC = () => {
     return { x, z, yaw: Math.PI, stride: fr * 0.012 * 7 + r * 0.3, swing: 1 };
   };
   return (
-    <Stage
+    <HStage
       set={
         <FieldSet camera={camera} frame={fr} mode="overcast" terrain="plain" farms>
           {/* the road east */}
@@ -380,7 +394,7 @@ const S4: React.FC = () => {
   const SLIP = 70;
   const push = f < SLIP ? Math.sin(f * 0.5) * 20 : 0;
   return (
-    <Stage
+    <HStage
       set={
         <FieldSet camera={camera} frame={fr} mode="storm" terrain="plain" mud={0.85} dawn={dawn} flash={flash} farms={false} tufts={false}>
           <FieldGun position={[0.05, 0, -1.35]} yaw={0.35} sink={0.22} roll={f < SLIP ? Math.sin(f * 0.5) * 6 : 0} />
@@ -399,7 +413,7 @@ const S4: React.FC = () => {
         keepHeads={false}
       blur={1.5}
       puppets={[
-        P("napoleon", NAPOLEON, [-0.4, 0.55], {
+        P("napoleon", NAPOLEON, [-0.22, 0.55], {
           ...faceChange([[0, "worried"], [40, "thinking"], [80, "skeptical"]], f),
           gesture: f > 40 ? "chin" : undefined,
           lookX: f > 76 ? 0.8 : -0.2,
@@ -442,7 +456,7 @@ const S5: React.FC = () => {
   const berry: Vec3 | null = f < CANNONS - 18 ? null : f < CANNONS ? [mix(bowl[0], cup[0], bt), mix(bowl[1], cup[1], bt) + Math.sin(bt * Math.PI) * 0.22, mix(bowl[2], cup[2], bt)] : null;
   const look = f > RUMBLE + 8 ? 1 : 0;
   return (
-    <Stage
+    <HStage
       set={
         <Breakfast camera={camera} frame={f} warm={false} hop={hop} ripple={ripple} plateBerry={berry}>
           <GodRays center={[WIN[0], WIN[1], ROOM_BACK + 0.02]} size={[0.9, 1.4]} panes={[2, 3]} sun={[-0.55, -0.6, 0.6]} strength={0.05} patch={0.25} frame={f} tops={[{ y: TOP + 0.002, x: [TABLE[0] - 0.75, TABLE[0] + 0.75], z: [TABLE[2] - 0.45, TABLE[2] + 0.45] }]} />
@@ -488,7 +502,7 @@ const S6: React.FC = () => {
   const gro: [number, number] = [0.42, -0.1];
   return (
     <>
-      <Stage
+      <HStage
         set={
           <FieldSet camera={camera} frame={fr} mode="garden" terrain="plain" farms={false}>
             <GardenWall a={[-6, -3.4]} b={[-1.2, -3.4]} h={0.8} />
@@ -549,7 +563,7 @@ const S7: React.FC = () => {
   ));
   const shots = [8, 22, 31, 47, 60, 74, 90];
   return (
-    <Stage
+    <HStage
       set={
         <FieldSet camera={camera} frame={fr} mode="smoke" terrain="river" farms={false}>
           {/* the Dyle: a slate-green ribbon in its bed, the stone bridge over it */}
@@ -625,7 +639,7 @@ const S8: React.FC = () => {
     return { x, z, yaw: -0.33, stride: t * 7 + r * 0.4, swing: 1.2 };
   };
   return (
-    <Stage
+    <HStage
       set={
         <FieldSet camera={camera} frame={fr} mode="golden" terrain="slope">
           {[0, 1, 2].map((k) => (
@@ -659,7 +673,7 @@ const S8: React.FC = () => {
 // ---------- 9. The Guard (1110-1250): Wellington watches from the ridge as the Imperial Guard climbs into the smoke,
 // the volley, it breaks and runs; push in on him at dusk ----------
 
-const WELL_AT: [number, number] = [0.62, 2.0];
+const WELL_AT: [number, number] = [0.98, 2.0];
 const S9: React.FC = () => {
   const f = useShotFrame(); // 0..140
   const fr = f + 1110;
@@ -668,11 +682,11 @@ const S9: React.FC = () => {
   const WELL = 77;
   const camera = aim(beatPath(
     [
-      { at: 0, position: [1.6, 2.5, 7.0], target: [-1.0, -1.7, -19], fov: 40 },
-      { at: BREAKS + 10, position: [1.58, 2.42, 6.8], target: [-1.05, -1.75, -19], fov: 40 },
-      { at: RUNS + 14, position: [1.55, 2.35, 6.6], target: [-1.0, -1.6, -19], fov: 40 },
-      { at: WELL + 14, position: [1.5, 2.2, 6.15], target: [-0.6, -0.8, -15], fov: 40 },
-      { at: 139, position: [1.48, 2.15, 6.0], target: [-0.6, -0.8, -15], fov: 40 },
+      { at: 0, position: [1.85, 2.5, 7.0], target: [-0.8, -1.7, -19], fov: 40 },
+      { at: BREAKS + 10, position: [1.73, 2.42, 6.8], target: [-0.95, -1.75, -19], fov: 40 },
+      { at: RUNS + 14, position: [1.7, 2.35, 6.6], target: [-0.9, -1.6, -19], fov: 40 },
+      { at: WELL + 14, position: [1.8, 2.2, 6.4], target: [-0.2, -0.8, -15], fov: 40 },
+      { at: 139, position: [1.8, 2.15, 6.3], target: [-0.2, -0.8, -15], fov: 40 },
     ],
     f,
   ));
@@ -691,7 +705,7 @@ const S9: React.FC = () => {
   }, { nod: 4 + Math.sin(f * 0.07) * 4 });
   return (
     <>
-      <Stage
+      <HStage
         set={
           <FieldSet camera={camera} frame={fr} mode="dusk" terrain="valley">
             {[0, 1].map((k) => (
@@ -742,7 +756,7 @@ const S10: React.FC = () => {
   const gx = mix(0.2, -0.12, slide);
   const gz = -0.42 + Math.sin(slide * Math.PI) * 0.05;
   return (
-    <Stage
+    <HStage
       set={
         <Room camera={camera} mood="dream" floor="#3a2a4a" wall="#5a3a7a" wallPattern="panel" floorPattern="wood" width={5} depth={4} stripe="#3a2050">
           <SandTable position={[0, 0, -0.55]} top={TT} w={1.3} d={0.9} />
@@ -804,7 +818,7 @@ const S11: React.FC = () => {
   const A = [march([-2.4, -11], 0.15, 1), march([-3.2, -16.5], 0.15, 2)];
   const R = [march([1.9, -13], -0.15, 9), march([2.7, -18.5], -0.15, 10)];
   return (
-    <Stage
+    <HStage
       set={
         <FieldSet camera={camera} frame={fr} mode="frost" terrain="plain">
           {A.map((p, k) => (
@@ -849,7 +863,7 @@ const S12: React.FC = () => {
   ));
   return (
     <>
-      <Stage
+      <HStage
         set={
           <FieldSet camera={camera} frame={fr} mode="sunset" terrain="plain" farms={false}>
             <StoneWall position={[0.2, 0, 1.0]} length={2.4} h={0.55} />

@@ -5,6 +5,7 @@ import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { cancelRender, continueRender, delayRender, staticFile } from "remotion";
 import { toonRamp } from "./toon";
 import { paintTexture } from "./surfaces";
+import { modelHeadParts, useModelAudit } from "../engine/audit";
 
 // Props too complex for the kit primitives (a car, a bicycle, an animal) are modelled in Blender by a script in
 // videos/<slug>/blender/, exported to public/videos/<slug>/models/<name>.glb and shown with <BlenderModel>.
@@ -80,6 +81,9 @@ export type PartPose = { position?: Vec3; rotation?: Vec3; scale?: number | Vec3
 // `joints`: per-frame value for joints declared in a sand3d model (s3d.joint), by joint name: degrees for revolute and
 // continuous, metres for prismatic, from rest. The GLB carries each joint as a node on its pivot with its axis.
 // Don't pose the same node through `parts` and `joints`.
+// `heads`: for the framing audit, the node names that make the model's head (default: nodes named head or skull,
+// with the ears, eyes, muzzle... beside them; see engine/audit.ts modelHeadParts); `false` for a model with no head
+// or one meant to be cropped.
 export const BlenderModel: React.FC<{
   src: string;
   position?: Vec3;
@@ -89,7 +93,8 @@ export const BlenderModel: React.FC<{
   shadows?: boolean;
   parts?: Record<string, PartPose>;
   joints?: Record<string, number>;
-}> = ({ src, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, ink = 0.015, shadows = true, parts, joints }) => {
+  heads?: string[] | false;
+}> = ({ src, position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, ink = 0.015, shadows = true, parts, joints, heads }) => {
   const [gltf, setGltf] = useState<GLTF | null>(null);
   const [handle] = useState(() => delayRender(`Loading model ${src}`));
   useEffect(() => {
@@ -140,8 +145,12 @@ export const BlenderModel: React.FC<{
     }
   }
 
+  const holder = useRef<THREE.Group>(null);
+  const headParts = useMemo(() => (root && heads !== false ? modelHeadParts(root, heads) : []), [root, heads === false ? "" : (heads ?? []).join(",")]);
+  useModelAudit(holder, () => headParts, src.split("/").pop()!.replace(/\.glb$/, ""));
+
   return (
-    <group position={position} rotation={rotation} scale={scale}>
+    <group ref={holder} position={position} rotation={rotation} scale={scale} userData={{ model: src }}>
       {root && <primitive object={root} />}
     </group>
   );
