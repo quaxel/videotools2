@@ -5,6 +5,7 @@ export * from "./stage";
 export * from "./sound";
 export * from "./Video";
 export { Puppet } from "../puppet/Puppet";
+export { ARM, clampReach, drinkFrom, hammerSwing, pianoPlay, steer, strumPlay } from "../puppet/tools";
 export type { Expression, HeldItem, PuppetLook, PuppetPose } from "../puppet/Puppet";
 export { cardTilt, handWorld, HEAD_Y, HIP_HEIGHT, PUPPET_HEIGHT, PuppetBillboard } from "../puppet/PuppetBillboard";
 export type { PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";

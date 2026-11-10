@@ -1,0 +1,47 @@
+{
+  "title": "Why 'You Deserve It' Picks the Wrong Box",
+  "topic": "Why 'You Deserve It' Picks the Wrong Box (Gesta Romanorum's three caskets; Cavanaugh 2014 on deservingness and indulgence)",
+  "mechanism": "Feeling that you deserve it, not your mood, is what best predicts treating yourself (Cavanaugh 2014); the medieval gold casket's inscription speaks to exactly that feeling, which is why a fresh winner reaches for it, and it holds dead men's bones.",
+  "beats": {
+    "hook": "The muddy tournament winner slams his trophy down in front of three sealed caskets; the camera glides onto the gold one as his I DESERVE IT gauge whips to red: the gold box promises him exactly what he deserves.",
+    "but": "It's a medieval test: gold, silver and plain lead, and only one holds the prize.",
+    "then": "This morning he knocked every rider into the mud; he crows that nobody deserves it more. In the corner a quiet woman waits her turn.",
+    "conflict": "He reads WHOSO CHOOSETH ME SHALL FIND THAT HE DESERVETH, the needle slams into the red, he grabs the gold: dust and dead men's bones, a skull rolls into his lap; silver holds earth and worms. 'But I earned this!'",
+    "pivot": "You see, in 2014 researcher Lisa Cavanaugh studied when people treat themselves: the best predictor wasn't mood, it was feeling they deserved it. His VICTORY pump inflates the I DESERVE IT balloon that shoves his hand to the gold.",
+    "so": "So the woman ignores the needle and opens plain lead: fine gold and precious stones.",
+    "closing": "Today that gold box has a price tag, and the same three words (a shiny YOU DESERVE IT box on a shop shelf)."
+  },
+  "seed": {
+    "what": "The quiet woman in plain dress waiting in the corner of the hall (she opens the lead casket at the end); the lead casket itself sits in every hall shot.",
+    "first_line": 4
+  },
+  "locations": [
+    { "id": "hall-warm", "set": "HallSet warm: candle-lit stone hall, trestle table with GOLD / SILVER / LEAD caskets, I DESERVE IT gauge", "colour": "amber" },
+    { "id": "lists", "set": "ListsSet: tournament lists at midday, tilt barrier, pavilions, cheering stand, mud", "colour": "grass green and sky blue" },
+    { "id": "hall-dusk", "set": "HallSet dusk: the far corner, violet window light, the woman by a candle", "colour": "violet" },
+    { "id": "hall-day", "set": "HallSet day: cool window light on the gold casket and its inscription", "colour": "pale cyan white" },
+    { "id": "hall-ember", "set": "HallSet ember: red glow, the gauge slamming into the red", "colour": "red" },
+    { "id": "hall-sick", "set": "HallSet sick: green light, the gold casket's dust and bones", "colour": "sickly green" },
+    { "id": "hall-dust", "set": "HallSet dust: brown torchlight, the silver casket's earth and worms", "colour": "brown ochre" },
+    { "id": "hall-truth", "set": "HallSet truth: cold blue, the STUDY book, MOOD and I DESERVE IT gauges and the TREAT YOURSELF lever", "colour": "cold blue" },
+    { "id": "hall-dream", "set": "HallSet dream: purple, the VICTORY pump inflating the I DESERVE IT balloon", "colour": "purple magenta" },
+    { "id": "hall-jewel", "set": "HallSet jewel: rose light, the lead casket opening on gold and gems", "colour": "rose pink" },
+    { "id": "aisle", "set": "AisleSet: modern gift aisle, white shelves, the gold YOU DESERVE IT box", "colour": "white and cyan" }
+  ],
+  "characters": [
+    { "id": "knight", "look": "young knight, ginger hair, blue surcoat over mail, red cloak, mud splashed up the surcoat (fictional chooser)" },
+    { "id": "woman", "look": "quiet young woman, long dark hair, plain grey-brown ankle-length dress (stands in for the tale's princess)" },
+    { "id": "emperor", "look": "old emperor with white beard, gold crown, deep red robe and purple cloak (sets the test)" },
+    { "id": "rival", "look": "rival knight in a red surcoat over mail, knocked into the mud" },
+    { "id": "shopper", "look": "modern shopper in a teal top and jeans" }
+  ],
+  "gags": [
+    { "line": 0, "what": "The trophy slams onto the table so hard the caskets jump and dust puffs off the cloth." },
+    { "line": 2, "what": "The rival is lifted out of the saddle and lands back-first in a mud puddle with a brown splash." },
+    { "line": 7, "what": "The gold lid lifts, a cloud of dust blasts the knight's face and a skull hops out and rolls into his lap." },
+    { "line": 8, "what": "A worm wriggles out of the silver casket onto his gauntlet; he shakes it off." },
+    { "line": 13, "what": "The I DESERVE IT balloon swells until it pops in his face." }
+  ],
+  "story_numbers": [],
+  "format_note": "The knight, the emperor, the tournament and the shop are story: in the Gesta Romanorum tale the king's daughter makes the choice (the woman stands in for her) and picks lead. The casket inscriptions and contents follow the tale word for word (kellscraft text). Caskets, trophy and gauge are drawn larger than life so they read on a phone. The gauges, pump and balloon are explanatory props, not historical objects. The study is about deservingness predicting indulgence; the video does not claim it shows people choose wrongly."
+}

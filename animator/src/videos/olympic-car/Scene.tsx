@@ -11,6 +11,7 @@ import {
   lerp3,
   moodBackground,
   MusicCue,
+  PUPPET_HEIGHT,
   PuppetPlacement,
   PuppetPose,
   ramp,
@@ -20,6 +21,7 @@ import {
   Shot,
   Stage,
   StadiumSet,
+  steer,
   stroll,
   summerLight,
   Timing,
@@ -56,11 +58,15 @@ const carWith = (f: number, z: number, opts: { lorz?: Partial<PuppetPose>; steam
   const at: [number, number] = [CAR_X, z];
   const d = carSeat(at, 0, DRIVER_SEAT);
   const l = carSeat(at, 0, PASSENGER);
-  const cast: PuppetPlacement[] = [{ id: "driver", look: DRIVER, pose: { expression: "neutral", sit: true, air: d.air, ...opts.driver } as PuppetPose, at: d.at }];
+  // The driver's hands stay on the wheel and steer: the rim (1.04 m up, 0.15 m radius, tilted toward him) in his
+  // puppet units, measured from his lifted seat; the 3D wheel turns by the same angle.
+  const bump = opts.bump ?? 0;
+  const wheel = steer(f, { wheel: [0, -((1.04 + bump) * 1060) / PUPPET_HEIGHT + d.air], r: (0.15 * 1060) / PUPPET_HEIGHT, flat: 0.65 });
+  const cast: PuppetPlacement[] = [{ id: "driver", look: DRIVER, pose: { expression: "neutral", sit: true, air: d.air, ...wheel.pose, ...opts.driver } as PuppetPose, at: d.at }];
   if (opts.lorz) cast.push({ id: "lorz", look: LORZ, pose: { expression: "smug", sit: true, air: l.air, ...opts.lorz } as PuppetPose, at: l.at });
   const set = (
     <>
-      <Automobile position={[CAR_X, 0, z]} roll={z} frame={f} steam={opts.steam} bump={opts.bump} />
+      <Automobile position={[CAR_X, 0, z]} roll={z} frame={f} steam={opts.steam} bump={opts.bump} steer={wheel.wheelAngle} />
       {opts.zAt && (
         <DustTrail
           frame={f}

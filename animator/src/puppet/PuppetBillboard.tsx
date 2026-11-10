@@ -4,7 +4,8 @@ import { useThree } from "@react-three/fiber";
 import { cancelRender, continueRender, delayRender } from "remotion";
 import * as THREE from "three";
 import { auditCardEdges, usePuppetAudit } from "../engine/audit";
-import { Puppet, PuppetLook, PuppetPose } from "./Puppet";
+import { CardLimbs, probeJoints } from "./CardLimbs";
+import { LimbMode, Puppet, PuppetLook, PuppetPose } from "./Puppet";
 
 // The SVG puppet rasterised onto a camera-facing plane inside the 3D set, so it can stand
 // behind objects, sit on stools and cast a contact shadow.
@@ -36,6 +37,9 @@ export type PuppetPlacement = {
   tint?: string; // multiplies the cut-out's colours, so it takes on the set's light (Stage sets it from the mood)
   light?: PuppetLight; // light the cut-out from the set's lights instead of the flat tint
   fixedYaw?: number; // do not turn to the camera: keep the card facing this direction (radians; 0 = +z, PI / 2 = +x), e.g. lying in a mirror
+  // Arms and legs are 3D by default (ink sticks in the scene built on the card's own limb pose: puppet/CardLimbs.tsx);
+  // "2d" draws them on the card as before (pin an old shot that looks wrong with 3D limbs).
+  limbs?: "3d" | "2d";
   crop?: boolean; // let the frame edge cut this puppet's head (Stage otherwise pans to keep every head whole)
   // Show the puppet only inside an ellipse in world space (a reflection in a mirror, a figure behind a porthole): pixels where
   // ((p - center) . u)^2 + ((p - center) . v)^2 > 1 are not drawn. u and v are the ellipse axes scaled by 1 / radius.
@@ -209,20 +213,21 @@ export const cardTilt = (cam: [number, number, number], at: [number, number]) =>
 
 // For held props (a paddle, a cup in a world-space prop): where a hand at `reach` lands in the scene.
 // Where a puppet's hand is in the world: `reach` (puppet units, as in reachR) on the card standing at `at`,
-// which turns to face the camera and, from high up, leans back (cardTilt).
-export const handWorld = (at: [number, number], reach: [number, number], camera: { position: [number, number, number] }): [number, number, number] => {
+// which turns to face the camera and, from high up, leans back (cardTilt). `lift` (puppet units) is how far the body
+// is raised: pass the pose's `air` (a car seat, a jump) minus its `bob`, since reach points move with the body.
+export const handWorld = (at: [number, number], reach: [number, number], camera: { position: [number, number, number] }, lift = 0): [number, number, number] => {
   const dx = camera.position[0] - at[0];
   const dz = camera.position[2] - at[1];
   const l = Math.hypot(dx, dz) || 1;
   const fwd: [number, number] = [dx / l, dz / l];
   const right: [number, number] = [dz / l, -dx / l];
   const t = cardTilt(camera.position, at);
-  const h = -reach[1] * K;
+  const h = (lift - reach[1]) * K;
   const back = -h * Math.sin(t);
   return [at[0] + right[0] * reach[0] * K + fwd[0] * back, h * Math.cos(t), at[1] + right[1] * reach[0] * K + fwd[1] * back];
 };
 
-export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff", light: lightIn, mask, fixedYaw }) => {
+export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: authored, at, tint = "#ffffff", light: lightIn, mask, fixedYaw, limbs = "3d" }) => {
   const light = lightIn ?? (mask ? ({} as PuppetLight) : undefined);
   const [x, z] = at;
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
@@ -260,6 +265,8 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   const need = pxPerMetre * K * 1.15;
   const density = DENSITY_STEPS.find((d) => d >= need) ?? DENSITY_STEPS[DENSITY_STEPS.length - 1];
 
+  // 3D limbs need the card's real orientation; a masked reflection keeps them on the card.
+  const limbMode: LimbMode = limbs === "3d" && !mask ? "markers" : "svg";
   const markup = useMemo(
     () =>
       renderToStaticMarkup(
@@ -269,11 +276,13 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
           width={Math.round(VB.w * density)}
           height={Math.round(VB.h * density)}
         >
-          <Puppet id={id} look={look} pose={pose} />
+          <Puppet id={id} look={look} pose={pose} limbs={limbMode} />
         </svg>,
       ),
-    [id, look, pose, density, VB],
+    [id, look, pose, density, VB, limbMode],
   );
+  // Where the card's arms and legs are, for the 3D limbs.
+  const joints = useMemo(() => (limbMode === "markers" ? probeJoints(markup) : {}), [markup, limbMode]);
 
   const canvas = useMemo(() => {
     const c = document.createElement("canvas");
@@ -350,6 +359,9 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
     img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`;
   }, [markup, canvas, texture, advance, gl, id]);
 
+  // A world point in the card's frame (inside the yaw and tilt groups below).
+  const toCard = (w: [number, number, number]) =>
+    new THREE.Vector3(w[0] - x, w[1], w[2] - z).applyAxisAngle(new THREE.Vector3(0, 1, 0), -yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
   return (
     <group ref={root} position={[x, 0, z]} userData={{ puppet: true }}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} scale={[1, 0.42, 1]} visible={!mask}>
@@ -358,6 +370,18 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
       </mesh>
       <group rotation={[0, yaw, 0]}>
         <group rotation={[-tilt, 0, 0]}>
+          {limbMode === "markers" && (
+            <CardLimbs
+              joints={joints}
+              K={K}
+              profile={pose.view === "side"}
+              facing={pose.facing ?? 1}
+              pants={look.pants}
+              shoes={look.shoes}
+              reachL={pose.worldL && toCard(pose.worldL)}
+              reachR={pose.worldR && toCard(pose.worldR)}
+            />
+          )}
           <mesh position={[(VB.x + VB.w / 2) * K, -(VB.y + VB.h / 2) * K, 0]} castShadow customDepthMaterial={depthMaterial} material={litMaterial ?? undefined}>
             <planeGeometry args={[VB.w * K, VB.h * K]} />
             {!litMaterial && <meshBasicMaterial map={texture} color={tint} transparent alphaTest={0.02} toneMapped={false} fog={false} />}

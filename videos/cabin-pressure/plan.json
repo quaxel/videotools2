@@ -1,0 +1,125 @@
+{
+  "title": "Why Feeling Great Is the Danger When the Oxygen Masks Drop",
+  "topic": "Why a cabin pressure loss gives you only seconds of useful consciousness",
+  "mechanism": "A jet pumps its cabin up to an eight-thousand-foot pressure; when it leaks, hypoxia arrives as euphoria instead of fear, so at thirty-five thousand feet you get thirty to sixty seconds to pull the mask that fires a chemical oxygen generator while the pilots dive to ten thousand feet.",
+  "beats": {
+    "hook": "When the oxygen masks drop, the most dangerous thing on the plane is how good you feel: Barry giggles under the swinging masks.",
+    "but": "Outside, the air is so thin it cannot keep a brain running, so the jet squeezes the cabin to an eight-thousand-foot pressure.",
+    "then": "A door seal cracks, the air screams out, the cabin fogs, the cabin-altitude needle climbs and the masks drop before fifteen thousand.",
+    "conflict": "Grandma Rose helps everyone else first while Barry pokes the flat bag and laughs; nobody screams.",
+    "pivot": "You see, a brain starving for oxygen does not feel fear, it feels a warm, happy buzz, and at this height that buzz gives you thirty to sixty seconds.",
+    "so": "So the attendant shouts to pull the mask: the yank fires a chemical oxygen generator, the pilots mask up and dive to ten thousand feet, and the plane wakes up.",
+    "closing": "Up there, feeling great is the warning. Mask first, then help."
+  },
+  "seed": {
+    "what": "The yellow oxygen mask hanging in front of Barry (pulling it is the fix)",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "sky-cruise",
+      "set": "SkySet day + airliner.glb, glide to a window (exterior.tsx)",
+      "colour": "deep blue"
+    },
+    {
+      "id": "cabin-masks",
+      "set": "CabinSet cruise, Barry and swinging masks (cabinShots.tsx)",
+      "colour": "cream and yellow"
+    },
+    {
+      "id": "cockpit-cruise",
+      "set": "CockpitSet calm, CABIN ALT gauge (cockpit.tsx)",
+      "colour": "dark teal"
+    },
+    {
+      "id": "door-seal",
+      "set": "CabinSet fog at the over-wing exit (cabinFx.tsx)",
+      "colour": "cold blue-white"
+    },
+    {
+      "id": "psu-drop",
+      "set": "CabinSet alarm, PSU doors pop (cabinShots.tsx)",
+      "colour": "amber"
+    },
+    {
+      "id": "cabin-rows",
+      "set": "CabinSet, Rose, Mia and Barry in row 1 (cabinShots.tsx)",
+      "colour": "warm cream"
+    },
+    {
+      "id": "euphoria",
+      "set": "CabinSet dream re-light, stopwatch (cabinFx.tsx)",
+      "colour": "purple-pink"
+    },
+    {
+      "id": "galley",
+      "set": "GalleySet, Sofia (cockpit.tsx)",
+      "colour": "steel grey"
+    },
+    {
+      "id": "generator",
+      "set": "PSU macro, O2 generator canister (cockpit.tsx)",
+      "colour": "orange glow"
+    },
+    {
+      "id": "cockpit-dive",
+      "set": "CockpitSet alarm, masks, altimeter (cockpit.tsx)",
+      "colour": "slate blue and red"
+    },
+    {
+      "id": "cabin-calm",
+      "set": "CabinSet sunlit (cabinFx.tsx)",
+      "colour": "sunlit gold"
+    },
+    {
+      "id": "sky-low",
+      "set": "below the cloud deck over a turquoise sea (exterior.tsx)",
+      "colour": "turquoise"
+    }
+  ],
+  "characters": [
+    {
+      "id": "barry",
+      "look": "round cheerful man, ginger hair, teal sweater; the euphoric one"
+    },
+    {
+      "id": "rose",
+      "look": "grandma, long silver hair, glasses, lilac cardigan; helps everyone first"
+    },
+    {
+      "id": "mia",
+      "look": "kid, long dark hair, pink hoodie, seated next to Rose"
+    },
+    {
+      "id": "sofia",
+      "look": "flight attendant, long black hair in navy uniform with red scarf"
+    },
+    {
+      "id": "captain",
+      "look": "pilot, grey hair, white shirt, navy tie, beard"
+    },
+    {
+      "id": "firstofficer",
+      "look": "pilot, dark hair, white shirt, navy tie"
+    }
+  ],
+  "gags": [
+    {
+      "line": 1,
+      "what": "Barry swats the swinging mask away, it swings back and bonks him on the head (stars burst), he giggles harder"
+    },
+    {
+      "line": 5,
+      "what": "Decompression: napkins, a paper cup and peanuts whip toward the cracked door seal and the fog bursts out (physics scatter)"
+    },
+    {
+      "line": 7,
+      "what": "Barry pokes the limp reservoir bag like a balloon and it flops; he laughs"
+    },
+    {
+      "line": 12,
+      "what": "The generator canister pops and glows hot; a tiny puff of heat shimmer, Barry's mask snaps onto his face"
+    }
+  ],
+  "story_numbers": []
+}

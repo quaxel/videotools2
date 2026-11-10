@@ -1,0 +1,122 @@
+{
+  "title": "The King Who Banned the Music From Stopping",
+  "topic": "The King Who Banned the Music From Stopping (adaptation; Nelson, Meyvis and Galak 2009 on commercial interruptions)",
+  "mechanism": "Enjoyment fades as people get used to a pleasant experience; an interruption breaks that adaptation and brings the enjoyment back, which is why TV with ad breaks was enjoyed more than without (Nelson, Meyvis and Galak 2009), except for people who adapt little.",
+  "beats": {
+    "hook": "Mid-feast: a servant rolls in a drum taller than himself, four drummers pound, the Shah bellows LOUDER, and his JOY needle drops a notch on every beat.",
+    "but": "It's his victory feast; the first song had sent the needle to the top, but hours later the same music barely moves it.",
+    "then": "He orders more musicians, a bigger drum, one the size of a cart, which rolls off the stage and flattens the flute player.",
+    "conflict": "The blacksmith offers a plain iron ring: THIS TOO SHALL PASS. 'Nothing passes! Not my party!'",
+    "pivot": "He hurls the ring, it snaps a lute string, the hall goes silent; when the music starts again the needle shoots past the top. You see, in 2009 researchers found ad breaks made TV shows more enjoyable, though people said they'd rather skip them: a GETTING USED TO IT spring drags the needle down and a BREAK cuts it.",
+    "so": "It fails for people who barely get used to anything. So now the Shah stops his own band every hour with a gong.",
+    "closing": "And your favorite show? It just cut to an ad (a living-room TV switches to AD BREAK)."
+  },
+  "seed": {
+    "what": "The blacksmith hammering the plain iron ring in the yard forge (he brings it to the Shah later).",
+    "first_line": 3
+  },
+  "locations": [
+    {
+      "id": "hall-candle",
+      "set": "ThroneRoomSet candle: the feast at night, musicians' stage, giant drum, JOY dial",
+      "colour": "amber"
+    },
+    {
+      "id": "hall-day",
+      "set": "ThroneRoomSet day: the first song in bright daylight",
+      "colour": "white and turquoise"
+    },
+    {
+      "id": "forge",
+      "set": "ForgeSet: brick hearth, anvil, sparks",
+      "colour": "fire orange and soot"
+    },
+    {
+      "id": "hall-dusk",
+      "set": "ThroneRoomSet corner light: hours later, dim teal dusk",
+      "colour": "dark teal"
+    },
+    {
+      "id": "hall-night",
+      "set": "ThroneRoomSet night: the crowded stage, the cart-sized drum",
+      "colour": "night blue"
+    },
+    {
+      "id": "hall-corner",
+      "set": "ThroneRoomSet corner: the blacksmith offers the ring",
+      "colour": "dark teal"
+    },
+    {
+      "id": "hall-silence",
+      "set": "ThroneRoomSet candle, close on the oud as the string snaps; the hall freezes",
+      "colour": "amber grey"
+    },
+    {
+      "id": "hall-burst",
+      "set": "ThroneRoomSet day: the music restarts, confetti",
+      "colour": "bright white gold"
+    },
+    {
+      "id": "mechanism-tv",
+      "set": "ThroneRoomSet night: two TV sets on the table, NO BREAKS and WITH BREAKS dials",
+      "colour": "deep blue"
+    },
+    {
+      "id": "mechanism-spring",
+      "set": "ThroneRoomSet corner: the JOY dial, GETTING USED TO IT spring, BREAK scissors",
+      "colour": "teal"
+    },
+    {
+      "id": "hall-gong",
+      "set": "ThroneRoomSet night: the Shah strikes the gong",
+      "colour": "night blue"
+    },
+    {
+      "id": "living-room",
+      "set": "LivingSet: a modern living room, TV switching to AD BREAK",
+      "colour": "purple"
+    }
+  ],
+  "characters": [
+    {
+      "id": "shah",
+      "look": "Shah with a gold crown, black beard, green robe with a gold belt, purple cloak"
+    },
+    {
+      "id": "smith",
+      "look": "blacksmith, leather apron, stubble, rolled sleeves"
+    },
+    {
+      "id": "drummer",
+      "look": "drummers in blue and green with head cloths"
+    },
+    {
+      "id": "lutist",
+      "look": "oud player in a red head cloth"
+    },
+    {
+      "id": "flutist",
+      "look": "flute player, a woman with long hair"
+    },
+    {
+      "id": "viewer",
+      "look": "modern viewer on a sofa"
+    }
+  ],
+  "gags": [
+    {
+      "line": 6,
+      "what": "The cart-sized drum rolls off the stage and flattens the flute player, who lies flat with stars."
+    },
+    {
+      "line": 9,
+      "what": "The thrown ring snaps the oud string, which whips the lutist's head cloth off; everyone freezes mid-motion."
+    },
+    {
+      "line": 16,
+      "what": "The Shah whacks the gong so hard he spins round."
+    }
+  ],
+  "story_numbers": [],
+  "format_note": "The Shah, the feast, the blacksmith and the snapped string are a story frame; the 'This too shall pass' ring comes from a fable told by medieval Persian Sufi poets. The JOY dial, spring and scissors are explanatory props. The two TV sets on the table stand for the 2009 study's conditions (with and without ad breaks), not for any device in the story's time."
+}

@@ -18,12 +18,13 @@ import {
   Stage,
   stroll,
   Timing,
+  pianoPlay,
   useShotFrame,
   Video,
 } from "../../engine";
 import { Holster } from "../../scenes/DuelPreview";
 import { SIGN, STREET, TOWN_BG, townLight, TownMode, Tumbleweed, WesternTownSet } from "../../three/WesternTownSet";
-import { CoffinCart, Fly, Lantern, PIANO_SEAT, SaloonSet, saloonLight, Tape } from "./props";
+import { CoffinCart, Fly, Lantern, PIANO_KEYS, PIANO_SEAT, SaloonSet, saloonLight, Tape } from "./props";
 import TIMING_JSON from "./timing.json";
 
 // "The Measure" (ÖLÇÜ): a sundown duel in a western street. The rule: draw when the saloon piano stops. The pianist
@@ -133,12 +134,11 @@ const S1: React.FC = () => {
 
 // The pianist at the upright, in profile facing it; `play` 0..1 how hard he plays (hands hop on the keys).
 const pianist = (f: number, play: number, extra: Partial<PuppetPose> = {}): PuppetPlacement => {
-  const hop = (k: number) => Math.abs(Math.sin(f * (0.55 + k * 0.13) + k)) * 40 * play;
   return {
     id: "pianist",
     look: PIANIST_LOOK,
     at: PIANO_SEAT,
-    pose: { expression: "happy", sit: true, view: "side", facing: -1, reachR: [-400, -520 + hop(1)], reachL: [-330, -500 + hop(2)], handR: "open", handL: "open", ...extra },
+    pose: { expression: "happy", sit: true, view: "side", facing: -1, ...pianoPlay(f, { keys: PIANO_KEYS, view: "side", facing: -1, energy: play }), ...extra },
   };
 };
 const SALOON_WIDE: CameraShot = { position: [-0.6, 1.25, 2.6], target: [-2.4, 0.75, -1.0], fov: 42 };
@@ -336,7 +336,7 @@ const S11: React.FC = () => {
       bg="#2a140c"
       blur={2}
       puppets={[
-        hit ? { id: "pianist", look: PIANIST_LOOK, at: PIANO_SEAT, pose: { expression: "shocked", sit: true, view: "side", facing: -1, reachR: [-300, -520], reachL: [-250, -500], handR: "fist", handL: "fist", squash: f < SLAM + 6 ? 0.15 : 0 } } : pianist(f, 1.4, { expression: "excited", headTilt: Math.sin(f * 0.5) * 8 }),
+        hit ? { id: "pianist", look: PIANIST_LOOK, at: PIANO_SEAT, pose: { expression: "shocked", sit: true, view: "side", facing: -1, reachR: [PIANO_KEYS[0], PIANO_KEYS[1] - 30], reachL: [PIANO_KEYS[0] + 20, PIANO_KEYS[1] - 10], handR: "fist", handL: "fist", squash: f < SLAM + 6 ? 0.15 : 0 } } : pianist(f, 1.4, { expression: "excited", headTilt: Math.sin(f * 0.5) * 8 }),
         { id: "barman", look: BARMAN_LOOK, at: w.at, pose: barman },
       ]}
       light={saloonLight()}

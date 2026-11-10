@@ -63,6 +63,7 @@ export type PuppetLook = {
   build?: "broad" | "narrow"; // torso and shoulder width: a broad, barrel-chested build or a narrow, upright one
   tunic?: boolean; // knee-length tunic below the body, in the outfit colour, with a darker hem band
   patch?: string; // a mended patch on the tunic (needs `tunic`)
+  mud?: string; // mud splashed up the tunic from the hem (needs `tunic`; the mud colour)
   belt?: string; // narrow leather belt at the waist with a pouch and a sheathed work knife
   wraps?: string; // cloth leg wraps round the shins
   mail?: string; // mail shirt (metal colour) to the hips, with doubled shoulder flaps
@@ -73,6 +74,13 @@ export type PuppetLook = {
 
 // Pants and shoe colours reach every Leg and Foot through context, so the front, side and back views share them.
 const WearCtx = React.createContext<{ pants?: string; shoes?: string; wraps?: string }>({});
+// "svg": arms and legs drawn as ink lines (previews, plain SVG). "markers": not drawn; invisible joint markers
+// (data-j) mark where they are, and PuppetBillboard builds 3D limbs on them (puppet/CardLimbs.tsx).
+export type LimbMode = "svg" | "markers";
+const LimbCtx = React.createContext<LimbMode>("svg");
+const Mark: React.FC<{ j: string; p: [number, number]; shape?: string; front?: boolean }> = ({ j, p, shape, front }) => (
+  <circle data-j={j} data-shape={shape} data-front={front ? 1 : undefined} cx={p[0]} cy={p[1]} r={0} fill="none" />
+);
 
 export type PuppetPose = {
   expression: Expression;
@@ -92,6 +100,7 @@ export type PuppetPose = {
   facing?: 1 | -1; // side view: 1 faces screen-right, -1 faces screen-left
   hold?: { item: HeldItem; hand: "L" | "R" }; // side view holds in the near hand
   itemTilt?: number; // degrees the held item is turned (180 = upside down)
+  itemFill?: number; // 0..1 how full a held "glass" of water is (the surface stays level as it tips)
   coinDrop?: number; // a coin falling from the hand: units below the hand, undefined = none
   face?: FaceMicro; // micro-expression offsets (Stage adds them automatically)
   from?: Expression; // the expression being left; with blend < 1 the face eases from it to `expression`
@@ -119,6 +128,13 @@ export type PuppetPose = {
   armSwing?: number; // walking arms swing against the legs this much (1 = normal); arms you set yourself are kept
   squash?: number; // + squashes (landing, sitting down hard), - stretches (take-off); keeps the volume, feet stay put
   hair?: { lift?: number; sway?: number }; // soft hair trailing the body: lift (units, + floats up), sway (degrees)
+  noArms?: boolean; // no arms or hands at all (neither drawn nor 3D)
+  noLegs?: boolean; // no legs or feet at all
+  // 3D limbs (the default on a set: PuppetBillboard): send the screen-left (front view) / far (profile) hand, or the
+  // screen-right / near hand, to a point in the WORLD (metres): a piano key, a glass, a hammer grip. The arm reaches
+  // from the card's shoulder in 3D. A `hold` item in that hand is then not drawn: place the prop in 3D yourself.
+  worldL?: [number, number, number];
+  worldR?: [number, number, number];
 };
 
 // ---------- period costume pieces (drawn in the puppet's own units, front view unless named Side/Back) ----------
@@ -288,6 +304,17 @@ const Tunic: React.FC<{ look: PuppetLook; uid: string; hem: number; side?: boole
       <path d={`M ${-band + (side ? 4 : 0)} ${hem - 22} Q ${side ? 8 : 0} ${hem - 2} ${band} ${hem - 22}`} fill="none" stroke={SHADE} strokeWidth={14} opacity={0.32} />
       {/* fold lines falling from the belt */}
       <path d={`M ${-60 * w} -320 L ${-80 * w} ${hem + 2} M ${50 * w} -320 L ${74 * w} ${hem + 4}`} fill="none" stroke={SHADE} strokeWidth={6} opacity={0.22} strokeLinecap="round" />
+      {look.mud && (
+        <g>
+          {/* splashes thrown up from the hem: big blots low, flecks higher up */}
+          {(side
+            ? [[-120, -40, 34, 24], [-40, -18, 40, 22], [60, -30, 30, 20], [130, -14, 36, 22], [-90, -110, 16, 12], [20, -150, 12, 9], [100, -96, 14, 10]]
+            : [[-150, -36, 36, 24], [-60, -16, 44, 22], [40, -28, 32, 20], [140, -18, 38, 24], [-110, -104, 17, 12], [-10, -140, 12, 9], [90, -118, 15, 11], [160, -80, 11, 8]]
+          ).map(([x, y, rx, ry], i) => (
+            <ellipse key={i} cx={x * w} cy={hem + y} rx={rx} ry={ry} transform={`rotate(${(i * 37) % 50 - 25} ${x * w} ${hem + y})`} fill={look.mud} opacity={0.88} />
+          ))}
+        </g>
+      )}
       {look.patch && !back && (
         <g transform={`translate(${side ? 70 : -96 * w} ${hem - 74}) rotate(-6)`}>
           <rect x={-38} y={-30} width={76} height={58} rx={8} fill={look.patch} stroke={INK} strokeWidth={7} />
@@ -436,7 +463,7 @@ export type HandShape = "open" | "point" | "fist";
 // Mouth shapes: closed lips (m, b, p), rounded (o, u, w), wide (e, i), open (a), lip under teeth (f, v).
 export type Viseme = "mbp" | "o" | "e" | "a" | "fv";
 
-export type HeldItem = "cup" | "drink" | "phone" | "toolbox" | "key" | "popcorn" | "briefcase" | "candy" | "wine";
+export type HeldItem = "glass" | "cup" | "drink" | "phone" | "toolbox" | "key" | "popcorn" | "briefcase" | "candy" | "wine";
 
 const INK = "#161212";
 const STROKE = 12;
@@ -528,8 +555,19 @@ const knee = (hx: number, hy: number, fx: number, fy: number, kx: number, ky: nu
   const cand = [base + off, base - off].map((a) => [hx + Math.cos(a) * THIGH, hy + Math.sin(a) * THIGH] as [number, number]);
   return cand.sort((p, q) => (q[0] - hx) * kx + (q[1] - hy) * ky - ((p[0] - hx) * kx + (p[1] - hy) * ky))[0];
 };
-const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number }> = ({ pts, foot, footScale }) => {
+const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number; mark?: string }> = ({ pts, foot, footScale, mark }) => {
   const { pants, wraps } = React.useContext(WearCtx);
+  const mode = React.useContext(LimbCtx);
+  if (mode === "markers" && mark) {
+    return (
+      <g>
+        <Mark j={`${mark}:s`} p={pts[0]} />
+        <Mark j={`${mark}:e`} p={pts[1] ?? lerp2(pts[0], pts[pts.length - 1], 0.5)} />
+        <Mark j={`${mark}:h`} p={pts[pts.length - 1]} />
+        <Mark j={`${mark}:f`} p={foot} shape={String(footScale ?? 1.3)} />
+      </g>
+    );
+  }
   const d = pts.map((p) => p.join(",")).join(" ");
   // Leg wraps: the shin (knee to ankle) a little thicker, in the wrap colour, with bands where the cloth overlaps.
   const shin = pts.length > 2 ? `${lerp2(pts[1], pts[2], 0.08).join(",")} ${lerp2(pts[1], pts[2], 0.9).join(",")}` : "";
@@ -626,7 +664,36 @@ const PUPIL: Partial<Record<Expression, [number, number, number]>> = {
 };
 
 // Things a hand can hold, drawn around the grip point (0, 0).
-const Item: React.FC<{ item: HeldItem }> = ({ item }) => {
+// A clear drinking glass of water gripped round its middle: rim at y -66, base at y 58 (then scaled up 1.3, so the
+// rim is 92 units from the hand). The water surface stays level whatever `tilt` the glass is turned to, and its
+// height follows `fill`.
+const GLASS_D = "M -40 -66 L 40 -66 L 32 58 L -32 58 Z";
+const WaterGlass: React.FC<{ tilt: number; fill: number; uid: string }> = ({ tilt, fill, uid }) => {
+  const f = Math.max(0, Math.min(1, fill));
+  // Level surface in the world, through the point `fill` of the way up the glass's axis.
+  const level = 58 - f * 116;
+  return (
+    <g transform="scale(1.3)">
+      <clipPath id={`glass-${uid}`}>
+        <path d={GLASS_D} />
+      </clipPath>
+      <path d={GLASS_D} fill="#dff3fb" opacity={0.55} />
+      {f > 0.01 && (
+        <g clipPath={`url(#glass-${uid})`}>
+          <g transform={`translate(0 ${level}) rotate(${-tilt})`}>
+            <rect x={-200} y={0} width={400} height={300} fill="#5ab8e8" />
+            <rect x={-200} y={0} width={400} height={8} fill="#bfe8fb" />
+          </g>
+        </g>
+      )}
+      <path d="M -26 -50 L -20 44" stroke="#ffffff" strokeWidth={8} strokeLinecap="round" opacity={0.85} />
+      <path d={GLASS_D} fill="none" stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+    </g>
+  );
+};
+
+const Item: React.FC<{ item: HeldItem; tilt?: number; fill?: number; uid?: string }> = ({ item, tilt = 0, fill = 0.8, uid = "g" }) => {
+  if (item === "glass") return <WaterGlass tilt={tilt} fill={fill} uid={uid} />;
   if (item === "cup") {
     // Casino coin cup with coins heaped on top
     return (
@@ -727,8 +794,10 @@ const Item: React.FC<{ item: HeldItem }> = ({ item }) => {
 const UPPER = 130;
 const LOWER = 120;
 
-// Two-bone reach: the elbow and hand for a hand placed at (tx, ty), the elbow bending outward and down.
-const reachArm = (x: number, y: number, side: 1 | -1, tx: number, ty: number) => {
+// Two-bone reach: the elbow and hand for a hand placed at (tx, ty), the elbow bending outward and down. In profile
+// (`profile`, the puppet facing +x) the elbow bends the way a real one does: below a forward reach, in front of a
+// raised arm, behind a lowered one.
+const reachArm = (x: number, y: number, side: 1 | -1, tx: number, ty: number, profile = false) => {
   const dx = tx - x;
   const dy = ty - y;
   const d = Math.min(UPPER + LOWER - 1, Math.max(Math.abs(UPPER - LOWER) + 1, Math.hypot(dx, dy)));
@@ -736,29 +805,38 @@ const reachArm = (x: number, y: number, side: 1 | -1, tx: number, ty: number) =>
   const off = Math.acos((UPPER * UPPER + d * d - LOWER * LOWER) / (2 * UPPER * d));
   // Of the two elbow positions, take the one further out to this arm's side (then lower).
   const cand = [base + off, base - off].map((a) => [x + Math.cos(a) * UPPER, y + Math.sin(a) * UPPER] as [number, number]);
-  const [ex, ey] = cand.sort((p, q) => side * (q[0] - p[0]) + (q[1] - p[1]) * 0.3)[0];
+  // Profile: the elbow on the down-and-back side of the shoulder-to-hand line, normal (-dy, dx).
+  const [ex, ey] = profile
+    ? cand.sort((p, q) => (-dy * (q[0] - x) + dx * (q[1] - y)) - (-dy * (p[0] - x) + dx * (p[1] - y)))[0]
+    : cand.sort((p, q) => side * (q[0] - p[0]) + (q[1] - p[1]) * 0.3)[0];
   const hx = ex + ((tx - ex) / Math.hypot(tx - ex, ty - ey)) * LOWER;
   const hy = ey + ((ty - ey) / Math.hypot(tx - ex, ty - ey)) * LOWER;
   return { ex, ey, hx, hy };
 };
 
-const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, number]; reach?: [number, number]; hand?: HandShape; item?: HeldItem; tilt?: number; drop?: number }> = ({
+const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, number]; reach?: [number, number]; profile?: boolean; hand?: HandShape; item?: HeldItem; tilt?: number; drop?: number; fill?: number; uid?: string; mark?: string; front?: boolean }> = ({
   x,
   y,
   side,
   angles,
   reach,
+  profile,
   hand,
   item,
   tilt = 0,
   drop,
+  fill,
+  uid,
+  mark,
+  front,
 }) => {
+  const mode = React.useContext(LimbCtx);
   const [shoulder, elbow] = angles;
   // Angles open outward, away from the body.
   const a1 = (shoulder * Math.PI) / 180;
   const a2 = ((shoulder + elbow) * Math.PI) / 180;
   const { ex, ey, hx, hy } = reach
-    ? reachArm(x, y, side, reach[0], reach[1])
+    ? reachArm(x, y, side, reach[0], reach[1], profile)
     : (() => {
         const ex = x + side * Math.sin(a1) * UPPER;
         const ey = y + Math.cos(a1) * UPPER;
@@ -766,6 +844,24 @@ const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, numbe
       })();
   // Forearm direction as an angle from straight down, outward positive (what Hand expects).
   const fore = (Math.atan2(side * (hx - ex), hy - ey) * 180) / Math.PI;
+  if (mode === "markers" && mark) {
+    // 3D arm: only the joints, plus what the hand holds (drawn on the card at the hand)
+    return (
+      <g>
+        <Mark j={`${mark}:s`} p={[x, y]} front={front} />
+        <Mark j={`${mark}:e`} p={[ex, ey]} />
+        <Mark j={`${mark}:h`} p={[hx, hy]} shape={hand ?? "open"} />
+        {item && (
+          <g transform={`translate(${hx} ${hy - 6}) rotate(${tilt})`}>
+            <Item item={item} tilt={tilt} fill={fill} uid={uid} />
+          </g>
+        )}
+        {drop !== undefined && (
+          <ellipse cx={hx} cy={hy + 60 + drop} rx={22} ry={22 * Math.abs(Math.cos(drop / 40))} fill="#ffcc33" stroke={INK} strokeWidth={7} />
+        )}
+      </g>
+    );
+  }
   return (
     <g>
       <polyline
@@ -778,7 +874,7 @@ const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, numbe
       />
       {item && (
         <g transform={`translate(${hx} ${hy - 6}) rotate(${tilt})`}>
-          <Item item={item} />
+          <Item item={item} tilt={tilt} fill={fill} uid={uid} />
         </g>
       )}
       {drop !== undefined && (
@@ -1139,10 +1235,14 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
   const torso = `translate(0 -280) scale(${(1 + 0.06 * bend) * bw} ${k}) translate(0 280)`;
   const seat = pose.sit ? 1 : Math.max(0, Math.min(1, pose.seat ?? 0));
   const arm = (side: "L" | "R") => {
+    if (pose.noArms) return null;
     const s = side === "L" ? -1 : 1;
-    const held = pose.hold?.hand === side;
+    const world = side === "L" ? pose.worldL : pose.worldR;
+    const held = pose.hold?.hand === side && !world;
     return (
       <Arm
+        mark={side === "L" ? "armL" : "armR"}
+        front={inFront(side)}
         x={s * 130 * bw}
         y={sh}
         side={s}
@@ -1152,6 +1252,8 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         item={held ? pose.hold!.item : undefined}
         tilt={held ? pose.itemTilt : undefined}
         drop={held ? pose.coinDrop : undefined}
+        fill={pose.itemFill}
+        uid={`${id}-${side}`}
       />
     );
   };
@@ -1169,7 +1271,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
       <LeafPattern look={look} id={patternId} />
 
       {/* Legs: swing from the hips, bend at the knee when crouching, fold toward the camera when seated */}
-      <g transform={`translate(0 ${-(pose.air ?? 0)})`}>
+      <g transform={`translate(0 ${-(pose.air ?? 0)})`} display={pose.noLegs ? "none" : undefined}>
         {[-1, 1].map((side) => {
           if (pose.stride !== undefined && seat === 0) {
             // Walking toward (or away from) the camera: the legs step forward and back, not out to the sides. The
@@ -1180,7 +1282,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             const hip: [number, number] = [side * 55, -280 + drop - depth * 6];
             const foot: [number, number] = [side * 60, -14 + depth * 26 - lift];
             const kn = lift > 1 ? knee(hip[0], hip[1], foot[0], foot[1], side * 0.5, 0.4) : lerp2(hip, foot, 0.5);
-            return <Leg key={side} pts={[hip, kn, foot]} foot={[foot[0] + side * 6, foot[1] - 4]} footScale={1.3 * (1 + 0.12 * depth)} />;
+            return <Leg key={side} mark={side < 0 ? "legL" : "legR"} pts={[hip, kn, foot]} foot={[foot[0] + side * 6, foot[1] - 4]} footScale={1.3 * (1 + 0.12 * depth)} />;
           }
           const hip: [number, number] = [side * 55, -280 + drop];
           const a = ((pose.legSwing ?? 0) * side * Math.PI) / 180;
@@ -1191,7 +1293,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           const seated: [number, number][] = [[side * 55, -280], [side * 92, -236], [side * 84, -18]];
           const pts = [hip, standKnee, standFoot].map((p, i) => lerp2(p, seated[i], seat));
           const foot = lerp2([standFoot[0] + side * 8, standFoot[1] - 4], [side * 96, -16], seat);
-          return <Leg key={side} pts={pts} foot={foot} />;
+          return <Leg key={side} mark={side < 0 ? "legL" : "legR"} pts={pts} foot={foot} />;
         })}
       </g>
 
@@ -1268,8 +1370,8 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         </g>
         </g>
         {/* A holding arm comes in front of the body so the item shows */}
-        {pose.hold?.hand === "L" && arm("L")}
-        {pose.hold?.hand === "R" && arm("R")}
+        {pose.hold?.hand === "L" && !pose.frontL && arm("L")}
+        {pose.hold?.hand === "R" && !pose.frontR && arm("R")}
 
         {/* Head */}
         <g transform={head}>
@@ -1352,8 +1454,9 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           )}
         </g>
         {/* Arms that cross the body or touch the face */}
-        {pose.frontL && pose.hold?.hand !== "L" && arm("L")}
-        {pose.frontR && pose.hold?.hand !== "R" && arm("R")}
+        {/* front arms, holding or not, come over the head too (a glass at the lips, a hand on the chin) */}
+        {pose.frontL && arm("L")}
+        {pose.frontR && arm("R")}
       </g>
     </g>
   );
@@ -1471,13 +1574,18 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   const sw = pose.armSwing ?? 1;
   const nearArm: [number, number] = crawling ? [62 - cyc * 14, 26] : pose.armR ?? [-swing * 1.2 * sw, 14 + Math.max(0, -swing) * sw];
   const farArm: [number, number] = crawling ? [62 + cyc * 14, 26] : pose.armL ?? [swing * 1.2 * sw, 14 + Math.max(0, swing) * sw];
+  // Reach points are screen-space puppet units like in front view (+x = screen right), so a prop placed with
+  // handWorld lands in the hand whichever way the puppet faces: flip x into this mirrored group. reachR moves the
+  // near arm, reachL the far one; both hands follow the body when it bends, as they follow `lean` in front view.
+  const fx = pose.facing ?? 1;
+  const sideReach = (r?: [number, number]): [number, number] | undefined => (crawling || !r ? undefined : [r[0] * fx, r[1]]);
   const leg = (a: number, key: string, phase: number) => {
     const hip: [number, number] = [back, -280 + drop];
     if (crawling) {
       // Knee on the floor under the hip, shin trailing behind.
       const kn: [number, number] = [phase * 30 - 10, -36];
       const foot: [number, number] = [kn[0] - 128, -18];
-      return <Leg key={key} pts={[hip, kn, foot]} foot={[foot[0] - 8, foot[1] - 4]} footScale={1.1} />;
+      return <Leg key={key} mark={key === "far" ? "legL" : "legR"} pts={[hip, kn, foot]} foot={[foot[0] - 8, foot[1] - 4]} footScale={1.1} />;
     }
     const r = (a * Math.PI) / 180;
     // Walking: the leg swinging forward (the far leg while cos(stride / 3) > 0) lifts its foot, so its knee bends.
@@ -1488,15 +1596,15 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
     const pts = [hip, standKnee, standFoot].map((p, i) => lerp2(p, seated[i], seat));
     // Halfway between standing and seated the knee pokes forward instead of collapsing onto the hip.
     if (seat > 0 && seat < 1) pts[1] = knee(pts[0][0], pts[0][1], pts[2][0], pts[2][1], 1, 0);
-    return <Leg key={key} pts={pts} foot={lerp2([standFoot[0] + 14, standFoot[1] - 4], [168, -18], seat)} />;
+    return <Leg key={key} mark={key === "far" ? "legL" : "legR"} pts={pts} foot={lerp2([standFoot[0] + 14, standFoot[1] - 4], [168, -18], seat)} />;
   };
   return (
     <g transform={`scale(${pose.facing ?? 1} 1)`}>
       <LeafPattern look={look} id={patternId} />
-      <g transform={`translate(0 ${-(pose.air ?? 0)})`}>{[leg(swing, "far", crawling ? -cyc : 1), leg(-swing, "near", crawling ? cyc : -1)]}</g>
+      <g transform={`translate(0 ${-(pose.air ?? 0)})`} display={pose.noLegs ? "none" : undefined}>{[leg(swing, "far", crawling ? -cyc : 1), leg(-swing, "near", crawling ? cyc : -1)]}</g>
       <g transform={`translate(${back} ${bob + drop - (pose.air ?? 0)}) rotate(${tip + Math.sin(seat * Math.PI) * 18} 0 -280)`}>
         {look.cloak && <CloakBehind color={look.cloak} uid={patternId} w={1} hem={-210} side />}
-        <Arm x={-6} y={-552} side={1} angles={farArm} />
+        {!pose.noArms && <Arm mark="armL" x={-6} y={-552} side={1} angles={farArm} reach={sideReach(pose.reachL)} profile hand={pose.handL} />}
         {look.shorts && <Inked d={SIDE_SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
         <g transform={look.build ? `scale(${0.5 + 0.5 * buildW(look)} 1)` : undefined}>
         <path d={SIDE_BODY} fill={look.vest ?? look.outfit} stroke={INK} strokeWidth={STROKE} />
@@ -1589,7 +1697,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <SideFace pose={pose} skin={look.skin} uid={patternId} />
           {look.glasses && <circle cx={166} cy={-804} r={50} fill="none" stroke={INK} strokeWidth={10} />}
         </g>
-        <Arm x={10} y={-548} side={1} angles={nearArm} item={pose.hold?.item} tilt={pose.itemTilt} drop={pose.coinDrop} />
+        {!pose.noArms && <Arm mark="armR" front x={10} y={-548} side={1} angles={nearArm} reach={sideReach(pose.reachR)} profile hand={pose.handR} item={pose.worldR ? undefined : pose.hold?.item} tilt={pose.itemTilt} drop={pose.coinDrop} fill={pose.itemFill} uid={`${id}-side`} />}
       </g>
     </g>
   );
@@ -1608,7 +1716,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   return (
     <g>
       <LeafPattern look={look} id={patternId} />
-      {pose.sit ? (
+      {pose.noLegs ? null : pose.sit ? (
         [-1, 1].map((side) => <BackLeg key={side} x1={side * 55} y1={-280} x2={side * 62} y2={-210} />)
       ) : (
         [-1, 1].map((side) => {
@@ -1646,8 +1754,8 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         {(look.lanyard || look.chain) && (
           <path d="M -70 -616 Q 0 -596 70 -616" fill="none" stroke={look.lanyard ?? look.chain} strokeWidth={12} strokeLinecap="round" />
         )}
-        <Arm x={-130 * bw} y={-545} side={-1} angles={armL} item={pose.hold?.hand === "L" ? pose.hold.item : undefined} />
-        <Arm x={130 * bw} y={-545} side={1} angles={armR} item={pose.hold?.hand === "R" ? pose.hold.item : undefined} />
+        {!pose.noArms && <Arm mark="armL" front x={-130 * bw} y={-545} side={-1} angles={armL} reach={pose.reachL} hand={pose.handL} item={pose.hold?.hand === "L" ? pose.hold.item : undefined} />}
+        {!pose.noArms && <Arm mark="armR" front x={130 * bw} y={-545} side={1} angles={armR} reach={pose.reachR} hand={pose.handR} item={pose.hold?.hand === "R" ? pose.hold.item : undefined} />}
         <g transform={`rotate(${pose.headTilt ?? 0} 0 -640)`}>
           <circle cx={-204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
           <circle cx={204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
@@ -1691,10 +1799,14 @@ const Zzz: React.FC<{ x: number; y: number; t: number }> = ({ x, y, t }) => (
   </g>
 );
 
-export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> = (props) => {
+export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string; limbs?: LimbMode }> = ({ limbs = "svg", ...props }) => {
   const { pose } = props;
   const inner = pose.view === "side" ? <SidePuppet {...props} /> : pose.view === "back" ? <BackPuppet {...props} /> : <FrontPuppet {...props} />;
-  const body = <WearCtx.Provider value={{ pants: props.look.pants, shoes: props.look.shoes, wraps: props.look.wraps }}>{inner}</WearCtx.Provider>;
+  const body = (
+    <LimbCtx.Provider value={limbs}>
+      <WearCtx.Provider value={{ pants: props.look.pants, shoes: props.look.shoes, wraps: props.look.wraps }}>{inner}</WearCtx.Provider>
+    </LimbCtx.Provider>
+  );
   // Squash and stretch about the contact point (the feet, or the middle of the body in the air); sy * sx^2 = 1.
   const sq = Math.max(-0.45, Math.min(0.45, pose.squash ?? 0));
   const sy = 1 - sq;

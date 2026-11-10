@@ -1051,11 +1051,12 @@ const coastCanvas = () =>
 // High above the clouds. `mode`: day (the jet stream, deep blue), night (moon and stars, silver clouds), coast (dawn
 // over America, gaps in the deck showing the forested coast). `speed` scrolls the deck (m/frame); children are the
 // balloon etc. near the origin. Camera anywhere within ±10 m of it.
-export const SkySet: React.FC<{ camera: CameraShot; frame: number; mode: "day" | "night" | "coast"; speed?: number; children?: React.ReactNode }> = ({
+export const SkySet: React.FC<{ camera: CameraShot; frame: number; mode: "day" | "night" | "coast"; speed?: number; streaks?: boolean; children?: React.ReactNode }> = ({
   camera,
   frame,
   mode,
   speed = 0.35,
+  streaks = true, // the jet-stream dashes; off for a big subject they would cross
   children,
 }) => {
   const sky = SKIES[mode];
@@ -1103,8 +1104,8 @@ export const SkySet: React.FC<{ camera: CameraShot; frame: number; mode: "day" |
       )}
       <CloudDeck frame={frame} y={-9} speed={speed} colors={sky.cloud} sparse={mode === "coast" ? 0.6 : 0} />
       {mode !== "coast" && <CloudDeck frame={frame + 400} y={-16} speed={speed * 0.6} colors={sky.cloud} />}
-      {mode === "day" && <WindStreaks frame={frame} speed={speed} />}
-      {mode === "night" && <WindStreaks frame={frame} speed={speed} color="#aab8e8" />}
+      {streaks && mode === "day" && <WindStreaks frame={frame} speed={speed} />}
+      {streaks && mode === "night" && <WindStreaks frame={frame} speed={speed} color="#aab8e8" />}
       {children}
     </>
   );

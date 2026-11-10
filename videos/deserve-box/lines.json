@@ -1,0 +1,88 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a comic medieval fable with a twist, brisk and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.4
+    },
+    "knight": {
+      "voice": "Aiden",
+      "instruct": "Boastful young knight fresh from victory, loud, cocky and very pleased with himself.",
+      "seed": 13,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "He just won the tournament. Now a gold box promises him exactly what he deserves."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It's a medieval test. Three sealed caskets: gold, silver, and plain lead."
+    },
+    {
+      "speaker": "narrator",
+      "text": "This morning he knocked every rider into the mud."
+    },
+    {
+      "speaker": "knight",
+      "text": "Undefeated! Who deserves it more than me?"
+    },
+    {
+      "speaker": "narrator",
+      "text": "In the corner, a quiet woman waits her turn."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The gold lid reads: whoso chooseth me shall find that he deserveth."
+    },
+    {
+      "speaker": "narrator",
+      "text": "His I-deserve-it needle slams into the red. His hand goes straight for the gold."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The lid lifts. Dust, and dead men's bones. A skull rolls into his lap."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Silver promises what his nature desires. Inside, earth and worms."
+    },
+    {
+      "speaker": "knight",
+      "text": "But I earned this!",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, in twenty fourteen, researcher Lisa Cavanaugh studied when people treat themselves."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The best predictor wasn't their mood. It was feeling they deserved it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "His victory pumps that feeling up, and it shoves his hand to the gold."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The gold box never had to be good. It only had to tell a winner he'd earned it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So the woman ignores the needle and opens plain lead."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Inside, fine gold and precious stones."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Today that gold box has a price tag, and the same three words."
+    }
+  ]
+}

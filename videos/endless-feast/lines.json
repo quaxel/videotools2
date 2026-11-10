@@ -1,0 +1,92 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a comic royal fable with a twist, brisk and excited, never calm.",
+      "seed": 7,
+      "tempo": 1.4
+    },
+    "shah": {
+      "voice": "Eric",
+      "instruct": "Booming, spoiled Persian king at his own victory feast, loud, demanding and full of himself.",
+      "seed": 21,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "The Shah keeps adding drummers, and every drum makes his feast more boring."
+    },
+    {
+      "speaker": "shah",
+      "text": "Louder! This music must never stop!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "It's his victory feast. The first song sent his joy needle to the top."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Out in the yard, a blacksmith hammers a plain iron ring."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But hours later, the same music barely moves the needle."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So he orders more musicians, then a bigger drum, then one the size of a cart."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It rolls off the stage and flattens the flute player."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The blacksmith offers his ring. It reads: this too shall pass."
+    },
+    {
+      "speaker": "shah",
+      "text": "Nothing passes! Not my party!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "He hurls the ring. It snaps a lute string, and the whole hall goes silent."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then the music starts again, and the needle shoots past the top.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, in two thousand nine, researchers tested TV shows with and without ad breaks."
+    },
+    {
+      "speaker": "narrator",
+      "text": "People said they'd rather skip the breaks. But breaks made the shows more fun."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Joy fades as you get used to it, a spring dragging the needle down."
+    },
+    {
+      "speaker": "narrator",
+      "text": "A break cuts the spring, and the needle jumps back up."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It fails for people who barely get used to anything."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So now the Shah stops his own band every hour, with a gong."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And your favorite show? It just cut to an ad."
+    }
+  ]
+}

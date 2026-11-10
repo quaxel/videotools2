@@ -167,6 +167,10 @@ read at a glance in the toon look (ink outline, flat bands, right way round and 
 Picture): camera inside geometry or something through the lens, a pole or prop crossing a face, floating props or
 black voids, puppets too small to act (40-60 % of the frame height in a medium shot), the main event shown in steps,
 the light following the story, and every date, name and number on screen spelled as in the script.
+Every puppet using a tool (playing, hammering, driving, strumming, drinking, sawing…) has its hands ON the tool and
+moving in every shot and every camera angle: no hanging or frozen arms, no prop floating beside the hand. Check two
+stills a few frames apart for each such shot. Build these with `puppet/tools.ts` (guide/library.md → tool motions); when the tool is a 3D prop, send the hand to it with
+`worldR` / `worldL` (arms and legs are 3D by default) so it stays in the hand as the camera moves.
 Write what you find to `build/mistakes_<round>.md` (rules.md → Process) and fix high severity first.
 For a closer look pass frames: `pipeline.py stills <slug> 120,480,900`. Fix and repeat, at most 3 rounds.
 

@@ -1,5 +1,10 @@
 import { Composition } from "remotion";
 import { LakeLitStill, LakePreview } from "./scenes/LakePreview";
+import { TOOL_TOUR_FRAMES, ToolTour } from "./scenes/ToolTour";
+import { TOOL_STAGE_FRAMES, ToolStage } from "./scenes/ToolStage";
+import { PUPPET3D_FRAMES, Puppet3DPreview } from "./scenes/Puppet3DPreview";
+import { HYBRID_FRAMES, HybridPreview } from "./scenes/HybridPreview";
+import { JointProbe } from "./scenes/JointProbe";
 import { FACE_TOUR_STEP, FacePreview, FaceTour, GESTURE_TOUR_FRAMES, GestureTour } from "./scenes/FacePreview";
 import { MOVE_TOUR_FRAMES, MoveTour, SAD_WALK_FRAMES, SadWalk, WALK_TOWARD_FRAMES, WalkToward } from "./scenes/MovePreview";
 import { AlleyPreview } from "./scenes/AlleyPreview";
@@ -16,6 +21,7 @@ import { PhysicsPreview } from "./scenes/PhysicsPreview";
 import { SlotHook } from "./scenes/SlotHook";
 import { SpacePreview } from "./scenes/SpacePreview";
 import { SunlitLunch, SunlitLunchEat } from "./scenes/SunlitLunch";
+import { CabinExterior, CabinInterior } from "./scenes/CabinPressure";
 import { TransitionPreview } from "./scenes/TransitionPreview";
 import { VIDEOS } from "./videos";
 import { DESIGN_FRAMES, DogNoseDesign } from "./videos/dog-nose/Design";
@@ -37,6 +43,11 @@ export const Root: React.FC = () => (
     <Composition id="VikingRomanGate" component={VikingRomanGate} durationInFrames={VR_GATE_FRAMES} fps={30} width={1920} height={1080} />
     <Composition id="VikingRomanGateStates" component={VikingRomanGateStates} durationInFrames={3} fps={30} width={1920} height={1080} />
     <Composition id="FaceTour" component={FaceTour} durationInFrames={FACE_TOUR_STEP * 15} fps={30} width={1080} height={1920} />
+    <Composition id="JointProbe" component={JointProbe} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="HybridPreview" component={HybridPreview} durationInFrames={HYBRID_FRAMES} fps={30} width={1080} height={1920} />
+    <Composition id="Puppet3DPreview" component={Puppet3DPreview} durationInFrames={PUPPET3D_FRAMES} fps={30} width={1080} height={1920} />
+    <Composition id="ToolStage" component={ToolStage} durationInFrames={TOOL_STAGE_FRAMES} fps={30} width={1080} height={1920} />
+    <Composition id="ToolTour" component={ToolTour} durationInFrames={TOOL_TOUR_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="GestureTour" component={GestureTour} durationInFrames={GESTURE_TOUR_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="MoveTour" component={MoveTour} durationInFrames={MOVE_TOUR_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="WalkToward" component={WalkToward} durationInFrames={WALK_TOWARD_FRAMES} fps={30} width={1080} height={1920} />
@@ -55,6 +66,8 @@ export const Root: React.FC = () => (
     <Composition id="TransitionPreview" component={TransitionPreview} durationInFrames={180} fps={30} width={1080} height={1920} />
     <Composition id="PhysicsPreview" component={PhysicsPreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="SunlitLunch" component={SunlitLunch} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="CabinExterior" component={CabinExterior} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="CabinInterior" component={CabinInterior} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="SunlitLunchEat" component={SunlitLunchEat} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="LakePreview" component={LakePreview} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition
