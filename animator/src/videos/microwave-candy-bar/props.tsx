@@ -1,15 +1,11 @@
 import React from "react";
 import * as THREE from "three";
-import { Halo, InkBox, InkCylinder, Label, toonRamp, Vec3 } from "../../engine";
+import { Halo, InkBox, InkCylinder, Label, rand, toonRamp, Vec3 } from "../../engine";
 
 // Props for "The Melted Candy Bar That Invented the Microwave" (1945-1967). Magnetron, candy bar, popcorn and the
 // water molecule are drawn about 2x real size (plan.json format_note).
 
 const INK = "#161212";
-const rnd = (i: number, k: number) => {
-  const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453;
-  return x - Math.floor(x);
-};
 
 // An inked toon sphere (optionally squashed with `scale`).
 export const Ball: React.FC<{ position: Vec3; radius: number; color: string; scale?: Vec3; ink?: number; emissive?: string }> = ({
@@ -177,12 +173,12 @@ export const PopcornBurst: React.FC<{
   return (
     <group userData={{ ghost: true }}>
       {Array.from({ length: count }, (_, i) => {
-        const t0 = Math.floor(rnd(i, seed) * 28);
+        const t0 = Math.floor(rand(i, seed) * 28);
         const t = frame - t0;
         if (t < 0) return null;
-        const vx = (rnd(i, seed + 1) - 0.5) * 0.06 * spread;
-        const vy = 0.03 + rnd(i, seed + 2) * 0.04;
-        const vz = (rnd(i, seed + 3) - 0.2) * 0.03 * spread;
+        const vx = (rand(i, seed + 1) - 0.5) * 0.06 * spread;
+        const vy = 0.03 + rand(i, seed + 2) * 0.04;
+        const vz = (rand(i, seed + 3) - 0.2) * 0.03 * spread;
         // solve landing
         let tl = Infinity;
         const landAt = (y: number) => {
@@ -204,7 +200,7 @@ export const PopcornBurst: React.FC<{
         const tc = Math.min(t, tl);
         const p: Vec3 = [origin[0] + vx * tc, origin[1] + vy * tc + 0.5 * g * tc * tc, origin[2] + vz * tc];
         const landed = t >= tl;
-        const r = 0.016 + rnd(i, seed + 4) * 0.008;
+        const r = 0.016 + rand(i, seed + 4) * 0.008;
         const spin = landed ? tl * 0.3 : tc * 0.3;
         return (
           <group key={i} position={[p[0], p[1] + (landed ? r * 0.7 : 0), p[2]]} rotation={[spin, spin * 0.7, 0]}>
@@ -251,16 +247,16 @@ export const EggBurst: React.FC<{ at: Vec3; frame: number; floor: number; seed?:
     <group userData={{ ghost: true }}>
       {Array.from({ length: 16 }, (_, i) => {
         const kind = i < 5 ? "yolk" : i < 11 ? "white" : "shell";
-        const vx = (rnd(i, seed) - 0.5) * 0.07;
-        const vy = 0.02 + rnd(i, seed + 1) * 0.04;
-        const vz = (rnd(i, seed + 2) - 0.3) * 0.05;
+        const vx = (rand(i, seed) - 0.5) * 0.07;
+        const vy = 0.02 + rand(i, seed + 1) * 0.04;
+        const vz = (rand(i, seed + 2) - 0.3) * 0.05;
         const a = 0.5 * g;
         const c = at[1] - floor;
         const tl = (-vy - Math.sqrt(vy * vy - 4 * a * c)) / (2 * a);
         const t = Math.min(frame, tl);
         const landed = frame >= tl;
         const p: Vec3 = [at[0] + vx * t, landed ? floor + 0.004 : at[1] + vy * t + a * t * t, at[2] + vz * t];
-        const r = kind === "shell" ? 0.014 : 0.018 + rnd(i, seed + 3) * 0.014;
+        const r = kind === "shell" ? 0.014 : 0.018 + rand(i, seed + 3) * 0.014;
         const col = kind === "yolk" ? "#f4c020" : kind === "white" ? "#fffaf0" : "#efe4d0";
         const sc: Vec3 = landed && kind !== "shell" ? [1.8, 0.25, 1.6] : kind === "shell" ? [1, 0.4, 1.2] : [1, 1, 1];
         return <Ball key={i} position={p} radius={r} color={col} scale={sc} ink={0.003} />;
@@ -421,7 +417,7 @@ export const BookStack: React.FC<{ position: Vec3; titles?: string[]; rotationY?
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
       {Array.from({ length: Math.max(3, titles.length) }, (_, i) => (
-        <group key={i} position={[(rnd(i, 4) - 0.5) * 0.03, 0.025 + i * 0.05, 0]} rotation={[0, (rnd(i, 5) - 0.5) * 0.2, 0]}>
+        <group key={i} position={[(rand(i, 4) - 0.5) * 0.03, 0.025 + i * 0.05, 0]} rotation={[0, (rand(i, 5) - 0.5) * 0.2, 0]}>
           <InkBox size={[0.3, 0.045, 0.22]} position={[0, 0, 0]} color={cols[i % cols.length]} ink={0.004} />
           {titles[i] && <Label text={titles[i]} position={[0, 0, 0.112]} width={0.26} bg={cols[i % cols.length]} fg="#f4e8c8" border={false} />}
         </group>
@@ -457,7 +453,7 @@ export const NightWindow: React.FC<{ position: Vec3; size?: [number, number] }> 
       <meshBasicMaterial color="#f4ecc8" toneMapped={false} />
     </mesh>
     {[...Array(9)].map((_, i) => (
-      <mesh key={i} position={[(rnd(i, 9) - 0.5) * size[0] * 0.9, (rnd(i, 10) - 0.5) * size[1] * 0.9, 0.019]}>
+      <mesh key={i} position={[(rand(i, 9) - 0.5) * size[0] * 0.9, (rand(i, 10) - 0.5) * size[1] * 0.9, 0.019]}>
         <circleGeometry args={[0.006, 6]} />
         <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </mesh>
@@ -630,8 +626,8 @@ export const PopcornBowl: React.FC<{ position: Vec3; seed?: number }> = ({ posit
       <meshBasicMaterial color={INK} side={THREE.BackSide} />
     </mesh>
     {Array.from({ length: 14 }, (_, i) => {
-      const a = rnd(i, seed) * Math.PI * 2;
-      const r = rnd(i, seed + 1) * 0.1;
+      const a = rand(i, seed) * Math.PI * 2;
+      const r = rand(i, seed + 1) * 0.1;
       return <Ball key={i} position={[Math.cos(a) * r, 0.01 + (0.1 - r) * 0.5, Math.sin(a) * r]} radius={0.025} color="#fff6dc" ink={0.003} />;
     })}
   </group>

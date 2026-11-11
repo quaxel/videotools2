@@ -1,0 +1,99 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, excited storyteller telling an astonishing true space story, brisk and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.42
+    },
+    "young": {
+      "voice": "Dylan",
+      "instruct": "A playful, cocky astronaut on the Moon showing off over the radio, grinning, a little breathless.",
+      "seed": 5,
+      "tempo": 1.2
+    },
+    "duke": {
+      "voice": "Aiden",
+      "instruct": "An astronaut tipping over backward in panic, startled and breathless, urgent.",
+      "seed": 9,
+      "tempo": 1.2
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "On the Moon, a jump of just four feet nearly killed a man, and his own backpack did it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "April nineteen seventy-two. Apollo sixteen's Charlie Duke and John Young finish their last moonwalk."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Munich's Olympics are coming, so they invent the Moon Olympics."
+    },
+    {
+      "speaker": "young",
+      "text": "Watch this, Charlie. I can jump flat-footed, straight up!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Up here, you weigh one sixth as much. Young bounces like a kid."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Duke wants to beat him. He makes a big push and flies about four feet high."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But as he straightens up, his backpack pulls him over backward."
+    },
+    {
+      "speaker": "duke",
+      "text": "Whoa, whoa, I can't correct it!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "He falls four feet, right onto the backpack. And that backpack is his air.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, the Moon cuts your weight, but not your mass."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Duke said the pack weighed as much as he did. Once it tips, it keeps going."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And it's a fiberglass shell. Crack it, and your air rushes out."
+    },
+    {
+      "speaker": "young",
+      "text": "Charlie! That ain't very smart."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Young helps him up. Duke freezes, listening for a hiss, a leak, anything."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Nothing. The pack held."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Now picture you, jumping twice as high, flipping right over."
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's why moonwalkers loped and skipped, and hopped only for fun.",
+      "pauseAfter": 0.2
+    },
+    {
+      "speaker": "narrator",
+      "text": "So on the Moon, keep your jumps small. Remember the man who didn't."
+    }
+  ]
+}

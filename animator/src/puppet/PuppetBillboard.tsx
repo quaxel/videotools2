@@ -5,7 +5,7 @@ import { cancelRender, continueRender, delayRender } from "remotion";
 import * as THREE from "three";
 import { auditCardEdges, usePuppetAudit } from "../engine/audit";
 import { CardLimbs, probeJoints } from "./CardLimbs";
-import { LimbMode, Puppet, PuppetLook, PuppetPose } from "./Puppet";
+import { drawnHead, LimbMode, Puppet, PuppetLook, PuppetPose } from "./Puppet";
 
 // The SVG puppet rasterised onto a camera-facing plane inside the 3D set, so it can stand
 // behind objects, sit on stools and cast a contact shadow.
@@ -17,6 +17,7 @@ export const HEAD_Y = 800 * K; // centre of the head above the feet
 const VB_STAND = { x: -540, y: -1120, w: 1080, h: 1160 }; // covers raised and outstretched arms, caps and hat brims
 // A puppet lying down (or on its way down) stretches to the left of its feet, head first.
 const VB_LIE = { x: -1180, y: -1120, w: 1620, h: 1160 };
+const VB_SPIN = { x: -780, y: -1280, w: 1560, h: 1560 }; // a turning body (pose.spin) sweeps a circle round its middle
 // A crawling puppet tips its body forward, head reaching past the standing box on whichever side it faces.
 const VB_CRAWL = { x: -1180, y: -1120, w: 2360, h: 1160 };
 // Texture density in pixels per puppet unit. It follows the puppet's size on screen (a close-up needs ~2,
@@ -290,24 +291,34 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   const zzz = pose.sleep && !lying ? 240 : 0;
   const extra = Math.ceil((lift + hatTop + zzz) / 60) * 60;
   const crawling = pose.crawl !== undefined;
+  const spinning = !!pose.spin;
   // Lying down, the headgear points to screen-left instead, past the lying box.
   const hatSide = lying ? Math.ceil(hatTop / 60) * 60 : 0;
   const VB = useMemo(() => {
-    const base = lying ? { ...VB_LIE, x: VB_LIE.x - hatSide, w: VB_LIE.w + hatSide } : crawling ? VB_CRAWL : VB_STAND;
+    const suit = look.space ? 320 : 0; // a moon suit's helmet and backpack stick out past the lying box
+    const lieBox = { x: VB_LIE.x - hatSide - suit, y: VB_LIE.y - suit, w: VB_LIE.w + hatSide + suit * 2, h: VB_LIE.h + suit };
+    // spinning and lying at once: the union of both boxes, so neither the turning body nor the lying head is clipped
+    const both = (p: typeof VB_SPIN, q: typeof VB_SPIN) => {
+      const x = Math.min(p.x, q.x), y = Math.min(p.y, q.y);
+      return { x, y, w: Math.max(p.x + p.w, q.x + q.w) - x, h: Math.max(p.y + p.h, q.y + q.h) - y };
+    };
+    const base = spinning && lying ? both(VB_SPIN, lieBox) : spinning ? VB_SPIN : lying ? lieBox : crawling ? VB_CRAWL : VB_STAND;
     return extra ? { ...base, y: base.y - extra, h: base.h + extra } : base;
-  }, [lying, crawling, extra, hatSide]);
+  }, [lying, crawling, extra, hatSide, spinning, !!look.space]);
   const root = useRef<THREE.Group>(null);
   const card = useRef<THREE.Group>(null);
   const headY = HEAD_Y + (pose.air ?? 0) * K; // a puppet lifted onto a seat (a car bench) carries its head up too
+  const drawn = drawnHead(pose, look); // the head as drawn: tipped by `lie`, lifted by `air`
   // The head as drawn: on the card (turned to the camera, leaning back by cardTilt about the raised feet), where the
   // drawing has it at headY - liftM above the card's pivot. The audit also takes the hat (`look.hat`) into the head.
   usePuppetAudit(
     root,
-    () => card.current?.localToWorld(new THREE.Vector3(0, headY - liftM, 0)) ?? root.current?.parent?.localToWorld(new THREE.Vector3(x, headY, z)) ?? new THREE.Vector3(x, headY, z),
-    205 * K,
+    () => card.current?.localToWorld(new THREE.Vector3(drawn.x * K, -drawn.y * K - liftM, 0)) ?? root.current?.parent?.localToWorld(new THREE.Vector3(x, headY, z)) ?? new THREE.Vector3(x, headY, z),
+    drawn.r * K,
     id,
     !!pose.sit,
-    { card, headOnCard: headY - liftM, hat: hatBox(look, pose) },
+    // The hat sits on the drawn head and tips with it (`lie` turns the drawing up to 90° about the feet).
+    { card, headOnCard: -drawn.y * K - liftM, headOnCardX: drawn.x * K, hatTilt: (Math.max(0, Math.min(1, pose.lie ?? 0)) * Math.PI) / 2, hat: hatBox(look, pose) },
   );
   const advance = useThree((s) => s.advance);
   const gl = useThree((s) => s.gl);
@@ -416,10 +427,10 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
   // A world point in the card's frame (inside the yaw and tilt groups below).
   // The tilt pivots about the raised feet (liftM); the limbs sit in a group shifted back down by liftM.
   const toCard = (w: [number, number, number]) =>
-    new THREE.Vector3(w[0] - x, w[1] - liftM, w[2] - z).applyAxisAngle(new THREE.Vector3(0, 1, 0), -yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt).add(new THREE.Vector3(0, liftM, 0));
+    new THREE.Vector3(w[0] - x, w[1] - liftM - (pose.rise ?? 0), w[2] - z).applyAxisAngle(new THREE.Vector3(0, 1, 0), -yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt).add(new THREE.Vector3(0, liftM, 0));
   return (
-    <group ref={root} position={[x, 0, z]} userData={{ puppet: true }}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]} scale={[1, 0.42, 1]} visible={!mask}>
+    <group ref={root} position={[x, pose.rise ?? 0, z]} userData={{ puppet: true }}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004 - (pose.rise ?? 0), 0]} scale={[1, 0.42, 1]} visible={!mask}>
         <circleGeometry args={[0.28, 40]} />
         <meshBasicMaterial color="#000" transparent opacity={0.3} depthWrite={false} />
       </mesh>
@@ -434,6 +445,10 @@ export const PuppetBillboard: React.FC<PuppetPlacement> = ({ id, look, pose: aut
                 facing={pose.facing ?? 1}
                 pants={look.pants}
                 shoes={look.shoes}
+                sleeves={look.sleeves}
+                gloves={look.gloves}
+                bulk={look.bulk}
+                stripe={look.space?.stripe}
                 reachL={pose.worldL && toCard(pose.worldL)}
                 reachR={pose.worldR && toCard(pose.worldR)}
               />

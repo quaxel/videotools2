@@ -1,6 +1,6 @@
 # Sarajevo, Appel Quay and the Latin Bridge corner, 28 June 1914
 
-Set: `src/videos/what-if-sarajevo/SarajevoSet.tsx` (per-video; move to the kit if reused).
+Set: `SarajevoSet`, in a video's own folder (find it with `grep -rln SarajevoSet src/videos` from `animator/`; move it to the kit if reused).
 
 ## Sources
 - Wikipedia, Latin Bridge: https://en.wikipedia.org/wiki/Latin_Bridge (stone Ottoman bridge, four arches on three

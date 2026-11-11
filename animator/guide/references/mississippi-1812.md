@@ -1,6 +1,6 @@
 # The Mississippi at New Madrid, 1811-1812
 
-Sets: `src/three/RiverSets.tsx`. Used by `src/videos/mississippi-backward`.
+Sets: `src/three/RiverSets.tsx`.
 
 ## Sources
 

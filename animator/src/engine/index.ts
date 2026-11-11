@@ -1,11 +1,15 @@
 // Everything a scene needs. Scenes import from "../../engine" plus the set and puppet libraries.
 export * from "./anim";
+// Shared small helpers (ease, mix, rand, pup, one, multi, UNITS) and camera framing (wide, widePath): import, never re-define.
+export * from "./helpers";
+export * from "./camera";
+export { anticipate, easeIn, easeOut, follow, settle, smooth } from "./motion";
 export * from "./clock";
 export * from "./stage";
 export * from "./sound";
 export * from "./Video";
 export { Puppet } from "../puppet/Puppet";
-export { ARM, clampReach, drinkFrom, hammerSwing, pianoPlay, steer, strumPlay } from "../puppet/tools";
+export { ARM, clampReach, drinkFrom, hammerSwing, pianoPlay, solveReach, steer, strumPlay } from "../puppet/tools";
 export type { Expression, HeldItem, PuppetLook, PuppetPose } from "../puppet/Puppet";
 export { cardTilt, handWorld, HEAD_Y, HIP_HEIGHT, PUPPET_HEIGHT, PuppetBillboard } from "../puppet/PuppetBillboard";
 export type { PuppetLight, PuppetPlacement } from "../puppet/PuppetBillboard";

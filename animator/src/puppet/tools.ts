@@ -1,4 +1,5 @@
 import { PuppetPose } from "./Puppet";
+import { handWorld } from "./PuppetBillboard";
 
 // Puppets using a tool: ready-made, frame-driven arm motions that put the hands ON the tool and keep them working.
 // A puppet that plays, hammers, drives, saws… must be seen doing it: never leave its arms hanging or frozen while
@@ -23,6 +24,26 @@ export const clampReach = (s: V2, p: V2, max = ARM - 4): V2 => {
   const dy = p[1] - s[1];
   const d = Math.hypot(dx, dy);
   return d <= max ? p : [s[0] + (dx / d) * max, s[1] + (dy / d) * max];
+};
+
+// The reach (puppet units, for reachL / reachR) that puts a hand on a world point, for a puppet standing at `at`
+// seen by `camera`: the inverse of handWorld, by a few Newton steps. It matches the target's world x and y (the hand
+// stays in the card's plane, so its depth is whatever the card gives): right for a puppet the camera sees roughly
+// along z. Not limited to arm's length: a target too far gives a reach the arm cannot make, so keep the prop within
+// ARM of the shoulder (or pass the result through clampReach and place the prop with handWorld). `air` as in handWorld.
+export const solveReach = (at: V2, target: [number, number, number], camera: { position: [number, number, number] }, air = 0): V2 => {
+  let r: V2 = [-200, -600];
+  for (let it = 0; it < 6; it++) {
+    const p = handWorld(at, r, camera, air);
+    const px = handWorld(at, [r[0] + 10, r[1]], camera, air);
+    const py = handWorld(at, [r[0], r[1] - 10], camera, air);
+    const ex = target[0] - p[0];
+    const ey = target[1] - p[1];
+    const dxx = (px[0] - p[0]) / 10;
+    const dyy = (py[1] - p[1]) / -10;
+    r = [r[0] + (Math.abs(dxx) > 1e-6 ? ex / dxx : 0), r[1] + (Math.abs(dyy) > 1e-6 ? ey / dyy : 0)];
+  }
+  return r;
 };
 
 const clamp01 = (t: number) => Math.max(0, Math.min(1, t));

@@ -86,15 +86,37 @@ const Stick: React.FC<{ p: THREE.Vector3; q: THREE.Vector3; r?: number; color?: 
   );
 };
 
+// A coloured band round the middle of a limb segment (a suit's commander stripe).
+const Band: React.FC<{ p: THREE.Vector3; q: THREE.Vector3; r: number; color: string }> = ({ p, q, r, color }) => {
+  const d = q.clone().sub(p);
+  const len = d.length();
+  if (len < 1e-5) return null;
+  const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  const mid = p.clone().lerp(q, 0.5);
+  return (
+    <mesh position={mid} quaternion={quat}>
+      <cylinderGeometry args={[r * 0.74, r * 0.74, len * 0.22, 16]} />
+      <Mat color={color} />
+    </mesh>
+  );
+};
+
 // A mitten hand: a ball, a pointing finger along the forearm, or a flatter open palm.
-const Hand3: React.FC<{ at: THREE.Vector3; along: THREE.Vector3; shape?: string }> = ({ at, along, shape }) => {
+const Hand3: React.FC<{ at: THREE.Vector3; along: THREE.Vector3; shape?: string; glove?: string }> = ({ at, along, shape, glove }) => {
   const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), along.clone().normalize());
+  const r = (shape === "fist" ? 0.036 : 0.033) * (glove ? 1.35 : 1);
   return (
     <group position={at} quaternion={q}>
       <mesh castShadow scale={shape === "open" ? [1.15, 1.05, 0.75] : [1, 1, 1]}>
-        <sphereGeometry args={[shape === "fist" ? 0.036 : 0.033, 16, 12]} />
-        <Mat color={INK} />
+        <sphereGeometry args={[glove ? r * 0.8 : r, 16, 12]} />
+        <Mat color={glove ?? INK} />
       </mesh>
+      {glove && (
+        <mesh scale={shape === "open" ? [1.15, 1.05, 0.75] : [1, 1, 1]}>
+          <sphereGeometry args={[r, 16, 12]} />
+          <Mat color={INK} back />
+        </mesh>
+      )}
       {shape === "point" && (
         <mesh position={[0, 0.045, 0]}>
           <capsuleGeometry args={[0.011, 0.045, 4, 8]} />
@@ -132,10 +154,15 @@ export const CardLimbs: React.FC<{
   facing: number; // 1 / -1 in profile
   pants?: string;
   shoes?: string;
+  sleeves?: string;
+  gloves?: string;
+  bulk?: number;
+  stripe?: string;
   // world hand targets already converted into the card frame (metres)
   reachL?: THREE.Vector3;
   reachR?: THREE.Vector3;
-}> = ({ joints, K, profile, facing, pants, shoes, reachL, reachR }) => {
+}> = ({ joints, K, profile, facing, pants, shoes, sleeves, gloves, bulk = 1, stripe, reachL, reachR }) => {
+  const R = LIMB_R * bulk;
   const P = (j: Joint | undefined, z: number) => (j ? new THREE.Vector3(j.x * K, -j.y * K, z) : undefined);
   const arms = (["armL", "armR"] as const).map((name) => {
     const s = joints[`${name}:s`];
@@ -159,9 +186,10 @@ export const CardLimbs: React.FC<{
     }
     return (
       <group key={name}>
-        <Stick p={S} q={E} />
-        <Stick p={E} q={H} />
-        <Hand3 at={H} along={H.clone().sub(E)} shape={h.shape} />
+        <Stick p={S} q={E} r={R} color={sleeves} />
+        <Stick p={E} q={H} r={R} color={sleeves} />
+        {stripe && <Band p={S} q={E} r={R} color={stripe} />}
+        <Hand3 at={H} along={H.clone().sub(E)} shape={h.shape} glove={gloves} />
       </group>
     );
   });
@@ -175,8 +203,9 @@ export const CardLimbs: React.FC<{
     const [A, B, C] = [P(hip, z)!, P(kn, z)!, P(ank, z)!];
     return (
       <group key={name}>
-        <Stick p={A} q={B} color={pants} />
-        <Stick p={B} q={C} color={pants} />
+        <Stick p={A} q={B} r={R} color={pants} />
+        <Stick p={B} q={C} r={R} color={pants} />
+        {stripe && <Band p={A} q={B} r={R} color={stripe} />}
         {ft && <Foot3 at={P(ft, z)!} scale={Number(ft.shape ?? 1.3)} profile={profile} facing={facing} shoes={shoes} />}
       </group>
     );

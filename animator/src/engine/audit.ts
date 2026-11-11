@@ -1,12 +1,15 @@
 import React, { RefObject, useLayoutEffect } from "react";
-import { getInputProps } from "remotion";
+import { continueRender, delayRender, getInputProps } from "remotion";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useShotStart } from "./clock";
 
 // Framing audit for `pipeline.py stills`: when the render is started with the input prop `audit`, puppets,
 // labels and screens measure where they land in the picture and log what a reviewer would flag: a face or a
 // sign cut by the frame edge, under the caption band, or hidden behind a set piece. stills.mjs collects the
-// "[framing]" lines per frame, and a puppet standing inside a set object. Normal renders skip all of it.
+// "[framing]" lines per frame, and a puppet standing inside a set object. A near-lens foreground object (Stage
+// `foreground`) over part of a face or a label is reported too, and so is the `Headline` (HTML over the canvas): cut
+// by the frame edge, over the captions, over a face, a hat or a sign, too long. Normal renders skip all of it.
 
 export const auditing = () => (getInputProps() as { audit?: boolean }).audit === true;
 
@@ -67,6 +70,92 @@ const HEAD_Y_M = (800 * 1.3) / 1060; // puppet head centre above its card's pivo
 const say = (msg: string) => console.log(`[framing] ${msg}`);
 const fmt = (v: THREE.Vector3) => `(${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)})`;
 const pct = (v: number) => Math.round(v * 100);
+
+// ---------- the Headline: HTML over the canvas ----------
+
+// `Headline` (ui/Headline.tsx) is a DOM overlay, so nothing in the scene sees it. Its card carries `data-headline`
+// (the text) and `data-shot` (its shot's start frame); the audits below read the card's rectangle from the DOM at the
+// frame being drawn (React has committed the overlay before the canvas advances), relative to the canvas, which
+// fills the frame. So the box is what is on screen at that frame: scaled up during the drop-in, and left out while
+// the headline is under half opacity (fading in or out, or its shot under a transition). Only headlines of the
+// canvas's own shot count (two shots are mounted during a transition).
+// While a web font is still loading the card has the wrong size: the look is put off until the fonts are in, and the
+// canvas is advanced once more then (the still waits for it).
+const HEADLINE_COVER = 0.1; // share of a head, a hat or a sign a headline may lie over
+const HEADLINE_EDGE = 0.005; // share of the card outside the frame (rounding)
+const HEADLINE_CAPTION = 0.02; // share of the card inside the caption band
+const HEADLINE_WORDS = 6;
+const HEADLINE_LINES = 2;
+type Title = { text: string; box: Box; lines: number };
+type Canvas = { gl: { domElement: HTMLCanvasElement }; advance: (t: number) => void };
+const fontWaiters = new Set<(t: number) => void>();
+const headlines = (state: Canvas, shot: number): Title[] => {
+  if (typeof document === "undefined") return [];
+  const els = document.querySelectorAll<HTMLElement>(`[data-headline][data-shot="${shot}"]`);
+  if (!els.length) return [];
+  if (document.fonts.status === "loading") {
+    if (!fontWaiters.size) {
+      const handle = delayRender("framing audit: waiting for the headline's font");
+      void document.fonts.ready.then(() => {
+        const go = [...fontWaiters];
+        fontWaiters.clear();
+        go.forEach((advance) => advance(performance.now()));
+        continueRender(handle);
+      });
+    }
+    fontWaiters.add(state.advance);
+    return [];
+  }
+  const frame = state.gl.domElement.getBoundingClientRect();
+  if (!(frame.width > 0 && frame.height > 0)) return [];
+  const out: Title[] = [];
+  els.forEach((el) => {
+    let o = 1;
+    for (let e: HTMLElement | null = el; e && o >= 0.5; e = e.parentElement) o *= Number(getComputedStyle(e).opacity);
+    if (o < 0.5) return;
+    const r = el.getBoundingClientRect();
+    if (!(r.width > 0 && r.height > 0)) return;
+    const cs = getComputedStyle(el);
+    const line = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.02;
+    const lines = Math.max(1, Math.round((el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / line));
+    out.push({
+      text: (el.dataset.headline ?? "").replace(/\s+/g, " ").trim(),
+      box: {
+        x0: ((r.left - frame.left) / frame.width) * 2 - 1,
+        x1: ((r.right - frame.left) / frame.width) * 2 - 1,
+        y0: 1 - ((r.bottom - frame.top) / frame.height) * 2,
+        y1: 1 - ((r.top - frame.top) / frame.height) * 2,
+      },
+      lines,
+    });
+  });
+  return out;
+};
+// The headline on its own: whole in the frame, clear of the captions, 2-6 words on at most 2 lines.
+const auditHeadlines = (titles: Title[]) => {
+  for (const t of titles) {
+    const cut = 1 - area(overlap(t.box, FRAME)) / Math.max(1e-9, area(t.box));
+    if (cut > HEADLINE_EDGE) say(`headline "${t.text}" cut by the frame edge (${Math.max(1, pct(cut))}% outside)`);
+    const band = { ...CAPTION, x0: -1, x1: 1 };
+    const under = area(overlap(overlap(t.box, FRAME), band)) / Math.max(1e-9, area(t.box));
+    if (under > HEADLINE_CAPTION) say(`headline "${t.text}" over the captions (${pct(under)}% of it)`);
+    if (t.lines > HEADLINE_LINES) say(`headline "${t.text}" runs over ${t.lines} lines (at most ${HEADLINE_LINES})`);
+    const words = t.text.split(" ").filter(Boolean).length;
+    if (words > HEADLINE_WORDS) say(`headline "${t.text}" has ${words} words (at most ${HEADLINE_WORDS})`);
+  }
+};
+// Share of `box` (a head, a hat, a sign: the part of it in the frame) under a headline, when over the tolerance.
+const underHeadline = (box: Box, titles: Title[]): { t: Title; share: number } | null => {
+  const seen = overlap(box, FRAME);
+  const a = area(seen);
+  if (a <= 0) return null;
+  let worst: { t: Title; share: number } | null = null;
+  for (const t of titles) {
+    const share = area(overlap(seen, t.box)) / a;
+    if (share > HEADLINE_COVER && (!worst || share > worst.share)) worst = { t, share };
+  }
+  return worst;
+};
 
 // ---------- text drawn on canvases ----------
 
@@ -193,9 +282,10 @@ const visiblePoint = (w: Word, box: Box): THREE.Vector3 => {
 // cut-out is flat); rooms (floor, walls) are skipped by size, glows, glass, ink hulls and anything under a
 // `userData.ghost` group (smoke, held props, effects) are ignored.
 const BODY = { halfW: 0.13, halfD: 0.06, y0: 0.15, y1: 0.95 };
-const bodyHits = (scene: THREE.Scene, x: number, z: number): THREE.Vector3[] => {
+const bodyHits = (scene: THREE.Scene, x: number, z: number, lift = 0): THREE.Vector3[] => {
   scene.updateMatrixWorld();
-  const body = new THREE.Box3(new THREE.Vector3(x - BODY.halfW, BODY.y0, z - BODY.halfD), new THREE.Vector3(x + BODY.halfW, BODY.y1, z + BODY.halfD));
+  // `lift`: a puppet raised in the world (pose `rise`: on a porch, in the air) has its body that much higher.
+  const body = new THREE.Box3(new THREE.Vector3(x - BODY.halfW, BODY.y0 + lift, z - BODY.halfD), new THREE.Vector3(x + BODY.halfW, BODY.y1 + lift, z + BODY.halfD));
   const hits: THREE.Vector3[] = [];
   const box = new THREE.Box3();
   const size = new THREE.Vector3();
@@ -216,14 +306,18 @@ const bodyHits = (scene: THREE.Scene, x: number, z: number): THREE.Vector3[] => 
 // For a flat sign of `w` x `h` metres centred on `ref`'s origin in its local XY plane. When the sign's texture has
 // words on it (canvas text, see above), the frame-edge check is on the words: any letter outside the frame is a cut
 // ("AUNCH"); the card's border may be cropped. Without words (a logo) it is on the card, 20 % outside.
+type SignTag = { w: number; h: number; name: string };
 export const useSignAudit = (ref: RefObject<THREE.Object3D | null>, w: number, h: number, name: string) => {
+  const shot = useShotStart();
   useLayoutEffect(() => {
-    if (ref.current) ref.current.userData.signAudit = true; // the scene audit leaves its words to this one
+    // the scene audit leaves its words to this one, and checks it for a foreground object over it (auditCover)
+    if (ref.current) ref.current.userData.signAudit = { w, h, name } satisfies SignTag;
   });
-  useFrame(({ camera, scene }) => {
+  useFrame((state) => {
+    const { camera, scene } = state;
     const obj = ref.current;
     if (!obj || !auditing()) return;
-    obj.userData.signAudit = true; // the scene audit leaves its words to this one
+    obj.userData.signAudit = { w, h, name } satisfies SignTag;
     if (optedOut(obj)) return;
     obj.updateWorldMatrix(true, true);
     let words: Word[] = [];
@@ -249,6 +343,8 @@ export const useSignAudit = (ref: RefObject<THREE.Object3D | null>, w: number, h
     } else if (inFrame / area(box) < 0.8) say(`sign "${label}" cut by the frame edge (${Math.round((1 - inFrame / area(box)) * 100)}% outside)`);
     const under = area(overlap(overlap(box, FRAME), CAPTION)) / inFrame;
     if (under > 0.3) say(`sign "${label}" under the captions (${Math.round(under * 100)}%)`);
+    const title = underHeadline(box, headlines(state, shot));
+    if (title) say(`headline "${title.t.text}" covers sign "${label}" (${pct(title.share)}% of the sign)`);
     const centre = new THREE.Vector3().applyMatrix4(obj.matrixWorld);
     if (hidden(centre, scene, camera, obj, 0.02)) say(`sign "${label}" hidden behind the set`);
   });
@@ -304,24 +400,35 @@ const union = (a: Box | null, b: Box | null): Box | null =>
 // `opts.card` (the card's lean group, head at (0, headOnCard) on it) with `opts.hat` (the drawn hat's box in metres from the
 // head centre, PuppetBillboard's hatBox) adds the hat to the head: a hat cut by the frame edge is a cut head too.
 // Overlay hats (see overlayHats) count the same.
+type HeadTag = { head: () => THREE.Vector3; r: number; id: string };
 export const usePuppetAudit = (
   ref: RefObject<THREE.Object3D | null>,
   head: () => THREE.Vector3,
   r: number,
   id: string,
   sit = false,
-  opts: { card?: RefObject<THREE.Object3D | null>; headOnCard?: number; hat?: { x0: number; x1: number; y0: number; y1: number } | null } = {},
+  opts: { card?: RefObject<THREE.Object3D | null>; headOnCard?: number; headOnCardX?: number; hatTilt?: number; hat?: { x0: number; x1: number; y0: number; y1: number } | null } = {},
 ) => {
-  useFrame(({ camera, scene }) => {
+  const shot = useShotStart();
+  // The scene audit checks the head for a foreground object over it (auditCover). Set after every commit: the
+  // puppet's `userData` prop replaces the object on each render.
+  useLayoutEffect(() => {
+    if (ref.current) ref.current.userData.auditHead = { head, r, id } satisfies HeadTag;
+  });
+  useFrame((state) => {
+    const { camera, scene } = state;
     const obj = ref.current;
     if (!obj || !auditing() || optedOut(obj)) return;
+    obj.userData.auditHead = { head, r, id } satisfies HeadTag;
     obj.updateWorldMatrix(true, true);
     const c = head();
     if (!sit) {
-      const hits = bodyHits(scene, c.x, c.z);
+      // the body stands on the feet (the puppet's own position), not under the head, which `lie` carries aside
+      const feet = obj.getWorldPosition(new THREE.Vector3());
+      const hits = bodyHits(scene, feet.x, feet.z, feet.y);
       if (hits.length) {
         const p = hits[0];
-        say(`body of ${id} inside a set object at (${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}) standing at (${c.x.toFixed(2)}, ${c.z.toFixed(2)})`);
+        say(`body of ${id} inside a set object at (${p.x.toFixed(1)}, ${p.y.toFixed(1)}, ${p.z.toFixed(1)}) standing at (${feet.x.toFixed(2)}, ${feet.z.toFixed(2)})`);
       }
     }
     const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).multiplyScalar(r);
@@ -339,9 +446,13 @@ export const usePuppetAudit = (
     if (faceCut) say(`face of ${id} cut by the frame edge (${Math.round(out * 100)}% outside)`);
     if (centreIn && centre.x > CAPTION.x0 && centre.x < CAPTION.x1 && centre.y > CAPTION.y0 && centre.y < CAPTION.y1) say(`face of ${id} under the captions`);
     if (centreIn && hidden(c, scene, camera, obj, r)) say(`face of ${id} hidden behind the set`);
+    // The Headline over the head (heads too small to read as a face, under 2 % of the frame height, are left out).
+    const titles = box.y1 - box.y0 > 0.04 ? headlines(state, shot) : [];
+    const overFace = underHeadline(box, titles);
+    if (overFace) say(`headline "${overFace.t.text}" covers the face of ${id} (${pct(overFace.share)}% of the head)`);
     // The hat is part of the head: with the face in, any of the hat outside the frame is a cut (a close-up's big head
     // may still crop it).
-    if (faceCut || big) return;
+    if ((faceCut || big) && (overFace || !titles.length)) return;
     let hat: Box | null = null;
     const card = opts.card?.current;
     if (card && opts.hat) {
@@ -351,12 +462,20 @@ export const usePuppetAudit = (
         [hb.x1, hb.y0],
         [hb.x0, hb.y1],
         [hb.x1, hb.y1],
-      ].map(([x, y]) => card.localToWorld(new THREE.Vector3(x, (opts.headOnCard ?? HEAD_Y_M) + y, 0)));
+      ].map(([x, y]) => {
+        const t = opts.hatTilt ?? 0; // the head's tilt on the card (counter-clockwise, y up)
+        const rx = x * Math.cos(t) - y * Math.sin(t);
+        const ry = x * Math.sin(t) + y * Math.cos(t);
+        return card.localToWorld(new THREE.Vector3((opts.headOnCardX ?? 0) + rx, (opts.headOnCard ?? HEAD_Y_M) + ry, 0));
+      });
       hat = project(pts, camera);
     }
     const over = overlayHats(scene, id, c, r);
     if (over) hat = union(hat, project(corners8(over), camera));
     if (!hat) return;
+    const overHat = overFace ? null : underHeadline(hat, titles);
+    if (overHat) say(`headline "${overHat.t.text}" covers the hat of ${id} (${pct(overHat.share)}% of the hat)`);
+    if (faceCut || big) return;
     const hatOut = 1 - area(overlap(hat, FRAME)) / Math.max(1e-9, area(hat));
     if (hatOut > 0.1) say(`hat of ${id} cut by the frame edge (${pct(hatOut)}% outside)`);
   });
@@ -498,7 +617,7 @@ const auditCrowd = (mesh: THREE.InstancedMesh, head: CrowdHead, camera: THREE.Ca
 // One per canvas that draws the set (Stage mounts it): instanced crowds (auditCrowd) and words on any canvas texture
 // that no useSignAudit sign owns (a shop sign, a board, a painted drop), checked like a sign: cut by the frame edge
 // (any letter out), under the captions, hidden behind the set.
-const auditWords = (mesh: THREE.Mesh, camera: THREE.Camera, scene: THREE.Scene) => {
+const auditWords = (mesh: THREE.Mesh, camera: THREE.Camera, scene: THREE.Scene, front?: Front) => {
   const mat = (Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as THREE.Material;
   if (!mat || (mat.transparent && mat.opacity < 0.3)) return;
   const words = wordsOn(mesh);
@@ -523,6 +642,13 @@ const auditWords = (mesh: THREE.Mesh, camera: THREE.Camera, scene: THREE.Scene) 
     if (s.box.y1 - s.box.y0 > 0.03 && hidden(mid, scene, camera, mesh, 0.02)) {
       say(`sign "${w.text}" hidden behind the set`);
       return;
+    }
+    if (s.box.y1 - s.box.y0 > 0.03 && front) {
+      const c = coverOf(wordPoints(w), camera, front, mesh, 0.05);
+      if (c && c.n >= 2 && c.share > COVER_TEXT) {
+        say(`sign "${w.text}" covered by foreground "${describe(c.by)}" (${pct(c.share)}% of its text)`);
+        return;
+      }
     }
   }
 };
@@ -643,9 +769,137 @@ const auditLayers = (look: Hit[][], focus: number) => {
   if (front / n > 0.33) say(`depth: foreground fills ${pct(front / n)}% of the frame`);
 };
 
+
+// ---------- a foreground object over a face or a label ----------
+
+// What may cover a subject: every solid mesh outside the puppets, with those Stage placed through `foreground`
+// (`userData.foreground` on their group) marked. Hats riding on a head (`userData.hatOf`) are part of the head.
+// A subject counts as covered where the first solid surface on the line from the lens to it is
+// - a Stage `foreground` object (anywhere in front of the subject), or
+// - any other object near the lens: nearer than NEAR x the subject's distance and NEAR x the shot's focus distance
+//   (the layer auditLayers calls foreground: a console edge, a pole, a door frame the camera looks past).
+// Set pieces close to the subject (a desk in front of a seated puppet, a held prop, a hat) are not foreground: the
+// "hidden behind the set" check covers those. Puppets never count, so an over-the-shoulder figure is allowed.
+const NEAR = 0.5;
+const COVER_FACE = 0.1; // share of the face (sample points in the frame) a foreground may cross before it is reported
+const COVER_TEXT = 0.1; // the same for one word
+type Front = { solid: THREE.Object3D[]; tagged: Set<THREE.Object3D>; focus?: number };
+const frontOf = (scene: THREE.Scene, focus?: number): Front => {
+  const solid: THREE.Object3D[] = [];
+  const tagged = new Set<THREE.Object3D>();
+  const visit = (o: THREE.Object3D, fg: boolean) => {
+    if (!o.visible || o.userData.puppet || o.userData.audit === false || o.userData.hatOf !== undefined) return;
+    const f = fg || !!o.userData.foreground;
+    const mesh = o as THREE.Mesh;
+    if (mesh.isMesh && !((o as THREE.InstancedMesh).isInstancedMesh && (o as THREE.InstancedMesh).count > 64)) {
+      const m = (Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as THREE.Material | undefined;
+      if (m && m.visible !== false && m.depthWrite !== false && !(m.transparent && m.opacity < 0.5) && m.side !== THREE.BackSide) {
+        solid.push(o);
+        if (f) tagged.add(o);
+      }
+    }
+    for (const c of o.children) visit(c, f);
+  };
+  visit(scene, false);
+  return { solid, tagged, focus };
+};
+
+// Of the world `points` of one subject that are in the frame: the share covered by foreground and the object covering
+// most of them. `self` (and all under it) is the subject's own mesh; `margin` metres in front of each point are free
+// (a hat brim, a label's own card).
+const coverOf = (points: THREE.Vector3[], camera: THREE.Camera, front: Front, self: THREE.Object3D | null, margin: number) => {
+  if (!front.solid.length) return null;
+  const eye = camera.getWorldPosition(new THREE.Vector3());
+  const ray = new THREE.Raycaster();
+  const by = new Map<THREE.Object3D, number>();
+  let seen = 0;
+  let n = 0;
+  for (const p of points) {
+    const v = p.clone().project(camera);
+    if (v.z > 1 || Math.abs(v.x) > 1 || Math.abs(v.y) > 1) continue;
+    const dir = p.clone().sub(eye);
+    const dist = dir.length();
+    if (dist - margin <= 0.02) continue;
+    seen++;
+    ray.set(eye, dir.normalize());
+    ray.near = 0.01;
+    ray.far = dist - margin;
+    const near = NEAR * Math.min(dist, front.focus ?? Infinity);
+    for (const hit of ray.intersectObjects(front.solid, false)) {
+      let own = false;
+      for (let o: THREE.Object3D | null = hit.object; o && self; o = o.parent) if (o === self) own = true;
+      if (own) continue;
+      // the first solid surface decides: a set piece nearer the subject in front of nothing is not foreground
+      if (front.tagged.has(hit.object) || hit.distance < near) {
+        n++;
+        by.set(hit.object, (by.get(hit.object) ?? 0) + 1);
+      }
+      break;
+    }
+  }
+  if (!n || !seen) return null;
+  const top = [...by.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  return { share: n / seen, n, by: top };
+};
+
+// Sample points over a word (cols x 3, inset from its edges).
+const wordPoints = (w: Word): THREE.Vector3[] => {
+  const [tl, tr, bl, br] = w.corners;
+  const cols = Math.min(12, Math.max(5, Math.round((3 * tl.distanceTo(tr)) / Math.max(1e-6, tl.distanceTo(bl)))));
+  const pts: THREE.Vector3[] = [];
+  for (let i = 0; i < cols; i++)
+    for (let j = 0; j < 3; j++) {
+      const s = (i + 0.5) / cols;
+      const t = (j + 0.5) / 3;
+      pts.push(tl.clone().lerp(tr, s).lerp(bl.clone().lerp(br, s), t));
+    }
+  return pts;
+};
+
+// A puppet's face: a disc of sample points (7 x 7 less the corners, 37) of the head's radius, facing the camera.
+const coverHead = (tag: HeadTag, camera: THREE.Camera, front: Front) => {
+  const c = tag.head();
+  const centre = c.clone().project(camera);
+  if (centre.z > 1 || Math.abs(centre.x) > 1 || Math.abs(centre.y) > 1) return; // not in the shot, or already a cut face
+  const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+  const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+  const pts: THREE.Vector3[] = [];
+  for (let i = -3; i <= 3; i++) for (let j = -3; j <= 3; j++) if (i * i + j * j <= 10) pts.push(c.clone().addScaledVector(right, (i / 3.5) * tag.r).addScaledVector(up, (j / 3.5) * tag.r));
+  // half a metre in front of the head is the puppet's own (a hat brim, a raised hand's prop, a microphone)
+  const cov = coverOf(pts, camera, front, null, Math.max(0.5, 2 * tag.r));
+  if (cov && cov.share > COVER_FACE) say(`face of ${tag.id} covered by foreground "${describe(cov.by)}" (${pct(cov.share)}% of the face)`);
+};
+
+// A kit sign (useSignAudit): its words, or the card when it has none (a logo). One line, the worst word.
+const coverSign = (obj: THREE.Object3D, tag: SignTag, camera: THREE.Camera, front: Front) => {
+  const corners = [
+    [-tag.w / 2, tag.h / 2],
+    [tag.w / 2, tag.h / 2],
+    [-tag.w / 2, -tag.h / 2],
+    [tag.w / 2, -tag.h / 2],
+  ].map(([x, y]) => new THREE.Vector3(x, y, 0).applyMatrix4(obj.matrixWorld));
+  const box = project(corners, camera);
+  if (!box || area(overlap(box, FRAME)) < 0.04) return; // as useSignAudit: only signs that read as part of the shot
+  let words: Word[] = [];
+  obj.traverse((o) => {
+    if ((o as THREE.Mesh).isMesh && o.visible) words = words.concat(wordsOn(o as THREE.Mesh));
+  });
+  words = words.filter((w) => wordOnScreen(w, camera, true));
+  if (!words.length) words = [{ text: tag.name, corners, normal: new THREE.Vector3() }];
+  let worst: NonNullable<ReturnType<typeof coverOf>> | null = null;
+  for (const w of words) {
+    const c = coverOf(wordPoints(w), camera, front, obj, 0.05);
+    if (c && c.n >= 2 && c.share > COVER_TEXT && (!worst || c.share > worst.share)) worst = c;
+  }
+  if (worst) say(`sign "${tag.name.replace(/\n/g, " ")}" covered by foreground "${describe(worst.by)}" (${pct(worst.share)}% of its text)`);
+};
+
 export const useSceneAudit = (opts: { focus?: number; shot?: number } = {}) => {
-  useFrame(({ camera, scene }) => {
+  const here = useShotStart();
+  useFrame((state) => {
+    const { camera, scene } = state;
     if (!auditing()) return;
+    auditHeadlines(headlines(state, opts.shot ?? here));
     scene.updateMatrixWorld();
     camera.updateMatrixWorld();
     if ((camera as THREE.PerspectiveCamera).isPerspectiveCamera) {
@@ -653,13 +907,16 @@ export const useSceneAudit = (opts: { focus?: number; shot?: number } = {}) => {
       auditZFight(look, camera as THREE.PerspectiveCamera, opts.shot ?? 0);
       if (opts.focus !== undefined) auditLayers(look, opts.focus);
     }
+    const front = frontOf(scene, opts.focus);
     const visit = (o: THREE.Object3D) => {
-      if (!o.visible || o.userData.audit === false || o.userData.puppet || o.userData.signAudit) return;
+      if (!o.visible || o.userData.audit === false) return;
+      if (o.userData.puppet) return void (o.userData.auditHead && coverHead(o.userData.auditHead as HeadTag, camera, front));
+      if (o.userData.signAudit) return void coverSign(o, o.userData.signAudit as SignTag, camera, front);
       const im = o as THREE.InstancedMesh;
       if (im.isInstancedMesh) {
         const h = crowdHead(im);
         if (h) auditCrowd(im, h, camera, scene);
-      } else if ((o as THREE.Mesh).isMesh) auditWords(o as THREE.Mesh, camera, scene);
+      } else if ((o as THREE.Mesh).isMesh) auditWords(o as THREE.Mesh, camera, scene, front);
       for (const c of o.children) visit(c);
     };
     visit(scene);

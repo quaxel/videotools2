@@ -33,6 +33,7 @@ Otomatik testler şu davranışları kapsar:
 6. API istek doğrulaması, dosya yükleme, dosya sunumu ve export.
 7. Veritabanı ve ek dosyaların tam yedekten geri yüklenmesi; bozuk yedeğin reddedilmesi.
 8. Toplu işlemde atomik kayıt ve sürüm çakışmasında geri alma.
+9. Fikir fabrikası (`tests/factory.test.ts`): ağırlıklı rubric puanı ve kapı (gate) kuralları, yapılmış videolarla İngilizce/Türkçe tekrar eşleşmesi, adayların kuyruğa eklenip elenmesi, puanların başlığa göre birleştirilmesi ve HTTP rotaları.
 
 Tarayıcı kontrolü ayrı test veritabanında yapılır. Yeni fikir oluşturma, başlık/aşama değişikliği, senaryo oluşturma, otomatik kayıttan sonra yeniden açma ve eski sürümlerin görünmesi kontrol edilmiştir. Masaüstü ve 390 piksel mobil ekran görüntüleri alınmıştır; mobil kütüphanede sayfa taşması görülmemiştir.
 
@@ -41,7 +42,7 @@ Tarayıcı kontrolü ayrı test veritabanında yapılır. Yeni fikir oluşturma,
 - PDF/görsellerin içeriğinde OCR yapılmaz; başlık ve notlar aranır.
 - JSON dışa aktarma veri taşıma ve inceleme içindir. Tam geri yükleme, ZIP yedeğiyle yapılır.
 - Depodaki araştırma bölümü değiştiğinde import bunu bildirir; otomatik birleştirme yapmaz. Güncel dosya ayrıca doküman olarak yüklenebilir.
-- Eski üretilmiş videoların ve Remotion render işlemlerinin otomatik bağlantısı bu sürümde bulunmaz.
-- Yapay zekâ araştırması, YouTube Analytics ve bulut/çok kullanıcılı erişim bağlı değildir.
+- Yapılmış videolar (`videos/*/plan.json`) yalnızca fikir fabrikasının tekrar kontrolünde okunur; Remotion render işlemlerine otomatik bağlantı bu sürümde bulunmaz.
+- Fikir fabrikası adayları `/ideate` skill'i ve `scripts/candidates.ts` üzerinden gelir; YouTube Analytics ve bulut/çok kullanıcılı erişim bağlı değildir.
 - Yükleme ve sıkıştırılmış yedek sınırı 50 MB'dır; açılmış yedek en fazla 150 MB olabilir. Uygulama, geri yükleyemeyeceği büyüklükte bir yedeği indirmeye sunmaz.
 - Dışa aktarılan Markdown/JSON dosyaları anlık kopyalardır; bunları düzenlemek veritabanını kendiliğinden değiştirmez.

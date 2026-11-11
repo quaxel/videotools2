@@ -1,29 +1,32 @@
 # Rules for every explainer video
 
-Distilled from frame-by-frame study of three reference Shorts and two comparison rounds against our own output;
-story, cutting and camera since replaced by the 3D-story house style (a slow camera travelling through one 3D world
-per shot, a cream dip between locations). `scripts/pipeline.py report` measures the numeric ones; the rest are
-checked by eye on the contact sheet.
+The house style: a fast hook, then a slow camera travelling through one 3D world per shot, a cream dip between
+locations, and a loop back to the opening picture. Each rule is in one place, here; the pipeline gates or reports it
+at the first stage that can know it, and the rest is checked by eye.
 
 ## Story (seven beats)
 
-Nine to twelve shots, one location each; the beats sit on the shots as below (shot numbers for a 10-shot video,
-percentages of the runtime).
+Two or three quick hook beats, then nine to twelve shots, one location each; the story beats sit on the shots as below
+(shot numbers for a 10-shot video, percentages of the runtime).
 
-1. **Hook (shots 1-3):** the first word at frame 0, no intro, no channel name. The first sentence states the premise
-   as a paradox, something that sounds impossible; the hook is 5-23 words (aim 16) and ends at about 4-5 s. The
-   picture is one continuous camera move onto the strange thing (the visual hook: what moves or changes on screen),
-   not a burst of cuts. Put the hero object close to the camera so it fills part of the frame.
+1. **Hook (the hook beats and shots 1-3):** the first word at frame 0, no intro, no channel name. The first sentence
+   states the premise as a paradox, something that sounds impossible; the hook is 5-23 words (aim 16) and ends at
+   about 4-5 s.
+   **Fast opening:** the first 3 s are 2-3 beats of the strange event, 0.7-1.5 s each, hard cuts (`false`) between
+   them, all over by 3.5 s: the thing coming at the lens, a face reacting, the impact or the result. Each is a
+   different picture of the event, at its peak from its first frame, with the camera already moving, the hero object
+   close to the lens. They are separate shot-list entries cut on the words of the first sentence, may share one set
+   and do not count towards the 9-12 shots; then the slow camera takes over.
    **Triple hook:** by frame 15 (0.5 s) all three channels are live at once, each doing a different job:
    - *Visual — "what is happening?"*: the strange thing is in frame and already moving or changing at frame 0
      (a streak in the sky, something falling, a thing in the wrong place); the camera move carries onto it, it does
      not arrive late.
    - *Verbal — "why should I care?"*: the first sentence, from frame 0, a question or a claim that sounds impossible,
      tied to the viewer where it can be ("you", a cost, a loss, a near miss).
-   - *Text — "what is this about?"*: a `Headline` in shot 1, fully in by frame 12: the video's label, question or a
-     contrasting angle, 2-6 words on at most 2 lines. Never the words of the spoken sentence (the captions already
-     show those); "WHAT IF IT HIT ELSEWHERE?" over "The asteroid that killed the dinosaurs may have hit the unluckiest
-     spot on Earth" is right, the same sentence in caps is not.
+   - *Text — "what is this about?"*: a `Headline` in shot 1, `at` ≤ 9 (readable by frame 12, settled by frame 17):
+     the video's label, question or a contrasting angle, 2-6 words on at most 2 lines, whole in the frame, clear of
+     the captions and not over the hero object, a face or a hat. Never the spoken words: "WHAT IF IT HIT ELSEWHERE?"
+     over "The asteroid that killed the dinosaurs may have hit the unluckiest spot on Earth" is right.
    - Test: cover any one channel and the other two still pull; if two channels say the same thing, rewrite one.
    - Balance: when the picture alone is startling, keep the headline short (2-3 words) and let the picture lead.
    - Nothing waits: no fade from black, no title card, no slow reveal before the three are on screen.
@@ -35,7 +38,11 @@ percentages of the runtime).
    UPPERCASE labels. No charts, arrows or floating numbers; numbers appear only on objects (a counter, a screen, a
    calendar).
 6. **So..., at 80-93 %:** the consequence.
-7. **Closing line:** 5-19 words (about 9) that land the story. No outro, no call to action, no loop back to the start.
+7. **Closing line:** 5-19 words (about 9) that land the story. No outro, no call to action.
+   **The video loops** (a replay counts towards the view percentage): the last shot ends on the opening picture,
+   with the first beat's camera, the strange thing back in its frame-0 state and the opening light, and no dip, fade
+   or held end picture. The closing line and the first sentence read as one thought, and the music's end meets its
+   start. Check the last still beside the first and the `loop seam` that `motion` prints.
 
 - Escalation reads as but / then / so; one idea per sentence, concrete numbers and names.
 - **Seed:** the person or object the pivot depends on is visible within the first 20 s.
@@ -46,23 +53,26 @@ percentages of the runtime).
 - **Word budget:** 180–210 words for 50–60 s. Target pace 190–215 words per minute.
 - Sentences of 4–10 words, plain spoken English, concrete numbers ("2 minutes", "3 years").
 - The narrator is excited and gripping, never a calm documentary read, even for history or mystery topics.
-  Keep `pauseAfter` short (≤ 0.3 s) except before the pivot and before the closing line.
 - Spell years out as words ("eighteen seventy-six") so Qwen reads them right, and put the spelled form in the
   sourced claim too, or the report's fact check flags it.
 - **Never** use ellipses (...) or one-word repeated sentences ("Seven. Seven."): Qwen pauses 1–2 s on them.
-- At most one pause over 0.6 s, and only before the pivot (use `pauseAfter` on the line before "You see").
+- **Pauses:** `pauseAfter` ≤ 0.3 s, except about 0.4 s on the line before the pivot and on the line before the
+  closing line; only the pre-pivot one may go over 0.6 s; none on the closing line.
+- **Pace** (gated at `voice`): duration, words, wpm, `long_pauses`, and `speech_cover` ≥ 82 % on the voice track.
 - Dialogue is a separate line with its own speaker (`buddy`, `boss`, ...), one short line each.
 - **Facts:** every number spoken as a fact must be backed by a sourced claim in `research.md`. Story numbers go in `plan.json` → `story_numbers`.
 
 ## Picture
 
-- **Locations:** at least 8, each with its own dominant colour family. No colour above 40 % of the runtime. Re-light a location (warm, cold blue "truth", purple dream, night) to vary colour without a new set.
+- **Locations:** at least 8, no two neighbouring locations in the same colour family, at least 5 families over the
+  video, none above 40 % of the runtime. Re-light a location (warm, cold blue "truth", purple dream, night) to vary colour without a new set.
 - **Characters:** at least 4.
-- **Shots:** 9-12, one location each (average 4-7 s, none under 1.5 s or over 10 s). A shot ends on a real sentence end
-  from the voice timing. Inside a shot the camera does not cut: it carries from one subject to the next (`beatPath`).
+- **Shots:** after the hook beats, 9-12, one location each (average 4-7 s, none under 1.5 s or over 10 s). A shot ends on
+  a real sentence end from the voice timing. Inside a shot the camera does not cut: it carries from one subject to the next (`beatPath`).
 - **Transitions:** a 12-frame (0.4 s) cream `"dip"` at every change of location; a 12-frame `"dissolve"` for a change
-  of time in one place; at most one hard cut (`false`) in the whole video, kept for the one moment that needs a jolt.
-  New videos do not use the whip (`true`). Every transition is a shot boundary in the shot list (never a switch inside
+  of time in one place; hard cuts (`false`) between the hook beats and into shot 1, and after that at most one in the whole video, kept for the one moment
+  that needs a jolt.
+  New videos do not use the whip (`true`; `check` warns on one). Every transition is a shot boundary in the shot list (never a switch inside
   one shot component), so check, QA and sync see it.
 - **Camera speed:** mostly slow and smooth. Every shot has net travel, about 10 % of the frame width per second
   (25-40 % travel or push over a shot); ease in at the start, ease out to rest at the end, almost no wobble (`Video`
@@ -71,9 +81,13 @@ percentages of the runtime).
   location the camera travels from subject to subject and reaches each as the narrator names it (`beatPath`, keys
   on the word frames). Write the plan per shot in `../videos/<slug>/camera_plan.md`: time, location, path start → end,
   move type, foreground / midground / background objects and the in-world labels.
-- **Depth in every shot:** a foreground object close to the lens (blurred), the subject sharp in the midground, the
-  background softly blurred (Stage `foreground` + `frameSpot`, the post chain's depth of field focused on the subject).
-  The foreground never covers a face or a label, and never fills more than a third of the frame.
+- **Depth:** the subject sharp in the midground, the background softly blurred, and in most shots a foreground object
+  close to the lens (Stage `foreground` + `frameSpot` from the shot's first camera, at ≥ 1.1 m, small, at one frame
+  corner, 10-25 % of the frame). The foreground never covers a face or a label; over a third of the frame is an audit
+  fault (the framing audit reports both). An over-the-shoulder head stays under 25 % of the frame (checked by eye;
+  the audit never counts puppets as foreground). Drop it in a shot whose camera travels a lot: it drifts into the middle of
+  the frame. A foreground *behind* a head that seems to grow out of it
+  is not reported: look for it.
 - **Z-depth:** no two surfaces at the same depth (a sign, decal or poster flush on a wall, a patch on a floor, boxes
   sharing a face): they z-fight and flicker. Lift the front one 1-2 cm off, or give its material `polygonOffset`.
   The framing audit reports `z-fighting:` pairs and shots missing a depth layer (`depth:`).
@@ -85,6 +99,26 @@ percentages of the runtime).
   constant `sin` reads as a loop. Give the free hand something to do (on the cheek, patting, resting, gesturing).
 - **Held props stay in sight:** a puppet seated behind a table needs the top at ≤ 0.45 m and its hands above it
   (reach y above about -450); a hand or a fork that dips behind the top vanishes for those frames.
+- **Held props are held:** a prop the story hangs on (a stamp, a tool, a bag) is at the hand of a reach that actually
+  reaches it, or rests on something; never floating beside the hand or moving on its own. When an arm cannot reach,
+  build a mounted mechanism (a press, a lever).
+- **Tools are used, visibly:** a puppet using a tool (playing, hammering, driving, drinking, sawing) has its hands on
+  it and moving in every shot and camera angle, never hanging or frozen while the tool moves on its own. Build it
+  with `puppet/tools.ts`; for a 3D prop send the hand to it with `worldR` / `worldL` (library.md → Puppets).
+- **Seated puppets sit:** a puppet on a sofa, chair, bench or stool takes `sit: true` (or `sitDown`) on a seat whose
+  top is at `HIP_HEIGHT` (0.34 m), with `at` 1-3 cm in front of the seat's front edge, so the knees and shins are
+  drawn in front of the seat and the feet rest on the floor. A seat behind the puppet's `at` hides the legs and reads
+  as a figure standing inside the furniture. `sit: true` hangs the card legs straight down through the cushion, so give
+  every sitter `noLegs: true` and build its legs in world space: thighs over the cushion, knees past the front edge,
+  shins down to the floor (`seatLegs` / `SeatedLegs` in `src/videos/cabin-pressure/cabin.tsx`; `collide` skips
+  seated puppets, so check side and low angles on full-size stills). Keep a table in front clear of the feet; check the first still of every
+  seated shot.
+- **Cast behind the gag:** a puppet standing in front of the bench or board that holds the gag or the label hides
+  it. Put the cast behind it (a bench top ≤ 0.65 m) and the gag in front of them.
+- **Gestures end:** a shock or gesture pose (hands over the face, arms up, a point) comes down again within
+  1-1.5 s.
+- **Crowds move on the shot's clock:** troops, crowds and walks are timed from the shot's first frame, not the
+  video's, or they have marched off before the shot starts.
 - **Faces read on the stills:** check every expression close up. Contentment and eating read as `happy`;
   `excited` and `neutral` show wide round eyes that read as startled in a close shot.
 - **Key small objects must read on a phone:** a prop the story hangs on (a coin, a piece of meat, a pill) may be
@@ -93,23 +127,34 @@ percentages of the runtime).
   and a clear camera move (track the subject, tilt, crane). Sky shots are the stillest in `motion`; fix them first.
 - **Effects must not show through props:** smoke from a fire under a pot, steam in front of a hero object; check
   the macro stills for grey blobs over the subject.
-- **Nothing half visible:** a head (people, animals, crowd figures, the hat included) and every piece of text (signs,
-  labels, headlines, boards) is either whole in the frame or wholly out, through the whole shot, camera moves
-  included. Stage keeps puppet heads whole (library.md → `keepHeads`); the framing audit in `stills` reports the rest,
-  and every hit is a fix. The audit should list only intended back-view crops. A head sliced off in a straight line inside
-  the picture is the puppet's card, not the camera (the audit says "card of X cuts the drawing").
-  The audit sees puppets, their hats (drawn or a 3D overlay), instanced crowds, model heads (horses, dinosaurs) and
-  every word drawn on a canvas texture; a crowd running off the edge on purpose takes `userData.audit = false`.
-  It also reports z-fighting (two coplanar surfaces that flicker) and a frame with no background layer or a
-  foreground over a third of it (library.md → Framing audit).
+- **Nothing half visible:** every head (people, animals, crowd figures, hats included) and every piece of text
+  (signs, labels, headlines, boards) is whole in the frame or wholly out, through the whole shot, camera moves
+  included, and clear of the caption band. Stage keeps puppet heads whole (`keepHeads`); the framing audit in `stills`
+  reports the rest (library.md → Framing audit), and every hit is a fix or an intended crop opted out in code
+  (`userData.audit = false`, a puppet's `crop`, a model's `heads={false}`). A head sliced in a straight line inside
+  the picture is the puppet's card ("card of X cuts the drawing").
 - **No camera jumps:** the camera never snaps between two frames of one shot except on an impact sound. Head framing
   is smoothed per shot by the framing pre-pass; animate camera moves with eased ramps, not steps.
-- **Painted, not rendered:** flat colour fills with soft cel bands; no grain, gloss, bevels or reflections. Big
+- **Painted, not rendered:** flat colour fills with soft cel bands; no grain, gloss, bevels or reflections in
+  materials and textures (the fine paper grain the approved look lays over the whole picture is the only grain). Big
   surfaces (walls, floors, crates, hulls) carry painted wear in their `canvasTexture`: stains, chips, scratches, a
   gentle gradient on walls. A spotless flat fill reads as a placeholder.
 - **Light follows the story:** warm and bright from the hook to the conflict, deeper and bluer at the pivot, and a slow drift of light inside long shots (a sun patch sliding, a lamp flickering, dusk coming on).
+- **Nothing blows out:** bloom, god rays or a point light never turn a table, a cloth, a face or a wall into flat
+  white.
 - **Character size:** a speaking puppet's body is 40-60 % of the frame height in a medium shot, 70 %+ in a close
-  shot. A wide shot is the exception, not the default.
+  shot. A wide shot is the exception, not the default. The cut-out heads are big, so a medium shot needs the camera
+  about 3 m from the subject: pull every key back with `wide(c, k)` / `widePath(keys, f)` (default k 1.5), k ≈
+  1.0-1.25 only for a real close-up.
+- **Labels stay near the cast:** when a head nears the edge, `keepHeads` pans the camera and can push a label at
+  the other edge out. Keep labelled props within about 0.5 m of the main puppet, or leave the label off once the
+  prop has been labelled.
+- **Costumes fit the year:** for a story set in the past, every piece of every look, head to feet, and everything
+  a character holds belongs to the plan's `year`, place and the character's rank or trade (an 1815 marshal:
+  bicorne, braided coat, breeches, boots). The costume is decided in `plan.json`, built with the period check
+  (library.md → Puppets) and tested by `check` for kit pieces; a piece the kit lacks is built in the video's folder,
+  not taken from the nearest kit piece. Women wear
+  long hair (`long: true`).
 - **The main event happens in steps:** the thing the story is about (a collapse, a launch, a lift) is shown as
   cause and effect, not a jump between two states: a small first move, a shudder, the big move, then dust or debris
   (`Burst`, physics) and someone reacting. One idea per shot still holds; give the event two or three shots.
@@ -127,10 +172,10 @@ percentages of the runtime).
   jolt.
 - **Characters never pass through the set:** no puppet stands inside or walks through a counter, desk or prop
   (`pipeline.py collide` finds them).
-- **Motion:** median frame-to-frame change ≥ 3 and at most 30 % near-still frame pairs. Provisional: the old 6 / 15 %
-  came from fast, hand-held references; recalibrate from the first video made with the slow camera. `Stage` adds a
-  push and idle acting automatically (`energy`, default 1; with `steady` almost no drift); use `energy={0}` only for
-  shots that must hold perfectly still, and give the stillest shots `pipeline.py motion` lists more net travel.
+- **Motion:** median frame-to-frame change ≥ 3 and at most 30 % near-still frame pairs (`pipeline.py motion`). `Stage`
+  adds a push and idle acting automatically (`energy`, default 1; with `steady` almost no drift); use `energy={0}`
+  only for shots that must hold perfectly still. Give the stillest shots `motion` lists more net travel (up to 40 % of
+  the frame width) or more puppet and secondary action, never wobble.
 
 ## Sound
 
@@ -144,34 +189,25 @@ percentages of the runtime).
   motion (`jawCloses`, `stepFrames`, `impactCues`), so the sound follows the action. Soft-attack sounds for soft
   actions: chewing is a wet munch, never a thump (`chew` knocks; do not use it for eating).
 - **Every one-shot effect has the location's `space`** (`room`, `hall`, `outdoor`, `far` for what happens far off).
-- **No effect starts in the last 8 frames:** it is cut into a click.
+- **No effect starts in the last 8 frames:** it is cut into a click (`sync` warns).
+- **Effects never drown a word:** an effect under spoken words stays at or below about -6 LU over the voice; the mix
+  report's `Lowest line p10 margin` is at least 3 LU.
 - Mix lands at -17 to -14 LUFS.
 
 ## Process
 
-- Voice first: write `lines.json`, run `pipeline.py voice`, then cut shots to the printed line frames.
+- A gate is passed by fixing it or by `approve <slug> script|stills --force` with the user's OK, never by going on
+  to the render.
 - Do not render the full video after every change. Type-check, look at stills, fix, and render once at the end.
 - Test small first: one still, then a short clip of the hardest shot when it is new (a new set, a physics gag, the
   main event), then the full video.
 - Judge by eye. A check can pass while the picture still looks wrong; then say what is different in plain words and
   fix that, not the number.
-- Fix from a list, not at random: write every problem found on the stills or a render to
-  `../videos/<slug>/build/mistakes_<round>.md` (numbered: time or frame, shot, problem, severity high / medium / low),
-  fix high first, one shot at a time, and look at the new frame of each fix before calling it fixed.
-- Facts on screen: every date, name and number in a label, sign or `Headline` matches the script and is spelled
+- Fix from a list, not at random: the `video-reviewer` agent (`.claude/agents/video-reviewer.md`), not the author,
+  reviews each stills sheet and writes `../videos/<slug>/build/mistakes_<round>.md` (numbered: time or frame, shot,
+  problem, severity high / medium / low). Fix high first, one shot at a time, and look at the new frame of each fix
+  before calling it fixed. At most 3 review rounds; all fixes of a round go into one `stills --shots` run.
+- After the render, read the QA sheets (`build/qa/sheet_*.jpg`) of every shot with a gag or a mechanism, not only
+  the listed pops.
+- **Facts on screen:** every date, name and number in a label, sign or `Headline` matches the script and is spelled
   right.
-- Every pipeline script renders from one shared bundle (`scripts/bundle.mjs` → `out/bundles/`, rebuilt in seconds when
-  `src/` changes, `public/` symlinked). To render a clip by hand, use it too: `npx remotion render "$(node
-  scripts/bundle.mjs)" <slug> <out.mp4> --frames=a-b`. A bare `npx remotion render <slug>` still copies `public/`
-  (~340 MB) into `$TMPDIR/remotion-*`; delete that afterwards, or the disk fills up.
-- **Headless Chrome V8 crash** ("Fatal error ... object-literal boilerplate migration", the tab dies mid-render): seen in
-  a shot with hundreds of instanced soldiers, horses and flags (what-if-waterloo shot 11). V8 builds each object
-  literal (a JSX props object, `{ x, z, yaw }` per figure, a `joints` record) from a per-call-site template; when the same
-  site sees a field as a small integer on one frame and a fraction on the next, the template's field type is
-  widened, and under heavy load that migration can crash. The literals are written at the call sites in the
-  slug's own code, so the engine cannot wrap them. Workaround that held: keep values that change per frame from
-  ever being whole numbers at one call site (`const dbl = (v: number) => v + 1e-7` on positions, sizes, joint
-  angles and placement fields; write sizes as `1.04`, not `1`). `render` retries a crashed segment shot by shot;
-  if one shot keeps crashing, apply `dbl` to the numbers built per frame in that shot.
-- Check what you changed, not the whole video: `stills --shots` and `collide --shots` after a fix, the full runs once
-  before the approval.

@@ -13,6 +13,11 @@ import { GreatWallPreview } from "./scenes/GreatWallPreview";
 import { ThronePreview } from "./scenes/ThronePreview";
 import { DUEL_FRAMES, DuelAnim, DuelPreview } from "./scenes/DuelPreview";
 import { CostumePreview } from "./scenes/CostumePreview";
+import { CharacterPoses, CharacterStill } from "./scenes/CharacterStill";
+import { SuitPreview, SuitStage } from "./scenes/SuitPreview";
+import { MJHoustonPreview } from "./scenes/MJHoustonPreview";
+import { MJLabPreview } from "./scenes/MJLabPreview";
+import { MJMoonPreview } from "./scenes/MJMoonPreview";
 import { MarathonPreview } from "./scenes/MarathonPreview";
 import { MODEL_PREVIEW_FRAMES, ModelPreview } from "./scenes/ModelPreview";
 import { LAUNDRY_FRAMES, LaundryPreview } from "./scenes/LaundryPreview";
@@ -56,6 +61,13 @@ export const Root: React.FC = () => (
     <Composition id="SlotHook" component={SlotHook} durationInFrames={150} fps={30} width={1080} height={1920} />
     <Composition id="MarathonPreview" component={MarathonPreview} durationInFrames={120} fps={30} width={1080} height={1920} />
     <Composition id="CostumePreview" component={CostumePreview} durationInFrames={30} fps={30} width={1080} height={1920} />
+    <Composition id="CharacterStill" component={CharacterStill} defaultProps={{ pose: "stand" as const, age: "kid" as const }} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="CharacterPoses" component={CharacterPoses} defaultProps={{ age: "kid" as const }} durationInFrames={1} fps={30} width={1800} height={1620} />
+    <Composition id="SuitPreview" component={SuitPreview} durationInFrames={30} fps={30} width={1080} height={1920} />
+    <Composition id="SuitStage" component={SuitStage} durationInFrames={30} fps={30} width={1080} height={1920} />
+    <Composition id="MJHoustonPreview" component={MJHoustonPreview} durationInFrames={240} fps={30} width={1080} height={1920} />
+    <Composition id="MJMoonPreview" component={MJMoonPreview} durationInFrames={40} fps={30} width={1080} height={1920} />
+    <Composition id="MJLabPreview" component={MJLabPreview} durationInFrames={240} fps={30} width={1080} height={1920} />
     <Composition id="DuelPreview" component={DuelPreview} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="DuelAnim" component={DuelAnim} durationInFrames={DUEL_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="ThronePreview" component={ThronePreview} durationInFrames={50} fps={30} width={1080} height={1920} />

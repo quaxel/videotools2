@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1440" width="2048" height="1152">
+  <!-- Wait, Why? channel banner. YouTube shows the full 2560x1440 only on TV;
+       phones and desktop crop to the centre. Text stays inside the safe area
+       x 507..2053, y 508..931. -->
+  <rect width="2560" height="1440" fill="#FFC83D"/>
+
+  <!-- background question marks -->
+  <g font-family="'Arial Rounded MT Bold','Arial Rounded MT','Helvetica Neue',Arial,sans-serif" font-weight="700" fill="#F7B21E" text-anchor="middle">
+    <text font-size="420" transform="translate(210 420) rotate(-14)">?</text>
+    <text font-size="260" transform="translate(560 250) rotate(12)">?</text>
+    <text font-size="340" transform="translate(940 330) rotate(-8)">?</text>
+    <text font-size="220" transform="translate(1330 230) rotate(16)">?</text>
+    <text font-size="380" transform="translate(1720 380) rotate(-12)">?</text>
+    <text font-size="260" transform="translate(2080 240) rotate(9)">?</text>
+    <text font-size="400" transform="translate(2390 470) rotate(-10)">?</text>
+    <text font-size="300" transform="translate(150 900) rotate(10)">?</text>
+    <text font-size="240" transform="translate(2420 900) rotate(14)">?</text>
+    <text font-size="360" transform="translate(330 1340) rotate(-9)">?</text>
+    <text font-size="240" transform="translate(720 1230) rotate(13)">?</text>
+    <text font-size="320" transform="translate(1120 1350) rotate(-15)">?</text>
+    <text font-size="230" transform="translate(1500 1220) rotate(8)">?</text>
+    <text font-size="380" transform="translate(1880 1370) rotate(-7)">?</text>
+    <text font-size="280" transform="translate(2270 1260) rotate(15)">?</text>
+  </g>
+
+  <!-- wordmark -->
+  <g font-family="'Arial Rounded MT Bold','Arial Rounded MT','Helvetica Neue',Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <text x="1280" y="755" font-size="230" letter-spacing="-4"><tspan fill="#1D1B2F">Wait, </tspan><tspan fill="#F0442E">Why?</tspan></text>
+    <text x="1280" y="866" font-size="55" fill="#1D1B2F">The hidden logic behind everything, in about a minute.</text>
+  </g>
+</svg>

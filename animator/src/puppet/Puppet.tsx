@@ -70,6 +70,14 @@ export type PuppetLook = {
   cloak?: string; // wool cloak hanging behind the shoulders, pinned with a brooch at the puppet's L shoulder
   tied?: boolean; // hair tied back in a short tail at the nape
   stubble?: string; // a faint short-stubble shadow round the jaw
+  // Apollo moon suit (1969-1972). All opt-in.
+  space?: { stripe?: string; visor?: string; cap?: string }; // bubble helmet under the white visor shell (gold visor raised, `visor` its colour), the white life-support backpack with the small oxygen pack on top, the neck ring, the chest control box and hoses; `stripe` = commander's red bands (shell, arms, legs); `cap` = comm cap top colour
+  sleeves?: string; // arm colour: the 3D arms become coloured sleeves inside the ink outline (like `pants` on the legs)
+  gloves?: string; // hand colour (gloves); default ink mitten hands
+  bulk?: number; // limb thickness factor for the 3D arms and legs (a pressure suit ~1.8)
+  tie?: string; // necktie colour (front and side views)
+  tieWide?: boolean; // a wide 1970s tie instead of a narrow one
+  headset?: string; // a radio headset: band over the head, an ear cup and a boom mic to the mouth (front and side views)
 };
 
 // Pants and shoe colours reach every Leg and Foot through context, so the front, side and back views share them.
@@ -117,9 +125,11 @@ export type PuppetPose = {
   fromGesture?: Gesture; // with blend < 1, the gesture being left (see moveChange in engine/anim.ts)
   crouch?: number; // 0..1 knees bend and the hips sink (feet stay put); with `air` it tucks the legs in a jump
   air?: number; // units the whole puppet is off the ground (jumps)
+  rise?: number; // metres: lifts the whole card in the world, its contact shadow staying on the ground (a body in the air that also tips or lies, which `air` cannot do: `lie` turns `air` with the body)
   bend?: number; // 0..1 bend forward at the hips (toward the camera in front view, toward `facing` in profile)
   seat?: number; // 0..1 legs between standing and seated (sitting down / getting up); `sit` is the same as 1
   lie?: number; // 0..1 tip over onto the back, head to screen-left (sleeping, fainting); 1 = flat on the floor
+  spin?: number; // degrees: turns the whole drawing about the middle of the body (a somersault, a head-first landing); clockwise on screen
   sleep?: boolean; // eyes shut in sleep, a slack mouth and floating "z"s
   crawl?: number; // on hands and knees in profile; the number is the crawl cycle phase (frames)
   stride?: number; // walk cycle phase (frames; `walk` sets it): the swinging leg lifts its foot and bends its knee
@@ -174,6 +184,127 @@ const Strap: React.FC<{ d: string; color: string; w?: number }> = ({ d, color, w
   <g fill="none" strokeLinecap="round" strokeLinejoin="round">
     <path d={d} stroke={INK} strokeWidth={w + 12} />
     <path d={d} stroke={color} strokeWidth={w} />
+  </g>
+);
+
+// ---------- Apollo moon suit: helmet, backpack, neck ring, chest box (look.space) ----------
+
+const SUIT_WHITE = "#f1eee7";
+const PACK_WHITE = "#e9e6de";
+const RING = "#8f9caa";
+
+// The life-support backpack seen from the front: only its sides and top show round the body and helmet.
+const PackFront: React.FC<{ uid: string }> = ({ uid }) => (
+  <g>
+    <Inked d="M -228 -1020 Q -228 -1066 -186 -1066 L 186 -1066 Q 228 -1066 228 -1020 L 228 -380 Q 228 -340 186 -340 L -186 -340 Q -228 -340 -228 -380 Z" fill={PACK_WHITE} uid={uid} name="pack" />
+    <Inked d="M -196 -1080 Q -196 -1092 -180 -1092 L 180 -1092 Q 196 -1092 196 -1080 L 196 -1060 L -196 -1060 Z" fill="#dcd8ce" uid={uid} name="opsf" width={10} />
+  </g>
+);
+
+// In profile (facing +x) the pack is a deep box on the back with the oxygen purge pack on top.
+const PACK_SIDE_D = "M -330 -940 Q -330 -985 -290 -985 L -140 -985 Q -112 -985 -112 -950 L -112 -360 Q -112 -330 -140 -330 L -296 -330 Q -330 -330 -330 -364 Z";
+const OPS_SIDE_D = "M -318 -1058 Q -318 -1078 -296 -1078 L -150 -1078 Q -128 -1078 -128 -1058 L -128 -985 L -318 -985 Z";
+const PackSide: React.FC<{ uid: string }> = ({ uid }) => (
+  <g>
+    <Inked d={PACK_SIDE_D} fill={PACK_WHITE} uid={uid} name="packs" />
+    <Inked d={OPS_SIDE_D} fill="#dcd8ce" uid={uid} name="ops" width={10} />
+    {/* seams and a strap round the waist */}
+    <path d="M -330 -700 L -112 -700 M -330 -520 L -112 -520" stroke={INK} strokeWidth={6} opacity={0.35} />
+    <path d="M -112 -420 L 120 -400" stroke={INK} strokeWidth={9} opacity={0.5} />
+  </g>
+);
+
+const PackBack: React.FC<{ uid: string }> = ({ uid }) => (
+  <g>
+    <Inked d="M -196 -1000 Q -196 -1040 -160 -1040 L 160 -1040 Q 196 -1040 196 -1000 L 196 -380 Q 196 -330 156 -330 L -156 -330 Q -196 -330 -196 -380 Z" fill={PACK_WHITE} uid={uid} name="packb" />
+    <Inked d="M -170 -1090 Q -170 -1100 -150 -1100 L 150 -1100 Q 170 -1100 170 -1090 L 170 -1040 L -170 -1040 Z" fill="#dcd8ce" uid={uid} name="opsb" width={10} />
+    <path d="M -196 -760 L 196 -760 M -196 -560 L 196 -560" stroke={INK} strokeWidth={6} opacity={0.35} />
+    {[-120, -40, 40, 120].map((x) => (
+      <rect key={x} x={x - 24} y={-470} width={48} height={70} rx={10} fill="#c9c4b8" stroke={INK} strokeWidth={6} />
+    ))}
+  </g>
+);
+
+// The chest: a grey control box with knobs, and the blue and red hose connectors at the waist.
+const SuitChest: React.FC<{ side?: boolean }> = ({ side }) =>
+  side ? (
+    <g>
+      <rect x={110} y={-560} width={70} height={92} rx={12} fill="#9aa2aa" stroke={INK} strokeWidth={8} />
+      <circle cx={150} cy={-400} r={22} fill="#3a6ad0" stroke={INK} strokeWidth={7} />
+    </g>
+  ) : (
+    <g>
+      <rect x={-74} y={-566} width={148} height={96} rx={14} fill="#9aa2aa" stroke={INK} strokeWidth={8} />
+      {[-40, 0, 40].map((x) => (
+        <circle key={x} cx={x} cy={-518} r={13} fill="#3c4148" />
+      ))}
+      <circle cx={-92} cy={-400} r={24} fill="#3a6ad0" stroke={INK} strokeWidth={7} />
+      <circle cx={92} cy={-400} r={24} fill="#d03a3a" stroke={INK} strokeWidth={7} />
+      <path d="M -60 -350 L 60 -350" stroke={INK} strokeWidth={6} opacity={0.3} />
+      {/* the backpack's shoulder straps */}
+      <path d="M -112 -606 L -96 -470 M 112 -606 L 96 -470" stroke="#c9c4b8" strokeWidth={22} strokeLinecap="round" />
+      <path d="M -112 -606 L -96 -470 M 112 -606 L 96 -470" stroke={INK} strokeWidth={4} strokeLinecap="round" opacity={0.5} />
+    </g>
+  );
+
+// The neck ring the helmet locks onto.
+const NeckRing: React.FC<{ side?: boolean }> = ({ side }) =>
+  side ? (
+    <ellipse cx={30} cy={-612} rx={112} ry={30} transform="rotate(-6 30 -612)" fill={RING} stroke={INK} strokeWidth={9} />
+  ) : (
+    <ellipse cx={0} cy={-612} rx={128} ry={30} fill={RING} stroke={INK} strokeWidth={9} />
+  );
+
+// The comm cap ("Snoopy cap") over the hair: a coloured top, white sides, ear cups.
+const CommCap: React.FC<{ color: string; side?: boolean }> = ({ color, side }) =>
+  side ? (
+    <g stroke={INK} strokeWidth={10} strokeLinejoin="round">
+      <path d="M -176 -810 C -180 -950 -90 -1012 26 -1010 C 150 -1008 220 -930 224 -880 C 120 -906 -20 -900 -176 -810 Z" fill="#f4f2ec" />
+      <path d="M -150 -900 C -110 -985 -30 -1010 40 -1008 C 130 -1004 190 -960 210 -912 C 110 -940 -40 -940 -150 -900 Z" fill={color} />
+      <ellipse cx={-14} cy={-790} rx={52} ry={66} fill="#2a2a2e" />
+    </g>
+  ) : (
+    <g stroke={INK} strokeWidth={10} strokeLinejoin="round">
+      <path d="M -208 -800 C -214 -960 -110 -1012 0 -1012 C 110 -1012 214 -960 208 -800 C 170 -880 100 -906 0 -906 C -100 -906 -170 -880 -208 -800 Z" fill="#f4f2ec" />
+      <path d="M -150 -950 C -110 -1000 -50 -1012 0 -1012 C 50 -1012 110 -1000 150 -950 C 100 -966 -100 -966 -150 -950 Z" fill={color} />
+      <ellipse cx={-206} cy={-790} rx={34} ry={58} fill="#2a2a2e" />
+      <ellipse cx={206} cy={-790} rx={34} ry={58} fill="#2a2a2e" />
+    </g>
+  );
+
+// The bubble helmet with the white outer shell and the gold sun visor pushed up. Front and side views.
+const SpaceHelmet: React.FC<{ uid: string; side?: boolean; visor: string; stripe?: string }> = ({ uid, side, visor, stripe }) => {
+  const cx = side ? 22 : 0;
+  const cy = -808;
+  const r = 262;
+  // The shell covers the top (front view) or the top and back (side view); its lower edge rides over the forehead.
+  const shell = side
+    ? `M ${cx - r - 14} ${cy + 70} C ${cx - r - 30} ${cy - 210} ${cx - 140} ${cy - r - 26} ${cx + 30} ${cy - r - 22} C ${cx + 170} ${cy - r - 14} ${cx + r + 6} ${cy - 150} ${cx + r - 10} ${cy - 96} C ${cx + 150} ${cy - 160} ${cx + 20} ${cy - 170} ${cx - 90} ${cy - 120} C ${cx - 170} ${cy - 80} ${cx - 220} ${cy} ${cx - r + 40} ${cy + 80} Z`
+    : `M ${cx - r - 16} ${cy - 30} C ${cx - r - 18} ${cy - 210} ${cx - 150} ${cy - r - 24} ${cx} ${cy - r - 24} C ${cx + 150} ${cy - r - 24} ${cx + r + 18} ${cy - 210} ${cx + r + 16} ${cy - 30} C ${cx + 210} ${cy - 120} ${cx + 120} ${cy - 160} ${cx} ${cy - 160} C ${cx - 120} ${cy - 160} ${cx - 210} ${cy - 120} ${cx - r - 16} ${cy - 30} Z`;
+  // The raised gold visor shows as a band just under the shell's front edge.
+  const gold = side
+    ? `M ${cx - 70} ${cy - 128} C ${cx + 30} ${cy - 172} ${cx + 160} ${cy - 160} ${cx + r - 10} ${cy - 96} C ${cx + 180} ${cy - 120} ${cx + 60} ${cy - 128} ${cx - 50} ${cy - 96} Z`
+    : `M ${cx - 214} ${cy - 112} C ${cx - 130} ${cy - 168} ${cx + 130} ${cy - 168} ${cx + 214} ${cy - 112} C ${cx + 150} ${cy - 128} ${cx - 150} ${cy - 128} ${cx - 214} ${cy - 112} Z`;
+  return (
+    <g>
+      {/* the clear bubble: a faint blue tint, its outline and a glint */}
+      <circle cx={cx} cy={cy} r={r} fill="#cfe6ff" opacity={0.16} />
+      <path d={gold} fill={visor} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+      <Inked d={shell} fill={SUIT_WHITE} uid={uid} name={side ? "shells" : "shell"} width={11} />
+      {stripe && !side && <path d={`M ${cx - 26} ${cy - r - 22} L ${cx + 26} ${cy - r - 22} L ${cx + 22} ${cy - 162} L ${cx - 22} ${cy - 162} Z`} fill={stripe} stroke={INK} strokeWidth={6} />}
+      {stripe && side && <path d={`M ${cx - 40} ${cy - r - 18} C ${cx - 140} ${cy - r} ${cx - r} ${cy - 160} ${cx - r - 14} ${cy - 40} L ${cx - r + 30} ${cy - 30} C ${cx - r + 40} ${cy - 140} ${cx - 120} ${cy - r + 30} ${cx - 30} ${cy - r + 26} Z`} fill={stripe} stroke={INK} strokeWidth={6} />}
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={INK} strokeWidth={10} />
+      <path d={`M ${cx + (side ? 120 : -170)} ${cy + 40} Q ${cx + (side ? 190 : -205)} ${cy + 110} ${cx + (side ? 170 : -150)} ${cy + 170}`} fill="none" stroke="#ffffff" strokeWidth={18} strokeLinecap="round" opacity={0.75} />
+      <path d={`M ${cx + (side ? 210 : 150)} ${cy + 20} L ${cx + (side ? 216 : 160)} ${cy + 50}`} stroke="#ffffff" strokeWidth={14} strokeLinecap="round" opacity={0.6} />
+    </g>
+  );
+};
+
+// From behind the helmet is the white shell all round.
+const SpaceHelmetBack: React.FC<{ uid: string; stripe?: string }> = ({ uid, stripe }) => (
+  <g>
+    <Inked d={circD(0, -812, 262)} fill={SUIT_WHITE} uid={uid} name="shellb" width={11} />
+    {stripe && <path d="M -26 -1068 L 26 -1068 L 26 -620 L -26 -620 Z" fill={stripe} stroke={INK} strokeWidth={6} />}
   </g>
 );
 
@@ -1311,6 +1442,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             <Cel uid={patternId} name="hairb" d={FRONT_LONG_D} />
           </g>
         )}
+        {look.space && <PackFront uid={patternId} />}
         {look.cloak && <CloakBehind color={look.cloak} uid={patternId} w={bw} hem={-300} />}
         {look.shorts && <Inked d={SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
         {look.tunic && <Tunic look={look} uid={patternId} hem={-176} />}
@@ -1349,6 +1481,10 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         {/* Collar (with a tunic: the linen undershirt at the neck) */}
         <path d="M -48 -622 L 0 -575 L 48 -622" fill={look.tunic ? "#e4d6b4" : "#fff"} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
         {look.cloak && <CloakPin color={look.cloak} w={1} />}
+        {look.space && <SuitChest />}
+        {look.space && <NeckRing />}
+        {look.tie && <path d={look.tieWide ? "M -16 -598 L 16 -598 L 40 -360 L 0 -318 L -40 -360 Z" : "M -11 -598 L 11 -598 L 24 -370 L 0 -338 L -24 -370 Z"} fill={look.tie} stroke={INK} strokeWidth={8} strokeLinejoin="round" />}
+        {look.tie && look.tieWide && <path d="M -30 -470 L 30 -500 M -34 -420 L 34 -450" stroke="#ffffff" strokeWidth={10} opacity={0.5} />}
         <g transform={`rotate(${pose.swing ?? 0} 0 -615)`}>
         {look.chain && (
           <path
@@ -1403,6 +1539,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           />
           </g>
           </UnderHat>
+          {look.space && <CommCap color={look.space.cap ?? "#5a4030"} />}
           {look.kerchief && <Inked d={KERCHIEF_D} fill={look.kerchief} uid={patternId} name="kerchief" />}
           {look.hat && <HatFront color={look.hat} uid={patternId} style={look.hatStyle} />}
           {look.cap && (
@@ -1450,6 +1587,16 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
               <circle cx={-72} cy={-800} r={52} />
               <circle cx={72} cy={-800} r={52} />
               <line x1={-20} y1={-806} x2={20} y2={-806} />
+            </g>
+          )}
+          {look.space && <SpaceHelmet uid={patternId} visor={look.space.visor ?? "#d8a428"} stripe={look.space.stripe} />}
+          {look.headset && (
+            <g stroke={INK} strokeWidth={9} strokeLinejoin="round">
+              <path d="M -212 -800 C -220 -1010 220 -1010 212 -800" fill="none" stroke={look.headset} strokeWidth={22} />
+              <path d="M -212 -800 C -220 -1010 220 -1010 212 -800" fill="none" strokeWidth={6} opacity={0.6} />
+              <ellipse cx={-214} cy={-796} rx={36} ry={56} fill={look.headset} />
+              <path d="M -206 -760 Q -170 -650 -60 -668" fill="none" stroke={look.headset} strokeWidth={12} />
+              <circle cx={-56} cy={-668} r={18} fill="#2a2a2e" />
             </g>
           )}
         </g>
@@ -1603,6 +1750,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
       <LeafPattern look={look} id={patternId} />
       <g transform={`translate(0 ${-(pose.air ?? 0)})`} display={pose.noLegs ? "none" : undefined}>{[leg(swing, "far", crawling ? -cyc : 1), leg(-swing, "near", crawling ? cyc : -1)]}</g>
       <g transform={`translate(${back} ${bob + drop - (pose.air ?? 0)}) rotate(${tip + Math.sin(seat * Math.PI) * 18} 0 -280)`}>
+        {look.space && <PackSide uid={patternId} />}
         {look.cloak && <CloakBehind color={look.cloak} uid={patternId} w={1} hem={-210} side />}
         {!pose.noArms && <Arm mark="armL" x={-6} y={-552} side={1} angles={farArm} reach={sideReach(pose.reachL)} profile hand={pose.handL} />}
         {look.shorts && <Inked d={SIDE_SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
@@ -1633,6 +1781,8 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           </g>
         )}
         <path d="M 46 -628 L 86 -592 L 108 -626" fill={look.tunic ? "#e4d6b4" : "#fff"} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+        {look.space && <SuitChest side />}
+        {look.space && <NeckRing side />}
         {look.chain && (
           <path d="M 18 -618 Q 92 -520 132 -604" fill="none" stroke={look.chain} strokeWidth={16} strokeLinecap="round" strokeDasharray="1 20" />
         )}
@@ -1661,6 +1811,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <Cel uid={patternId} name="hair" d={sideHair} />
           </g>
           </UnderHat>
+          {look.space && <CommCap color={look.space.cap ?? "#5a4030"} side />}
           {look.kerchief && (
             <g>
               <Inked d={SIDE_KERCHIEF_D} fill={look.kerchief} uid={patternId} name="kerchief" />
@@ -1696,6 +1847,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           {look.hat && look.hatStyle === "galea" && <GaleaCheek color={look.hat} />}
           <SideFace pose={pose} skin={look.skin} uid={patternId} />
           {look.glasses && <circle cx={166} cy={-804} r={50} fill="none" stroke={INK} strokeWidth={10} />}
+          {look.space && <SpaceHelmet uid={patternId} side visor={look.space.visor ?? "#d8a428"} stripe={look.space.stripe} />}
         </g>
         {!pose.noArms && <Arm mark="armR" front x={10} y={-548} side={1} angles={nearArm} reach={sideReach(pose.reachR)} profile hand={pose.handR} item={pose.worldR ? undefined : pose.hold?.item} tilt={pose.itemTilt} drop={pose.coinDrop} fill={pose.itemFill} uid={`${id}-side`} />}
       </g>
@@ -1743,6 +1895,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         {look.belt && <Belt color={look.belt} w={1} back />}
         </g>
         {look.cloak && <Inked d={CLOAK_BACK_D(bw, -300)} fill={look.cloak} uid={patternId} name="cloak" />}
+        {look.space && <PackBack uid={patternId} />}
         {look.suspenders && <path d="M -92 -612 L 0 -440 L 92 -612 M 0 -440 L 0 -272" fill="none" stroke={look.suspenders} strokeWidth={22} />}
         {look.bib && <Bib text={look.bib} />}
         {look.apron && (
@@ -1773,6 +1926,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
             </g>
           )}
           {look.hat && (look.hatStyle === "galea" ? <GaleaFront color={look.hat} uid={patternId} back /> : <HatFront color={look.hat} uid={patternId} style={look.hatStyle} />)}
+          {look.space && <SpaceHelmetBack uid={patternId} stripe={look.space.stripe} />}
           {look.cap && (
             <g stroke={INK} strokeWidth={STROKE} strokeLinejoin="round">
               <path d="M -206 -850 Q -196 -1058 0 -1062 Q 196 -1058 206 -850 Q 0 -900 -206 -850 Z" fill={look.cap} />
@@ -1783,6 +1937,23 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
       </g>
     </g>
   );
+};
+
+// Where the head's centre is drawn on the card, in puppet units (SVG: +x screen-right, y down, feet at 0), and its
+// radius with headgear: `air` lifts it, `lie` tips the whole drawing about the feet (and a moon suit's pack lifts the
+// lying body). The framing audit and keepHeads both use it, so a tipping or lying puppet's head is checked where it is.
+export const drawnHead = (pose: PuppetPose, look: PuppetLook): { x: number; y: number; r: number } => {
+  const lie = Math.max(0, Math.min(1, pose.lie ?? 0)); // as Puppet draws it: `sleep` alone stays upright
+  const a = (-90 * lie * Math.PI) / 180;
+  // `spin` turns the body about its middle (0, -500 - air) first, as Puppet draws it; the head is 300 above that.
+  const s = ((pose.spin ?? 0) * Math.PI) / 180;
+  const hx = 300 * Math.sin(s);
+  const hy = -500 - (pose.air ?? 0) - 300 * Math.cos(s);
+  return {
+    x: hx * Math.cos(a) - hy * Math.sin(a),
+    y: hx * Math.sin(a) + hy * Math.cos(a) - (155 + (look.space ? 190 : 0)) * lie,
+    r: look.space ? 272 : 205,
+  };
 };
 
 // Floating "z"s over a sleeper's head at (x, y), rising and fading on a loop.
@@ -1812,7 +1983,8 @@ export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string; 
   const sy = 1 - sq;
   const sx = 1 / Math.sqrt(sy);
   const py = (pose.air ?? 0) > 1 ? -(pose.air ?? 0) - 500 : 0;
-  const squashed = sq ? <g transform={`translate(0 ${py}) scale(${sx} ${sy}) translate(0 ${-py})`}>{body}</g> : body;
+  const squashed0 = sq ? <g transform={`translate(0 ${py}) scale(${sx} ${sy}) translate(0 ${-py})`}>{body}</g> : body;
+  const squashed = pose.spin ? <g transform={`rotate(${pose.spin} 0 ${-500 - (pose.air ?? 0)})`}>{squashed0}</g> : squashed0;
   const lie = Math.max(0, Math.min(1, pose.lie ?? 0));
   if (!lie && !pose.sleep) return squashed;
   // Lying: tip over backwards around the feet onto the floor, head to screen-left, body resting on y = 0.
@@ -1820,7 +1992,7 @@ export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string; 
   const head: [number, number] = [800 * Math.sin(a), -800 * Math.cos(a) - 155 * lie];
   return (
     <g>
-      <g transform={`translate(0 ${-155 * lie}) rotate(${-90 * lie})`}>{squashed}</g>
+      <g transform={`translate(0 ${-(155 + (props.look.space ? 190 : 0)) * lie}) rotate(${-90 * lie})`}>{squashed}</g>
       {pose.sleep && <Zzz x={head[0] + 60} y={head[1] - (lie > 0.5 ? 120 : 240)} t={pose.face?.t ?? 0} />}
     </g>
   );

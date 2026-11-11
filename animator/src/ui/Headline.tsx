@@ -1,12 +1,16 @@
 import React from "react";
 import { AbsoluteFill, interpolate } from "remotion";
 import { loadFont } from "@remotion/google-fonts/PlayfairDisplay";
+import { useShotStart } from "../engine/clock";
 
 const { fontFamily: SERIF } = loadFont("normal", { weights: ["900"], subsets: ["latin"] });
 
 // A headline set in heavy 19th-century newspaper type on a strip of cream paper, high in the frame (above the
 // captions). It drops in with a small overshoot at `at` (shot frames) and fades at `out`.
+// The card carries `data-headline` (its text) and `data-shot` (its shot's start frame): the framing audit
+// (engine/audit.ts) measures it there, since this is HTML outside the 3D canvas.
 export const Headline: React.FC<{ f: number; text: string; at?: number; out?: number; y?: number; size?: number }> = ({ f, text, at = 0, out = 9999, y = 250, size = 92 }) => {
+  const shot = useShotStart();
   const dt = f - at;
   if (dt < 0 || f > out + 8) return null;
   const s = interpolate(dt, [0, 4, 8], [1.25, 0.96, 1], { extrapolateRight: "clamp" });
@@ -26,6 +30,8 @@ export const Headline: React.FC<{ f: number; text: string; at?: number; out?: nu
         }}
       >
         <div
+          data-headline={text}
+          data-shot={shot}
           style={{
             background: "#f3ead2",
             border: "6px solid #161212",

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <!-- Community post: 2 new Shorts every day -->
+  <rect width="1080" height="1080" fill="#FFC83D"/>
+
+  <g font-family="'Arial Rounded MT Bold','Arial Rounded MT','Helvetica Neue',Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <!-- background question marks -->
+    <g fill="#F7B21E">
+      <text font-size="260" transform="translate(130 330) rotate(-14)">?</text>
+      <text font-size="170" transform="translate(950 250) rotate(12)">?</text>
+      <text font-size="220" transform="translate(960 620) rotate(-9)">?</text>
+      <text font-size="180" transform="translate(120 660) rotate(11)">?</text>
+      <text font-size="150" transform="translate(110 1000) rotate(-10)">?</text>
+      <text font-size="190" transform="translate(975 1010) rotate(13)">?</text>
+    </g>
+
+    <!-- wordmark -->
+    <text x="540" y="140" font-size="68" letter-spacing="-1"><tspan fill="#1D1B2F">Wait, </tspan><tspan fill="#F0442E">Why?</tspan></text>
+
+    <!-- message -->
+    <text x="540" y="620" font-size="540" fill="#F0442E">2</text>
+    <text x="540" y="770" font-size="118" fill="#1D1B2F" letter-spacing="-2">NEW SHORTS</text>
+    <rect x="235" y="822" width="610" height="136" rx="68" fill="#1D1B2F"/>
+    <text x="540" y="920" font-size="86" fill="#FFC83D">EVERY DAY</text>
+  </g>
+</svg>

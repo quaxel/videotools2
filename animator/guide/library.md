@@ -1,7 +1,9 @@
 # Component library
 
-Everything a scene imports comes from `src/engine` (`import { ... } from "../../engine"`). A complete worked
-example is `src/videos/slot-machines/Scene.tsx`; copy its structure.
+A scene imports from `src/engine` (`import { ... } from "../../engine"`); sets not re-exported there (Western, Balloon, River, Niagara, Casino / Interior / MoreSets, `useOwned`) come from `../../three/<File>`, and `headWorld` from `../../puppet/PuppetBillboard`. A new scene starts from
+`scripts/scaffold.py` (make-video step 5), never from an older video's structure.
+
+This file is a reference: read the section you need when you need it, not the whole file.
 
 ## Scene file contract (`src/videos/<slug>/Scene.tsx`)
 
@@ -20,30 +22,30 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
   the hand-held drift, guide/rules.md → Camera speed); older ones leave them off and keep their look.
 
 - Write each SHOTS entry on one line as `[123, 456, Name, false]` (numbers or `TIMING.totalFrames`); `pipeline.py check` parses it.
-- **Seamless loop** (older videos only; new ones end on their closing line, guide/rules.md → Story): end the video on the opening shot just before its frame 0. Write the first shot
+- **Seamless loop** (every Short loops, guide/rules.md → Story, closing line): end the video on the opening picture just before its frame 0. In the slow-camera style the last shot is set in the opening location and its camera comes to rest on the first hook beat's starting camera, with the subject in its frame-0 state. The older way (older fast-cut videos only: it enters on a whip, which new videos do not use): write the first shot
   as a factory over a clock offset (`const shotAt = (offset) => () => { const f = useShotFrame() + offset; ... }`),
   use `shotAt(0)` first and `shotAt(-N)` as the last N frames (whip `true` from the shot before), with `energy={0}`
-  in it so the hand-held drift matches, and repeat its sound under the last N frames. Example: `src/videos/olympic-car`.
+  in it so the hand-held drift matches, and repeat its sound under the last N frames.
 - Cut points come from `timing.json` → `lines[i].from / to` and `captions[k].from`.
 - Inside a shot: `const f = useShotFrame();` (0 at the cut; negative while the shot whips in). `useFinalFrame()` gives the video frame.
 - **Two clocks, never mixed:** anything that *travels* through a shot (a march, a walk, a column on a road, a cart, a
   pan of positions) runs on the shot frame `f`, so it starts where it is placed at the cut. Only looping, place-less
   motion (flag ripple, smoke, rain, fire flicker, a set's `frame` prop) takes the video frame (`useFinalFrame()`, or
-  `f + <shot start>`), so the loop does not restart at every cut. Feeding the video frame to a march put Waterloo's
-  troops 10-20 m down the road before their shot began. For blocks and columns of figures use `formation(at, rows,
+  `f + <shot start>`), so the loop does not restart at every cut. Fed the video frame, a march is already
+  10-20 m down the road when its shot begins. For blocks and columns of figures use `formation(at, rows,
   cols, yaw, { shotFrame: f, speed? })` (`engine/anim.ts`): `at` is where the block stands at the shot's frame 0,
   `speed` metres per frame along its heading; it returns `(i) => { x, z, yaw, stride, swing }` per figure.
 - Mouth sync is automatic: a puppet in a `Stage` whose `id` equals a speaker in `lines.json` opens its mouth from the voice (`timing.json` → `mouth`) while that speaker talks, over any authored `mouthOpen`. So give the talking puppet the speaker's name as its id. `voice` writes the tracks; `voice_assemble.py <slug> --mouth` adds them to an older video.
 - Acting is automatic too: a talking puppet makes a beat gesture (nod, arm or lean) on stressed syllables; every puppet breathes, blinks at its own rhythm and glances to a spot and holds there. Author big actions in the pose; leave the small life to `Stage`.
-- Impacts shake the camera automatically: a `boom`, `reel-stop` or `stamp` cue in the effect list gives a short jolt and punch-in, scaled by its volume. For the prop that takes the hit, spread `squash(f, hitFrame, 0.25)` into its group `scale` (squashes, springs back, settles).
+- Impacts shake the camera automatically: a `boom`, `sting`, `reel-stop` or `stamp` cue (strength 1 / 0.8 / 0.6 / 0.45) in the effect list gives a short jolt and punch-in, scaled by its volume. For the prop that takes the hit, spread `squash(f, hitFrame, 0.25)` into its group `scale` (squashes, springs back, settles).
 
 ## Engine
 
 | Export | Use |
 | --- | --- |
-| `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy?, light? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. The push (10 % of the camera-to-target distance over the shot), the settle after the cut, the camera's drift and impact shake scale with that distance only up to `REACH` (7 m, `engine/liven.ts`): aim at a ridge 40 m off freely, the push stays 0.7 m instead of a 4 m dolly into whoever stands in front of the lens. No need for a slug-local clamp on the target any more. `light` = how the set's lights fall on the puppets (see Puppet lighting); default: a rig derived from the mood of `bg`. |
+| `Stage({ set, camera, bg, puppets?, blur?, truth?, flash?, energy?, light? })` | Renders a 3D set + puppets. `blur` softens the set only. `truth` 0..1 cold-blue grade, `flash` 0..1 white-out. `energy` (default 1) adds camera push/drift and idle acting on top of the authored shot; 0 = exactly as written. The push (10 % of the camera-to-target distance over the shot), the settle after the cut, the camera's drift and impact shake scale with that distance only up to `REACH` (7 m, `engine/liven.ts`): aim at a ridge 40 m off freely, the push stays 0.7 m instead of a 4 m dolly into whoever stands in front of the lens. No need for a slug-local clamp on the target any more. `light` = how the set's lights fall on the puppets (see Puppet lighting); default: the mood rig when `bg` is a `moodBackground(...)`; any other background (a set's own) gets no rig, so pass the set's light function. |
 | `keepHeads` (Stage, default on) | No half heads, ever: every frame Stage checks each puppet's head; one cut by a frame edge makes the camera pan just enough to bring it in, then widen (≤ 25 %), then step back (≤ 3×); if heads still cannot all fit, the outer ones are panned wholly out. Heads wholly off-screen, back-view (over-the-shoulder) puppets and placements with `crop: true` are left alone. So frame shots loosely and let it settle; for a macro on an object, leave the people out of `puppets` rather than half in. Solved frame by frame it would jump, so `pipeline.py framing` (run automatically by `stills`, `motion` and `render` when the scene changed) renders a tiny pass, logs the correction per frame, holds it ±24 frames and eases it per shot into `public/videos/<slug>/framing.json`, which the render applies: the camera starts drifting before a head reaches the edge instead of snapping. (`engine/framing.ts`, `scripts/framing.mjs`) |
-| Framing audit (`stills`) | `pipeline.py stills` renders with the `audit` prop and prints `framing:` lines (`engine/audit.ts`). It covers: puppet faces (cut by the edge, under the captions, hidden behind the set, the body inside a set object, the card cutting the drawing) and their hats (`hat of X cut by the frame edge`: the drawn hat, and any small solid mesh under a `ghost` group sitting on the head, such as a 3D hat overlay in `foreground`; tag one with `userData.hatOf = "<puppet id>"` to be sure); instanced crowd figures (`face of a crowd figure at (x, y, z) cut...`, one line per crowd): heads instanced as their own sphere next to an instanced body (the theatre audiences), merged vertex-coloured figures (the skin near the axis in the upper half is the face, the axis above it the hat), or any InstancedMesh with `userData.heads = { y, r, top? }` in instance space (set it on new crowds); heads wholly out, hidden behind something or sunk in near-black shadow are not reported; model heads (BlenderModel `heads`); and every word drawn on a canvas with `fillText`/`strokeText` that shows on a plane or box face (kit `Label`, `Screen`, a set's shop sign, a slug's own board): any letter outside the frame is a cut (`sign "X" cut by the frame edge (N% of its text outside)`), plus under the captions and hidden behind the set. Kit signs are checked on their words, so a cropped card border with whole words is fine. Z depth, from a grid of 14 x 25 rays per frame (instanced meshes of more than 64 are left out): `z-fighting: "A" and "B" coplanar at (x, y, z)` when two different solid objects meet a ray within the depth buffer's resolution with parallel faces on at least 2 rays and different colours (a poster flat on its wall, a floor patch on the floor, two boxes sharing a face; lift the top one a few mm or give it `polygonOffset`), once per pair per shot, ignoring transparent, depthWrite-off and polygonOffset materials and pieces of one small group or one model; `depth: no background layer` when nothing in the frame lies past 1.6 x the subject's distance (Stage's focus: the nearest puppet head, else the aim), and `depth: foreground fills N% of the frame` when upright surfaces nearer than half the subject's distance cover over a third of it (a floor running to the lens does not count; no foreground at all is fine). With `blur` and no post chain the foreground has its own canvas and is not measured. To leave an object out on purpose: `userData.audit = false` on it or a group above it (puppets: `crop`, models: `heads={false}`). |
+| Framing audit (`stills`) | `pipeline.py stills` renders with the `audit` prop and prints `framing:` lines (`engine/audit.ts`). It covers: puppet faces (cut by the edge, under the captions, hidden behind the set, the body inside a set object, the card cutting the drawing) and their hats (`hat of X cut by the frame edge`: the drawn hat, and any small solid mesh under a `ghost` group sitting on the head, such as a 3D hat overlay in `foreground`; tag one with `userData.hatOf = "<puppet id>"` to be sure); instanced crowd figures (`face of a crowd figure at (x, y, z) cut...`, one line per crowd): heads instanced as their own sphere next to an instanced body (the theatre audiences), merged vertex-coloured figures (the skin near the axis in the upper half is the face, the axis above it the hat), or any InstancedMesh with `userData.heads = { y, r, top? }` in instance space (set it on new crowds); heads wholly out, hidden behind something or sunk in near-black shadow are not reported; model heads (BlenderModel `heads`); and every word drawn on a canvas with `fillText`/`strokeText` that shows on a plane or box face (kit `Label`, `Screen`, a set's shop sign, a slug's own board): any letter outside the frame is a cut (`sign "X" cut by the frame edge (N% of its text outside)`), plus under the captions and hidden behind the set. Kit signs are checked on their words, so a cropped card border with whole words is fine. Z depth, from a grid of 14 x 25 rays per frame (instanced meshes of more than 64 are left out): `z-fighting: "A" and "B" coplanar at (x, y, z)` when two different solid objects meet a ray within the depth buffer's resolution with parallel faces on at least 2 rays and different colours (a poster flat on its wall, a floor patch on the floor, two boxes sharing a face; lift the top one a few mm or give it `polygonOffset`), once per pair per shot, ignoring transparent, depthWrite-off and polygonOffset materials and pieces of one small group or one model; `depth: no background layer` when nothing in the frame lies past 1.6 x the subject's distance (Stage's focus: the nearest puppet head, else the aim), and `depth: foreground fills N% of the frame` when upright surfaces nearer than half the subject's distance cover over a third of it (a floor running to the lens does not count; no foreground at all is fine). It also reports a foreground over a face or a label (`face of X covered by foreground "..."`, `sign "..." covered by foreground "..."`): a Stage `foreground` object, or any solid object nearer than half the subject's and the focus distance, across more than 10 % of a puppet's face or of one word; puppets and hats never count. With `blur` and no post chain the foreground has its own canvas and is not measured. The `Headline` (HTML over the canvas; its card is measured in the DOM at the frame being drawn, at half opacity or more, against the heads and signs of its own shot): `headline "X" cut by the frame edge (N% outside)`, `headline "X" over the captions (N% of it)`, `headline "X" covers the face of ID (N% of the head)`, `headline "X" covers the hat of ID (N% of the hat)`, `headline "X" covers sign "Y" (N% of the sign)` (each over more than 10 % of the head, the hat or a kit sign; heads under 2 % of the frame height are left out), `headline "X" runs over N lines (at most 2)` and `headline "X" has N words (at most 6)`; a hero object that is not a puppet or a sign still needs eyes. To leave an object out on purpose: `userData.audit = false` on it or a group above it (puppets: `crop`, models: `heads={false}`). |
 | `CameraShot = { position, target, fov }` | Every set must receive the camera and contain `<CameraRig>` (the kit's `Room` does this). |
 | `lerp3, ramp, clamp01, breathe, talk, walk` | Animation helpers. `ramp(f, a, b)` 0→1 between frames a and b. `...walk(f)` inside a pose while walking. |
 | `Easing, interpolate` | From `remotion`. |
@@ -51,8 +53,29 @@ export const Scene: React.FC = () => <Video slug={SLUG} timing={TIMING} shots={S
 | `FADE` | Whip transition length (8 frames, `true` in the shot list): the old shot whips out left, the new one in from the right. Older videos only; new ones change location with `"dip"`. |
 | `beatPath(keys, f, fov?)`, `warpU(beats, f)` | A camera that travels through key views `{ at, position, target, fov? }` and reaches each at its shot frame `at` (the frame the narrator names that subject: the line's span from `timing.json`, the word placed by its position in the line). A monotone cubic time warp: eases out of the first key, glides through the middle ones without stopping or overshooting, comes to rest at the last; the path is a smooth curve through the keys. `const camera = beatPath([{ at: 0, position: [0, 1.6, 6], target: [0, 1, 0] }, { at: 70, position: [2, 1.4, 4], target: [2, 1, 0] }], f);` |
 | `"dissolve"` (shot list, in place of `true`) | `DISSOLVE` (12) frames: the new shot fades in over the old one, which plays on to the cut. For a change of time in one place (night to dawn, before and after), not for a change of place. Ported from animated-short's `XFADE`; `src/scenes/TransitionPreview.tsx` shows it. |
-| `Stage` `foreground`, `frameSpot(cam, aspect, x, y, dist)`, `Foliage` | Framing objects between the lens and the subject (a branch, a railing, a crate corner), ported from animated-short's `FOREGROUND`. `frameSpot` gives the world point at screen position x, y (-1..1, +y up) `dist` metres in front of a camera: place from the shot's first camera so the object stays put and the camera moves past it. Keep them at 0.3-0.5 x the focus distance over 10-25 % of one frame edge, never on a face (the framing audit still flags a hidden face). Drawn over the cast and left out of `collide`; the post chain's depth of field blurs them, without it they get a canvas of their own blurred 3 x `blur`. `Foliage` is a leafy clump for it. |
+| `Stage` `foreground`, `frameSpot(cam, aspect, x, y, dist)`, `Foliage` | Framing objects between the lens and the subject (a branch, a railing, a crate corner), ported from animated-short's `FOREGROUND`. `frameSpot` gives the world point at screen position x, y (-1..1, +y up) `dist` metres in front of a camera: place from the shot's first camera so the object stays put and the camera moves past it. Keep them at 0.3-0.5 x the focus distance and never nearer than 1.1 m (rules.md → Depth), 10-25 % of the frame at one frame edge, never on a face or a label (the framing audit reports a covered face or label, and a foreground over a third of the frame as a fault). Drawn over the cast and left out of `collide`; the post chain's depth of field blurs them, without it they get a canvas of their own blurred 3 x `blur`. `Foliage` is a leafy clump for it. |
 | `sfx("stamp")`, `MUSIC_FILES.lounge / .mystery / .upbeat / .tension` | Sound file paths. |
+
+### Shared helpers: import them, never re-define them
+
+These used to be copied into every `Scene.tsx`. They are engine exports now (`engine/helpers.ts`,
+`engine/camera.ts`, `engine/motion.ts`, `puppet/tools.ts`): import them from `"../../engine"` and do not declare a
+local `ease`, `mix`, `rand`/`rnd`, `pup`/`P`, `one`, `multi`, `UNITS`, `wide`, `path` or `solveReach` in a video.
+
+| Export | Use |
+| --- | --- |
+| `ease(f, a, b)` | Slow-in / slow-out progress 0..1 between frames a and b (`smooth(ramp(f, a, b))`). `const put = ease(f, 40, 72);` |
+| `mix(a, b, t)` | Linear blend of two numbers, not clamped. `reachR: [mix(150, 60, put), mix(-560, -470, put)]` (`lerp3` for a `Vec3`). |
+| `rand(i, k = 1)` | Repeatable pseudo-random 0..1 for item i; `k` picks an independent stream. `const vx = (rand(i, seed) - 0.5) * 0.06;` Never `Math.random()`: frames render out of order. |
+| `smooth(p)`, `easeIn(p)`, `easeOut(p)`, `anticipate(p, dip?, over?)` | Curves on a 0..1 progress (clamped). `const p = easeOut(ramp(f, 10, 22));` |
+| `settle(t, freq?, damping?)`, `follow(fn, f, freq?, damping?)` | Spring wobble after a stop (1 at t = 0, decaying) and the lag of a soft part behind a moving value. `scaleY = 1 + 0.2 * settle(f - LAND)` |
+| `pup(id, look, at, pose)` | One entry of Stage's `puppets`; a pose without `expression` gets `"neutral"`. `pup("percy", PERCY, [0.2, -0.5], { expression: "happy", ...walk(f) })` |
+| `one((f) => <Stage ... />)` | A shot component from a function of the shot frame. `const S3 = one((f) => <Stage ... />);` |
+| `multi([[len, part], ...])` | One shot made of several cuts, each part with its own frame from 0; the last runs to the shot's end. `const S2 = multi([[48, wideView], [0, closeUp]]);` |
+| `UNITS` | Puppet units per metre (1060 / 1.3), for pose fields in units. `air: 0.4 * UNITS` |
+| `wide(cam, k = WIDE)` | The same view from k times as far from its target (`WIDE` = 1.5: the cut-out heads are big, a medium shot needs about 3 m). `frameSpot(wide(S1_START), 9 / 16, -0.9, -0.9, 1.15)` |
+| `widePath(keys, f, k = WIDE)` | `beatPath` with every key pulled back by `wide`; a key's own `k` overrides. `const camera = widePath([{ at: 0, position, target }, { at: 130, ...S1_END, k: 1.45 }], f);` |
+| `solveReach(at, target, camera, air?)` | The reach (puppet units) that puts a hand on a world point: the inverse of `handWorld`, matching world x and y. Not limited to the arm's length (`clampReach` does that). `reachR: solveReach(AT, CUP, camera)` |
 
 ## New locations: research references first
 
@@ -77,7 +100,7 @@ references, never their characters, props or shots; reference frames never go in
   `wallPattern`: plaster (default), brick, panel, wallpaper, tile, plain. `floorPattern`: wood (default), tile, carpet, concrete, plain.
   `sun: { x, color?, bars? }` lays window light (soft bars) on the floor and wall. Give every location its own pattern pair.
 - `LightPool`, `Halo({ position, size, color })` — extra window light and additive glow (screens and lamps already have halos).
-  Moods: `warm`, `daylight`, `cold`, `dream`, `night`, `neon`, `golden`, `office`, `alarm`, `dusk`; `moodBackground(mood)` gives the Stage `bg`.
+  Moods: `warm`, `daylight`, `cold`, `dream`, `night`, `neon`, `golden`, `office`, `alarm`, `dusk`, `space`; `moodBackground(mood)` gives the Stage `bg`.
 - Props (positions in metres, y = 0 floor): `Door({position, open, sign, glow})`, `Window`, `Desk`, `Counter`, `Chair`, `Shelf`,
   `Lamp`, `Plant`, `Crates`, `Board({cards})` corkboard, `Screen({text, appear?, count?})` (glowing text; `appear`/`count` as on Label, for a figure that comes up on a monitor), `BigButton({label, press})`, `Switch({label, on})`,
   `Label({text, position, width, appear?, count?})` readable UPPERCASE card (use "\n" for two lines). `appear` = frames since it came on: pops in past full size with a white flash (pass `f - at` from the shot; negative hides it). `count` 0..1 counts its numbers up from zero (`countText(text, p)` does the same for any string). Add a `pop` sound on the frame it appears. Never count years or IDs (1982, FLIGHT 214).
@@ -88,7 +111,7 @@ references, never their characters, props or shots; reference frames never go in
   overlap a character in `<group userData={{ ghost: true }}>` so they are not counted.
 - Write a new prop as a small component in `src/videos/<slug>/props.tsx` from these pieces; move it to the kit if it is reusable.
 
-Existing themed sets (slot-machines video): `CasinoSet`, `SlotMachine`, `InteriorStrip`, `XrayWheel`, `AtmSet`, `ExteriorSet`, `LabSet`.
+Casino, bank and lab sets: `CasinoSet`, `SlotMachine` (their own files), `InteriorStrip`, `XrayWheel` (`Interior.tsx`), `AtmSet`, `ExteriorSet`, `LabSet` (`MoreSets.tsx`), all in `src/three/`.
 
 ### Blender models (`src/three/model.tsx`, also exported from the engine)
 
@@ -193,7 +216,7 @@ Built from photo references: `guide/references/great-wall.md`.
 
 ### Kentucky farmyard, clear spring day, 1870s (`src/three/FarmyardSet.tsx`)
 
-Built from photo references: `guide/references/kentucky-farmyard-1876.md`. Used by `src/videos/meat-shower`.
+Built from photo references: `guide/references/kentucky-farmyard-1876.md`.
 - `FarmyardSet({ camera, frame, steam?, children })` — grass yard (floor y = 0) with a trodden dirt patch, a hewn-log
   house with chinking, shingle roof and stone chimney (front wall z = `HOUSE.front`), worm (zigzag rail) fences left,
   back and right (`WormFence({ a, b })`), a woodpile, an ash hopper at `HOPPER` and the black soap kettle on legs over a
@@ -209,7 +232,7 @@ Built from photo references: `guide/references/kentucky-farmyard-1876.md`. Used 
 
 ### WWII balloon bomb: launch beach, sky, snow fields, pine forest (`src/three/BalloonSets.tsx`)
 
-Built from photo references: `guide/references/balloon-bomb.md`. Used by `src/videos/balloon-bombs`.
+Built from photo references: `guide/references/balloon-bomb.md`.
 - `PaperBalloon({ frame, bags? })` — the 10 m washi envelope with gores, load band, shroud lines and the
   `Chandelier` (aluminium ring, sandbags, bombs) at its origin. `InflatingEnvelope({ frame, fill })` swells on the
   sand held by guide ropes; `GroundedBalloon` is a collapsed heap with the ring tipped over; `DrapedPaper` hangs it
@@ -227,7 +250,7 @@ Built from photo references: `guide/references/balloon-bomb.md`. Used by `src/vi
 
 ### The Mississippi at New Madrid, 1811-1812 (`src/three/RiverSets.tsx`)
 
-Built from references: `guide/references/mississippi-1812.md`. Used by `src/videos/mississippi-backward`.
+Built from references: `guide/references/mississippi-1812.md`.
 - `RiverSet({ camera, frame, mode, water?, debris?, post?, clear? })` — the river runs along z, downstream (south) toward
   -z, surface at `RIVER.water`, a clay cut bank left (top y = 1), a sand bar and low bank right, cottonwood forest,
   dome sky. Modes `night` (moon, stars), `predawn`, `dawn`, `day`. `water` (`WaterState`): `drift` metres the water has
@@ -245,7 +268,7 @@ Built from references: `guide/references/mississippi-1812.md`. Used by `src/vide
 
 ### Niagara Falls and Lake Erie, March 1848 (`src/three/NiagaraSets.tsx`)
 
-Built from photo references: `guide/references/niagara-1848.md`. Used by `src/videos/niagara-silent`.
+Built from photo references: `guide/references/niagara-1848.md`.
 - `NiagaraSet({ camera, frame, mode, water, mist?, rainbow?, lift?, clear?, mill?, wheel? })` — the upper river runs
   toward +z over a bed of grey dolomite ledges (y = 0) and falls over a gently curved crest (`crestZ(x)`, |x| <
   `NIAGARA.half`) into the gorge `NIAGARA.drop` below. `water.flow` 0..1: full falls with curtain, rapids and mist down
@@ -255,20 +278,33 @@ Built from photo references: `guide/references/niagara-1848.md`. Used by `src/vi
   Modes `day`, `night`, `dawn`, `dusk`, `sunset`, `gale`; light puppets with `fallsLight(mode, f, lantern?)`.
 - `ErieSet({ camera, frame, mode, push, jam, burst, gale })` — Lake Erie narrowing into the river mouth at z = 0
   (`erieHalf(z)`): ice sheets slide in the gale, pile into a jam across the neck, and burst downstream.
-- `Rainbow`, `GaleStreaks`. Props in `src/videos/niagara-silent/props.tsx`: `Horse` (trot `phase`, `rear`; seat a rider
+- `Rainbow`, `GaleStreaks`. Props kept in a video's own folder, not the kit (find one with `grep -rn "export const Horse" src/videos`): `Horse` (trot `phase`, `rear`; seat a rider
   with `sit: true, air: (HORSE.saddle - 0.34) * units`), `PocketWatch`, `Musket`, `Fish`, `Lantern`, `FlyingHat`.
 - One whip (the musket shot, NiagaraSet day, into the ice-burst shot, ErieSet dusk, at frame 758) failed with "Error
   creating WebGL context" at concurrency ≥ 2 while other NiagaraSet → ErieSet whips rendered fine; root cause not
-  found, so that cut is hard. `RENDER_SEGMENT` / `FRAMING_SEGMENT` env vars shrink the render segments.
+  found, so that cut is hard. `FRAMING_SEGMENT` shrinks the framing pass's segments.
 
 ### Rendering long or heavy videos
 
 A render tab keeps every finished shot's WebGL context (and its GPU memory) alive, so a long video with heavy sets
-used to die mid-render with "Error creating WebGL context". `pipeline.py` now renders the picture in 400-frame
-segments, each in a fresh browser (`render_video`), joins them without re-encoding and muxes the soundtrack from
-`scripts/sound.mjs` (the `soundOnly` input prop skips the shots); `framing.mjs` segments the same way. In a scene:
+used to die mid-render with "Error creating WebGL context". `pipeline.py` now renders the picture one part per
+shot, each a fresh render (`render_video`), cached in `build/parts/` and reused with `--shots`; a failed or glitched
+part is rendered again up to `RENDER_RETRIES` (2) times. It joins the parts without re-encoding and muxes the soundtrack from
+`scripts/sound.mjs` (the `soundOnly` input prop skips the shots); `framing.mjs` renders in 400-frame segments (`FRAMING_SEGMENT`). In a scene:
 free what you create (`useOwned`, dispose instanced meshes on unmount), instance repeated small meshes (a forest's
-limbs and tufts), and put several cuts in one place on one Stage with a `multi` shot (`src/videos/balloon-bombs`).
+limbs and tufts), and put several cuts in one place on one Stage with a `multi` shot.
+
+Every pipeline script renders from one shared bundle (`scripts/bundle.mjs` → `out/bundles/`, rebuilt in seconds when
+`src/` changes, `public/` symlinked); render a clip by hand from it too (`npx remotion render "$(node
+scripts/bundle.mjs)" <slug> <out.mp4> --frames=a-b`). A bare `npx remotion render <slug>` copies `public/` (~340 MB)
+into `$TMPDIR/remotion-*`: delete that afterwards.
+
+**Headless Chrome V8 crash** ("Fatal error ... object-literal boilerplate migration", seen in a shot
+with hundreds of instanced figures): V8 widens an object literal's template when one call site sees a field as a small
+integer on one frame and a fraction on the next, and under heavy load that can crash. `render` retries the crashed
+shot; if one shot keeps crashing, keep its per-frame numbers from ever being whole at a call site
+(`const dbl = (v: number) => v + 1e-7` on positions, sizes, joint angles and placement fields; sizes as `1.04`, not
+`1`).
 
 ### Post chain (`src/engine/post/`, `Video` prop `post`)
 
@@ -299,8 +335,10 @@ already 2× supersampled). The sets keep only their own hull outlines:
   newspaper type on a cream strip, high in the frame above the captions; drops in at `at`, fades at `out`. To keep
   one headline across several shots, render it in each with `at` = minus the shot's offset (no re-pop). Use it for
   the hook question and short on-screen facts ("NO CLOUDS. NO STORM."), at most 6 words on at most 2 lines.
-  Shot 1 always has one (rules.md → Story, triple hook): `at` ≤ 9 so it is fully in by frame 12, `out` near the end
-  of the hook, text that is not the words of the first sentence.
+  Shot 1 always has one (rules.md → Story, triple hook): `at` ≤ 9 so it is readable by frame 12 and settled by
+  frame 17, `out` near the end of the hook, text that is not the words of the first sentence. Keep it whole in the
+  frame, clear of the captions and off the hero object, faces and hats (move it with `y`, shrink it with `size`, or
+  frame the subject lower); the framing audit reports these (Framing audit, above).
 
 ### Sunbeams through a window (`src/three/godrays.tsx`)
 
@@ -374,7 +412,9 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   WWII onward).
   Early-medieval and Roman dress: `build?: "broad" | "narrow"`, `tunic?: true` (knee-length, in the outfit colour),
   `patch?` (on the tunic), `belt?` (with pouch and knife), `wraps?` (leg wraps), `mail?` (mail shirt), `cloak?`,
-  `tied?: true` (hair tied back), `stubble?`.
+  `tied?: true` (hair tied back), `stubble?`, `mud?` (on the tunic).
+  Apollo suit and modern office: `space?: { stripe?, visor?, cap? }`, `sleeves?`, `gloves?`, `bulk?` (~1.8 for a
+  pressure suit), `tie?`, `tieWide?`, `headset?`.
   `CostumePreview` shows them in all three views.
 - **Period check, for the whole costume.** For a story set in the past, go through every field each look sets, every
   `hold` item and every piece the video adds itself, from head to feet, not only the hat. Each piece must fit the
@@ -382,8 +422,7 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   `shorts`, `bib`, a `phone`. `shoes` adds a pale sole: before the 20th century only in dark leather colours. The
   period sets are narrow too: the farm dress is 19th-century rural wear and the tunic set is early-medieval and
   Roman, so an 1815 marshal gets neither. Drop or replace what does not fit. When the kit lacks a piece the period
-  needs (a bicorne, a top hat, a uniform coat), build it in the video's own folder, as
-  `src/videos/what-if-waterloo/hats.tsx` does for bicornes, rather than taking the nearest kit piece.
+  needs (a bicorne, a top hat, a uniform coat), build it in the video's own folder rather than taking the nearest kit piece.
   `pipeline.py check` does the coarse part automatically against plan.json `year` (`COSTUME_ERAS`, `HAT_ERAS`,
   `ITEM_ERAS` in `scripts/pipeline.py`): a kit piece from another era fails it, unless the look carries
   `// period-ok: <why>`. Colours, the pieces a video builds itself and what is missing stay with you.
@@ -392,7 +431,7 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   - Micro-expressions are automatic: in a `Stage` every held face keeps moving a little (brow flicks, lid droop, lip twitch, mouth width, searching eyes), tuned per expression in `engine/liven.ts`. `face` (`FaceMicro`) adds your own offsets on top; `energy: 0` turns it off. Preview all faces with the `FacePreview` composition.
   - Expression changes ease instead of popping: spread `faceChange([[0, "neutral"], [40, "shocked"], ...], f)` into the pose (it sets `expression`, `from`, `blend`). Brows, lids and pupils glide, the old mouth closes and the new one opens over ~10 frames. `FaceTour` shows one puppet going through every expression this way.
   - Body language is automatic too: a pose that sets no arms takes its expression's posture from `puppet/gestures.ts` (`POSTURE`: sad slumps, smug puts hands on hips, skeptical crosses arms, thinking holds the chin…), easing between postures during a `faceChange`. Poses that author arms keep them and only borrow the posture's `slump` / `lean`.
-  - `gesture`: `wave | point | shrug | armsCrossed | handsOnHips | chin | scratchHead | facepalm | cheer | clap` — a ready-made, animated body pose (the wave swings, the clap claps, the cheer pumps). Fields you set in the pose win over the gesture. `GestureTour` previews them all. To change gesture or body mid-shot, spread `moveChange([[0, "neutral"], [30, "happy", "wave"], [80, "thinking", "chin"]], f)` into the pose: face and body ease into each step over ~12 frames (a hanging arm glides into a reach, front/behind and hand shape switch halfway).
+  - `gesture`: `wave | point | shrug | armsCrossed | handsOnHips | chin | scratchHead | facepalm | cheer | clap` — a ready-made, animated body pose (the wave swings, the clap claps, the cheer pumps). Fields you set in the pose win over the gesture. `GestureTour` previews them all. To change gesture or body mid-shot, spread `moveChange([[0, "neutral"], [30, "happy", "wave"], [80, "thinking", "chin"]], f)` into the pose: face and body ease into each step over ~16 frames (`len`) (a hanging arm glides into a reach, front/behind and hand shape switch halfway).
   - Whole-body moves (spread into the pose; `MoveTour` previews them): `jump(f, start, height?, len?)` (load, flight with tucked legs, squash landing), `sitDown(f, start)` / `standUp(f, start)` (legs fold onto a hip-height seat, then holds `sit`), `lieDown(f, start, len?, asleep?)` / `getUp(f, start)` (tips back onto the floor; asleep adds shut eyes and floating "z"s), `crawlTo(f, start, frames, from, to)` (all fours in profile, like `stroll`). `walk` / `stroll` lift the swinging foot and swing the arms. Seen from the front (walking toward or away from the camera) the legs step forward and back, the forward foot lower and bigger, and the forward arm bends up toward the camera; `armSwing` (set by Stage) scales the arm swing. `WalkToward` previews a puppet walking up to the camera.
   - **Every walk carries its emotion, automatically.** Stage gives each expression its own gait: happy/excited bounce with big arm swings, sad/bored drag their feet (low `stepLift`), sink on every step, roll and hang their heads, worried shuffles, angry/determined lean in with fists, smug swaggers chin-up, skeptical keeps its arms close and head cocked, confused hesitates, thinking walks slowly head-down, awkward goes stiff, shocked flaps, disgusted shrinks back. Just set the expression on a walking puppet; do not hand-author a flat walk. `SadWalk` previews the sad gait (with a stumble and a sigh you would add per shot). `stroll` ties the steps to the distance covered so the planted foot does not slide; when you move a puppet yourself, use `walkAt(metresCovered, speed01)` instead of `walk(f * speed)`.
   - Body fields behind them: `crouch` (0..1 knees bend, hips sink), `air` (units off the ground), `bend` (0..1 at the hips; reads best in profile), `seat` (0..1 standing to seated), `lie` (0..1 onto the back; the cut-out widens to fit), `sleep`, `crawl` (phase, profile only), `stride` (walk phase).
@@ -411,9 +450,9 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   - `view: front | side | back`, `facing: 1 | -1` (side view). Leave both unset and the cut-out turns itself: profile when the camera is 60° or more off the set's front (+z), its back past 125° (not when sitting). Set `view: "front"` to keep it facing the camera.
   - Walk-ins: `const w = stroll(f, start, frames, from, to)`, then place at `w.at` and spread `...w.pose` last: it strides (in profile when crossing sideways) and stands once it arrives.
   - Mouth shapes (`viseme`), the lanyard/cap follow-through (`swing`) and beat gestures come from `Stage` automatically.
-  - `hold: { item: cup | drink | phone | toolbox | key | popcorn | briefcase | candy | wine, hand: L | R }`, `itemTilt` (deg), `coinDrop` (units fallen)
+  - `hold: { item: cup | drink | phone | toolbox | key | popcorn | briefcase | candy | wine | glass, hand: L | R }`, `itemTilt` (deg), `coinDrop` (units fallen)
 - `PuppetPlacement.fixedYaw` (radians, 0 = +z, PI / 2 = +x): the card does not turn to the camera but stays facing that direction, e.g. lying in a mirror's surface so it foreshortens with it; no lean-back tilt from high cameras; set `view: "front"` too.
-- `PuppetPlacement.mask = { center, u, v }`: draw the puppet only inside an ellipse in world space (a reflection in a mirror, a figure in a porthole). `u` and `v` are the ellipse axes scaled by 1 / radius; the test is made where the view ray meets the mask's plane, so the cut follows the glass outline on screen even though the card stands a little in front. The contact shadow is hidden for masked puppets. With `archBottom` (negative, in v units) the mask is an arch instead of an ellipse (flat base, half ellipse on top), for a standing mirror (`MirrorArch` in `src/videos/eagle-vision/props.tsx`: frame flush on the floor, bottom rail hidden below it). Example: `MIRROR_MASK` in `src/videos/eagle-vision/Design.tsx`.
+- `PuppetPlacement.mask = { center, u, v }`: draw the puppet only inside an ellipse in world space (a reflection in a mirror, a figure in a porthole). `u` and `v` are the ellipse axes scaled by 1 / radius; the test is made where the view ray meets the mask's plane, so the cut follows the glass outline on screen even though the card stands a little in front. The contact shadow is hidden for masked puppets. With `archBottom` (negative, in v units) the mask is an arch instead of an ellipse (flat base, half ellipse on top), for a standing mirror (frame flush on the floor, bottom rail hidden below it).
 - The cut-out card grows with the puppet: `air` (a car seat, a jump), an upward `bob` and a stretch (negative
   `squash`) extend its top, and it is wide enough for outstretched arms. The `stills` audit reads every card's edge
   pixels and reports "card of X cuts the drawing" if anything still runs off it (the cause of heads sliced off in a
@@ -424,11 +463,11 @@ Height 1.3 m (`PUPPET_HEIGHT`), head centre `HEAD_Y` ≈ 0.98 m, seat height `HI
   A puppet lifted 1 m or more with `air` (`LIFT_PIVOT`: a theatre box, a balcony, a stage) leans about its raised feet
   and measures the camera height from its raised head (`cardTilt(cam, at, lift)`, lift = air in metres): before, a
   camera level with a puppet in a box 2 m up read as a steep high angle within ~4 m and swung the card back into the
-  set (the puppet vanished), which is why what-if-lincoln lowered whole sets. Raised floors need no `drop` any more.
+  set (the puppet vanished). Raised floors need no `drop` any more.
   Smaller lifts (a car seat, a saddle) keep the floor pivot exactly as before. A slug-local overlay that rebuilds the
   card (a 3D hat) on a puppet lifted 1 m or more must pass the same `lift` to `cardTilt` and `air` to `handWorld`;
-  `headWorld(at, air, camera)` gives the head centre on the card.
-- Vertical frame is narrow: at fov 40 the visible half-width is only about 0.23 × camera distance (1.5 m away → ±0.35 m).
+  `headWorld(at, air, camera.position)` (from `puppet/PuppetBillboard`) gives the head centre on the card.
+- Vertical frame is narrow: at fov 40 the visible half-width is only about 0.2 × camera distance in 9:16 (1.5 m away → ±0.31 m; 0.65 × in 16:9).
   Keep props and puppets that must share a shot within that width, stack mechanism props vertically, and keep key
   text above the caption band (lower ~30 % of the frame). Puppets behind a counter need it ≤ 0.65 m tall to show their torso.
 - Framing references (puppet at z ≈ 1): medium `position [x-0.9, 1.25, 4.2] target [x-0.1, 1.0, 0.4] fov 36`;
@@ -443,7 +482,7 @@ headlights, low sun) brightens and colours the side facing it, with a curved cel
 cylinder round the body), and a soft rim glows along the silhouette edges that face it, fading inward (directional
 only: no glow wrapped round the whole outline). The far side keeps the puppet's colours, dimmed slightly.
 
-- With no `light`, Stage uses `moodLight(mood)`: no lights, just the faint ambient hint, so puppets look as drawn.
+- With no `light`, Stage uses the mood rig only when `bg` is a `moodBackground(...)`; a set's own background gets no rig, so puppets look as drawn.
 - Give a shot its own `light` when it has a strong source: `PuppetLight = { tint?, tintAmount?, shadow?,
   points?: [{ position, color, strength, range }], distant?: [{ direction, color, strength }] }` (at most two of each;
   `direction` points toward the light; `shadow` dims the far side, default 0.12). Fire: `firePoint(...)` (strength
@@ -459,10 +498,12 @@ gripping; a calm read makes the video feel slow.
 
 ## Sound
 
-Effects (`public/sfx/*.wav`, synthesised by `scripts/sfx_generate.py`): `reel-spin` (loop), `reel-stop`, `near-miss` (sad wah),
+Effects (`public/sfx/*.wav`, synthesised by `scripts/sfx_generate.py`; the full list is `SFX_FILES` in `engine/sound.tsx`, which
+also has `tank`, `compressor`, `squeak`, `morse`, `battle`, `deflate`, `sniff`, `roar`, `bark`, `slime`, `notif`, `skid`, `clang`,
+`crickets`, `scrape`, `snore`, `clink`, `bolt`): `reel-spin` (loop), `reel-stop`, `near-miss` (sad wah),
 `chime`, `button`, `bill-whirr`, `credit-blip`, `whoosh`, `tape-stop`, `hum` (loop), `stamp`, `tick`, `boom`, `paper`, `ambience` (loop),
 `pop` (a sign popping in), `drawer` (cash drawer out + stop), `card` (card slid or swiped), `door` (creak + shut), `sting` (pivot hit:
-put it on the "You see" line), `riser` (1.6 s build; start it so it ends on the pivot), `wind` (outdoor breeze, loop), `plop`
+put it on the "You see" line; it also jolts the camera), `riser` (1.6 s build; start it so it ends on the pivot), `wind` (outdoor breeze, loop), `plop`
 (a small soft lump landing on grass), `crackle` (small wood fire, loop), `chew` (two squishy chews),
 `crowd` (stadium cheering, loop), `engine` (early motor car chugging, loop), `honk` (bulb horn), `hiss` (steam burst),
 `steps` (running on dirt, loop), `rumble` (earthquake roar, loop), `river` (rushing water, loop), `falls` (waterfall roar,
@@ -483,11 +524,12 @@ Synthesised effects are fine for clicks, beeps and whooshes; organic sounds (che
 recordings, and any sound repeated wants several takes, or a run of it sounds stamped out.
 - **Takes.** `public/foley/<name>/NN.wav`, listed with source and licence in `src/engine/foley.json`
   (`foley.py list`). Import recordings with `foley.py import <name> <files> --license L --source URL`, or from the
-  shared sound library (`$SOUND_LIBRARY`, default `../../videotools/sound-library`, search it with its
-  `kutuphane.mjs liste`) with `lib:<glob>`, which carries over its author, source and licence. Each file is trimmed,
+  shared sound library (`$SOUND_LIBRARY`, default `../../video-tools/sound-library`, search it with its
+  `kutuphane.mjs liste`) with `lib:<glob>`, which carries over its author, source and licence; `--lowpass HZ` softens a
+  crisp recording. Each file is trimmed,
   faded and normalised into a take; fewer than `--min` (4) are filled with pitched copies. `foley.py synth <name>
   --from <sfx_generate function>` makes takes of a synthesised sound with different seeds. A licence with BY needs
-  the author in the video description (the manifest says so). Present: `chomp` (a soft bite: recorded crunches
+  the author in the video description (the manifest says so). Present (`foley.py list` has the full set: also `gunshot`, `gunshot-2`, `gunshot-echo`, `jingle`, `paper`, `pop`, `scrape`, `snore`, `tick`): `chomp` (a soft bite: recorded crunches
   low-passed, CC0, 7), `crunch` (a crisp bite, CC0, 7), `fork-plate` (CC0, 5), `munch` (a wet chew, synthesised, 6),
   `thud` (wooden knocks, CC BY 3.0 Ogrebane, 6). `kernel` (one popcorn kernel popping, synthesised by `sfx_generate.py kernel()`, own, 8; spread the pops of a burst over its frames with `foleyCues`). An eating puppet: `fork-plate` as the fork leaves the plate,
   `chomp` on the bite, `munch` on each jaw close after it (`SunlitLunch.tsx`).
@@ -545,12 +587,38 @@ numpy + scipy). `score.py` gives every score its timeline and its finish:
 - `finish(...)`: folds the tail past the end onto the start, masters to the library loops' loudness, writes
   `public/videos/<slug>/music.wav` and the cue sheet `build/score.md`.
 
-Write `music.py` per video (the composition is the creative part; `../videos/ghost-army/music.py` is a worked example:
-march in F for the hook, light pizzicato for the story, a D-minor spy pulse for the deception, a drone at the
-twist, the theme whistled at the end, a snare pickup into frame 0). Pass `score` to `Video` to play it; the
+Write `music.py` per video (the composition is the creative part: for example a march for the hook, light pizzicato for the story, a
+drone at the twist, the theme at the end and a pickup into frame 0). Pass `score` to `Video` to play it; the
 `score` input prop overrides that for an A/B without editing the scene:
 `SCORE=1 node scripts/sound.mjs <slug> ../output/ab/score.wav`, then mux it over the existing render
 (`ffmpeg -i ../output/<slug>.mp4 -i ../output/ab/score.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 320k -shortest ../output/ab/<slug>-score.mp4`).
 Switch a scene to its score only after the user has heard the A/B.
 
 Look (all views, every puppet): cel shading (flat, slightly soft shadow on the right and below, bangs shadow on the forehead), eyelids on white eyes, 30-unit arms and legs, short thick mitten hands with a thumb, simple rounded feet; excited is an open laugh with upper teeth and a tongue; in profile an egg-shaped head with the eye near the front of the face and, for `long` hair, one piece of hair over the back of the head and the nape. These live in `src/puppet/Puppet.tsx`; change them there so every character follows.
+
+## Short clips and stills outside the pipeline
+
+When the user asks for a single frame or a few seconds rather than a full explainer, write a composition in
+`src/scenes/<Name>.tsx` (a `ShotList` plus `SoundTrack`, as `src/scenes/SunlitLunch.tsx` does: one function of the
+frame that both a still and a clip use) and register it in `src/Root.tsx`. The same rules apply to picture and sound.
+`$D` below is a scratch folder.
+
+```bash
+POST=1 STILL_SCALE=1 node scripts/stills.mjs <Name> ../output/stills-<name> <frames>
+```
+
+Check a clip's effects the same way as a video's:
+
+```bash
+node scripts/cues.mjs <Name> $D/cues.json && .venv/bin/python scripts/foley.py space --cues $D/cues.json && STEM=sfx node scripts/sound.mjs <Name> $D/sfx.wav && STEM=music node scripts/sound.mjs <Name> $D/music.wav && .venv/bin/python scripts/mixreport.py effects $D/cues.json $D
+```
+
+Render it from the shared bundle with the post chain and bring the audio to -15 LUFS (a clip has no pipeline
+mastering):
+
+```bash
+npx remotion render "$(node scripts/bundle.mjs)" <Name> $D/raw.mp4 --props='{"post":true}' --gl=angle && ffmpeg -y -i $D/raw.mp4 -c:v copy -af loudnorm=I=-15:TP=-2:LRA=11 -c:a aac -b:a 320k -ar 48000 ../output/<name>.mp4
+```
+
+Check the result with `pipeline.glitch_frames` (no broken frames) before sending it, and delete any
+`$TMPDIR/remotion-*` left over.

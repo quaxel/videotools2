@@ -5,7 +5,9 @@
 #   animator/.venv/bin/python uploader/server.py                 http://127.0.0.1:8765
 #   animator/.venv/bin/python uploader/server.py --dry-run       whole flow without calling YouTube (nothing is saved as uploaded)
 #   animator/.venv/bin/python uploader/server.py --import <slug> add (or refresh) one video in the database and exit
-#   --db PATH, --port N                                 another database file / port (tests)
+#   animator/.venv/bin/python uploader/server.py --analytics         fetch YouTube Analytics for every uploaded video
+#   animator/.venv/bin/python uploader/server.py --analytics-report  write videos/analytics.md + videos/analytics.csv
+#   --db PATH, --port N, --out DIR                      another database file / port / report folder (tests)
 #
 # Everything lives in uploader/uploader.db (SQLite, gitignored). A video is imported once: when output/<slug>.mp4 and
 # videos/<slug>/ both exist, its title / description / tags are read from videos/<slug>/youtube.md (or drafted from
@@ -30,6 +32,8 @@ from urllib.parse import urlparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+import analytics  # noqa: E402  (no Google imports in there; the API clients are built here and passed in)
 
 # The Google client libraries live only in animator/.venv. Started with another python (e.g. `python3 server.py`),
 # re-run under the venv so "YouTube'a bağlan" doesn't fail later with "No module named 'google'".
@@ -45,7 +49,12 @@ CLIENT_SECRET = os.path.join(SECRETS, "client_secret.json")
 TOKEN = os.path.join(SECRETS, "token.json")
 # "youtube" (manage) is needed to add the video to the playlist; youtube.upload alone cannot.
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
+# Asked for at every new sign-in but never required for uploading: the user may untick it (the narrower grant is
+# stored), a token from before this scope existed keeps working for uploads, and only the analytics fetch asks the
+# user to connect again.
+ANALYTICS_SCOPE = analytics.ANALYTICS_SCOPE
 PLAYLIST = "Explained"  # every upload is added to this playlist of the channel
+FETCH_LOCK = threading.Lock()  # the page's analytics fetch runs one at a time
 HOST, PORT = "127.0.0.1", int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 8765
 DRY_RUN = "--dry-run" in sys.argv
 DB_PATH = sys.argv[sys.argv.index("--db") + 1] if "--db" in sys.argv else os.path.join(HERE, "uploader.db")
@@ -90,6 +99,7 @@ def now():
 def init_db():
     with closing(db()) as con, con:
         con.executescript(SCHEMA)
+        analytics.migrate(con)  # CREATE TABLE IF NOT EXISTS only
         done = con.execute("SELECT value FROM settings WHERE key = 'migrated_hidden_txt'").fetchone()
     if not done:
         # One-time: the videos listed in the old hidden.txt come in archived, with their metadata read while the
@@ -301,7 +311,30 @@ def validate(meta, privacy, publish_at):
 
 # ---------- YouTube ----------
 
-def credentials(interactive=False):
+def write_token(text):
+    """Write token.json atomically, so a thread reading it never sees a half-written file."""
+    os.makedirs(SECRETS, exist_ok=True)
+    tmp = TOKEN + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, TOKEN)
+
+
+def granted_scopes():
+    """The scopes the saved token was granted (only that field of token.json is looked at)."""
+    try:
+        return set(json.load(open(TOKEN, encoding="utf-8")).get("scopes") or [])
+    except (OSError, ValueError):
+        return set()
+
+
+def has_analytics_scope():
+    return set(SCOPES) <= granted_scopes() and ANALYTICS_SCOPE in granted_scopes()
+
+
+def credentials(interactive=False, want_analytics=False):
+    """want_analytics (with interactive): also start the Google sign-in when the token works but lacks the analytics
+    scope. If that sign-in fails or is abandoned, the old token file is left as it was."""
     from google.auth.exceptions import RefreshError
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
@@ -309,24 +342,36 @@ def credentials(interactive=False):
     creds = None
     if os.path.isfile(TOKEN):
         info = json.load(open(TOKEN, encoding="utf-8"))
-        if set(SCOPES) <= set(info.get("scopes") or []):  # a token from before a scope was added must connect again
-            creds = Credentials.from_authorized_user_info(info, SCOPES)
+        granted = set(info.get("scopes") or [])
+        if set(SCOPES) <= granted:  # a token from before an upload scope was added must connect again
+            # Keep every granted scope (the analytics one too): a refresh asks for exactly these, and to_json() writes
+            # them back, so passing only SCOPES here would silently drop the analytics grant at the first refresh.
+            creds = Credentials.from_authorized_user_info(info, SCOPES + sorted(granted - set(SCOPES)))
     if creds and not creds.valid and creds.refresh_token:
         try:
             creds.refresh(Request())
-            open(TOKEN, "w").write(creds.to_json())
+            write_token(creds.to_json())
         except RefreshError:
             creds = None  # revoked, or expired (7 days while the consent screen is in "Testing")
-    if (not creds or not creds.valid) and interactive:
+    regrant = want_analytics and not has_analytics_scope()
+    if (not creds or not creds.valid or regrant) and interactive:
         from google_auth_oauthlib.flow import InstalledAppFlow
 
-        flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET, SCOPES)
+        # Google lets the user untick a scope: accept a narrower grant instead of failing on it, and store what was granted
+        os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
+        flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET, SCOPES + [ANALYTICS_SCOPE])
         try:  # an abandoned Google sign-in gives up after 5 minutes instead of blocking "YouTube'a bağlan" forever
             creds = flow.run_local_server(port=0, prompt="consent", open_browser=True, timeout_seconds=300)
         except AttributeError:
             raise RuntimeError("Google izni 5 dakika içinde verilmedi; yeniden deneyin.")
-        os.makedirs(SECRETS, exist_ok=True)
-        open(TOKEN, "w").write(creds.to_json())
+        given = creds.granted_scopes or creds.scopes or []
+        granted = sorted(set(given.split() if isinstance(given, str) else given))
+        if not set(SCOPES) <= set(granted):
+            raise RuntimeError("YouTube yükleme ve yönetme izni verilmedi; bağlanırken bu iki izni işaretli bırakın.")
+        info = json.loads(creds.to_json())
+        info["scopes"] = granted
+        creds = Credentials.from_authorized_user_info(info, granted)
+        write_token(json.dumps(info))
     return creds if creds and creds.valid else None
 
 
@@ -337,6 +382,33 @@ def youtube():
     if not creds:
         raise RuntimeError("YouTube bağlantısı yok ya da süresi doldu: “YouTube'a bağlan” ile yeniden bağlanın.")
     return build("youtube", "v3", credentials=creds, cache_discovery=False)
+
+
+ANALYTICS_HELP = ("YouTube Analytics izni yok: kayıtlı Google izni bu özellikten önce verilmiş (yüklemeler etkilenmez). "
+                  "Sayfayı açın (uploader/server.py) → “Analitik” → “Analitik izni ver” ile bir kez yeniden izin verin; "
+                  "Google Cloud projesinde “YouTube Analytics API” de açık olmalı (README: Audience analytics).")
+
+
+def youtube_analytics():
+    from googleapiclient.discovery import build
+
+    if not has_analytics_scope():
+        raise analytics.AnalyticsError(ANALYTICS_HELP)
+    creds = credentials()
+    if not creds:
+        raise analytics.AnalyticsError("YouTube bağlantısı yok ya da süresi doldu: sayfadan yeniden bağlanın.")
+    return build("youtubeAnalytics", "v2", credentials=creds, cache_discovery=False)
+
+
+def fetch_analytics(log=print):
+    """Fetch for every uploaded video into the `analytics` table. --dry-run: no API client is built, nothing is saved."""
+    with closing(db()) as con:
+        if DRY_RUN:
+            return analytics.fetch_all(con, None, None, dry_run=True, log=log)
+        yta = youtube_analytics()
+        summary = analytics.fetch_all(con, yta, youtube(), log=log)
+        analytics.snapshot_production(con, os.path.join(ROOT, "videos"))
+        return summary
 
 
 def auth_status():
@@ -352,10 +424,10 @@ def auth_status():
     return out
 
 
-def connect():
+def connect(want_analytics=False):
     auth_state.update(connecting=True, error=None)
     try:
-        credentials(interactive=True)
+        credentials(interactive=True, want_analytics=want_analytics)
     except Exception as e:
         auth_state["error"] = str(e)
     finally:
@@ -379,6 +451,10 @@ def add_to_playlist(video_id):
                 break
         if not playlist_id:
             return f"Kanalda “{PLAYLIST}” adında bir oynatma listesi bulunamadı."
+        # a retry after a lost response must not add the video twice (a playlist allows duplicates)
+        there = yt.playlistItems().list(part="id", playlistId=playlist_id, videoId=video_id, maxResults=1).execute()
+        if there.get("items"):
+            return None
         yt.playlistItems().insert(part="snippet", body={"snippet": {
             "playlistId": playlist_id, "resourceId": {"kind": "youtube#video", "videoId": video_id}}}).execute()
         return None
@@ -479,6 +555,20 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"videos": all_videos(), "limits": LIMITS, "categories": CATEGORIES, "dryRun": DRY_RUN})
         elif path == "/api/auth":
             self.send_json(auth_status())
+        elif path == "/api/auth/scopes":  # local only: no call to Google
+            self.send_json({"analytics": has_analytics_scope(), **auth_state})
+        elif path == "/analytics":
+            try:
+                with closing(db()) as con:
+                    rows = analytics.collect(con, os.path.join(ROOT, "videos"))
+                data = analytics.render_page(rows, has_analytics_scope(), DRY_RUN).encode()
+            except Exception as e:
+                return self.send_json({"error": f"Analitik sayfası hazırlanamadı: {e}"}, 500)
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
         elif m := re.fullmatch(r"/media/([\w-]+)\.mp4", path):
             if (row := self.known_row(m.group(1))):
                 if os.path.isfile(mp4_path(row)):
@@ -498,8 +588,18 @@ class Handler(BaseHTTPRequestHandler):
             if not os.path.isfile(CLIENT_SECRET):
                 return self.send_json({"error": "uploader/secrets/client_secret.json bulunamadı (README'ye bakın)."}, 400)
             if not auth_state["connecting"]:
-                threading.Thread(target=connect, daemon=True).start()
+                threading.Thread(target=connect, args=(bool(data.get("analytics")),), daemon=True).start()
             return self.send_json({"ok": True})
+        if path == "/api/analytics/fetch":
+            if not FETCH_LOCK.acquire(blocking=False):  # one fetch at a time: a second would spend quota on the same rows
+                return self.send_json({"error": "Veriler zaten güncelleniyor; bitmesini bekleyin."}, 409)
+            try:
+                s = fetch_analytics(log=lambda *a: None)
+                return self.send_json({"fetched": len(s["fetched"]), "errors": len(s["errors"]), "skipped": len(s["skipped"])})
+            except Exception as e:
+                return self.send_json({"error": str(e)}, 400)
+            finally:
+                FETCH_LOCK.release()
         slug = data.get("slug", "")
         row = self.known_row(slug)
         if not row:
@@ -600,6 +700,24 @@ if __name__ == "__main__":
         info = video_info(get_row(slug))
         print(f"{slug}: veritabanında ({'youtube.md' if info['hasMd'] else 'otomatik taslak'}), başlık: {info['meta']['title']!r}"
               + (" — kendi düzenlemeleriniz korunuyor" if info["edited"] else ""))
+        sys.exit(0)
+    if "--analytics" in sys.argv:
+        print("YouTube Analytics" + (" (deneme modu: YouTube çağrılmaz, hiçbir şey kaydedilmez)" if DRY_RUN else ""))
+        try:
+            s = fetch_analytics()
+        except analytics.AnalyticsError as e:
+            sys.exit(str(e))
+        print(f"{len(s['fetched'])} video {'çekilecekti' if DRY_RUN else 'kaydedildi'}, {len(s['skipped'])} atlandı, "
+              f"{len(s['errors'])} hata. Rapor: uploader/server.py --analytics-report")
+        if "--analytics-report" not in sys.argv:
+            sys.exit(1 if s["errors"] else 0)
+    if "--analytics-report" in sys.argv:
+        out_dir = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else os.path.join(ROOT, "videos")
+        with closing(db()) as con:
+            if not DRY_RUN:
+                analytics.snapshot_production(con, os.path.join(ROOT, "videos"))
+            md, csv_path, rows = analytics.write_report(con, os.path.join(ROOT, "videos"), out_dir)
+        print(f"{len(rows)} video, {sum(r['avg_view_pct'] is not None for r in rows)} tanesinde analitik verisi → {md}, {csv_path}")
         sys.exit(0)
     url = f"http://{HOST}:{PORT}"
     try:
