@@ -1,6 +1,6 @@
-# St Mary's Hospital lab, 1928 (Fleming) — reference notes
+# St Mary's Hospital lab, 1928 (Alexander Fleming's lab) — reference notes
 
-Used by `src/videos/what-if-fleming` (sets built in that slug's `props.tsx`, not the shared kit).
+The sets are a video's own props, not the shared kit.
 
 Sources (read, not downloaded): the Alexander Fleming Laboratory Museum write-ups —
 https://www.ianvisits.co.uk/articles/the-alexander-fleming-museum-has-reopened-56530/ ,

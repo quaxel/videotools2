@@ -1,21 +1,21 @@
 import React from "react";
 import {
-  beatPath,
   Burst,
   CameraShot,
   Chair,
   Counter,
+  ease,
   faceChange,
   foleyCues,
   frameSpot,
   handWorld,
-
   Headline,
   InkBox,
   InkCylinder,
   jawCloses,
   jump,
   Label,
+  mix,
   moodBackground,
   MUSIC_FILES,
   MusicCue,
@@ -31,6 +31,8 @@ import {
   useShotFrame,
   Vec3,
   Video,
+  wide,
+  widePath,
   Window,
 } from "../../engine";
 import { headWorld } from "../../puppet/PuppetBillboard";
@@ -86,37 +88,7 @@ const TIMING = TIMING_JSON as Timing;
 export const SLUG = "microwave-candy-bar";
 export const timing = TIMING;
 
-const ease = (f: number, a: number, b: number) => {
-  const p = ramp(f, a, b);
-  return p * p * (3 - 2 * p);
-};
-const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 const ASPECT = 9 / 16;
-
-// Every camera key is pulled back from its target by K (the cut-out heads are big: medium shots need ~3 m).
-const K = 1.5;
-type Key = { at: number; position: Vec3; target: Vec3; fov?: number; k?: number };
-const wide = <T extends { position: Vec3; target: Vec3 }>(c: T, k = K): T => ({
-  ...c,
-  position: [c.target[0] + (c.position[0] - c.target[0]) * k, c.target[1] + (c.position[1] - c.target[1]) * k, c.target[2] + (c.position[2] - c.target[2]) * k] as Vec3,
-});
-const path = (keys: Key[], f: number) => beatPath(keys.map(({ k, ...key }) => wide(key, k ?? K)), f);
-
-// The reach (puppet units) that puts a hand at a world point, as seen from the camera: a few Newton steps on handWorld.
-const solveReach = (at: [number, number], target: Vec3, camera: CameraShot): [number, number] => {
-  let r: [number, number] = [-200, -600];
-  for (let it = 0; it < 6; it++) {
-    const p = handWorld(at, r, camera);
-    const px = handWorld(at, [r[0] + 10, r[1]], camera);
-    const py = handWorld(at, [r[0], r[1] - 10], camera);
-    const ex = target[0] - p[0];
-    const ey = target[1] - p[1];
-    const dxx = (px[0] - p[0]) / 10;
-    const dyy = (py[1] - p[1]) / -10;
-    r = [r[0] + (Math.abs(dxx) > 1e-6 ? ex / dxx : 0), r[1] + (Math.abs(dyy) > 1e-6 ? ey / dyy : 0)];
-  }
-  return r;
-};
 
 // ---------- cast (1945-1967; the closing child is present day) ----------
 
@@ -189,7 +161,7 @@ const PocketGoo: React.FC<{ pocket: Vec3; f: number; stain: number }> = ({ pocke
 const S1_END: CameraShot = { position: [0.34, 0.92, 1.75], target: [0.17, 0.7, -0.45], fov: 40 };
 const S1: React.FC = () => {
   const f = useShotFrame(); // 0..130
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.5, 1.22, 2.45], target: [0.12, 0.82, -0.5], fov: 40 },
       { at: 59, position: [0.42, 1.02, 2.0], target: [0.15, 0.74, -0.5], fov: 40 },
@@ -241,7 +213,7 @@ const S1: React.FC = () => {
 const S2_END: CameraShot = { position: [0.08, 1.02, 1.95], target: [0.0, 0.7, -0.35], fov: 40 };
 const S2: React.FC = () => {
   const f = useShotFrame(); // 0..162
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.25, 1.95, 1.85], target: [0.05, 0.85, -0.4], fov: 40 },
       { at: 161, ...S2_END },
@@ -296,7 +268,7 @@ const S2: React.FC = () => {
 const S3_END: CameraShot = { position: [0.3, 1.25, 2.55], target: [0.32, 1.0, -0.8], fov: 40 };
 const S3: React.FC = () => {
   const f = useShotFrame(); // 0..142
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [-0.32, 1.2, 2.5], target: [-0.3, 0.95, -0.8], fov: 40 },
       { at: 141, ...S3_END },
@@ -357,7 +329,7 @@ const S3: React.FC = () => {
 
 const S4: React.FC = () => {
   const f = useShotFrame(); // 0..121
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.4, 1.55, 1.6], target: [0.3, 1.0, -0.7], fov: 40 },
       { at: 50, position: [0.3, 1.2, 1.75], target: [0.2, 0.86, -0.6], fov: 40 },
@@ -412,7 +384,7 @@ const S4: React.FC = () => {
 const POP = 80; // "They popped"
 const S5: React.FC = () => {
   const f = useShotFrame(); // 0..114
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.3, 1.2, 2.2], target: [0.05, 0.85, -0.6], fov: 40 },
       { at: 60, position: [0.32, 1.08, 1.85], target: [0.12, 0.84, -0.6], fov: 40 },
@@ -477,7 +449,7 @@ const BURST = 81;
 const S6_END: CameraShot = { position: [0.04, 1.1, 1.75], target: [0.04, 0.86, -0.75], fov: 40 };
 const S6: React.FC = () => {
   const f = useShotFrame(); // 0..209
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.08, 1.05, 2.0], target: [0.08, 0.85, -0.62], fov: 40, k: 1.55 },
       { at: BURST - 6, position: [0.08, 1.02, 2.0], target: [0.08, 0.84, -0.62], fov: 40, k: 1.35 },
@@ -542,7 +514,7 @@ const S6: React.FC = () => {
 
 const S7: React.FC = () => {
   const f = useShotFrame(); // 0..261
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [-0.05, 0.78, 1.35], target: [0.0, 0.62, -0.3], fov: 40, k: 1.25 },
       { at: 78, position: [-0.42, 0.98, 2.05], target: [-0.36, 0.8, -0.3], fov: 40 },
@@ -596,7 +568,7 @@ const S7: React.FC = () => {
 const STAMP = 69; // "filed"
 const S8: React.FC = () => {
   const f = useShotFrame(); // 0..113
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.28, 1.35, 2.35], target: [0.02, 1.0, -0.8], fov: 40 },
       { at: 113, position: [0.06, 1.15, 1.5], target: [0.0, 0.9, -0.5], fov: 40 },
@@ -660,7 +632,7 @@ const S8: React.FC = () => {
 const WEIGH = 88; // "weighed"
 const S9: React.FC = () => {
   const f = useShotFrame(); // 0..132
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.15, 1.7, 2.35], target: [0.12, 1.42, -0.9], fov: 40 },
       { at: 64, position: [0.18, 1.55, 2.25], target: [0.15, 1.25, -0.9], fov: 40 },
@@ -720,7 +692,7 @@ const PRICE = 92; // "four"
 const S10_END: CameraShot = { position: [0.2, 1.18, 2.15], target: [0.28, 0.95, -1.0], fov: 40 };
 const S10: React.FC = () => {
   const f = useShotFrame(); // 0..147
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [-0.5, 1.22, 2.15], target: [-0.42, 1.0, -1.0], fov: 40 },
       { at: 147, ...S10_END },
@@ -768,7 +740,7 @@ const S10: React.FC = () => {
 
 const S11: React.FC = () => {
   const f = useShotFrame(); // 0..154
-  const camera = path(
+  const camera = widePath(
     [
       { at: 0, position: [0.1, 1.2, 2.25], target: [0.0, 0.72, -0.6], fov: 40 },
       { at: 60, position: [0.2, 0.98, 1.65], target: [0.08, 0.62, -0.4], fov: 40 },

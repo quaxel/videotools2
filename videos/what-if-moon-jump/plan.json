@@ -1,0 +1,59 @@
+{
+  "title": "What If Your Moon Jump Went Too High?",
+  "topic": "What if your Moon jump went too high? (Apollo 16, Charlie Duke's 1972 fall onto his life-support backpack)",
+  "year": 1972,
+  "mechanism": "The Moon cuts your weight to about a sixth but not your mass: a big push sends a suited astronaut four feet up, and once the heavy life-support backpack starts tipping him backward it keeps going, so Charlie Duke landed on the fiberglass shell that held his air.",
+  "beats": {
+    "hook": "On the Moon a four-foot jump nearly killed a man, and his own backpack did it: Duke rising past the flag, his shocked face in the helmet, the backpack slamming into the dust.",
+    "but": "April 1972, Apollo 16: Duke and Young finish their last moonwalk; Munich's Olympics are coming, so they invent the Moon Olympics.",
+    "then": "Young shows off, jumping flat-footed straight up and bouncing like a kid in one-sixth gravity; Duke wants to beat him and flies about four feet high.",
+    "conflict": "As he straightens up the backpack pulls him over backward, he can't correct it, and falls four feet right onto the backpack: that backpack is his air. Houston flinches.",
+    "pivot": "You see, the Moon cuts your weight but not your mass: the pack weighed as much as Duke, so once it tips it keeps going; and it is a fiberglass shell, crack it and the air rushes out.",
+    "so": "Young: 'Charlie! That ain't very smart.' He helps him up; Duke freezes, listening for a hiss; nothing, the pack held. Now picture you, jumping twice as high, flipping right over. That's why moonwalkers loped and skipped.",
+    "closing": "So on the Moon, keep your jumps small. Remember the man who didn't. (hands over to: On the Moon, a jump of just four feet nearly killed a man...)"
+  },
+  "triple_hook": {
+    "visual": "Charlie Duke in his white suit is already rising past the striped flag in front of the gold-foil lander, tipping back, black sky and the blue Earth behind, camera pushing up with him.",
+    "verbal": "On the Moon, a jump of just four feet nearly killed a man, and his own backpack did it.",
+    "text": "WHAT IF YOU JUMP TOO HIGH?"
+  },
+  "seed": {
+    "what": "Duke's big white life-support backpack (PLSS), on screen from the first beat, the thing that tips him over and the shell that holds his air",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "lm-site", "set": "MoonSet (new): Descartes highlands by the gold-foil lunar module, low golden sun, black sky, Earth, flag, rover", "colour": "gold and grey" },
+    { "id": "munich", "set": "StadiumSet (new, small): 1972 Munich stadium at dusk, red track, high-jump bar and mat, banner MUNICH 1972, floodlights", "colour": "red and orange" },
+    { "id": "earthshine", "set": "MoonSet looking toward Earth: big blue Earth, cold blue rim, Young bouncing", "colour": "blue and black" },
+    { "id": "jump", "set": "MoonSet low angle up at Duke against the LM and the sun glare", "colour": "warm gold white" },
+    { "id": "shadow-side", "set": "MoonSet in the LM's shadow, cold blue-grey, profile of the backward tip and fall", "colour": "cold blue grey" },
+    { "id": "houston", "set": "Room: Mission Control 1972, rows of green-grey consoles, amber screens, a big TV wall showing the fall", "colour": "green and amber" },
+    { "id": "truth-lab", "set": "Room re-lit cold blue (truth): a giant scale labelled WEIGHT dropping to 1/6, a heavy pack on a tipping post labelled MASS", "colour": "navy and cyan" },
+    { "id": "pack-shop", "set": "Room: a 1972 suit workshop, the backpack cut open on a stand: FIBERGLASS shell, OXYGEN tank, a crack, red warning light", "colour": "white and orange red" },
+    { "id": "help-up", "set": "MoonSet by the rover, neutral sun, Young helping Duke up", "colour": "grey and white with blue Earth" },
+    { "id": "dream", "set": "MoonSet re-lit as a purple what-if dream, star field, a viewer astronaut flipping over", "colour": "purple and magenta" },
+    { "id": "lope", "set": "MoonSet on a slope with the rover: astronauts loping and skipping, Earth high", "colour": "pale blue white" },
+    { "id": "lm-site-loop", "set": "MoonSet back at the LM and flag, ending on the frame-0 camera", "colour": "gold and grey" }
+  ],
+  "characters": [
+    { "id": "duke", "look": "Charlie Duke, Apollo 16 lunar module pilot: 1972 A7LB white moon suit with no stripes, white lunar boots, white gloves, clear bubble helmet under the white visor assembly with the gold visor raised, big white life-support backpack (PLSS) with the small oxygen pack on top, dark hair" },
+    { "id": "young", "look": "John Young, Apollo 16 commander: same 1972 white moon suit, backpack and helmet with commander's red stripes on the arms, legs and helmet, white lunar boots, dark hair" },
+    { "id": "england", "look": "Tony England, CapCom in Houston 1972: short-sleeved white shirt, narrow dark tie, dark slacks, black shoes, headset with boom mic, short hair" },
+    { "id": "controller", "look": "A flight controller, Houston 1972: short-sleeved pale blue shirt, wide patterned tie, horn-rimmed glasses, headset, coffee mug" },
+    { "id": "jumper", "look": "A 1972 high jumper in Munich: red sleeveless athletics vest, short shorts (1972 track kit), white running spikes" },
+    { "id": "you", "look": "The viewer as an astronaut in a dream: white moon suit with orange accent stripes, helmet with a clear visor, backpack" }
+  ],
+  "gags": [
+    { "line": 4, "what": "Young bounces like a kid: three boing hops, each kicking up clean ballistic dust arcs; the last hop's dust rains onto Duke's visor and he wipes it with a glove" },
+    { "line": 8, "what": "Duke lands flat on his backpack, boots in the air, a ballistic dust ring sprays out and falls straight back down" },
+    { "line": 8, "what": "In Houston, the controller flinches at the TV and his coffee mug tips over the console" },
+    { "line": 15, "what": "The dream 'you' flips over twice like a pinwheel and lands head-first, stuck in the dust like a dart, legs kicking" }
+  ],
+  "props": [
+    { "idea": "weight drops on the Moon", "prop": "a giant dial scale labelled WEIGHT whose needle swings from EARTH down to 1/6" },
+    { "idea": "mass stays", "prop": "a heavy pack on a tipping post labelled MASS that tips and keeps going" },
+    { "idea": "the pack holds his air", "prop": "the backpack cut open on a stand: FIBERGLASS shell, OXYGEN tank, a spreading crack and a falling gauge" }
+  ],
+  "format_note": "The jump is staged at its sourced height of about four feet (1.2 m) on the puppet's 1.3 m scale; hang time is slowed for readability. The Earth is drawn larger in the sky than it would look from the Moon.",
+  "story_numbers": ["twice (as high, the what-if dream)", "1/6 on the scale dial (one sixth, sourced)"]
+}

@@ -47,6 +47,16 @@
   "source": "synthesised, scripts/sfx_generate.py munch()",
   "license": "own"
  },
+ "paper": {
+  "count": 6,
+  "source": "synthesised, scripts/sfx_generate.py paper()",
+  "license": "own"
+ },
+ "pop": {
+  "count": 6,
+  "source": "synthesised, scripts/sfx_generate.py pop()",
+  "license": "own"
+ },
  "relay": {
   "count": 8,
   "source": "synthesised, scripts/sfx_generate.py relay()",
@@ -67,5 +77,10 @@
   "source": "Ogrebane (artisticdude) (https://opengameart.org/content/metal-and-wood-impact-sound-effects)",
   "license": "CC BY 3.0",
   "note": "wooden knocks: crates, chairs, a prop landing; 2 pitched copies; credit the author in the video description"
+ },
+ "tick": {
+  "count": 6,
+  "source": "synthesised, scripts/sfx_generate.py tick()",
+  "license": "own"
  }
 }

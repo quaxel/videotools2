@@ -10,7 +10,10 @@ type Vec3 = [number, number, number];
 // Room x ±3.5, back wall z = -3. The upright piano stands against the left wall, its keys toward +x; the pianist
 // sits at `PIANO_SEAT` in profile facing it. The bar runs along the right; the back window looks onto the street.
 export const PIANO: Vec3 = [-3.05, 0, -1.0];
-export const PIANO_SEAT: [number, number] = [-2.05, -1.0];
+// Close enough for his hands to reach the keys (keys centre x -2.72, 0.56 m up): a puppet's arm is only ~0.3 m.
+export const PIANO_SEAT: [number, number] = [-2.4, -1.0];
+// The middle of the keyboard in the pianist's puppet units (screen space, seated, the camera in front).
+export const PIANO_KEYS: [number, number] = [-228, -470];
 export const BAR_X = 2.3;
 export const WINDOW: Vec3 = [0.6, 1.45, -2.95];
 const LAMPS: Vec3[] = [

@@ -28,21 +28,27 @@ const VideoContext = createContext<{ timing: Timing; sfx: Sfx[]; lighting: boole
 export const LookContext = createContext<{ lighting?: boolean; post?: boolean | Partial<PostParts> } | null>(null);
 
 // The framing table for this video, if the pipeline wrote one (null while loading or when there is none).
+// The shots mount only once the table has been read (`loaded`). Mounted before it, a Stage first drew its camera
+// with the raw head correction and was drawn again when the table arrived; the screenshot could fall between the two,
+// so the same still came out in one of two framings from run to run (a few pixels apart), and the first frame a
+// render tab drew could miss the smoothed correction.
 const useFramingTable = (slug: string) => {
-  const [table, setTable] = useState<FramingTable | null>(null);
+  const [state, setState] = useState<{ table: FramingTable | null; loaded: boolean }>({ table: null, loaded: false });
   const [handle] = useState(() => delayRender(`framing table ${slug}`));
   useEffect(() => {
     if ((getInputProps() as { framingPass?: boolean }).framingPass) {
-      continueRender(handle);
+      setState({ table: null, loaded: true });
       return;
     }
     fetch(staticFile(`videos/${slug}/framing.json`))
       .then((r) => (r.ok ? r.json() : null))
-      .then((t) => setTable(t))
       .catch(() => null)
-      .finally(() => continueRender(handle));
-  }, [slug, handle]);
-  return table;
+      .then((t) => setState({ table: t, loaded: true }));
+  }, [slug]);
+  useEffect(() => {
+    if (state.loaded) continueRender(handle);
+  }, [state.loaded, handle]);
+  return state;
 };
 
 // `lighting` (default on): puppets take the set's light (a rig derived from the mood, or a Stage's own `light`)
@@ -69,7 +75,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   captions = true,
   dip,
 }) => {
-  const framing = useFramingTable(slug);
+  const { table: framing, loaded } = useFramingTable(slug);
   // `soundOnly` (input prop, scripts/sound.mjs): the soundtrack alone, without mounting a single 3D shot.
   const { soundOnly: so, cueDump, score: scoreProp, stem } = getInputProps() as { soundOnly?: boolean; cueDump?: boolean; score?: boolean; stem?: "voice" | "music" | "sfx" };
   const soundOnly = so === true;
@@ -81,7 +87,7 @@ export const Video: React.FC<{ slug: string; timing: Timing; shots: Shot[]; sfx:
   if (cueDump) console.log("[cues] " + JSON.stringify({ shots: shots.map(([a, b, , whip]) => [a, b, whip]), sfx, music: bed, library: music }));
   return (
   <AbsoluteFill style={{ backgroundColor: "#000" }}>
-    {!soundOnly && (
+    {!soundOnly && loaded && (
       <VideoContext.Provider value={{ timing, sfx, lighting, post, steady, framing }}>
         <ShotList shots={shots} dip={dip} />
       </VideoContext.Provider>

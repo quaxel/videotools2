@@ -1,6 +1,6 @@
 # Niagara Falls and the Lake Erie ice jam, March 1848
 
-Sets: `src/three/NiagaraSets.tsx`. Used by `src/videos/niagara-silent`.
+Sets: `src/three/NiagaraSets.tsx`.
 
 ## Sources (looked at in the browser, Wikimedia Commons media search)
 

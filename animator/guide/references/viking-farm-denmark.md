@@ -1,4 +1,4 @@
-# Viking farm, Denmark, c. AD 900-980 (viking-vs-roman: Bjorn's farm)
+# Viking farm, Denmark, c. AD 900-980
 
 Sources (read 2026-11-06):
 - Ribe VikingeCenter, the Hviding farm estate (reconstruction of the farm dug at Gammel Hviding, c. 980):

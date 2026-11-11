@@ -7,7 +7,7 @@
 #                                     [--min 4] [--pitch 0.94,1.06] [--lowpass HZ] [--max SECONDS]
 #       Recordings in: each trimmed of silence, faded, peak-normalised, one take each; with fewer than --min takes,
 #       pitched copies (resampled, so pitch and length move together) fill up to --min. `lib:darbe/*tahta*` takes
-#       files from the shared sound library ($SOUND_LIBRARY, default ../../videotools/sound-library) and copies its
+#       files from the shared sound library ($SOUND_LIBRARY, default ../../video-tools/sound-library) and copies its
 #       catalog's author, source and licence; files of your own need --license and --source. --lowpass softens a
 #       recording (a crisp crunch into a soft chomp), --max keeps only the first seconds after the onset.
 #   .venv/bin/python scripts/foley.py synth <name> --from <sfx_generate function> [--takes 6]
@@ -33,7 +33,7 @@ SR = 48000
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PUBLIC = os.path.join(ROOT, "public")
 MANIFEST = os.path.join(ROOT, "src", "engine", "foley.json")
-LIBRARY = os.environ.get("SOUND_LIBRARY", os.path.join(ROOT, "..", "..", "videotools", "sound-library"))
+LIBRARY = os.environ.get("SOUND_LIBRARY", os.path.join(ROOT, "..", "..", "video-tools", "sound-library"))
 SPACES = ("room", "hall", "outdoor", "far")
 
 

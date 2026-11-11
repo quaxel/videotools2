@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import type { PuppetPlacement } from "../puppet/PuppetBillboard";
+import { drawnHead } from "../puppet/Puppet";
 import type { CameraShot } from "./stage";
 
 // Never a half head: Stage runs every shot's camera through keepHeadsInFrame. Any puppet whose head is partly in
@@ -64,8 +65,17 @@ const fit = (spans: { c: number; r: number; drop?: boolean; main?: boolean }[], 
 
 export const keepHeadsInFrame = (shot: CameraShot, aspect: number, puppets: PuppetPlacement[]): CameraShot => {
   const heads: Head[] = puppets
-    .filter((p) => !p.crop && p.pose.view !== "back" && !(p.pose.lie ?? 0) && !p.pose.sleep)
-    .map((p) => ({ c: new THREE.Vector3(p.at[0], HEAD_Y + (p.pose.air ?? 0) * K, p.at[1]), r: HEAD_R }));
+    .filter((p) => !p.crop && p.pose.view !== "back")
+    .map((p) => {
+      // The head as drawn (tipped by `lie`, lifted by `air`), carried along the card's right (it faces the camera) and
+      // raised by `rise`; a moon suit's helmet is bigger than a head.
+      const d = drawnHead(p.pose, p.look);
+      const fx = shot.target[0] - shot.position[0];
+      const fz = shot.target[2] - shot.position[2];
+      const n = Math.hypot(fx, fz) || 1;
+      const side = d.x * K;
+      return { c: new THREE.Vector3(p.at[0] - (fz / n) * side, -d.y * K + (p.pose.rise ?? 0), p.at[1] + (fx / n) * side), r: p.look.space ? HEAD_R * 1.3 : HEAD_R };
+    });
   if (!heads.length) return shot;
   let out = shot;
   for (let pass = 0; pass < 20; pass++) {

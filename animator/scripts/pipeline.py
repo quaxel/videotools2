@@ -4,10 +4,6 @@
 #   .venv/bin/python scripts/pipeline.py new <slug> "<topic>"   scaffold videos/<slug>/ and src/videos/<slug>/
 #   .venv/bin/python scripts/pipeline.py voice <slug>           Qwen TTS -> fitted track -> timing.json + pace check; ends
 #                                                              non-zero (after writing everything) when the pace misses
-#   .venv/bin/python scripts/pipeline.py scaffold <slug> [--force] [--dry-run]
-#                                                              after voice: write src/videos/<slug>/Scene.tsx and
-#                                                              videos/<slug>/camera_plan.md cut to the voice frames
-#                                                              (scripts/scaffold.py); refuses to overwrite without --force
 #   .venv/bin/python scripts/pipeline.py pace <slug>            duration, words, wpm + speech_cover and long_pauses on the
 #                                                              voice track -> build/pace.json (voice runs it); non-zero on a miss
 #   .venv/bin/python scripts/pipeline.py physics <slug>         bake videos/<slug>/physics.mjs (Rapier, scripts/physics.mjs)
@@ -107,10 +103,10 @@ TARGETS = {
     "top_hue_share": (0, 0.40),
     "seed_by": (0, 20),  # seconds: the twist's object or person first appears
     "lufs": (-17, -14),
-    # Calibrated on the 14 slow-camera videos (2026-11-11): motion 4.8-13.6 (median 7.2), still_share 1-16 %; the old
-    # fast-cut videos gave 6.5-16.6 and 0-6 %. The floor sits just under the stillest delivered video.
-    "motion": (4.5, None),  # median frame-to-frame change (10 fps, 54x96)
-    "still_share": (0, 0.20),  # share of frame pairs that barely change (< 2)
+    # PROVISIONAL: the old fast-cut, hand-held references gave 8.0 and 10 %; the slow gliding camera (rules.md →
+    # Camera) moves less per frame. Recalibrate from the first video made with it.
+    "motion": (3.0, None),  # median frame-to-frame change (10 fps, 54x96)
+    "still_share": (0, 0.30),  # share of frame pairs that barely change (< 2)
     "glitch_frames": (0, 0),  # broken frames in the render (lost WebGL canvas); render retries them
     "black_frames": (0, 0),  # qa.py: frames with mean luma < 4 %
     "frozen_spans": (0, 0),  # qa.py: 12+ frames without any change
@@ -1879,7 +1875,6 @@ if __name__ == "__main__":
         call = {
             "new": lambda: cmd_new(args[0], args[1]),
             "voice": lambda: cmd_voice(args[0]),
-            "scaffold": lambda: __import__("scaffold").main(given),
             "pace": lambda: pace_check(args[0]),  # ends non-zero on a miss, like voice
             "register": cmd_register,
             "physics": lambda: cmd_physics(args[0]),

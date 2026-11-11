@@ -64,16 +64,32 @@ export type PuppetLook = {
   build?: "broad" | "narrow"; // torso and shoulder width: a broad, barrel-chested build or a narrow, upright one
   tunic?: boolean; // knee-length tunic below the body, in the outfit colour, with a darker hem band
   patch?: string; // a mended patch on the tunic (needs `tunic`)
+  mud?: string; // mud splashed up the tunic from the hem (needs `tunic`; the mud colour)
   belt?: string; // narrow leather belt at the waist with a pouch and a sheathed work knife
   wraps?: string; // cloth leg wraps round the shins
   mail?: string; // mail shirt (metal colour) to the hips, with doubled shoulder flaps
   cloak?: string; // wool cloak hanging behind the shoulders, pinned with a brooch at the puppet's L shoulder
   tied?: boolean; // hair tied back in a short tail at the nape
   stubble?: string; // a faint short-stubble shadow round the jaw
+  // Apollo moon suit (1969-1972). All opt-in.
+  space?: { stripe?: string; visor?: string; cap?: string }; // bubble helmet under the white visor shell (gold visor raised, `visor` its colour), the white life-support backpack with the small oxygen pack on top, the neck ring, the chest control box and hoses; `stripe` = commander's red bands (shell, arms, legs); `cap` = comm cap top colour
+  sleeves?: string; // arm colour: the 3D arms become coloured sleeves inside the ink outline (like `pants` on the legs)
+  gloves?: string; // hand colour (gloves); default ink mitten hands
+  bulk?: number; // limb thickness factor for the 3D arms and legs (a pressure suit ~1.8)
+  tie?: string; // necktie colour (front and side views)
+  tieWide?: boolean; // a wide 1970s tie instead of a narrow one
+  headset?: string; // a radio headset: band over the head, an ear cup and a boom mic to the mouth (front and side views)
 };
 
 // Pants and shoe colours reach every Leg and Foot through context, so the front, side and back views share them.
 const WearCtx = React.createContext<{ pants?: string; shoes?: string; wraps?: string }>({});
+// "svg": arms and legs drawn as ink lines (previews, plain SVG). "markers": not drawn; invisible joint markers
+// (data-j) mark where they are, and PuppetBillboard builds 3D limbs on them (puppet/CardLimbs.tsx).
+export type LimbMode = "svg" | "markers";
+const LimbCtx = React.createContext<LimbMode>("svg");
+const Mark: React.FC<{ j: string; p: [number, number]; shape?: string; front?: boolean }> = ({ j, p, shape, front }) => (
+  <circle data-j={j} data-shape={shape} data-front={front ? 1 : undefined} cx={p[0]} cy={p[1]} r={0} fill="none" />
+);
 
 export type PuppetPose = {
   expression: Expression;
@@ -93,6 +109,7 @@ export type PuppetPose = {
   facing?: 1 | -1; // side view: 1 faces screen-right, -1 faces screen-left
   hold?: { item: HeldItem; hand: "L" | "R" }; // side view holds in the near hand
   itemTilt?: number; // degrees the held item is turned (180 = upside down)
+  itemFill?: number; // 0..1 how full a held "glass" of water is (the surface stays level as it tips)
   coinDrop?: number; // a coin falling from the hand: units below the hand, undefined = none
   face?: FaceMicro; // micro-expression offsets (Stage adds them automatically)
   from?: Expression; // the expression being left; with blend < 1 the face eases from it to `expression`
@@ -109,9 +126,11 @@ export type PuppetPose = {
   fromGesture?: Gesture; // with blend < 1, the gesture being left (see moveChange in engine/anim.ts)
   crouch?: number; // 0..1 knees bend and the hips sink (feet stay put); with `air` it tucks the legs in a jump
   air?: number; // units the whole puppet is off the ground (jumps)
+  rise?: number; // metres: lifts the whole card in the world, its contact shadow staying on the ground (a body in the air that also tips or lies, which `air` cannot do: `lie` turns `air` with the body)
   bend?: number; // 0..1 bend forward at the hips (toward the camera in front view, toward `facing` in profile)
   seat?: number; // 0..1 legs between standing and seated (sitting down / getting up); `sit` is the same as 1
   lie?: number; // 0..1 tip over onto the back, head to screen-left (sleeping, fainting); 1 = flat on the floor
+  spin?: number; // degrees: turns the whole drawing about the middle of the body (a somersault, a head-first landing); clockwise on screen
   sleep?: boolean; // eyes shut in sleep, a slack mouth and floating "z"s
   crawl?: number; // on hands and knees in profile; the number is the crawl cycle phase (frames)
   stride?: number; // walk cycle phase (frames; `walk` sets it): the swinging leg lifts its foot and bends its knee
@@ -120,6 +139,13 @@ export type PuppetPose = {
   armSwing?: number; // walking arms swing against the legs this much (1 = normal); arms you set yourself are kept
   squash?: number; // + squashes (landing, sitting down hard), - stretches (take-off); keeps the volume, feet stay put
   hair?: { lift?: number; sway?: number }; // soft hair trailing the body: lift (units, + floats up), sway (degrees)
+  noArms?: boolean; // no arms or hands at all (neither drawn nor 3D)
+  noLegs?: boolean; // no legs or feet at all
+  // 3D limbs (the default on a set: PuppetBillboard): send the screen-left (front view) / far (profile) hand, or the
+  // screen-right / near hand, to a point in the WORLD (metres): a piano key, a glass, a hammer grip. The arm reaches
+  // from the card's shoulder in 3D. A `hold` item in that hand is then not drawn: place the prop in 3D yourself.
+  worldL?: [number, number, number];
+  worldR?: [number, number, number];
 };
 
 // ---------- period costume pieces (drawn in the puppet's own units, front view unless named Side/Back) ----------
@@ -159,6 +185,127 @@ const Strap: React.FC<{ d: string; color: string; w?: number }> = ({ d, color, w
   <g fill="none" strokeLinecap="round" strokeLinejoin="round">
     <path d={d} stroke={INK} strokeWidth={w + 12} />
     <path d={d} stroke={color} strokeWidth={w} />
+  </g>
+);
+
+// ---------- Apollo moon suit: helmet, backpack, neck ring, chest box (look.space) ----------
+
+const SUIT_WHITE = "#f1eee7";
+const PACK_WHITE = "#e9e6de";
+const RING = "#8f9caa";
+
+// The life-support backpack seen from the front: only its sides and top show round the body and helmet.
+const PackFront: React.FC<{ uid: string }> = ({ uid }) => (
+  <g>
+    <Inked d="M -228 -1020 Q -228 -1066 -186 -1066 L 186 -1066 Q 228 -1066 228 -1020 L 228 -380 Q 228 -340 186 -340 L -186 -340 Q -228 -340 -228 -380 Z" fill={PACK_WHITE} uid={uid} name="pack" />
+    <Inked d="M -196 -1080 Q -196 -1092 -180 -1092 L 180 -1092 Q 196 -1092 196 -1080 L 196 -1060 L -196 -1060 Z" fill="#dcd8ce" uid={uid} name="opsf" width={10} />
+  </g>
+);
+
+// In profile (facing +x) the pack is a deep box on the back with the oxygen purge pack on top.
+const PACK_SIDE_D = "M -330 -940 Q -330 -985 -290 -985 L -140 -985 Q -112 -985 -112 -950 L -112 -360 Q -112 -330 -140 -330 L -296 -330 Q -330 -330 -330 -364 Z";
+const OPS_SIDE_D = "M -318 -1058 Q -318 -1078 -296 -1078 L -150 -1078 Q -128 -1078 -128 -1058 L -128 -985 L -318 -985 Z";
+const PackSide: React.FC<{ uid: string }> = ({ uid }) => (
+  <g>
+    <Inked d={PACK_SIDE_D} fill={PACK_WHITE} uid={uid} name="packs" />
+    <Inked d={OPS_SIDE_D} fill="#dcd8ce" uid={uid} name="ops" width={10} />
+    {/* seams and a strap round the waist */}
+    <path d="M -330 -700 L -112 -700 M -330 -520 L -112 -520" stroke={INK} strokeWidth={6} opacity={0.35} />
+    <path d="M -112 -420 L 120 -400" stroke={INK} strokeWidth={9} opacity={0.5} />
+  </g>
+);
+
+const PackBack: React.FC<{ uid: string }> = ({ uid }) => (
+  <g>
+    <Inked d="M -196 -1000 Q -196 -1040 -160 -1040 L 160 -1040 Q 196 -1040 196 -1000 L 196 -380 Q 196 -330 156 -330 L -156 -330 Q -196 -330 -196 -380 Z" fill={PACK_WHITE} uid={uid} name="packb" />
+    <Inked d="M -170 -1090 Q -170 -1100 -150 -1100 L 150 -1100 Q 170 -1100 170 -1090 L 170 -1040 L -170 -1040 Z" fill="#dcd8ce" uid={uid} name="opsb" width={10} />
+    <path d="M -196 -760 L 196 -760 M -196 -560 L 196 -560" stroke={INK} strokeWidth={6} opacity={0.35} />
+    {[-120, -40, 40, 120].map((x) => (
+      <rect key={x} x={x - 24} y={-470} width={48} height={70} rx={10} fill="#c9c4b8" stroke={INK} strokeWidth={6} />
+    ))}
+  </g>
+);
+
+// The chest: a grey control box with knobs, and the blue and red hose connectors at the waist.
+const SuitChest: React.FC<{ side?: boolean }> = ({ side }) =>
+  side ? (
+    <g>
+      <rect x={110} y={-560} width={70} height={92} rx={12} fill="#9aa2aa" stroke={INK} strokeWidth={8} />
+      <circle cx={150} cy={-400} r={22} fill="#3a6ad0" stroke={INK} strokeWidth={7} />
+    </g>
+  ) : (
+    <g>
+      <rect x={-74} y={-566} width={148} height={96} rx={14} fill="#9aa2aa" stroke={INK} strokeWidth={8} />
+      {[-40, 0, 40].map((x) => (
+        <circle key={x} cx={x} cy={-518} r={13} fill="#3c4148" />
+      ))}
+      <circle cx={-92} cy={-400} r={24} fill="#3a6ad0" stroke={INK} strokeWidth={7} />
+      <circle cx={92} cy={-400} r={24} fill="#d03a3a" stroke={INK} strokeWidth={7} />
+      <path d="M -60 -350 L 60 -350" stroke={INK} strokeWidth={6} opacity={0.3} />
+      {/* the backpack's shoulder straps */}
+      <path d="M -112 -606 L -96 -470 M 112 -606 L 96 -470" stroke="#c9c4b8" strokeWidth={22} strokeLinecap="round" />
+      <path d="M -112 -606 L -96 -470 M 112 -606 L 96 -470" stroke={INK} strokeWidth={4} strokeLinecap="round" opacity={0.5} />
+    </g>
+  );
+
+// The neck ring the helmet locks onto.
+const NeckRing: React.FC<{ side?: boolean }> = ({ side }) =>
+  side ? (
+    <ellipse cx={30} cy={-612} rx={112} ry={30} transform="rotate(-6 30 -612)" fill={RING} stroke={INK} strokeWidth={9} />
+  ) : (
+    <ellipse cx={0} cy={-612} rx={128} ry={30} fill={RING} stroke={INK} strokeWidth={9} />
+  );
+
+// The comm cap ("Snoopy cap") over the hair: a coloured top, white sides, ear cups.
+const CommCap: React.FC<{ color: string; side?: boolean }> = ({ color, side }) =>
+  side ? (
+    <g stroke={INK} strokeWidth={10} strokeLinejoin="round">
+      <path d="M -176 -810 C -180 -950 -90 -1012 26 -1010 C 150 -1008 220 -930 224 -880 C 120 -906 -20 -900 -176 -810 Z" fill="#f4f2ec" />
+      <path d="M -150 -900 C -110 -985 -30 -1010 40 -1008 C 130 -1004 190 -960 210 -912 C 110 -940 -40 -940 -150 -900 Z" fill={color} />
+      <ellipse cx={-14} cy={-790} rx={52} ry={66} fill="#2a2a2e" />
+    </g>
+  ) : (
+    <g stroke={INK} strokeWidth={10} strokeLinejoin="round">
+      <path d="M -208 -800 C -214 -960 -110 -1012 0 -1012 C 110 -1012 214 -960 208 -800 C 170 -880 100 -906 0 -906 C -100 -906 -170 -880 -208 -800 Z" fill="#f4f2ec" />
+      <path d="M -150 -950 C -110 -1000 -50 -1012 0 -1012 C 50 -1012 110 -1000 150 -950 C 100 -966 -100 -966 -150 -950 Z" fill={color} />
+      <ellipse cx={-206} cy={-790} rx={34} ry={58} fill="#2a2a2e" />
+      <ellipse cx={206} cy={-790} rx={34} ry={58} fill="#2a2a2e" />
+    </g>
+  );
+
+// The bubble helmet with the white outer shell and the gold sun visor pushed up. Front and side views.
+const SpaceHelmet: React.FC<{ uid: string; side?: boolean; visor: string; stripe?: string }> = ({ uid, side, visor, stripe }) => {
+  const cx = side ? 22 : 0;
+  const cy = -808;
+  const r = 262;
+  // The shell covers the top (front view) or the top and back (side view); its lower edge rides over the forehead.
+  const shell = side
+    ? `M ${cx - r - 14} ${cy + 70} C ${cx - r - 30} ${cy - 210} ${cx - 140} ${cy - r - 26} ${cx + 30} ${cy - r - 22} C ${cx + 170} ${cy - r - 14} ${cx + r + 6} ${cy - 150} ${cx + r - 10} ${cy - 96} C ${cx + 150} ${cy - 160} ${cx + 20} ${cy - 170} ${cx - 90} ${cy - 120} C ${cx - 170} ${cy - 80} ${cx - 220} ${cy} ${cx - r + 40} ${cy + 80} Z`
+    : `M ${cx - r - 16} ${cy - 30} C ${cx - r - 18} ${cy - 210} ${cx - 150} ${cy - r - 24} ${cx} ${cy - r - 24} C ${cx + 150} ${cy - r - 24} ${cx + r + 18} ${cy - 210} ${cx + r + 16} ${cy - 30} C ${cx + 210} ${cy - 120} ${cx + 120} ${cy - 160} ${cx} ${cy - 160} C ${cx - 120} ${cy - 160} ${cx - 210} ${cy - 120} ${cx - r - 16} ${cy - 30} Z`;
+  // The raised gold visor shows as a band just under the shell's front edge.
+  const gold = side
+    ? `M ${cx - 70} ${cy - 128} C ${cx + 30} ${cy - 172} ${cx + 160} ${cy - 160} ${cx + r - 10} ${cy - 96} C ${cx + 180} ${cy - 120} ${cx + 60} ${cy - 128} ${cx - 50} ${cy - 96} Z`
+    : `M ${cx - 214} ${cy - 112} C ${cx - 130} ${cy - 168} ${cx + 130} ${cy - 168} ${cx + 214} ${cy - 112} C ${cx + 150} ${cy - 128} ${cx - 150} ${cy - 128} ${cx - 214} ${cy - 112} Z`;
+  return (
+    <g>
+      {/* the clear bubble: a faint blue tint, its outline and a glint */}
+      <circle cx={cx} cy={cy} r={r} fill="#cfe6ff" opacity={0.16} />
+      <path d={gold} fill={visor} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+      <Inked d={shell} fill={SUIT_WHITE} uid={uid} name={side ? "shells" : "shell"} width={11} />
+      {stripe && !side && <path d={`M ${cx - 26} ${cy - r - 22} L ${cx + 26} ${cy - r - 22} L ${cx + 22} ${cy - 162} L ${cx - 22} ${cy - 162} Z`} fill={stripe} stroke={INK} strokeWidth={6} />}
+      {stripe && side && <path d={`M ${cx - 40} ${cy - r - 18} C ${cx - 140} ${cy - r} ${cx - r} ${cy - 160} ${cx - r - 14} ${cy - 40} L ${cx - r + 30} ${cy - 30} C ${cx - r + 40} ${cy - 140} ${cx - 120} ${cy - r + 30} ${cx - 30} ${cy - r + 26} Z`} fill={stripe} stroke={INK} strokeWidth={6} />}
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={INK} strokeWidth={10} />
+      <path d={`M ${cx + (side ? 120 : -170)} ${cy + 40} Q ${cx + (side ? 190 : -205)} ${cy + 110} ${cx + (side ? 170 : -150)} ${cy + 170}`} fill="none" stroke="#ffffff" strokeWidth={18} strokeLinecap="round" opacity={0.75} />
+      <path d={`M ${cx + (side ? 210 : 150)} ${cy + 20} L ${cx + (side ? 216 : 160)} ${cy + 50}`} stroke="#ffffff" strokeWidth={14} strokeLinecap="round" opacity={0.6} />
+    </g>
+  );
+};
+
+// From behind the helmet is the white shell all round.
+const SpaceHelmetBack: React.FC<{ uid: string; stripe?: string }> = ({ uid, stripe }) => (
+  <g>
+    <Inked d={circD(0, -812, 262)} fill={SUIT_WHITE} uid={uid} name="shellb" width={11} />
+    {stripe && <path d="M -26 -1068 L 26 -1068 L 26 -620 L -26 -620 Z" fill={stripe} stroke={INK} strokeWidth={6} />}
   </g>
 );
 
@@ -289,6 +436,17 @@ const Tunic: React.FC<{ look: PuppetLook; uid: string; hem: number; side?: boole
       <path d={`M ${-band + (side ? 4 : 0)} ${hem - 22} Q ${side ? 8 : 0} ${hem - 2} ${band} ${hem - 22}`} fill="none" stroke={SHADE} strokeWidth={14} opacity={0.32} />
       {/* fold lines falling from the belt */}
       <path d={`M ${-60 * w} -320 L ${-80 * w} ${hem + 2} M ${50 * w} -320 L ${74 * w} ${hem + 4}`} fill="none" stroke={SHADE} strokeWidth={6} opacity={0.22} strokeLinecap="round" />
+      {look.mud && (
+        <g>
+          {/* splashes thrown up from the hem: big blots low, flecks higher up */}
+          {(side
+            ? [[-120, -40, 34, 24], [-40, -18, 40, 22], [60, -30, 30, 20], [130, -14, 36, 22], [-90, -110, 16, 12], [20, -150, 12, 9], [100, -96, 14, 10]]
+            : [[-150, -36, 36, 24], [-60, -16, 44, 22], [40, -28, 32, 20], [140, -18, 38, 24], [-110, -104, 17, 12], [-10, -140, 12, 9], [90, -118, 15, 11], [160, -80, 11, 8]]
+          ).map(([x, y, rx, ry], i) => (
+            <ellipse key={i} cx={x * w} cy={hem + y} rx={rx} ry={ry} transform={`rotate(${(i * 37) % 50 - 25} ${x * w} ${hem + y})`} fill={look.mud} opacity={0.88} />
+          ))}
+        </g>
+      )}
       {look.patch && !back && (
         <g transform={`translate(${side ? 70 : -96 * w} ${hem - 74}) rotate(-6)`}>
           <rect x={-38} y={-30} width={76} height={58} rx={8} fill={look.patch} stroke={INK} strokeWidth={7} />
@@ -437,7 +595,7 @@ export type HandShape = "open" | "point" | "fist";
 // Mouth shapes: closed lips (m, b, p), rounded (o, u, w), wide (e, i), open (a), lip under teeth (f, v).
 export type Viseme = "mbp" | "o" | "e" | "a" | "fv";
 
-export type HeldItem = "cup" | "drink" | "phone" | "toolbox" | "key" | "popcorn" | "briefcase" | "candy" | "wine";
+export type HeldItem = "glass" | "cup" | "drink" | "phone" | "toolbox" | "key" | "popcorn" | "briefcase" | "candy" | "wine";
 
 const INK = "#161212";
 const STROKE = 12;
@@ -529,8 +687,19 @@ const knee = (hx: number, hy: number, fx: number, fy: number, kx: number, ky: nu
   const cand = [base + off, base - off].map((a) => [hx + Math.cos(a) * THIGH, hy + Math.sin(a) * THIGH] as [number, number]);
   return cand.sort((p, q) => (q[0] - hx) * kx + (q[1] - hy) * ky - ((p[0] - hx) * kx + (p[1] - hy) * ky))[0];
 };
-const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number }> = ({ pts, foot, footScale }) => {
+const Leg: React.FC<{ pts: [number, number][]; foot: [number, number]; footScale?: number; mark?: string }> = ({ pts, foot, footScale, mark }) => {
   const { pants, wraps } = React.useContext(WearCtx);
+  const mode = React.useContext(LimbCtx);
+  if (mode === "markers" && mark) {
+    return (
+      <g>
+        <Mark j={`${mark}:s`} p={pts[0]} />
+        <Mark j={`${mark}:e`} p={pts[1] ?? lerp2(pts[0], pts[pts.length - 1], 0.5)} />
+        <Mark j={`${mark}:h`} p={pts[pts.length - 1]} />
+        <Mark j={`${mark}:f`} p={foot} shape={String(footScale ?? 1.3)} />
+      </g>
+    );
+  }
   const d = pts.map((p) => p.join(",")).join(" ");
   // Leg wraps: the shin (knee to ankle) a little thicker, in the wrap colour, with bands where the cloth overlaps.
   const shin = pts.length > 2 ? `${lerp2(pts[1], pts[2], 0.08).join(",")} ${lerp2(pts[1], pts[2], 0.9).join(",")}` : "";
@@ -627,7 +796,36 @@ const PUPIL: Partial<Record<Expression, [number, number, number]>> = {
 };
 
 // Things a hand can hold, drawn around the grip point (0, 0).
-const Item: React.FC<{ item: HeldItem }> = ({ item }) => {
+// A clear drinking glass of water gripped round its middle: rim at y -66, base at y 58 (then scaled up 1.3, so the
+// rim is 92 units from the hand). The water surface stays level whatever `tilt` the glass is turned to, and its
+// height follows `fill`.
+const GLASS_D = "M -40 -66 L 40 -66 L 32 58 L -32 58 Z";
+const WaterGlass: React.FC<{ tilt: number; fill: number; uid: string }> = ({ tilt, fill, uid }) => {
+  const f = Math.max(0, Math.min(1, fill));
+  // Level surface in the world, through the point `fill` of the way up the glass's axis.
+  const level = 58 - f * 116;
+  return (
+    <g transform="scale(1.3)">
+      <clipPath id={`glass-${uid}`}>
+        <path d={GLASS_D} />
+      </clipPath>
+      <path d={GLASS_D} fill="#dff3fb" opacity={0.55} />
+      {f > 0.01 && (
+        <g clipPath={`url(#glass-${uid})`}>
+          <g transform={`translate(0 ${level}) rotate(${-tilt})`}>
+            <rect x={-200} y={0} width={400} height={300} fill="#5ab8e8" />
+            <rect x={-200} y={0} width={400} height={8} fill="#bfe8fb" />
+          </g>
+        </g>
+      )}
+      <path d="M -26 -50 L -20 44" stroke="#ffffff" strokeWidth={8} strokeLinecap="round" opacity={0.85} />
+      <path d={GLASS_D} fill="none" stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+    </g>
+  );
+};
+
+const Item: React.FC<{ item: HeldItem; tilt?: number; fill?: number; uid?: string }> = ({ item, tilt = 0, fill = 0.8, uid = "g" }) => {
+  if (item === "glass") return <WaterGlass tilt={tilt} fill={fill} uid={uid} />;
   if (item === "cup") {
     // Casino coin cup with coins heaped on top
     return (
@@ -728,8 +926,10 @@ const Item: React.FC<{ item: HeldItem }> = ({ item }) => {
 const UPPER = 130;
 const LOWER = 120;
 
-// Two-bone reach: the elbow and hand for a hand placed at (tx, ty), the elbow bending outward and down.
-const reachArm = (x: number, y: number, side: 1 | -1, tx: number, ty: number) => {
+// Two-bone reach: the elbow and hand for a hand placed at (tx, ty), the elbow bending outward and down. In profile
+// (`profile`, the puppet facing +x) the elbow bends the way a real one does: below a forward reach, in front of a
+// raised arm, behind a lowered one.
+const reachArm = (x: number, y: number, side: 1 | -1, tx: number, ty: number, profile = false) => {
   const dx = tx - x;
   const dy = ty - y;
   const d = Math.min(UPPER + LOWER - 1, Math.max(Math.abs(UPPER - LOWER) + 1, Math.hypot(dx, dy)));
@@ -737,29 +937,38 @@ const reachArm = (x: number, y: number, side: 1 | -1, tx: number, ty: number) =>
   const off = Math.acos((UPPER * UPPER + d * d - LOWER * LOWER) / (2 * UPPER * d));
   // Of the two elbow positions, take the one further out to this arm's side (then lower).
   const cand = [base + off, base - off].map((a) => [x + Math.cos(a) * UPPER, y + Math.sin(a) * UPPER] as [number, number]);
-  const [ex, ey] = cand.sort((p, q) => side * (q[0] - p[0]) + (q[1] - p[1]) * 0.3)[0];
+  // Profile: the elbow on the down-and-back side of the shoulder-to-hand line, normal (-dy, dx).
+  const [ex, ey] = profile
+    ? cand.sort((p, q) => (-dy * (q[0] - x) + dx * (q[1] - y)) - (-dy * (p[0] - x) + dx * (p[1] - y)))[0]
+    : cand.sort((p, q) => side * (q[0] - p[0]) + (q[1] - p[1]) * 0.3)[0];
   const hx = ex + ((tx - ex) / Math.hypot(tx - ex, ty - ey)) * LOWER;
   const hy = ey + ((ty - ey) / Math.hypot(tx - ex, ty - ey)) * LOWER;
   return { ex, ey, hx, hy };
 };
 
-const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, number]; reach?: [number, number]; hand?: HandShape; item?: HeldItem; tilt?: number; drop?: number }> = ({
+const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, number]; reach?: [number, number]; profile?: boolean; hand?: HandShape; item?: HeldItem; tilt?: number; drop?: number; fill?: number; uid?: string; mark?: string; front?: boolean }> = ({
   x,
   y,
   side,
   angles,
   reach,
+  profile,
   hand,
   item,
   tilt = 0,
   drop,
+  fill,
+  uid,
+  mark,
+  front,
 }) => {
+  const mode = React.useContext(LimbCtx);
   const [shoulder, elbow] = angles;
   // Angles open outward, away from the body.
   const a1 = (shoulder * Math.PI) / 180;
   const a2 = ((shoulder + elbow) * Math.PI) / 180;
   const { ex, ey, hx, hy } = reach
-    ? reachArm(x, y, side, reach[0], reach[1])
+    ? reachArm(x, y, side, reach[0], reach[1], profile)
     : (() => {
         const ex = x + side * Math.sin(a1) * UPPER;
         const ey = y + Math.cos(a1) * UPPER;
@@ -767,6 +976,24 @@ const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, numbe
       })();
   // Forearm direction as an angle from straight down, outward positive (what Hand expects).
   const fore = (Math.atan2(side * (hx - ex), hy - ey) * 180) / Math.PI;
+  if (mode === "markers" && mark) {
+    // 3D arm: only the joints, plus what the hand holds (drawn on the card at the hand)
+    return (
+      <g>
+        <Mark j={`${mark}:s`} p={[x, y]} front={front} />
+        <Mark j={`${mark}:e`} p={[ex, ey]} />
+        <Mark j={`${mark}:h`} p={[hx, hy]} shape={hand ?? "open"} />
+        {item && (
+          <g transform={`translate(${hx} ${hy - 6}) rotate(${tilt})`}>
+            <Item item={item} tilt={tilt} fill={fill} uid={uid} />
+          </g>
+        )}
+        {drop !== undefined && (
+          <ellipse cx={hx} cy={hy + 60 + drop} rx={22} ry={22 * Math.abs(Math.cos(drop / 40))} fill="#ffcc33" stroke={INK} strokeWidth={7} />
+        )}
+      </g>
+    );
+  }
   return (
     <g>
       <polyline
@@ -779,7 +1006,7 @@ const Arm: React.FC<{ x: number; y: number; side: 1 | -1; angles: [number, numbe
       />
       {item && (
         <g transform={`translate(${hx} ${hy - 6}) rotate(${tilt})`}>
-          <Item item={item} />
+          <Item item={item} tilt={tilt} fill={fill} uid={uid} />
         </g>
       )}
       {drop !== undefined && (
@@ -1140,10 +1367,14 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
   const torso = `translate(0 -280) scale(${(1 + 0.06 * bend) * bw} ${k}) translate(0 280)`;
   const seat = pose.sit ? 1 : Math.max(0, Math.min(1, pose.seat ?? 0));
   const arm = (side: "L" | "R") => {
+    if (pose.noArms) return null;
     const s = side === "L" ? -1 : 1;
-    const held = pose.hold?.hand === side;
+    const world = side === "L" ? pose.worldL : pose.worldR;
+    const held = pose.hold?.hand === side && !world;
     return (
       <Arm
+        mark={side === "L" ? "armL" : "armR"}
+        front={inFront(side)}
         x={s * 130 * bw}
         y={sh}
         side={s}
@@ -1153,6 +1384,8 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         item={held ? pose.hold!.item : undefined}
         tilt={held ? pose.itemTilt : undefined}
         drop={held ? pose.coinDrop : undefined}
+        fill={pose.itemFill}
+        uid={`${id}-${side}`}
       />
     );
   };
@@ -1170,7 +1403,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
       <LeafPattern look={look} id={patternId} />
 
       {/* Legs: swing from the hips, bend at the knee when crouching, fold toward the camera when seated */}
-      <g transform={`translate(0 ${-(pose.air ?? 0)})`}>
+      <g transform={`translate(0 ${-(pose.air ?? 0)})`} display={pose.noLegs ? "none" : undefined}>
         {[-1, 1].map((side) => {
           if (pose.stride !== undefined && seat === 0) {
             // Walking toward (or away from) the camera: the legs step forward and back, not out to the sides. The
@@ -1181,7 +1414,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             const hip: [number, number] = [side * 55, -280 + drop - depth * 6];
             const foot: [number, number] = [side * 60, -14 + depth * 26 - lift];
             const kn = lift > 1 ? knee(hip[0], hip[1], foot[0], foot[1], side * 0.5, 0.4) : lerp2(hip, foot, 0.5);
-            return <Leg key={side} pts={[hip, kn, foot]} foot={[foot[0] + side * 6, foot[1] - 4]} footScale={1.3 * (1 + 0.12 * depth)} />;
+            return <Leg key={side} mark={side < 0 ? "legL" : "legR"} pts={[hip, kn, foot]} foot={[foot[0] + side * 6, foot[1] - 4]} footScale={1.3 * (1 + 0.12 * depth)} />;
           }
           const hip: [number, number] = [side * 55, -280 + drop];
           const a = ((pose.legSwing ?? 0) * side * Math.PI) / 180;
@@ -1192,7 +1425,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           const seated: [number, number][] = [[side * 55, -280], [side * 92, -236], [side * 84, -18]];
           const pts = [hip, standKnee, standFoot].map((p, i) => lerp2(p, seated[i], seat));
           const foot = lerp2([standFoot[0] + side * 8, standFoot[1] - 4], [side * 96, -16], seat);
-          return <Leg key={side} pts={pts} foot={foot} />;
+          return <Leg key={side} mark={side < 0 ? "legL" : "legR"} pts={pts} foot={foot} />;
         })}
       </g>
 
@@ -1210,6 +1443,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
             <Cel uid={patternId} name="hairb" d={FRONT_LONG_D} />
           </g>
         )}
+        {look.space && <PackFront uid={patternId} />}
         {look.cloak && <CloakBehind color={look.cloak} uid={patternId} w={bw} hem={-300} />}
         {look.shorts && <Inked d={SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
         {look.tunic && <Tunic look={look} uid={patternId} hem={-176} />}
@@ -1248,6 +1482,10 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         {/* Collar (with a tunic: the linen undershirt at the neck) */}
         <path d="M -48 -622 L 0 -575 L 48 -622" fill={look.tunic ? "#e4d6b4" : "#fff"} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
         {look.cloak && <CloakPin color={look.cloak} w={1} />}
+        {look.space && <SuitChest />}
+        {look.space && <NeckRing />}
+        {look.tie && <path d={look.tieWide ? "M -16 -598 L 16 -598 L 40 -360 L 0 -318 L -40 -360 Z" : "M -11 -598 L 11 -598 L 24 -370 L 0 -338 L -24 -370 Z"} fill={look.tie} stroke={INK} strokeWidth={8} strokeLinejoin="round" />}
+        {look.tie && look.tieWide && <path d="M -30 -470 L 30 -500 M -34 -420 L 34 -450" stroke="#ffffff" strokeWidth={10} opacity={0.5} />}
         <g transform={`rotate(${pose.swing ?? 0} 0 -615)`}>
         {look.chain && (
           <path
@@ -1269,8 +1507,8 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         </g>
         </g>
         {/* A holding arm comes in front of the body so the item shows */}
-        {pose.hold?.hand === "L" && arm("L")}
-        {pose.hold?.hand === "R" && arm("R")}
+        {pose.hold?.hand === "L" && !pose.frontL && arm("L")}
+        {pose.hold?.hand === "R" && !pose.frontR && arm("R")}
 
         {/* Head */}
         <g transform={head}>
@@ -1302,6 +1540,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
           />
           </g>
           </UnderHat>
+          {look.space && <CommCap color={look.space.cap ?? "#5a4030"} />}
           {look.kerchief && <Inked d={KERCHIEF_D} fill={look.kerchief} uid={patternId} name="kerchief" />}
           {look.hat && <HatFront color={look.hat} uid={patternId} style={look.hatStyle} />}
           {look.cap && (
@@ -1351,10 +1590,21 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
               <line x1={-20} y1={-806} x2={20} y2={-806} />
             </g>
           )}
+          {look.space && <SpaceHelmet uid={patternId} visor={look.space.visor ?? "#d8a428"} stripe={look.space.stripe} />}
+          {look.headset && (
+            <g stroke={INK} strokeWidth={9} strokeLinejoin="round">
+              <path d="M -212 -800 C -220 -1010 220 -1010 212 -800" fill="none" stroke={look.headset} strokeWidth={22} />
+              <path d="M -212 -800 C -220 -1010 220 -1010 212 -800" fill="none" strokeWidth={6} opacity={0.6} />
+              <ellipse cx={-214} cy={-796} rx={36} ry={56} fill={look.headset} />
+              <path d="M -206 -760 Q -170 -650 -60 -668" fill="none" stroke={look.headset} strokeWidth={12} />
+              <circle cx={-56} cy={-668} r={18} fill="#2a2a2e" />
+            </g>
+          )}
         </g>
         {/* Arms that cross the body or touch the face */}
-        {pose.frontL && pose.hold?.hand !== "L" && arm("L")}
-        {pose.frontR && pose.hold?.hand !== "R" && arm("R")}
+        {/* front arms, holding or not, come over the head too (a glass at the lips, a hand on the chin) */}
+        {pose.frontL && arm("L")}
+        {pose.frontR && arm("R")}
       </g>
     </g>
   );
@@ -1472,13 +1722,18 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   const sw = pose.armSwing ?? 1;
   const nearArm: [number, number] = crawling ? [62 - cyc * 14, 26] : pose.armR ?? [-swing * 1.2 * sw, 14 + Math.max(0, -swing) * sw];
   const farArm: [number, number] = crawling ? [62 + cyc * 14, 26] : pose.armL ?? [swing * 1.2 * sw, 14 + Math.max(0, swing) * sw];
+  // Reach points are screen-space puppet units like in front view (+x = screen right), so a prop placed with
+  // handWorld lands in the hand whichever way the puppet faces: flip x into this mirrored group. reachR moves the
+  // near arm, reachL the far one; both hands follow the body when it bends, as they follow `lean` in front view.
+  const fx = pose.facing ?? 1;
+  const sideReach = (r?: [number, number]): [number, number] | undefined => (crawling || !r ? undefined : [r[0] * fx, r[1]]);
   const leg = (a: number, key: string, phase: number) => {
     const hip: [number, number] = [back, -280 + drop];
     if (crawling) {
       // Knee on the floor under the hip, shin trailing behind.
       const kn: [number, number] = [phase * 30 - 10, -36];
       const foot: [number, number] = [kn[0] - 128, -18];
-      return <Leg key={key} pts={[hip, kn, foot]} foot={[foot[0] - 8, foot[1] - 4]} footScale={1.1} />;
+      return <Leg key={key} mark={key === "far" ? "legL" : "legR"} pts={[hip, kn, foot]} foot={[foot[0] - 8, foot[1] - 4]} footScale={1.1} />;
     }
     const r = (a * Math.PI) / 180;
     // Walking: the leg swinging forward (the far leg while cos(stride / 3) > 0) lifts its foot, so its knee bends.
@@ -1489,15 +1744,16 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
     const pts = [hip, standKnee, standFoot].map((p, i) => lerp2(p, seated[i], seat));
     // Halfway between standing and seated the knee pokes forward instead of collapsing onto the hip.
     if (seat > 0 && seat < 1) pts[1] = knee(pts[0][0], pts[0][1], pts[2][0], pts[2][1], 1, 0);
-    return <Leg key={key} pts={pts} foot={lerp2([standFoot[0] + 14, standFoot[1] - 4], [168, -18], seat)} />;
+    return <Leg key={key} mark={key === "far" ? "legL" : "legR"} pts={pts} foot={lerp2([standFoot[0] + 14, standFoot[1] - 4], [168, -18], seat)} />;
   };
   return (
     <g transform={`scale(${pose.facing ?? 1} 1)`}>
       <LeafPattern look={look} id={patternId} />
-      <g transform={`translate(0 ${-(pose.air ?? 0)})`}>{[leg(swing, "far", crawling ? -cyc : 1), leg(-swing, "near", crawling ? cyc : -1)]}</g>
+      <g transform={`translate(0 ${-(pose.air ?? 0)})`} display={pose.noLegs ? "none" : undefined}>{[leg(swing, "far", crawling ? -cyc : 1), leg(-swing, "near", crawling ? cyc : -1)]}</g>
       <g transform={`translate(${back} ${bob + drop - (pose.air ?? 0)}) rotate(${tip + Math.sin(seat * Math.PI) * 18} 0 -280)`}>
+        {look.space && <PackSide uid={patternId} />}
         {look.cloak && <CloakBehind color={look.cloak} uid={patternId} w={1} hem={-210} side />}
-        <Arm x={-6} y={-552} side={1} angles={farArm} />
+        {!pose.noArms && <Arm mark="armL" x={-6} y={-552} side={1} angles={farArm} reach={sideReach(pose.reachL)} profile hand={pose.handL} />}
         {look.shorts && <Inked d={SIDE_SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
         <g transform={look.build ? `scale(${0.5 + 0.5 * buildW(look)} 1)` : undefined}>
         <path d={SIDE_BODY} fill={look.vest ?? look.outfit} stroke={INK} strokeWidth={STROKE} />
@@ -1526,6 +1782,8 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           </g>
         )}
         <path d="M 46 -628 L 86 -592 L 108 -626" fill={look.tunic ? "#e4d6b4" : "#fff"} stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+        {look.space && <SuitChest side />}
+        {look.space && <NeckRing side />}
         {look.chain && (
           <path d="M 18 -618 Q 92 -520 132 -604" fill="none" stroke={look.chain} strokeWidth={16} strokeLinecap="round" strokeDasharray="1 20" />
         )}
@@ -1554,6 +1812,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           <Cel uid={patternId} name="hair" d={sideHair} />
           </g>
           </UnderHat>
+          {look.space && <CommCap color={look.space.cap ?? "#5a4030"} side />}
           {look.kerchief && (
             <g>
               <Inked d={SIDE_KERCHIEF_D} fill={look.kerchief} uid={patternId} name="kerchief" />
@@ -1589,8 +1848,9 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
           {look.hat && look.hatStyle === "galea" && <GaleaCheek color={look.hat} />}
           <SideFace pose={pose} skin={look.skin} uid={patternId} />
           {look.glasses && <circle cx={166} cy={-804} r={50} fill="none" stroke={INK} strokeWidth={10} />}
+          {look.space && <SpaceHelmet uid={patternId} side visor={look.space.visor ?? "#d8a428"} stripe={look.space.stripe} />}
         </g>
-        <Arm x={10} y={-548} side={1} angles={nearArm} item={pose.hold?.item} tilt={pose.itemTilt} drop={pose.coinDrop} />
+        {!pose.noArms && <Arm mark="armR" front x={10} y={-548} side={1} angles={nearArm} reach={sideReach(pose.reachR)} profile hand={pose.handR} item={pose.worldR ? undefined : pose.hold?.item} tilt={pose.itemTilt} drop={pose.coinDrop} fill={pose.itemFill} uid={`${id}-side`} />}
       </g>
     </g>
   );
@@ -1609,7 +1869,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
   return (
     <g>
       <LeafPattern look={look} id={patternId} />
-      {pose.sit ? (
+      {pose.noLegs ? null : pose.sit ? (
         [-1, 1].map((side) => <BackLeg key={side} x1={side * 55} y1={-280} x2={side * 62} y2={-210} />)
       ) : (
         [-1, 1].map((side) => {
@@ -1636,6 +1896,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         {look.belt && <Belt color={look.belt} w={1} back />}
         </g>
         {look.cloak && <Inked d={CLOAK_BACK_D(bw, -300)} fill={look.cloak} uid={patternId} name="cloak" />}
+        {look.space && <PackBack uid={patternId} />}
         {look.suspenders && <path d="M -92 -612 L 0 -440 L 92 -612 M 0 -440 L 0 -272" fill="none" stroke={look.suspenders} strokeWidth={22} />}
         {look.bib && <Bib text={look.bib} />}
         {look.apron && (
@@ -1647,8 +1908,8 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         {(look.lanyard || look.chain) && (
           <path d="M -70 -616 Q 0 -596 70 -616" fill="none" stroke={look.lanyard ?? look.chain} strokeWidth={12} strokeLinecap="round" />
         )}
-        <Arm x={-130 * bw} y={-545} side={-1} angles={armL} item={pose.hold?.hand === "L" ? pose.hold.item : undefined} />
-        <Arm x={130 * bw} y={-545} side={1} angles={armR} item={pose.hold?.hand === "R" ? pose.hold.item : undefined} />
+        {!pose.noArms && <Arm mark="armL" front x={-130 * bw} y={-545} side={-1} angles={armL} reach={pose.reachL} hand={pose.handL} item={pose.hold?.hand === "L" ? pose.hold.item : undefined} />}
+        {!pose.noArms && <Arm mark="armR" front x={130 * bw} y={-545} side={1} angles={armR} reach={pose.reachR} hand={pose.handR} item={pose.hold?.hand === "R" ? pose.hold.item : undefined} />}
         <g transform={`rotate(${pose.headTilt ?? 0} 0 -640)`}>
           <circle cx={-204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
           <circle cx={204} cy={-792} r={30} fill={look.skin} stroke={INK} strokeWidth={10} />
@@ -1666,6 +1927,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
             </g>
           )}
           {look.hat && (look.hatStyle === "galea" ? <GaleaFront color={look.hat} uid={patternId} back /> : <HatFront color={look.hat} uid={patternId} style={look.hatStyle} />)}
+          {look.space && <SpaceHelmetBack uid={patternId} stripe={look.space.stripe} />}
           {look.cap && (
             <g stroke={INK} strokeWidth={STROKE} strokeLinejoin="round">
               <path d="M -206 -850 Q -196 -1058 0 -1062 Q 196 -1058 206 -850 Q 0 -900 -206 -850 Z" fill={look.cap} />
@@ -1676,6 +1938,23 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
       </g>
     </g>
   );
+};
+
+// Where the head's centre is drawn on the card, in puppet units (SVG: +x screen-right, y down, feet at 0), and its
+// radius with headgear: `air` lifts it, `lie` tips the whole drawing about the feet (and a moon suit's pack lifts the
+// lying body). The framing audit and keepHeads both use it, so a tipping or lying puppet's head is checked where it is.
+export const drawnHead = (pose: PuppetPose, look: PuppetLook): { x: number; y: number; r: number } => {
+  const lie = Math.max(0, Math.min(1, pose.lie ?? 0)); // as Puppet draws it: `sleep` alone stays upright
+  const a = (-90 * lie * Math.PI) / 180;
+  // `spin` turns the body about its middle (0, -500 - air) first, as Puppet draws it; the head is 300 above that.
+  const s = ((pose.spin ?? 0) * Math.PI) / 180;
+  const hx = 300 * Math.sin(s);
+  const hy = -500 - (pose.air ?? 0) - 300 * Math.cos(s);
+  return {
+    x: hx * Math.cos(a) - hy * Math.sin(a),
+    y: hx * Math.sin(a) + hy * Math.cos(a) - (155 + (look.space ? 190 : 0)) * lie,
+    r: look.space ? 272 : 205,
+  };
 };
 
 // Floating "z"s over a sleeper's head at (x, y), rising and fading on a loop.
@@ -1692,16 +1971,21 @@ const Zzz: React.FC<{ x: number; y: number; t: number }> = ({ x, y, t }) => (
   </g>
 );
 
-export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> = (props) => {
+export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string; limbs?: LimbMode }> = ({ limbs = "svg", ...props }) => {
   const { pose } = props;
   const inner = pose.view === "side" ? <SidePuppet {...props} /> : pose.view === "back" ? <BackPuppet {...props} /> : <FrontPuppet {...props} />;
-  const body = <WearCtx.Provider value={{ pants: props.look.pants, shoes: props.look.shoes, wraps: props.look.wraps }}>{inner}</WearCtx.Provider>;
+  const body = (
+    <LimbCtx.Provider value={limbs}>
+      <WearCtx.Provider value={{ pants: props.look.pants, shoes: props.look.shoes, wraps: props.look.wraps }}>{inner}</WearCtx.Provider>
+    </LimbCtx.Provider>
+  );
   // Squash and stretch about the contact point (the feet, or the middle of the body in the air); sy * sx^2 = 1.
   const sq = Math.max(-0.45, Math.min(0.45, pose.squash ?? 0));
   const sy = 1 - sq;
   const sx = 1 / Math.sqrt(sy);
   const py = (pose.air ?? 0) > 1 ? -(pose.air ?? 0) - 500 : 0;
-  const squashed = sq ? <g transform={`translate(0 ${py}) scale(${sx} ${sy}) translate(0 ${-py})`}>{body}</g> : body;
+  const squashed0 = sq ? <g transform={`translate(0 ${py}) scale(${sx} ${sy}) translate(0 ${-py})`}>{body}</g> : body;
+  const squashed = pose.spin ? <g transform={`rotate(${pose.spin} 0 ${-500 - (pose.air ?? 0)})`}>{squashed0}</g> : squashed0;
   const lie = Math.max(0, Math.min(1, pose.lie ?? 0));
   if (!lie && !pose.sleep) return squashed;
   // Lying: tip over backwards around the feet onto the floor, head to screen-left, body resting on y = 0.
@@ -1709,7 +1993,7 @@ export const Puppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }
   const head: [number, number] = [800 * Math.sin(a), -800 * Math.cos(a) - 155 * lie];
   return (
     <g>
-      <g transform={`translate(0 ${-155 * lie}) rotate(${-90 * lie})`}>{squashed}</g>
+      <g transform={`translate(0 ${-(155 + (props.look.space ? 190 : 0)) * lie}) rotate(${-90 * lie})`}>{squashed}</g>
       {pose.sleep && <Zzz x={head[0] + 60} y={head[1] - (lie > 0.5 ? 120 : 240)} t={pose.face?.t ?? 0} />}
     </g>
   );

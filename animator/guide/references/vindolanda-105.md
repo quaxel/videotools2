@@ -1,4 +1,4 @@
-# Vindolanda, c. AD 105: timber fort and the bathhouse (viking-vs-roman: Felix's world)
+# Vindolanda, c. AD 105: timber fort and the bathhouse
 
 Sources (read 2026-11-06):
 - Vindolanda (Wikipedia, citing the Birleys' excavation reports): https://en.wikipedia.org/wiki/Vindolanda

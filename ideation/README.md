@@ -46,7 +46,7 @@ Tekrar kontrolü, yapılmış videolar (`videos/*/plan.json`) ve çöptekiler il
 
 ```bash
 npm run candidates -- catalog          # skill'in okuduğu bağlam
-npm run candidates -- add aday.json    # adayları yükle
+npm run candidates -- add aday.json [--scores puanlar.json]   # adayları (ve puanlayıcının kararlarını) yükle
 npm run candidates -- pending          # eleme kuyruğu
 ```
 
@@ -62,7 +62,7 @@ Veritabanı `.data/ideation.sqlite`, orijinal dosyalar `.data/uploads/` içinded
 
 **Ayarlar → Tam yedek indir** ile tutarlı bir veritabanı kopyası ve ek dosyalar alınır. Aynı ekrandan yedek geri yüklenebilir. Geri yükleme öncesinde mevcut çalışma alanı `.data/recovery/` içine otomatik yedeklenir. Uygulama açıkken veritabanını tek başına dosya kopyalayarak yedeklemeyin.
 
-Farklı bir veri dizini veya port için `IDEATION_DATA_DIR` ve `PORT` ortam değişkenleri kullanılabilir. Sunucu yalnızca yerel arayüzde dinler. Tarayıcı fontları uygulamayla birlikte gelir.
+Farklı bir veri dizini veya port için `IDEATION_DATA_DIR` ve `PORT`, tekrar kontrolünün okuduğu video klasörü için `IDEATION_VIDEOS_DIR` (varsayılan: depodaki `videos/`) ortam değişkenleri kullanılabilir. Sunucu yalnızca yerel arayüzde dinler. Tarayıcı fontları uygulamayla birlikte gelir.
 
 ## Kontroller
 
@@ -71,7 +71,7 @@ npm test
 npm run build
 ```
 
-İçe aktarmayı komut satırından tekrar kontrol etmek için `npm run import` kullanılabilir. Var olan kayıtlar çoğaltılmaz; kaynak bölümü değişmişse kullanıcı düzenlemelerinin üstüne yazılmaz. Ayarlar ekranındaki import önizlemesi de bu durumu gösterir.
+`npm run import` içe aktarmayı komut satırından yeniden çalıştırır (veritabanına yazar). Var olan kayıtlar çoğaltılmaz; kaynak bölümü değişmişse kullanıcı düzenlemelerinin üstüne yazılmaz. Ayarlar ekranındaki import önizlemesi de bu durumu gösterir.
 
 ## Ürün kararları
 

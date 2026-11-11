@@ -5,145 +5,103 @@ description: Generate, research lightly and strictly score a batch of new video 
 
 # Idea factory: generate and score candidates
 
-The ideation app (`ideation/`) holds the queue; this skill fills it. You generate and judge. The app validates,
-computes the score from your verdicts, runs a lexical duplicate check and shows the queue at
-http://localhost:5173/factory, where the user keeps (`y`) or rejects (`n`) each candidate.
+You generate and judge; the ideation app (`ideation/`) validates, scores your verdicts, checks lexical duplicates and
+shows the queue at http://localhost:5173/factory, where the user keeps (`y`) or rejects (`n`) each one. Arguments: a
+count N (default 10, max 20) and an optional seed theme. Run every command from `ideation/`.
 
-Arguments: a count N (default 10, max 20) and an optional seed theme. Work from `ideation/` for every command.
+## 1. Context
 
-## 1. Read the context, every time
+`npx tsx scripts/candidates.ts catalog > <scratchpad>/catalog.json`: the channel scope (`channel.promise`,
+`channel.categories`), the rubric, every video made and every idea with its state. A rejected or trashed idea is the
+user's "no": never propose it again under a new name. Read `../animator/guide/rules.md` → Story and Script too; the
+rubric is a short form of it.
 
-```bash
-npx tsx scripts/candidates.ts catalog > <scratchpad>/catalog.json
-```
+### House rules (override everything)
 
-It holds the channel scope (`channel.promise`, `channel.categories`), the rubric (criteria with the gate flag),
-every video already made (`videos`, by slug and title) and every idea in the workspace with its state, trashed and
-rejected ones included. A rejected or trashed idea is a "no" from the user: do not propose it again under a new
-name.
+- No topic centred on one commercial brand: a company, trademark or branded product or model (a story resting on one
+  aircraft, train or car model counts). Temples, buildings, places, institutions, cultures and people are not brands,
+  and an industry (airlines, gyms) is fine. Hiding the name does not make a brand story eligible.
+- The make-video format: 50-60 s, 180-210 words, one main character in a cast of at least 4, a twist that arrives as
+  an event, the mechanism shown with labelled physical props. A list of reasons or a chart fails.
+- Inside `channel.categories` and the promise; with a seed theme, every candidate is about it. Never zodiac (a
+  separate series).
 
-Also read `../animator/guide/rules.md` (Story and Script sections). The rubric questions are short forms of it.
+## 2. Generate about 3 × N, keep N
 
-House rules that override everything:
-- No topic centred on a commercial brand: one company, trademark or branded product/model. This covers
-  commercial brands only. Names of temples, mosques, churches, buildings, places, cities, institutions, cultures
-  and people are not brands, and an industry (airlines, gyms, casinos) is fine. Hiding the brand name does not
-  make a brand story eligible.
-- The format is the make-video Short: 50–60 s, 180–210 words, one character, a twist that arrives as an event,
-  a mechanism shown with labelled physical props. Topics that need a list of reasons or a chart fail.
-- Stay inside `channel.categories` and the channel promise. If a seed theme was given, every candidate must be
-  about it.
+Real, sourceable mechanisms and events, not trivia: public reports and studies, patents, museum and archive
+collections, incident reports, behavioural and perception research, odd laws and rulings, local history, animal
+senses, body science. The proven shapes: "Why <everyday thing> secretly works like this", "The day <strange real
+event> happened", "You wake up with <an animal's sense>". Cut anything that matches a made video or an idea in meaning
+("oversell" = "overbooking"), is brand-centred, or pays off with a fact instead of a twist event.
 
-## 2. Generate wide, then cut (about 3 × N raw ideas)
+## 3. Light research
 
-Look for real, sourceable mechanisms and events, not trivia lists. Use web search to find material, for example:
-public reports and studies (regulators, statistics offices, transport and health agencies), patents, museum and
-archive collections, engineering incident reports, behavioural-economics and perception research, odd laws and
-court rulings, local history ("the day X happened"), animal senses and body science.
+For each kept idea open 1-2 sources with WebFetch, primary or official where possible, for the key number or fact.
+List only pages you opened (none opened: `sources` empty). WebFetch returns a summary, not the page: put a number in
+`sources[].note` only when you asked for the sentence verbatim and got it. Disagreeing sources go in `limitations`,
+and the number stays out of the title. This only has to show "sourceable"; make-video checks the facts.
 
-The channel's proven shapes (see `catalog.videos`):
-- "Why <everyday thing> secretly works like this" — a hidden system behind prices, stores, buildings, rules.
-- "The day <strange real event> happened" — one dated, documented event with a physical cause.
-- "You wake up with <an animal's sense>" — perception from the inside.
-Zodiac videos are a separate series: never propose them.
+## 4. Drafts → `<scratchpad>/drafts.json`
 
-Cut every raw idea that matches a made video or an existing idea in meaning (not just in words: "oversell"
-= "overbooking"), that is brand-centred, or whose payoff is a fact with no twist event. Keep the best N.
-
-## 3. Light research for the N you keep
-
-For each, open 1–2 sources with WebFetch, preferably primary or official, and note the key number or fact the
-story rests on. Only list sources you actually opened. WebFetch returns a small model's summary, not the
-page: put a number in `sources[].note` only when you asked for the sentence verbatim and it came back verbatim.
-When sources disagree on a number, say so in `limitations` and leave the number out of the title. Full fact-checking happens later in make-video; here you
-only need enough to judge "sourceable". If you could not open one, leave `sources` empty.
-
-## 4. Write the drafts
-
-Turkish for `title`, `summary`, `question`, `mechanism` and `limitations` (the app is Turkish); English for
-`titleEn` and the hooks (the videos are English). Per candidate:
-
-- `title` — Turkish working title, a question or a striking statement.
-- `titleEn` — the English video title in the channel's style ("Why ...", "The Day ...").
-- `question` — the viewer's question in one sentence.
-- `mechanism` — the hidden mechanism in one or two sentences, with the key number.
-- `summary` — the six beats in a few sentences: hook image, the one character and situation, the rise (they
-  think they are winning), the twist **event**, the mechanism behind the scenes, the ending/loop.
-- `hooks` — 1–3 triple hooks (rules.md → Story, triple hook), each live within the first 0.5 s and each doing a
-  different job. `text` is the English opening line (the verbal hook: why should I care?); first word "He", "It's"
-  or "You". `firstImage` is the visual hook: what is in frame and already moving or changing at frame 0 (what is
-  happening?), not a still establishing view. `onScreen` is the text hook: the English shot-1 headline, 2–6 words,
-  the video's label, question or a contrasting angle (what is this about?), never the words of `text`. The first
-  hook is the preferred one.
-- `visualNotes` — the labelled props that show the mechanism (UPPERCASE labels), 3+ locations and 2 physical
-  gags.
-- `limitations` — what could make it fail: thin evidence, a contested number, sensitivity.
-- `category` — exactly one of `channel.categories`.
-- `tags`, `effort` (`low` | `medium` | `high`).
-
-## 5. Score in a separate pass
-
-Do not grade your own drafts in the same breath. Write the drafts (everything above, no `rubric`) to
-`<scratchpad>/drafts.json`, then spawn one fresh general-purpose subagent with this prompt (fill in the paths):
-
-> You are a strict editor for a YouTube Shorts channel that makes 50–60 s vertical animated explainers. Judge N
-> idea drafts against a rubric. You did not write them; be critical, do not be generous.
-> Read: the drafts `<scratchpad>/drafts.json` (Turkish fields plus English `titleEn` and hooks; `sources` are pages
-> that were actually opened, `note` says what they back); the catalog `<scratchpad>/catalog.json` (`rubric`,
-> `channel`, `videos` already made, workspace `ideas` incl. trashed/archived ones, which count as already
-> considered); the format rules `<repo>/animator/guide/rules.md` (Story and Script); and, for any made video that
-> looks close to a draft, `<repo>/videos/<slug>/plan.json` to compare the core.
-> House rules: no topic centred on a commercial brand: one company, trademark or branded product/model (a story
-> that rests on one specific aircraft/train/car model counts as model-centred). This covers commercial brands
-> only: names of temples, mosques, churches, buildings, places, cities, institutions, cultures and people are not
-> brands, and an industry is fine. Zodiac is off-limits.
-> For each draft give one entry per rubric key (all of them): verdict "pass" | "fail" | "unknown".
-> - `sourceable`: pass only if a listed source plausibly backs the key number/claim and is reasonably
->   authoritative; a blog or forum quoting a study is "unknown"; a contested core claim is "fail".
-> - `novelty`: fail if a made video or workspace idea has the same core mechanism or premise (meaning, not words),
->   or if it is an over-told internet fact with nothing new.
-> - Gates (brand_free, format_fit, twist_event, prop_mechanism): a twist that is really narrated information fails
->   twist_event; a contested or two-sided mechanism fails prop_mechanism or format_fit; a story whose beats
->   contradict the mechanism should be called out in small_story.
-> Output ONLY a JSON array, same order as the drafts, each element: {"titleEn": "<as in draft>", "rubric":
-> [{"key", "verdict", "evidence": "<short quote from the draft or source note, max 160 chars>", "reason": "<one
-> short Turkish sentence>"}], "dupes": [{"kind": "video"|"idea", "ref": "<slug or idea id>", "title", "score":
-> <0-1>, "why": "Anlamsal: <Turkish, short>"}], "rubricSummary": "<two Turkish sentences: strongest point, biggest
-> risk>"}. Only list dupes with score ≥ 0.4.
-> - `hook`: judge the first hook as a triple hook (rules.md → Story, triple hook); fail it if its `firstImage` is a
->   still view, its `onScreen` is missing or repeats `text`, or two of the three do the same job. Write it to `<scratchpad>/scores.json` and also return it.
-
-Do not give numeric scores; the app computes the score from the verdicts. A failed gate makes a candidate
-ineligible whatever the rest says, and each gate left `unknown` costs points. Keep gate failures in the batch:
-the user sees why, and the rejection is remembered.
-
-## 6. Load into the app
-
-The drafts file is an array of candidates in this shape (the scorer adds `rubric`, `dupes`, `rubricSummary`):
+Turkish for `title`, `question`, `mechanism`, `summary`, `limitations` (the app is Turkish); English for `titleEn` and
+the hooks (the videos are English).
 
 ```json
 [{
   "title": "...", "titleEn": "...", "question": "...", "mechanism": "...", "summary": "...",
   "category": "Gündelik sistemler", "tags": ["..."], "effort": "medium",
-  "hooks": [{ "text": "It's the button everyone presses ...", "language": "en", "firstImage": "...",
-              "onScreen": "THE BUTTON DOES NOTHING", "note": "" }],
+  "hooks": [{ "text": "...", "language": "en", "firstImage": "...", "onScreen": "...", "note": "" }],
   "visualNotes": "...", "limitations": "...",
   "sources": [{ "url": "https://...", "title": "...", "publisher": "...", "type": "official", "note": "key number" }]
 }]
 ```
 
-Source `type`: `paper` | `official` | `firsthand` | `news` | `other`.
+- `title`: a question or striking statement. `titleEn`: in the channel's style ("Why ...", "The Day ...").
+  `question`: the viewer's question in one sentence. `mechanism`: one or two sentences with the key number.
+- `summary`: the seven beats of rules.md → Story, a sentence each, so a kept idea carries into `plan.json`: hook (the
+  strange event, the main character), but, then (they think they are winning), conflict (the twist **event**), pivot
+  ("You see ..." on props), so, closing (hands back to the first line).
+- `hooks`: 1-3 triple hooks, the preferred first, each with three different jobs live by 0.5 s: `text` the opening
+  line (a claim that sounds impossible or a question, tied to the viewer), `firstImage` what is in frame and already
+  moving at frame 0 (not a still view), `onScreen` a 2-6 word headline (a label, question or contrasting angle, never
+  the words of `text`).
+- `visualNotes`: the labelled props (UPPERCASE labels), the 3-4 locations that carry the story (the video needs 8),
+  two physical gags. `limitations`: thin evidence, a contested number, sensitivity.
+- `category`: one of `channel.categories`. `effort`: `low` | `medium` | `high`. Source `type`: `paper` | `official` |
+  `firsthand` | `news` | `other`.
 
-```bash
-npx tsx scripts/candidates.ts add <scratchpad>/drafts.json --scores <scratchpad>/scores.json
-```
+## 5. Score in a separate pass
 
-It merges the verdicts by `titleEn`, then prints each candidate's score, `GATE` when a gate failed, `DUP` when a
-duplicate was found, and any validation errors (a draft the scorer skipped fails for a missing `rubric`). Fix the
-errors and add only the failed items again; re-adding a good item creates a copy.
+Never grade your own drafts. Spawn one fresh general-purpose subagent with this prompt (paths filled in):
 
-## 7. Report
+> You are a strict editor for a YouTube Shorts channel of 50-60 s vertical animated explainers. Judge the idea drafts
+> in `<scratchpad>/drafts.json` against the rubric; you did not write them, so be critical. Read the catalog
+> `<scratchpad>/catalog.json` (`rubric`, `channel`, `videos` made, workspace `ideas`, trashed and archived ones
+> included), the house rules in `<repo>/.claude/skills/ideate/SKILL.md` → House rules, `<repo>/animator/guide/rules.md`
+> → Story and Script, and for a made video close to a draft its `<repo>/videos/<slug>/plan.json`. `sources` are pages
+> that were opened; `note` says what they back.
+> For each draft give a verdict "pass" | "fail" | "unknown" for every rubric key:
+> - `sourceable`: pass only if a listed, reasonably authoritative source backs the key claim; a blog quoting a study
+>   is unknown; a contested core claim fails.
+> - `novelty`: fail if a made video or idea has the same core mechanism or premise, or it is an over-told fact.
+> - Gates (brand_free, format_fit, twist_event, prop_mechanism): narrated information is no twist event; a contested
+>   mechanism fails prop_mechanism or format_fit; beats that contradict the mechanism go in small_story.
+> - `hook`: the first hook as a triple hook; fail a still `firstImage`, a missing `onScreen` or one that repeats
+>   `text`, or two channels doing one job.
+> Output only a JSON array in the drafts' order: {"titleEn", "rubric": [{"key", "verdict", "evidence": "<quote from
+> draft or source note, ≤ 160 chars>", "reason": "<one Turkish sentence>"}], "dupes": [{"kind": "video"|"idea", "ref":
+> "<slug or id>", "title", "score": <0-1>, "why": "Anlamsal: <short Turkish>"}] (score ≥ 0.4 only), "rubricSummary":
+> "<two Turkish sentences: strongest point, biggest risk>"}. Write it to `<scratchpad>/scores.json` and return it.
 
-One short message: how many were added, the top three with score and one line each, how many failed a gate or
-were flagged as duplicates, the channel scope and seed used, and the link http://localhost:5173/factory. Ask the
-user to triage there; do not keep or reject candidates yourself.
+No numeric scores: the app computes them. A failed gate makes a candidate ineligible and each `unknown` gate costs
+points; keep gate failures in the batch so the user sees why and the rejection is remembered.
+
+## 6. Load and report
+
+`npx tsx scripts/candidates.ts add <scratchpad>/drafts.json --scores <scratchpad>/scores.json` merges the verdicts by
+`titleEn` and prints each score, `GATE`, `DUP` and validation errors. Fix and re-add only the failed items (re-adding
+a good one makes a copy).
+
+Report in one short message: how many were added, the top three with score and a line each, how many failed a gate or
+were flagged as duplicates, the scope and seed used, and http://localhost:5173/factory. The user triages there; never
+keep or reject candidates yourself.

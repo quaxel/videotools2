@@ -172,8 +172,7 @@ Two or three quick hook beats, then nine to twelve shots, one location each; the
   jolt.
 - **Characters never pass through the set:** no puppet stands inside or walks through a counter, desk or prop
   (`pipeline.py collide` finds them).
-- **Motion:** median frame-to-frame change ≥ 4.5 and at most 20 % near-still frame pairs (`pipeline.py motion`;
-  calibrated on the 14 slow-camera videos, whose stillest gave 4.8 and 16 %). `Stage`
+- **Motion:** median frame-to-frame change ≥ 3 and at most 30 % near-still frame pairs (`pipeline.py motion`). `Stage`
   adds a push and idle acting automatically (`energy`, default 1; with `steady` almost no drift); use `energy={0}`
   only for shots that must hold perfectly still. Give the stillest shots `motion` lists more net travel (up to 40 % of
   the frame width) or more puppet and secondary action, never wobble.

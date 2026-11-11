@@ -254,8 +254,9 @@ export const carSeat = (at: [number, number], heading: number, seat: [number, nu
 // A 1904 open touring car: deep red body with brass radiator and lamps, an open tonneau with two tufted benches, a
 // raked steering column, curved mudguards and running boards. `roll` metres travelled turns the wheels; `bump`
 // lurches the body; `steam` 0..1 blows steam out of the hood (the breakdown).
-export const Automobile: React.FC<{ position: Vec3; heading?: number; roll?: number; bump?: number; steam?: number; frame?: number; color?: string }> = ({
+export const Automobile: React.FC<{ position: Vec3; heading?: number; roll?: number; bump?: number; steam?: number; frame?: number; color?: string; steer?: number }> = ({
   position,
+  steer = 0,
   heading = 0,
   roll = 0,
   bump = 0,
@@ -314,10 +315,24 @@ export const Automobile: React.FC<{ position: Vec3; heading?: number; roll?: num
         ))}
         {/* steering column and wheel */}
         <InkCylinder radius={0.02} height={0.6} position={[-0.26, 0.82, 0.6]} rotation={[-0.75, 0, 0]} color="#2a2420" ink={0.006} />
-        <mesh position={[-0.26, 1.04, 0.42]} rotation={[0.85, 0, 0]}>
-          <torusGeometry args={[0.15, 0.018, 8, 24]} />
-          <meshToonMaterial color="#3a2a1e" gradientMap={toonRamp} />
-        </mesh>
+        {/* `steer` (radians, + = counter-clockwise seen from the front) turns the rim and its spokes, so the driver's
+            hands (steer() in puppet/tools.ts) and the wheel turn together */}
+        <group position={[-0.26, 1.04, 0.42]} rotation={[0.85, 0, steer]}>
+          <mesh>
+            <torusGeometry args={[0.15, 0.018, 8, 24]} />
+            <meshToonMaterial color="#3a2a1e" gradientMap={toonRamp} />
+          </mesh>
+          {[0, (2 * Math.PI) / 3, (4 * Math.PI) / 3].map((a) => (
+            <mesh key={a} position={[Math.cos(a + Math.PI / 2) * 0.075, Math.sin(a + Math.PI / 2) * 0.075, 0]} rotation={[0, 0, a]}>
+              <boxGeometry args={[0.014, 0.15, 0.01]} />
+              <meshToonMaterial color="#2a2018" gradientMap={toonRamp} />
+            </mesh>
+          ))}
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.028, 0.028, 0.03, 12]} />
+            <meshToonMaterial color="#d8a84a" gradientMap={toonRamp} />
+          </mesh>
+        </group>
         {/* steam from the hood when it breaks down */}
         {steam > 0 && (
           <group position={[0, 0.85, 0.9]} userData={{ ghost: true }}>

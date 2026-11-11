@@ -1,4 +1,6 @@
-# Waterloo country, June 1815 (FieldSet, src/videos/what-if-waterloo/WaterlooSet.tsx)
+# Waterloo country, June 1815
+
+Set: `FieldSet`, in a video's own folder (find it with `grep -rln FieldSet src/videos` from `animator/`).
 
 Built from general knowledge of the battlefield (period paintings and today's landscape around Mont-Saint-Jean,
 La Haye Sainte, Hougoumont and Plancenoit); no image was copied or downloaded.

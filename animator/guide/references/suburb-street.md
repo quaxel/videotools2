@@ -1,4 +1,4 @@
-# Suburban street, sidewalk tree, curbside bins (dog-nose)
+# Suburban street, sidewalk tree, curbside bins
 
 Sources (looked at in the browser, nothing downloaded):
 - Unsplash search "suburban sidewalk tree": https://unsplash.com/s/photos/suburban-sidewalk-tree (tree-lined residential road, autumn, lawns down to the kerb)

@@ -1,6 +1,6 @@
 # Late Cretaceous floodplain (Hell Creek type), 66 million years ago
 
-Used by `src/videos/what-if-asteroid/CretaceousSet.tsx`.
+Set: `CretaceousSet`, in a video's own folder (find it with `grep -rln CretaceousSet src/videos` from `animator/`).
 
 Sources (read, nothing downloaded):
 - Hell Creek Formation overview — https://en.wikipedia.org/wiki/Hell_Creek_Formation

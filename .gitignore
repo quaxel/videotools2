@@ -25,6 +25,9 @@ __pycache__/
 uploader/secrets/
 uploader/client_secret*.json
 uploader/uploader.db*
+# Database backups and the audience analytics report: private channel data
+uploader/backups/
+videos/analytics.*
 
 # Rendered videos and TTS model weights — too large for GitHub
 output/
@@ -39,12 +42,14 @@ animator/uploader/
 animator/public/space/
 
 # Pipeline outputs under build/, remade on demand (TTS takes, stills, QA frames, cue dumps, logs).
-# Kept: approvals.json, check.ok, score.md and timings.jsonl, which hold state and history.
+# Kept: approvals.json, check.ok, score.md and timings.jsonl, which hold state and history, and the review
+# findings of each round (mistakes_<round>.md), the lessons the next video is checked against.
 videos/*/build/*
 !videos/*/build/approvals.json
 !videos/*/build/check.ok
 !videos/*/build/score.md
 !videos/*/build/timings.jsonl
+!videos/*/build/mistakes_*.md
 
 # ModelPreview sample, regenerated from animator/guide/sand3d/car.py (sand3d-model skill)
 animator/public/models/preview/

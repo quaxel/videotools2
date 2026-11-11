@@ -166,7 +166,8 @@ export const Stage: React.FC<{
   const rig = <CameraRig {...camera} />;
   // Framing audit of the set's crowds, model heads and words (engine/audit.ts), in every canvas that draws the set.
   const audit = auditing() ? <SceneAudit focus={focus ?? focusDistance(camera, puppets)} shot={start} /> : null;
-  const front = foreground ? <group userData={{ ghost: true }}>{foreground}</group> : null;
+  // `foreground: true` marks them for the framing audit (a foreground over a face or a label, engine/audit.ts).
+  const front = foreground ? <group userData={{ ghost: true, foreground: true }}>{foreground}</group> : null;
   const usedPost = usePost();
   const post = GPU_TRIAL ? null : usedPost;
   if (post) {

@@ -1,13 +1,14 @@
 // Head-framing pre-pass: Stage keeps every puppet's head whole (engine/framing.ts), but solved frame by frame the
-// correction jumps when a head reaches an edge. This renders the video once at tiny scale with the `framingPass`
-// input prop, collects the raw correction Stage logs for every shot frame, and smooths it per shot: each frame takes
+// correction jumps when a head reaches an edge. This walks the video once at tiny scale with the `framingPass`
+// input prop (no screenshots, no encoder: only the browser's log lines are used; FRAMING_OLD=1 renders the tiny video
+// as before), in FRAMING_CONCURRENCY tabs (default 3: measured 106 s against 142 s with 5 and 184 s with 8), collects the raw correction Stage logs for every shot frame, and smooths it per shot: each frame takes
 // the strongest correction within ±HOLD frames (so the camera starts easing before a head arrives and holds while it
 // is needed), then a gaussian blur. The render reads the result from public/videos/<slug>/framing.json.
 //   node scripts/framing.mjs <slug>                 every shot
 //   node scripts/framing.mjs <slug> 120-300,900-1010 only those frame spans (whole shots), merged into the existing
 //                                                    table; pipeline.py stills <frames> uses this for the shots it looks at
 import { sharedBundle } from "./bundle.mjs";
-import { openBrowser, renderMedia, selectComposition } from "@remotion/renderer";
+import { openBrowser, renderFrames, renderMedia, selectComposition } from "@remotion/renderer";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -25,7 +26,9 @@ if (!slug) {
 }
 
 const serveUrl = await sharedBundle();
-const inputProps = { framingPass: true };
+// `stem: "none"`: no part of the soundtrack is mounted (engine/Video.tsx), so the pass does not fetch the sound files
+// and does not die on an effect whose baked file under public/space/ is missing. FRAMING_OLD=1 keeps the sound.
+const inputProps = { framingPass: true, ...(process.env.FRAMING_OLD === "1" ? {} : { stem: "none" }) };
 const shots = {}; // shot start -> { f -> delta }
 // Rendered in segments, each in a fresh browser: a render tab keeps every finished shot's WebGL context alive, so a
 // long video with heavy sets runs the GPU out of memory in one pass ("Error creating WebGL context").
@@ -43,26 +46,22 @@ for (const [a, b] of spans ?? [[0, total - 1]])
 for (const [start, end] of ranges) {
   const browser = await openBrowser("chrome", { chromiumOptions: { gl: "angle" } });
   const composition = await selectComposition({ serveUrl, id: slug, puppeteerInstance: browser, inputProps });
-  const tmp = path.join(os.tmpdir(), `framing-${slug}-${process.pid}-${start}.mp4`);
-  await renderMedia({
-    serveUrl,
-    composition,
-    codec: "h264",
-    outputLocation: tmp,
-    inputProps,
-    scale: 0.1,
-    muted: true,
-    frameRange: [start, end],
-    puppeteerInstance: browser,
-    chromiumOptions: { gl: "angle" },
-    onBrowserLog: ({ text }) => {
-      if (!text.startsWith("[framefix] ")) return;
-      const { s, f, d } = JSON.parse(text.slice(11));
-      (shots[s] ??= {})[f] = d;
-    },
-  });
+  const onBrowserLog = ({ text }) => {
+    if (!text.startsWith("[framefix] ")) return;
+    const { s, f, d } = JSON.parse(text.slice(11));
+    (shots[s] ??= {})[f] = d;
+  };
+  const common = { serveUrl, composition, inputProps, scale: 0.1, muted: true, frameRange: [start, end], concurrency: Number(process.env.FRAMING_CONCURRENCY ?? 3), puppeteerInstance: browser, chromiumOptions: { gl: "angle" }, onBrowserLog };
+  if (process.env.FRAMING_OLD === "1") {
+    // the old way: a tiny video nobody looks at (screenshots + h264), to compare the two
+    const tmp = path.join(os.tmpdir(), `framing-${slug}-${process.pid}-${start}.mp4`);
+    await renderMedia({ ...common, codec: "h264", outputLocation: tmp });
+    fs.rmSync(tmp, { force: true });
+  } else {
+    // Only the logs matter: the frames are walked without a screenshot or an encoder (imageFormat "none").
+    await renderFrames({ ...common, imageFormat: "none", outputDir: null, logLevel: "error", onStart: () => undefined, onFrameUpdate: () => undefined });
+  }
   await browser.close({ silent: true });
-  fs.rmSync(tmp, { force: true });
 }
 
 const ID = [0, 0, 0, 0, 0, 0, 1];

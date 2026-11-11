@@ -1,8 +1,7 @@
-# Ford's Theatre, Washington, 14 April 1865 (what-if-lincoln)
+# Ford's Theatre, Washington, 14 April 1865
 
-Sets built from these notes live in `src/videos/what-if-lincoln/` (FordsSet.tsx and the Room interiors in Scene.tsx);
-the State Box front, Lincoln's rocking chair and the passage chair are sand3d models in
-`../videos/what-if-lincoln/sand3d/`.
+Set: `FordsSet`, in a video's own folder (find it with `grep -rln FordsSet src/videos` from `animator/`); the State
+Box front, Lincoln's rocking chair and the passage chair are sand3d models.
 
 ## Sources
 - NPS, Ford's Theatre FAQ (the assassination; the theatre): https://www.nps.gov/foth/learn/historyculture/faq-the-assassination.htm , https://home.nps.gov/foth/learn/historyculture/faq-fords-theatre.htm

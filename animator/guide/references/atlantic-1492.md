@@ -1,4 +1,4 @@
-# Atlantic 1492: Columbus's ships, deck and cabin (what-if-columbus)
+# Atlantic 1492: Columbus's ships, deck and cabin
 
 Sources (read, nothing downloaded):
 - https://en.wikipedia.org/wiki/La_Santa_Mar%C3%ADa — nao, ~19 m hull, beam ~5.5 m, three small masts, single main deck, crew ~40.
