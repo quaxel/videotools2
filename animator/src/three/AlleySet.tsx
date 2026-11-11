@@ -6,6 +6,7 @@ import { SmokePlume } from "./LakeSet";
 import { MOODS } from "./moods";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // Rainy night alley with a ramen stall, built from photo references (guide/references/rainy-alley.md).
 // The alley runs away from the camera along -z between x = -1.3 (izakaya fronts) and x = 1.3 (a plain wall with
@@ -30,11 +31,6 @@ export const COOK: [number, number] = [1.07, -0.5];
 export const CAR_X = -0.55;
 const TUBE: Vec3 = [0.5, 1.92, STALL.z];
 const STALL_LANTERN: Vec3 = [-0.02, 1.5, -1.62];
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // The stall's fluorescent tube stutters now and then.
 const tube = (frame: number) => (frame % 71 < 2 || frame % 71 === 4 ? 0.55 : 1);

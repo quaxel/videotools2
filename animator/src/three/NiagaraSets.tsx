@@ -8,6 +8,7 @@ import { Blob, useOwned } from "./BalloonSets";
 import { Forest, Lights, Mood, MOODS, Sky, tiled, TreeSpot } from "./RiverSets";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // Niagara Falls and the Lake Erie ice jam of March 1848, built from guide/references/niagara-1848.md.
 //
@@ -30,10 +31,6 @@ export const NIAGARA = { half: 12, curve: 2.2, drop: 9, bank: 15, bankH: 1.4, fu
 export const crestZ = (x: number) => -NIAGARA.curve * (1 - Math.min(1, (x / NIAGARA.half) ** 2));
 export const MILL = { x: NIAGARA.bank + 3.2, z: -7, wheel: [NIAGARA.bank - 0.55, 0.95, -7] as Vec3 };
 
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);

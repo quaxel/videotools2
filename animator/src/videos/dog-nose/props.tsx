@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { canvasTexture, InkBox, InkCylinder, toonRamp, Vec3 } from "../../engine";
 import { rnd } from "../pisces-sign/props";
+import { Ball, Cyl, RBox, soft } from "../../three/primitives";
 
 // Props and characters for "You Wake Up With a Dog's Nose": scent ribbons and the smells at their ends, the dogs
 // (Rocky the deadpan judge, Max, Bella), the sock monster, feed cards, wheelie bins.
@@ -29,83 +29,8 @@ const useFrameGeometry = (make: () => THREE.BufferGeometry, deps: unknown[]) => 
 
 // ---------- soft shapes ----------
 
-// A rounded, bevelled box with smooth shading.
-export const RBox: React.FC<{ size: Vec3; position?: Vec3; rotation?: Vec3; color: string; radius?: number; rough?: number; map?: THREE.Texture | null; emissive?: string; k?: number; shadows?: boolean }> = ({
-  size,
-  position = [0, 0, 0],
-  rotation = [0, 0, 0],
-  color,
-  radius = 0.04,
-  rough = 0.65,
-  map = null,
-  emissive,
-  k = 0,
-  shadows = true,
-}) => {
-  const r = Math.min(radius, size[0] / 2.01, size[1] / 2.01, size[2] / 2.01);
-  const geo = useFrameGeometry(() => new RoundedBoxGeometry(size[0], size[1], size[2], 3, r), [size[0], size[1], size[2], r]);
-  return (
-    <mesh geometry={geo} position={position} rotation={rotation} castShadow={shadows} receiveShadow={shadows}>
-      <meshStandardMaterial color={color} roughness={rough} metalness={0} map={map} emissive={emissive ?? "#000"} emissiveIntensity={k} />
-    </mesh>
-  );
-};
-
-export const Cyl: React.FC<{ r: number; h: number; position?: Vec3; rotation?: Vec3; color: string; r2?: number; rough?: number; emissive?: string; k?: number; seg?: number }> = ({
-  r,
-  h,
-  position = [0, 0, 0],
-  rotation = [0, 0, 0],
-  color,
-  r2,
-  rough = 0.6,
-  emissive,
-  k = 0,
-  seg = 32,
-}) => (
-  <mesh position={position} rotation={rotation} castShadow receiveShadow>
-    <cylinderGeometry args={[r2 ?? r, r, h, seg]} />
-    <meshStandardMaterial color={color} roughness={rough} emissive={emissive ?? "#000"} emissiveIntensity={k} />
-  </mesh>
-);
-
-
-// The Pixar-style surface: smooth shading (no cel steps, no ink hull), soft roughness, a hint of sheen.
-export const soft = (color: string, rough = 0.62, emissive?: string, k = 0) => (
-  <meshStandardMaterial color={color} roughness={rough} metalness={0} emissive={emissive ?? "#000"} emissiveIntensity={k} />
-);
-
-// A smooth ball. `glow` draws it unlit (sparkles, highlights); `opacity` makes it see-through; `ink` > 1 adds a hull.
-export const Ball: React.FC<{ position: Vec3; radius: number; color: string; glow?: boolean; scale?: Vec3; ink?: number; opacity?: number; rough?: number; map?: THREE.Texture }> = ({
-  position,
-  radius,
-  color,
-  glow: lit,
-  scale = [1, 1, 1],
-  ink = 1,
-  opacity,
-  rough = 0.55,
-  map,
-}) => (
-  <group position={position} scale={scale}>
-    <mesh castShadow={!lit && opacity === undefined}>
-      <sphereGeometry args={[radius, 28, 20]} />
-      {lit || opacity !== undefined ? (
-        <meshBasicMaterial color={color} toneMapped={false} transparent={opacity !== undefined} opacity={opacity ?? 1} depthWrite={opacity === undefined} />
-      ) : map ? (
-        <meshStandardMaterial color={color} roughness={rough} map={map} />
-      ) : (
-        soft(color, rough)
-      )}
-    </mesh>
-    {!lit && opacity === undefined && ink > 1 && (
-      <mesh scale={ink}>
-        <sphereGeometry args={[radius, 20, 16]} />
-        <meshBasicMaterial color={INK} side={THREE.BackSide} />
-      </mesh>
-    )}
-  </group>
-);
+// RBox, Cyl, soft and Ball moved to the kit (src/three/primitives.tsx); re-exported here for older imports.
+export { Ball, Cyl, RBox, soft } from "../../three/primitives";
 
 // ---------- capsules ----------
 

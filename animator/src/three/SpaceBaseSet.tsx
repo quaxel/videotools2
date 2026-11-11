@@ -6,6 +6,7 @@ import { Ridge, SmokePlume } from "./LakeSet";
 import { MOODS } from "./moods";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // Moon base control deck: a metal-plated room (floor y = 0, back wall at z = -3) with a panoramic window onto the
 // lunar surface, a ringed planet and Earth. A hologram table stands in the middle at `HOLO` (cyan light), an airlock
@@ -23,11 +24,6 @@ const WIN = { half: 1.4, bottom: 0.55, top: 2.55 };
 const ROOM = { half: 4.5, height: 3.2 };
 const OUT_Y = -0.5;
 const BEACON: Vec3 = [AIRLOCK.x, 2.62, BACK_Z + 0.32];
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // The hologram dims for two frames now and then, like a projector catching.
 const holoFlicker = (frame: number) => (frame % 37 < 2 ? 0.55 : 1) * (0.92 + 0.08 * Math.sin(frame * 0.7));

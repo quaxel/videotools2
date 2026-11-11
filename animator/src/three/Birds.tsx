@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import * as THREE from "three";
 import { toonRamp } from "./toon";
+import { rand } from "../engine/helpers";
 
 // Large soaring birds for sky shots: inked cel turkey vultures (built from photo references, see
 // guide/references/kentucky-farmyard-1876.md) that circle a thermal, bank into the turn and teeter.
@@ -8,11 +9,6 @@ import { toonRamp } from "./toon";
 
 type Vec3 = [number, number, number];
 const INK = "#161212";
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // One turkey vulture wing (left-to-right along +x, forward = +z): a long broad wing ending in five spread
 // "fingers". `under` is the silvery rear half of the underside, `ink` the black outline shape.

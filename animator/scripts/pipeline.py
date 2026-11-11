@@ -2,13 +2,20 @@
 # review) are done by Claude Code following .claude/skills/make-video/SKILL.md; this file runs everything else.
 #
 #   .venv/bin/python scripts/pipeline.py new <slug> "<topic>"   scaffold videos/<slug>/ and src/videos/<slug>/
-#   .venv/bin/python scripts/pipeline.py voice <slug>           Qwen TTS -> fitted track -> timing.json + pace check
-#   .venv/bin/python scripts/pipeline.py pace <slug>            speech_cover + long_pauses on the voice track (voice runs it)
+#   .venv/bin/python scripts/pipeline.py voice <slug>           Qwen TTS -> fitted track -> timing.json + pace check; ends
+#                                                              non-zero (after writing everything) when the pace misses
+#   .venv/bin/python scripts/pipeline.py scaffold <slug> [--force] [--dry-run]
+#                                                              after voice: write src/videos/<slug>/Scene.tsx and
+#                                                              videos/<slug>/camera_plan.md cut to the voice frames
+#                                                              (scripts/scaffold.py); refuses to overwrite without --force
+#   .venv/bin/python scripts/pipeline.py pace <slug>            duration, words, wpm + speech_cover and long_pauses on the
+#                                                              voice track -> build/pace.json (voice runs it); non-zero on a miss
 #   .venv/bin/python scripts/pipeline.py physics <slug>         bake videos/<slug>/physics.mjs (Rapier, scripts/physics.mjs)
 #                                                              -> src/videos/<slug>/physics.json (run by check/stills when stale)
 #   .venv/bin/python scripts/pipeline.py register               regenerate src/videos/index.ts
-#   .venv/bin/python scripts/pipeline.py check <slug>           tsc + rule checks on the scene's shot list + costume pieces
-#                                                              out of period for plan.json `year`
+#   .venv/bin/python scripts/pipeline.py check <slug>           tsc + rule checks on the scene's shot list (hook beats, shots,
+#                                                              hard cuts; a whip warns) + plan.json targets (locations,
+#                                                              characters, gags, seed_by) + costume pieces out of period for `year`
 #   .venv/bin/python scripts/pipeline.py sync <slug>            sound cues vs the picture (scripts/cues.mjs dump) -> build/sync.txt
 #   .venv/bin/python scripts/pipeline.py music <slug>           the video's own score: videos/<slug>/music.py (scripts/music)
 #                                                              -> public/videos/<slug>/music.wav + build/score.md
@@ -18,15 +25,24 @@
 #                                                              one still per second + the start, middle and end of every
 #                                                              shot (or given frames, or every 15 frames through the chosen
 #                                                              shots) + contact sheet; a few frames or shots re-measure only
-#                                                              their shots' head framing (-> build/stills-check/)
+#                                                              their shots' head framing (-> build/stills-check/). The whole-video
+#                                                              sheet also gets hue_families and top_hue_share measured
+#                                                              the report's way -> build/stills/colour.txt
 #   .venv/bin/python scripts/pipeline.py collide <slug> [--shots 3,5]
 #                                                              every 5th frame (of the chosen shots): puppets walking or
-#                                                              standing inside set objects (--shots -> build/collide-shots/)
-#   .venv/bin/python scripts/pipeline.py motion <slug>          fast 30 % draft render + motion per shot (stillest first)
+#                                                              standing inside set objects (--shots -> build/collide-shots/).
+#                                                              No pictures: three tabs walk the frames (about 7 min a video, --shots ~30 s)
+#   .venv/bin/python scripts/pipeline.py motion <slug> [--shots 3,5]
+#                                                              30 % draft render + motion per shot (stillest first) + the
+#                                                              colour of the draft (build/colour-draft.txt) + the
+#                                                              frame-by-frame QA on the draft (-> build/qa-draft/)
 #   .venv/bin/python scripts/pipeline.py framing <slug>         head-framing pre-pass -> public/videos/<slug>/framing.json
 #                                                              (run by stills/motion/render when the scene changed)
-#   .venv/bin/python scripts/pipeline.py render <slug> [--2k]   full MP4 -> output/<slug>.mp4 (broken segments rendered again),
-#                                                              then qa; --2k renders the 1440x2560 delivery size
+#   .venv/bin/python scripts/pipeline.py render <slug> [--2k] [--shots 3,5]
+#                                                              full MP4 -> output/<slug>.mp4 (broken shots rendered again),
+#                                                              then qa; --2k renders the 1440x2560 delivery size.
+#                                                              The picture is kept per shot in build/parts/; --shots (motion
+#                                                              and render) renders only the shots that changed and reuses the rest
 #   .venv/bin/python scripts/pipeline.py glitch <slug> [mp4]    flat runs in a render (a lost WebGL canvas); render retries them
 #   .venv/bin/python scripts/pipeline.py qa <slug> [mp4]        frame-by-frame QA (scripts/qa.py) -> videos/<slug>/build/qa/
 #   .venv/bin/python scripts/pipeline.py report <slug>          measure the MP4, check facts, write videos/<slug>/report.md
@@ -34,12 +50,15 @@
 #   .venv/bin/python scripts/pipeline.py look <slug> <ref-dir> [frames]
 #                                                              our stills (post chain on) measured against reference frames
 #                                                              (scripts/look.py) -> build/look/look.md + sbs.jpg
-#   .venv/bin/python scripts/pipeline.py approve <slug> script|stills [--undo]
+#   .venv/bin/python scripts/pipeline.py approve <slug> script|stills [--undo] [--force]
 #                                                              record the OK on lines.json / the final contact sheet
-#                                                              (build/approvals.json); lapses when that file changes
+#                                                              (build/approvals.json); lapses when that file changes.
+#                                                              Refused while the voice's pace (script) or the sheet's
+#                                                              colour (stills) misses, unless --force
 #   .venv/bin/python scripts/pipeline.py go <slug> [--to stage] [--plan] [--2k]
 #                                                              run the missing / stale stages in order (default up to motion),
-#                                                              stopping at an approval the files have outgrown
+#                                                              stopping at an approval the files have outgrown, a pace
+#                                                              miss at voice, a colour miss at stills or motion, a collision
 #   .venv/bin/python scripts/pipeline.py web [--port 8766]      browser panel: every video's stages, run / stop, live log, outputs
 # voice, physics, check, sync, music, stills, collide, motion, render and report append their run time to
 # videos/<slug>/build/timings.jsonl. Every script renders from one shared bundle (scripts/bundle.mjs, out/bundles/),
@@ -88,10 +107,10 @@ TARGETS = {
     "top_hue_share": (0, 0.40),
     "seed_by": (0, 20),  # seconds: the twist's object or person first appears
     "lufs": (-17, -14),
-    # PROVISIONAL: the old fast-cut, hand-held references gave 8.0 and 10 %; the slow gliding camera (rules.md →
-    # Camera) moves less per frame. Recalibrate from the first video made with it.
-    "motion": (3.0, None),  # median frame-to-frame change (10 fps, 54x96)
-    "still_share": (0, 0.30),  # share of frame pairs that barely change (< 2)
+    # Calibrated on the 14 slow-camera videos (2026-11-11): motion 4.8-13.6 (median 7.2), still_share 1-16 %; the old
+    # fast-cut videos gave 6.5-16.6 and 0-6 %. The floor sits just under the stillest delivered video.
+    "motion": (4.5, None),  # median frame-to-frame change (10 fps, 54x96)
+    "still_share": (0, 0.20),  # share of frame pairs that barely change (< 2)
     "glitch_frames": (0, 0),  # broken frames in the render (lost WebGL canvas); render retries them
     "black_frames": (0, 0),  # qa.py: frames with mean luma < 4 %
     "frozen_spans": (0, 0),  # qa.py: 12+ frames without any change
@@ -121,6 +140,14 @@ def mark(key, value, fmt="{}"):
     target = f"≥ {lo}" if hi is None else f"≤ {hi}" if lo is None else f"{lo} – {hi}"
     ok = within(key, value)
     return f"| {key} | {fmt.format(value)} | {target} | {'ok' if ok else '**MISS**'} |", ok
+
+
+def gate_line(key, value, fmt="{}", ok=None, target=None, note=""):
+    """One `  ok   key = value (target ...)` / `  MISS ...` line for a target measured before the report."""
+    if ok is None:
+        ok = within(key, value)
+    target = target or mark(key, value)[0].split("|")[3].strip()
+    return ("  ok   " if ok else "  MISS ") + f"{key} = {fmt.format(value)} (target {target}{note})"
 
 
 # ---------- new ----------
@@ -179,35 +206,115 @@ def cmd_voice(slug):
     run(QWEN_PY, "scripts/voice_generate.py", slug)
     run(PY, "scripts/voice_assemble.py", slug)
     t = json.load(open(sdir(slug, "timing.json")))
-    words = sum(len(l["text"].split()) for l in t["lines"])
-    dur = t["totalFrames"] / FPS
-    wpm = words / dur * 60
-    print(f"\n{dur:.1f}s, {words} words, {wpm:.0f} wpm")
-    for key, val in (("duration", dur), ("words", words), ("wpm", wpm)):
-        print(("  ok   " if within(key, val) else "  MISS ") + f"{key} = {val:.0f} (target {mark(key, val)[0].split('|')[3].strip()})")
-    pace_check(slug)
+    misses = pace_check(slug, stop=False)
     print("\nline frames (cut shots to these):")
     for l in t["lines"]:
         print(f"  {l['i']:02d} {l['from']:5d}-{l['to']:5d} {l['speaker']:8s} {l['text']}")
+    pace_stop(slug, misses)  # after every output is written and printed
 
 
-# The report measures speech_cover and long_pauses on the final mix; measured on the bare voice track whisper finds
-# about 1-1.5 points more cover (music and effects hide word edges), so the voice stage asks for this much margin.
+# The report measures speech_cover and long_pauses on the final mix; on the bare voice track whisper finds a little
+# more cover (music and effects hide word edges). Over 51 videos (17 against their MP4, 34 against the report's
+# rounded figure) the voice track read a median 0.3 points higher, 1.4 at the 90th percentile and 2.6 at most, and
+# three videos lost more than 2.0. With this margin none of the 16 videos that missed 80 % in the report would have
+# passed here (two of them read above 80 % on the voice track); a 3-point margin would only stop more videos that
+# pass. long_pauses is whisper-jittery by one either way between track and mix (9 of the 10 report misses show here).
 VOICE_COVER_MARGIN = 0.02
 
+# What to change in lines.json for each pace miss (SKILL.md step 4), by (metric, too low / too high).
+PACE_HINTS = {
+    ("words", "low"): "add a sentence or a few words (180-210)",
+    ("words", "high"): "cut a sentence or a few words (180-210)",
+    ("duration", "low"): "add a few words or a line; do not slow the voice down to fill time",
+    ("duration", "high"): "cut words, or tempo +0.05 on the slowest speaker",
+    ("wpm", "low"): "tempo +0.05 on the slow speaker, or a shorter pauseAfter",
+    ("wpm", "high"): "tempo -0.05 on the fast speaker",
+    ("long_pauses", "high"): "shorten or drop pauseAfter (only the lines before the pivot and before the closing line may carry about 0.4), or join two short lines",
+    ("speech_cover", "low"): "a few more words in the lines with the longest silence after them, a shorter pauseAfter, or tempo +0.05 on a slow speaker",
+}
 
-def pace_check(slug):
-    """speech_cover and long_pauses measured on the voice track right after `voice`, so a miss is fixed in
-    lines.json (more words, shorter pauses, a faster tempo) before any scene work, not found by the report."""
-    m = audio_metrics(os.path.join(ROOT, "public", "videos", slug, "voice.wav"))
-    lo = TARGETS["speech_cover"][0] + VOICE_COVER_MARGIN
-    cover_ok = m["speech_cover"] >= lo
-    print(("  ok   " if cover_ok else "  MISS ") + f"speech_cover = {m['speech_cover']:.0%} on the voice track (target ≥ {lo:.0%} here: "
-          f"the final mix measures ~1-2 points lower)")
-    print(("  ok   " if within("long_pauses", m["long_pauses"]) else "  MISS ") + f"long_pauses = {m['long_pauses']} (target ≤ {TARGETS['long_pauses'][1]})")
-    if not cover_ok or not within("long_pauses", m["long_pauses"]):
-        print("  fix it now in lines.json (a few more words, a shorter pauseAfter, tempo +0.05 on a slow speaker), "
-              "then voice again: after the scene is built a re-voice moves every cut")
+
+def pace_path(slug):
+    return vdir(slug, "build", "pace.json")
+
+
+def voice_current(slug):
+    """timing.json and voice.wav exist and are not older than lines.json (the voice is of these lines)."""
+    wav, timing, lines = os.path.join(ROOT, "public", "videos", slug, "voice.wav"), sdir(slug, "timing.json"), vdir(slug, "lines.json")
+    return all(map(os.path.exists, (wav, timing, lines))) and os.path.getmtime(timing) >= os.path.getmtime(lines)
+
+
+def pace_check(slug, stop=True):
+    """words and duration (timing.json) and wpm, speech_cover and long_pauses (whisper on the voice track), measured
+    right after `voice`, so a miss is fixed in lines.json before any scene work instead of being found by the report
+    after the 2K render. Writes build/pace.json and returns the misses [(metric, value text, fix hint)]. With `stop`
+    (the `pace` command) a miss ends the run non-zero, like `voice` does after printing its line frames."""
+    wav = os.path.join(ROOT, "public", "videos", slug, "voice.wav")
+    t = json.load(open(sdir(slug, "timing.json")))
+    words = sum(len(l["text"].split()) for l in t["lines"])
+    dur = t["totalFrames"] / FPS
+    m = audio_metrics(wav)
+    # wpm the report's way: the words whisper hears per minute. It reads up to 8 below the script's own count
+    # (a number or a hyphenated word is one word to whisper), which is how videos passed here and missed there.
+    wpm, script_wpm = m["wpm"], words / dur * 60
+    cover_lo = TARGETS["speech_cover"][0] + VOICE_COVER_MARGIN
+    print(f"\n{dur:.1f}s, {words} words, {wpm:.0f} wpm heard by whisper ({script_wpm:.0f} by the script's word count)")
+    rows = [  # (metric, value, format, ok, line)
+        ("duration", dur, "{:.1f}", within("duration", dur), None),
+        ("words", words, "{}", within("words", words), None),
+        ("wpm", wpm, "{:.0f}", within("wpm", wpm), None),
+        ("long_pauses", m["long_pauses"], "{}", within("long_pauses", m["long_pauses"]), None),
+        ("speech_cover", m["speech_cover"], "{:.1%}", m["speech_cover"] >= cover_lo,
+         gate_line("speech_cover", m["speech_cover"], "{:.1%}", m["speech_cover"] >= cover_lo, f"≥ {cover_lo:.0%}",
+                   f" on the voice track: the final mix measures up to {VOICE_COVER_MARGIN * 100:.0f} points lower")),
+    ]
+    misses = []
+    for key, val, fmt, ok, line in rows:
+        print(line or gate_line(key, val, fmt, ok))
+        if not ok:
+            lo = cover_lo if key == "speech_cover" else TARGETS[key][0]
+            hint = PACE_HINTS[(key, "low" if lo is not None and val < lo else "high")]
+            misses.append((key, fmt.format(val), hint))
+            print(f"         fix: {hint}")
+    os.makedirs(os.path.dirname(pace_path(slug)), exist_ok=True)
+    json.dump({"voice_mtime": os.path.getmtime(wav), "duration": dur, "words": words, "wpm": wpm, "script_wpm": script_wpm,
+               "long_pauses": int(m["long_pauses"]), "speech_cover": float(m["speech_cover"]),
+               "misses": [list(x) for x in misses]}, open(pace_path(slug), "w"), indent=1)
+    if stop:
+        pace_stop(slug, misses)
+    return misses
+
+
+def pace_misses(slug, measure=False):
+    """The pace misses of the current voice track from build/pace.json: [] when it passes, None when it has not been
+    measured for this track (no voice yet, lines.json edited since, or a voice made before pace.json existed).
+    With `measure` an unmeasured current track is measured now (whisper, ~20 s)."""
+    if not voice_current(slug):
+        return None
+    wav = os.path.join(ROOT, "public", "videos", slug, "voice.wav")
+    p = pace_path(slug)
+    saved = json.load(open(p)) if os.path.exists(p) else None
+    if saved and abs(saved["voice_mtime"] - os.path.getmtime(wav)) < 1e-3:
+        return [tuple(x) for x in saved["misses"]]
+    return pace_check(slug, stop=False) if measure else None
+
+
+def pace_waived(slug):
+    """The script was approved with --force while the pace missed, and lines.json has not changed since."""
+    return approved(slug, "script") and bool(approvals(slug)["script"].get("forced"))
+
+
+def pace_stop(slug, misses):
+    """End the run non-zero on a pace miss (so `go` stops at voice), unless the script approval waived it."""
+    if not misses:
+        return
+    what = ", ".join(f"{k} {v}" for k, v, _ in misses)
+    if pace_waived(slug):
+        print(f"\npace misses ({what}) accepted by `approve {slug} script --force`")
+        return
+    sys.exit(f"\npace MISS: {what}. Fix lines.json now (hints above) and run `voice` again (unchanged lines are cached): "
+             f"after the scene is built a re-voice moves every cut. `pace {slug}` re-measures without re-voicing; "
+             f"`approve {slug} script --force` accepts the miss.")
 
 
 # ---------- register ----------
@@ -238,14 +345,63 @@ def shot_list(slug):
     return [(int(a), total if b.startswith("TIMING") else int(b), name, trans(fade)) for a, b, name, fade in SHOT_RE.findall(body)]
 
 
+# The fast opening (rules.md → Story, Hook): 2-3 quick beats of the strange event, hard cuts between them, all over by
+# 3.5 s. They are not location shots: the shot count, the shortest and average shot and the hard-cut limit are
+# measured on the shots after them.
+HOOK_END = 105  # frames
+HOOK_BEAT_MIN = 0.6  # seconds (rules.md says 0.7; scaffold falls back to 0.6 when the first sentence is short)
+HOOK_BEAT_MAX = 1.5  # seconds
+HOOK_BEATS_MIN = 2
+HOOK_BEATS_MAX = 3
+
+
+def split_hook(shots):
+    """(hook beats, body shots). Beats are the leading shots that end by HOOK_END, when there are at least two; a
+    video that opens on one longer shot has none."""
+    beats = [s for s in shots if s[1] <= HOOK_END]
+    return (beats, shots[len(beats):]) if len(beats) >= 2 else ([], shots)
+
+
 def shot_stats(slug):
+    """(all shots, average and longest length of the body shots in seconds)."""
     shots = shot_list(slug)
-    lens = [(b - a) / FPS for a, b, _, _ in shots]
+    lens = [(b - a) / FPS for a, b, _, _ in split_hook(shots)[1]]
     return shots, sum(lens) / len(lens), max(lens)
 
 
 def hard_cuts(shots):
+    """`false` transitions among the body shots, after the first: the cut from the last hook beat into shot 1 is part
+    of the fast opening (scaffold writes it), so it is not counted."""
     return sum(1 for _, _, _, t in shots[1:] if t is False)
+
+
+def seed_seconds(slug, plan=None, timing=None):
+    """When the plan's seed first appears: the start of its `first_line` in timing.json (999 when out of range)."""
+    plan = plan if plan is not None else json.load(open(vdir(slug, "plan.json")))
+    timing = timing if timing is not None else json.load(open(sdir(slug, "timing.json")))
+    seed = plan.get("seed")
+    line = seed.get("first_line", 0) if isinstance(seed, dict) else None
+    return timing["lines"][line]["from"] / FPS if isinstance(line, int) and 0 <= line < len(timing["lines"]) else 999
+
+
+def plan_problems(slug):
+    """The report's plan targets (locations, characters, gags, seed_by), measured at `check` from plan.json and
+    timing.json so a miss shows before the render."""
+    path = vdir(slug, "plan.json")
+    if not os.path.exists(path):
+        return [f"no videos/{slug}/plan.json"]
+    plan = json.load(open(path))
+    out = []
+    for key, what in (("locations", "locations"), ("characters", "characters"), ("gags", "gags")):
+        n = len(plan.get(key) or [])
+        if not within(key, n):
+            out.append(f"plan.json has {n} {what} (want ≥ {TARGETS[key][0]})")
+    seed = seed_seconds(slug, plan)
+    if seed == 999:
+        out.append("plan.json `seed.first_line` is missing or not a line index of timing.json")
+    elif not within("seed_by", seed):
+        out.append(f"the seed's first line starts at {seed:.1f}s (want ≤ {TARGETS['seed_by'][1]}s): move `seed.first_line` earlier")
+    return out
 
 
 # ---------- physics: rigid bodies baked offline ----------
@@ -284,17 +440,32 @@ def cmd_check(slug):
             problems.append(f"gap or overlap between {n1} (ends {b1}) and {n2} (starts {a2})")
     if shots and shots[-1][1] != total:
         problems.append(f"the last shot must end at totalFrames ({total})")
-    for a, b, n, _ in shots:
+    beats, body = split_hook(shots)
+    for a, b, n, _ in body:
         if (b - a) / FPS > TARGETS["longest_shot"][1]:
             problems.append(f"{n} is {(b - a) / FPS:.1f}s (max {TARGETS['longest_shot'][1]}s)")
         if (b - a) / FPS < TARGETS["shortest_shot"][0]:
-            problems.append(f"{n} is {(b - a) / FPS:.1f}s (min {TARGETS['shortest_shot'][0]}s)")
-    if not within("shots", len(shots)):
-        problems.append(f"{len(shots)} shots (want {TARGETS['shots'][0]}-{TARGETS['shots'][1]}: one per location visit)")
-    cuts = hard_cuts(shots)
+            problems.append(f"{n} is {(b - a) / FPS:.1f}s (min {TARGETS['shortest_shot'][0]}s; only hook beats that end by {HOOK_END / FPS:.1f}s may be shorter)")
+    for a, b, n, _ in beats:
+        if (b - a) / FPS < HOOK_BEAT_MIN:
+            problems.append(f"hook beat {n} is {(b - a) / FPS:.1f}s (min {HOOK_BEAT_MIN}s: shorter does not read)")
+        if (b - a) / FPS > HOOK_BEAT_MAX:
+            problems.append(f"hook beat {n} is {(b - a) / FPS:.1f}s (max {HOOK_BEAT_MAX}s: the fast opening drags)")
+    if len(beats) < HOOK_BEATS_MIN:
+        problems.append(f"no fast opening: the first shot runs past {HOOK_END / FPS:.1f}s; cut the first sentence into "
+                        f"{HOOK_BEATS_MIN}-{HOOK_BEATS_MAX} hook beats of {HOOK_BEAT_MIN}-{HOOK_BEAT_MAX}s that end by then (rules.md → Story 1)")
+    if len(beats) > HOOK_BEATS_MAX:
+        problems.append(f"{len(beats)} hook beats (at most {HOOK_BEATS_MAX} before {HOOK_END / FPS:.1f}s)")
+    if not within("shots", len(body)):
+        problems.append(f"{len(body)} shots after the hook (want {TARGETS['shots'][0]}-{TARGETS['shots'][1]}: one per location visit)")
+    cuts = hard_cuts(body)
     if cuts > TARGETS["hard_cuts"][1]:
         problems.append(f"{cuts} hard cuts (at most {TARGETS['hard_cuts'][1]}): change location with \"dip\", stay in one with a camera move")
-    print(f"{len(shots)} shots, average {avg:.2f}s, longest {longest:.2f}s, hard cuts {cuts}")
+    whips = [n for _, _, n, t in shots[1:] if t is True]
+    if whips:
+        print(f"  WARN whip transition (`true`) into {', '.join(whips)}: new videos use \"dip\", \"dissolve\" or one hard cut (rules.md → Transitions)")
+    problems += plan_problems(slug)
+    print((f"{len(beats)} hook beats + " if beats else "") + f"{len(body)} shots, average {avg:.2f}s, longest {longest:.2f}s, hard cuts {cuts}")
     out_of_period = 0
     try:
         costume, summary, out_of_period = costume_problems(slug)
@@ -642,10 +813,142 @@ def cmd_stills(slug, frames=None, shots=None):
     # approval and `go` look at.
     out = vdir(slug, "build", "stills-check" if frames or shots else "stills")
     run("node", "scripts/stills.mjs", slug, out, ",".join(map(str, frame_list)))
+    if not (frames or shots):
+        stills_colour(slug, out)
+
+
+# ---------- colour: hue families, on the report's MP4 and on the stills sheet ----------
+
+HUE_NAMES = ("red", "orange", "yellow", "lime", "green", "spring green", "cyan", "azure", "blue", "violet", "magenta", "rose")
+HUE_SIZE = (54, 96)  # the picture is measured at this size (frame_diffs)
+
+
+def hue_family(f):
+    """The hue family (0-11, 30° each from red) that most of the saturated, not dark pixels of the frames `f`
+    (RGB 0-255, shape (..., 3)) fall in: the report's unit of colour, one per second of picture."""
+    import numpy as np
+
+    f = f / 255
+    mx, mn = f.max(-1), f.min(-1)
+    chroma = mx - mn + 1e-6
+    r, g, b = f[..., 0], f[..., 1], f[..., 2]
+    h = np.where(mx == r, ((g - b) / chroma) % 6, np.where(mx == g, (b - r) / chroma + 2, (r - g) / chroma + 4)) * 60
+    m = (chroma / (mx + 1e-6) > 0.35) & (mx > 0.25)
+    hist, _ = np.histogram(h[m], bins=12, range=(0, 360))
+    return int(hist.argmax())
+
+
+def hue_summary(families):
+    """(hue_families, top_hue_share, the top family) of one family per second."""
+    cnt = Counter(families)
+    top, n = cnt.most_common(1)[0]
+    return len(cnt), n / len(families), top
+
+
+def hue_name(k):
+    return f"{HUE_NAMES[k]} ({k * 30}-{k * 30 + 30}°)"
+
+
+# How far the sheet's top_hue_share was from the MP4's on the videos compared (one to three stills stand for a
+# second the report measures from ten frames): a share this close under the limit is printed as CLOSE.
+STILLS_HUE_SLACK = 0.06
+
+
+def colour_lines(slug, families, source, close=0.0):
+    """The colour of a picture given one hue family per second (`families`: [(second, family)]): ok / MISS lines for
+    hue_families and top_hue_share, the dominant family and the shots that carry it, and what to change on a miss."""
+    shots = shot_list(slug)
+    shot_at = lambda k: next((n for a, b, n, _ in shots if a <= k * FPS + FPS // 2 < b), "?")
+    seconds = [(k, f, shot_at(k)) for k, f in families]
+    fams, share, top = hue_summary([f for _, f, _ in seconds])
+    lines = [gate_line(key, val, fmt).strip() for key, val, fmt in (("hue_families", fams, "{}"), ("top_hue_share", share, "{:.0%}"))]
+    limit = TARGETS["top_hue_share"][1]
+    if share <= limit < share + close:
+        lines.append(f"CLOSE top_hue_share: the sheet has read up to {close * 100:.0f} points under the MP4; `motion` measures "
+                     f"it on every frame of the draft, so move a shot off {HUE_NAMES[top]} now if that is cheap")
+    by_shot = Counter(n for _, f, n in seconds if f == top)
+    length = Counter(n for _, _, n in seconds)
+    lines.append(f"dominant: {hue_name(top)} leads {sum(by_shot.values())} of {len(seconds)} s, carried by "
+                 + ", ".join(f"{n} {c} of {length[n]} s" for n, c in by_shot.most_common()))
+    lines.append("families (seconds led): " + ", ".join(f"{HUE_NAMES[f]} {c}" for f, c in Counter(f for _, f, _ in seconds).most_common()))
+    lines.append("per shot: " + "; ".join(
+        f"{n} " + "/".join(f"{HUE_NAMES[f]} {c}" for f, c in Counter(f for _, f, m in seconds if m == n).most_common())
+        for n in dict.fromkeys(m for _, _, m in seconds)))
+    lines.append(source)
+    if share > limit:
+        lines.append(f"fix: give some of the shots above another leading colour (set, sky, floor, costume) or pull their grade "
+                     f"back, until {HUE_NAMES[top]} leads at most {limit:.0%} of the seconds")
+    if not within("hue_families", fams):
+        lines.append("fix: " + ("too few colour families: let some locations lead with a colour no other shot has" if fams < TARGETS["hue_families"][0]
+                                else "too many colour families: let neighbouring shots share a palette"))
+    return lines
+
+
+def stills_colour(slug, out):
+    """hue_families and top_hue_share from the whole-video stills, the way the report measures them on the MP4
+    (hue_family per second of picture, hue_summary), so a one-colour video is seen on the first sheet and not after
+    the 2K render. The stills are the picture the render makes: the same composition with the video's own post chain
+    and grade (stills.mjs passes no `post` prop unless POST is set, and neither does the render). The default stills
+    are not even in time (one per second plus three per shot), so every second of the video is measured from the
+    stills that fall inside it and each second counts once, as in the report. Prints the lines and writes
+    <out>/colour.txt."""
+    import numpy as np
+
+    names = sorted(f for f in os.listdir(out) if f[:-4].isdigit() and f.endswith(".jpg"))
+    at = np.array([int(f[:-4]) for f in names])
+    w, h = HUE_SIZE
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-pattern_type", "glob", "-i", os.path.join(out, "[0-9]*.jpg"),
+                          "-vf", f"scale={w}:{h}", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+    F = np.frombuffer(raw, np.uint8).reshape(-1, h, w, 3).astype(np.float32)
+    if len(F) != len(names):
+        sys.exit(f"colour: read {len(F)} pictures for {len(names)} stills in {out}")
+    total = json.load(open(sdir(slug, "timing.json")))["totalFrames"]
+    families = []
+    for k in range(total // FPS):
+        inside = (at >= k * FPS) & (at < (k + 1) * FPS)
+        if inside.any():
+            families.append((k, hue_family(F[inside])))
+    post = os.environ.get("POST")
+    lines = colour_lines(slug, families, f"measured on {len(names)} stills, one family per second of the video ({len(families)} s), with the "
+                         + (f"post chain forced by POST={post}" if post is not None else "video's own post chain and grade, as the render draws it")
+                         + "; the report measures the MP4 the same way, from ten frames a second.", close=STILLS_HUE_SLACK)
+    open(os.path.join(out, "colour.txt"), "w").write("\n".join(lines) + "\n")
+    print(f"\ncolour of the sheet ({os.path.relpath(os.path.join(out, 'colour.txt'), REPO)}):\n  " + "\n  ".join(lines))
+
+
+def draft_colour(slug, F):
+    """The same on every frame of the motion draft (`F` from frame_diffs: 10 frames a second), exactly as the report
+    will measure the delivery render -> build/colour-draft.txt."""
+    lines = colour_lines(slug, [(k, hue_family(F[k * 10 : (k + 1) * 10])) for k in range(len(F) // 10)],
+                         "measured on the motion draft, ten frames a second: the report's own measure.")
+    open(vdir(slug, "build", "colour-draft.txt"), "w").write("\n".join(lines) + "\n")
+    print("\ncolour of the draft (build/colour-draft.txt):\n  " + "\n  ".join(lines))
+
+
+def colour_misses(slug):
+    """The MISS lines of the last whole-video sheet (build/stills/colour.txt) and of the last motion draft
+    (build/colour-draft.txt, while the sheet is not newer than it: a new sheet is the scene's newer picture)."""
+    sheet, draft = vdir(slug, "build", "stills", "colour.txt"), vdir(slug, "build", "colour-draft.txt")
+    read = lambda p, tag: [f"{l.strip()} [{tag}]" for l in open(p) if l.startswith("MISS")] if os.path.exists(p) else []
+    found = read(sheet, "stills")
+    if os.path.exists(draft) and not (os.path.exists(sheet) and os.path.getmtime(sheet) > os.path.getmtime(draft)):
+        found += read(draft, "draft")
+    return found
+
+
+def colour_stop(slug):
+    """The message `go` stops with while the colour misses, unless the stills were approved with --force over it (a plain
+    approval was given while nothing missed, so a later miss, such as motion's draft, still stops `go`)."""
+    found = colour_misses(slug)
+    if not found or (approved(slug, "stills") and approvals(slug)["stills"].get("forced")):
+        return None
+    return (f"colour misses: {'; '.join(found)} (videos/{slug}/build/stills/colour.txt and build/colour-draft.txt name the hue "
+            f"and its shots). Change those shots and run `stills` again, or accept it with `pipeline.py approve {slug} stills --force`")
 
 
 def cmd_collide(slug, shots=None):
-    """Every 5th frame (of the chosen shots with --shots): puppets walking or standing inside set objects."""
+    """Every 5th frame (of the chosen shots with --shots): puppets walking or standing inside set objects.
+    stills.mjs walks the frames in tabs that stay open and takes no pictures, so the folder holds collide.txt only."""
     cmd_physics(slug, force=False)
     cmd_register()
     args = []
@@ -682,6 +985,7 @@ def played_src(e):
 
 
 LOOP_SNAP = 6  # frames: a looped effect that ends this close to a cut, but not on it, was meant to end on it
+END_QUIET = 8  # frames at the end where no effect may start (rules.md → Sound)
 WHOOSH_SLACK = 3  # frames around a whip's FADE window that still count as "on" it
 
 
@@ -704,6 +1008,8 @@ def sync_issues(slug):
             err(f"{played_src(e)} at {at}: no such file in public/")
         if at < 0 or at >= total:
             err(f"{src} at {at}: outside the video (0-{total})")
+        elif at >= total - END_QUIET:
+            warn(f"{src} at {at}: starts in the last {END_QUIET} frames ({total}), so it is cut into a click")
         if until is not None:
             until = round(until)
             if until <= at:
@@ -807,11 +1113,6 @@ def motion_by_shot(slug, diffs):
     return sorted(rows)
 
 
-# Frames per render pass. A render tab keeps every finished shot's WebGL context alive, so a long video with heavy
-# sets runs the GPU out of memory in one pass ("Error creating WebGL context"); each segment gets a fresh browser.
-RENDER_SEGMENT = int(os.environ.get("RENDER_SEGMENT", 400))
-
-
 def glitch_frames(path, first=0):
     """Broken frames of a rendered video. A render tab can lose its WebGL context mid-segment: the canvas then shows
     only the page background under the vignette (a run of flat frames), and when it comes back the textures can be gone
@@ -908,10 +1209,10 @@ def qa_meta(slug):
     return {"shots": [{"id": n, "a": a, "b": b} for a, b, n, _ in shots], "planned": planned}
 
 
-def cmd_qa(slug, path=None):
-    """Frame-by-frame QA of a render (scripts/qa.py) into videos/<slug>/build/qa/."""
+def cmd_qa(slug, path=None, into="qa"):
+    """Frame-by-frame QA of a render (scripts/qa.py) into videos/<slug>/build/qa/ (`into`: "qa-draft" for the draft)."""
     path = path or os.path.join(OUT, f"{slug}.mp4")
-    out = vdir(slug, "build", "qa")
+    out = vdir(slug, "build", into)
     os.makedirs(out, exist_ok=True)
     meta = os.path.join(out, "meta.json")
     json.dump(qa_meta(slug), open(meta, "w"), indent=1)
@@ -920,88 +1221,190 @@ def cmd_qa(slug, path=None):
 
 
 RENDER_RETRIES = 2
+SHARED_SRC = ("engine", "puppet", "three", "ui")  # src/ folders every shot draws from
 
 
-def render_video(slug, out, *args):
-    """Render the picture of `slug` to `out` (muted) in segments and join them without re-encoding. Each segment is
-    checked for broken frames (glitch_frames) and rendered again, up to RENDER_RETRIES times, until it is clean; a
-    segment whose render process fails (a crashed browser) is rendered again the same way."""
+def parts_dir(slug, cache):
+    """The cached picture of each shot for one render size (`cache`: "draft", "1080", "2k")."""
+    return vdir(slug, "build", "parts", cache)
+
+
+def part_signature(sl, i, args):
+    """What a shot's frames depend on besides its own code: its span, how it enters and how the next shot enters."""
+    return [sl[i][0], sl[i][1], sl[i][2], sl[i][3], sl[i + 1][3] if i + 1 < len(sl) else None, list(args)]
+
+
+def render_todo(slug, args, cache, shots):
+    """The shot indexes a `--shots` render must draw: the chosen shots, the shot before each one that enters with a
+    transition, and every other shot whose cached part is missing, has other frames or transitions, or is older than
+    the shared code or the voice timing (the captions and the mouths come from timing.json)."""
+    sl = shot_list(slug)
+    store = parts_dir(slug, cache)
+    index = os.path.join(store, "parts.json")
+    known = json.load(open(index)) if os.path.exists(index) else {}
+    changed = {i for i, s in enumerate(sl) if (s[0], s[1]) in set(shots)}
+    todo = changed | {i - 1 for i in changed if i > 0 and sl[i][3]}
+    shared = newest(*(os.path.join(ROOT, "src", d) for d in SHARED_SRC), os.path.join(ROOT, "remotion.config.ts"),
+                    sdir(slug, "timing.json"))
+    for i in sorted(set(range(len(sl))) - todo):
+        path = os.path.join(store, f"{sl[i][0]:05d}-{sl[i][1]:05d}.mp4")
+        name = os.path.basename(path)
+        why = ("no cached part" if not os.path.exists(path) else "its frames or transitions changed" if known.get(name) != part_signature(sl, i, args)
+               else "shared code or the voice timing changed since it was rendered" if os.path.getmtime(path) < shared else "")
+        if why:
+            print(f"  {sl[i][2]}: {why}, rendering it too")
+            todo.add(i)
+    return todo
+
+
+def render_video(slug, out, *args, cache, shots=None, todo=None):
+    """Render the picture of `slug` to `out` (muted), one part per shot, and join the parts without re-encoding.
+    Each part is checked for broken frames (glitch_frames) and rendered again, up to RENDER_RETRIES times, until it
+    is clean; a part whose render process fails (a crashed browser) is rendered again the same way. One part per
+    shot also means no tab renders across a cut (a tab died with "Page crashed!" there in kings-sticks) and no tab
+    keeps a finished shot's WebGL context alive.
+
+    The parts stay in videos/<slug>/build/parts/<cache>/. With `shots` [(start, end), ...] (the shots that changed,
+    from `--shots`) only those are rendered, plus the shot before each one that enters with a transition (its last
+    frames show the changed shot coming in); every other shot's part is reused when it still fits: same frames, same
+    transitions, and rendered after the last change to the shared engine, puppet, set and ui code. A part that does
+    not fit is rendered too. Without `shots` every shot is rendered."""
     total = json.load(open(os.path.join(ROOT, "src", "videos", slug, "timing.json")))["totalFrames"]
-    parts = []
     began = time.time()
+    sl = shot_list(slug)
+    store = parts_dir(slug, cache)
+    os.makedirs(store, exist_ok=True)
+    sig = lambda i: part_signature(sl, i, args)
+    part = lambda i: os.path.join(store, f"{sl[i][0]:05d}-{sl[i][1]:05d}.mp4")
+    index = os.path.join(store, "parts.json")
+    known = json.load(open(index)) if os.path.exists(index) else {}
+    if shots is not None and todo is None:
+        todo = render_todo(slug, args, cache, shots)
+    if todo is None:
+        todo = set(range(len(sl)))
+    else:
+        print(f"rendering {len(todo)} of {len(sl)} shots ({', '.join(sl[i][2] for i in sorted(todo))}); the rest come from {os.path.relpath(store, REPO)}", flush=True)
+    broken = []
+    serve = bundle_dir()  # one bundle for every part, instead of the CLI bundling src/ + public/ per part
 
-    cuts = sorted({s[0] for s in shot_list(slug)} | {total})
-    serve = bundle_dir()  # one bundle for every segment, instead of the CLI bundling src/ + public/ per segment
-
-    def segment(start, end, split=True):
-        # A tab can die with "Page crashed!" (a V8 fatal check while copying an object literal, seen in kings-sticks
-        # whenever one tab rendered across the cut at frame 1204). A crashed segment is rendered again one shot at a
-        # time, so no tab crosses a cut.
-        part = f"{out}.part{start}.mp4"
+    def render_part(i):
+        start, end = sl[i][0], sl[i][1] - 1
+        tmp = part(i) + ".new.mp4"
         for attempt in range(RENDER_RETRIES + 1):
-            ok = run("npx", "remotion", "render", serve, slug, part, f"--frames={start}-{end}", "--muted", *args,
+            ok = run("npx", "remotion", "render", serve, slug, tmp, f"--frames={start}-{end}", "--muted", *args,
                      check=False).returncode == 0
             clean_remotion_temp(began)
             if not ok:
-                inner = [c for c in cuts if start < c <= end]
-                if split and inner:
-                    edges = [start] + inner + [end + 1]
-                    print(f"render crashed in {start}-{end}, rendering it shot by shot: {edges}")
-                    for a, b in zip(edges, edges[1:]):
-                        segment(a, b - 1, split=False)
-                    return
-                # A segment with no cut inside it: a fresh browser usually gets through it.
                 if attempt == RENDER_RETRIES:
-                    raise SystemExit(f"render of frames {start}-{end} failed {RENDER_RETRIES + 1} times")
-                print(f"render of frames {start}-{end} failed, rendering the segment again")
+                    raise SystemExit(f"render of frames {start}-{end} ({sl[i][2]}) failed {RENDER_RETRIES + 1} times")
+                print(f"render of frames {start}-{end} ({sl[i][2]}) failed, rendering the shot again")
                 continue
-            found = glitch_frames(part, start)
+            found = glitch_frames(tmp, start)
             if not found:
                 break
             print(f"broken (flat) frames {spans(found)} in {start}-{end}"
-                  + (", rendering the segment again" if attempt < RENDER_RETRIES else ", giving up: check these frames as stills"))
-        parts.append(part)
+                  + (", rendering the shot again" if attempt < RENDER_RETRIES else ", giving up: check these frames as stills"))
+        os.replace(tmp, part(i))
+        if found:  # still broken after every retry: used for this video, but never reused as a good part
+            broken.append(sl[i][2])
+            known.pop(os.path.basename(part(i)), None)
+        else:
+            known[os.path.basename(part(i))] = sig(i)
+        json.dump(known, open(index, "w"), indent=1)  # after every part: a stopped render keeps what it finished
 
-    for start in range(0, total, RENDER_SEGMENT):
-        segment(start, min(total, start + RENDER_SEGMENT) - 1)
+    for i in sorted(todo):
+        render_part(i)
+    keep = {os.path.basename(part(i)) for i in range(len(sl))}
+    for name in os.listdir(store):  # parts of shots that no longer exist (the cuts moved)
+        if name.endswith(".mp4") and name not in keep:
+            os.remove(os.path.join(store, name))
+    json.dump({k: v for k, v in known.items() if k in keep}, open(index, "w"), indent=1)
     listing = f"{out}.parts.txt"
     with open(listing, "w") as fh:
-        fh.writelines(f"file '{p}'\n" for p in parts)
+        fh.writelines(f"file '{part(i)}'\n" for i in range(len(sl)))
     run("ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", listing, "-c", "copy", out)
-    for p in parts + [listing]:
-        os.remove(p)
+    os.remove(listing)
+    if broken:
+        print(f"WARNING: {', '.join(broken)} still had broken frames after {RENDER_RETRIES + 1} renders; they are not cached, "
+              "so the next render draws them again (the report's glitch_frames row counts them)")
+    return [sl[i] for i in sorted(todo)]
 
 
-def cmd_motion(slug):
+def render_plan(slug, shots, args, cache):
+    """For `--shots`: (chosen shot spans, the shot indexes to render, the frame spans whose head framing must be fresh,
+    which are exactly the shots that will be rendered)."""
+    chosen, _ = changed_spans(slug, shots)
+    if not chosen:
+        return None, None, None
+    todo = render_todo(slug, args, cache, chosen)
+    sl = shot_list(slug)
+    fresh = None if len(todo) == len(sl) else [(sl[i][0], sl[i][1] - 1) for i in sorted(todo)]
+    return chosen, todo, fresh
+
+
+def changed_spans(slug, shots):
+    """`--shots` for motion and render: the chosen shots, and the frame spans whose head framing must be fresh (the
+    chosen shots and the shot before each, which is rendered again with them)."""
+    if not shots:
+        return None, None
+    chosen = pick_shots(slug, shots)
+    sl = shot_list(slug)
+    idx = {i for i, s in enumerate(sl) if (s[0], s[1]) in set(chosen)}
+    idx |= {i - 1 for i in idx if i > 0 and sl[i][3]}
+    return chosen, [(sl[i][0], sl[i][1] - 1) for i in sorted(idx)]
+
+
+def cmd_motion(slug, shots=None):
+    """The 30 % draft render: motion per shot, then the frame-by-frame QA on the draft (build/qa-draft/), so a pop,
+    a frozen span or a black frame is found before the delivery render instead of after it."""
     import numpy as np
 
     cmd_register()
-    cmd_framing(slug, force=False)
+    margs = ("--scale=0.3", "--log=error")
+    chosen, todo, fresh = render_plan(slug, shots, margs, "draft")
+    cmd_framing(slug, force=False, spans=fresh)
     draft = os.path.join(OUT, "drafts", f"{slug}.mp4")
     os.makedirs(os.path.dirname(draft), exist_ok=True)
     with heavy_lock(slug, "motion"):
-        render_video(slug, draft, "--scale=0.3", "--log=error")
-    _, d = frame_diffs(draft)
+        render_video(slug, draft, *margs, cache="draft", shots=chosen, todo=todo)
+    F, d = frame_diffs(draft)
     med, still = float(np.median(d)), float((d < 2).mean())
     for key, val in (("motion", med), ("still_share", still)):
-        print(("  ok   " if within(key, val) else "  MISS ") + f"{key} = {val:.2f} (target {mark(key, val)[0].split('|')[3].strip()})")
+        print(gate_line(key, val, "{:.2f}"))
+    draft_colour(slug, F)
     print("\nstillest shots (median change):")
     for m, name, a, b in motion_by_shot(slug, d)[:8]:
         print(f"  {m:5.1f}  {name:16s} {a}-{b}")
+    # The loop (rules.md → Story, closing): the last frame should run into frame 0. Not a gate: the captions and the
+    # headline differ across the seam, so this is a number to read next to the video's own cuts.
+    F, _ = frame_diffs(draft)
+    seam = float(np.abs(F[-1] - F[0]).mean())
+    cuts = [float(d[a // 3 - 1]) for a, _, _, _ in shot_list(slug)[1:] if 0 < a // 3 - 1 < len(d)]
+    print(f"\nloop seam: last frame -> first frame changes {seam:.1f} (median frame to frame {med:.1f}"
+          + (f", this video's cuts {min(cuts):.0f}-{max(cuts):.0f}" if cuts else "") + "); near the cuts' size it reads as a cut, not a loop")
+    print("\n----- QA on the draft -----", flush=True)
+    qa = cmd_qa(slug, draft, "qa-draft")
+    faults = [f"{len(qa[k])} {k}" for k in ("black", "white", "frozen") if qa[k]]
+    where = os.path.relpath(vdir(slug, "build", "qa-draft"), REPO)
+    print(f"\ndraft QA: {', '.join(faults) if faults else 'no black, white or frozen frames'}; {len(qa['pops'])} pop(s) to look at"
+          + (f" on {where}/sheet_*.jpg (each sheet starts at the frame in its name, 60 frames a sheet): {spans(qa['pops'])}" if qa["pops"] else "")
+          + ". Fix what is real before `render`.")
 
 
 # `render <slug> --2k`: the delivery size, 1440x2560 (YouTube serves Shorts above 1080p from a 1440p upload).
 HD_SCALE = "1.3333333333333333"  # 4/3 to full precision: 1080 and 1920 times it must come out as whole pixels
 
 
-def cmd_render(slug, hd=False):
+def cmd_render(slug, hd=False, shots=None):
     cmd_register()
-    cmd_framing(slug, force=False)
+    rargs, cache = ("--log=error", *([f"--scale={HD_SCALE}"] if hd else [])), "2k" if hd else "1080"
+    chosen, todo, fresh = render_plan(slug, shots, rargs, cache)
+    cmd_framing(slug, force=False, spans=fresh)
     os.makedirs(OUT, exist_ok=True)
     out = os.path.join(OUT, f"{slug}.mp4")
     picture, sound = f"{out}.picture.mp4", f"{out}.sound.wav"
     with heavy_lock(slug, "render"):
-        render_video(slug, picture, "--log=error", *([f"--scale={HD_SCALE}"] if hd else []))
+        render_video(slug, picture, *rargs, cache=cache, shots=chosen, todo=todo)
     cmd_cues(slug)  # bakes the effects' spaces the soundtrack plays
     run("node", "scripts/sound.mjs", slug, sound)
     run("ffmpeg", "-v", "error", "-y", "-i", picture, "-i", sound, "-c:v", "copy", "-c:a", "aac", "-b:a", "320k", "-shortest", out)
@@ -1023,18 +1426,8 @@ def video_metrics(path):
 
     F, d = frame_diffs(path)
     motion, still = float(np.median(d)), float((d < 2).mean())
-    families = []
-    for k in range(len(F) // 10):
-        f = F[k * 10 : (k + 1) * 10] / 255
-        mx, mn = f.max(-1), f.min(-1)
-        chroma = mx - mn + 1e-6
-        r, g, b = f[..., 0], f[..., 1], f[..., 2]
-        h = np.where(mx == r, ((g - b) / chroma) % 6, np.where(mx == g, (b - r) / chroma + 2, (r - g) / chroma + 4)) * 60
-        m = (chroma / (mx + 1e-6) > 0.35) & (mx > 0.25)
-        hist, _ = np.histogram(h[m], bins=12, range=(0, 360))
-        families.append(int(hist.argmax()))
-    cnt = Counter(families)
-    return motion, still, d, len(cnt), cnt.most_common(1)[0][1] / len(families)
+    fams, top, _ = hue_summary([hue_family(F[k * 10 : (k + 1) * 10]) for k in range(len(F) // 10)])
+    return motion, still, d, fams, top
 
 
 def audio_metrics(path):
@@ -1090,8 +1483,7 @@ def cmd_report(slug):
     motion, still, diffs, fams, top = video_metrics(mp4)
     qa = cmd_qa(slug, mp4)
     mixed = cmd_mix(slug)
-    seed_line = plan.get("seed", {}).get("first_line", 0)
-    seed_at = timing["lines"][seed_line]["from"] / FPS if seed_line < len(timing["lines"]) else 999
+    seed_at = seed_seconds(slug, plan, timing)
     rows, misses = [], 0
     for key, value, fmt in (
         ("duration", am["duration"], "{:.1f}s"),
@@ -1104,11 +1496,11 @@ def cmd_report(slug):
         ("speech_margin_p10", mixed["p10_min"] if mixed["p10_min"] is not None else 99.0, "{:.1f} LU"),
         ("effects_hot", sum(1 for e in mixed.get("effects", []) if e["margin"] is not None and e["margin"] > EFFECT_HOT), "{}"),
         ("effects_repeated", len(mixed.get("repeats", [])), "{}"),
-        ("shots", len(shots), "{}"),
+        ("shots", len(split_hook(shots)[1]), "{}"),
         ("avg_shot", avg, "{:.2f}s"),
-        ("shortest_shot", min((b - a) / FPS for a, b, _, _ in shots), "{:.2f}s"),
+        ("shortest_shot", min((b - a) / FPS for a, b, _, _ in split_hook(shots)[1]), "{:.2f}s"),
         ("longest_shot", longest, "{:.2f}s"),
-        ("hard_cuts", hard_cuts(shots), "{}"),
+        ("hard_cuts", hard_cuts(split_hook(shots)[1]), "{}"),
         ("locations", len(plan.get("locations", [])), "{}"),
         ("characters", len(plan.get("characters", [])), "{}"),
         ("gags", len(plan.get("gags", [])), "{}"),
@@ -1200,7 +1592,7 @@ def stage_files(slug):
     return {
         "voice": (sdir(slug, "timing.json"), [vdir(slug, "lines.json")]),
         "physics": (sdir(slug, "physics.json"), [vdir(slug, "physics.mjs"), os.path.join(ROOT, "scripts", "physics.mjs")]),
-        "check": (vdir(slug, "build", "check.ok"), [sdir(slug)]),
+        "check": (vdir(slug, "build", "check.ok"), [sdir(slug), vdir(slug, "plan.json")]),
         "sync": (vdir(slug, "build", "sync.txt"), [sdir(slug), os.path.join(ROOT, "src", "engine", "sound.tsx")]),
         "music": (score, [vdir(slug, "music.py"), sdir(slug, "timing.json"), cues_path(slug), os.path.join(ROOT, "scripts", "music")]),
         "stills": (vdir(slug, "build", "stills", "contact.jpg"), [sdir(slug)]),
@@ -1237,6 +1629,11 @@ def stage_states(slug, hd=False, probe=True):
                 state = "stale"
         if stage == "voice" and (not os.path.exists(vdir(slug, "lines.json")) or "Replace me." in open(vdir(slug, "lines.json")).read()):
             note = "write lines.json first"
+        if stage == "voice" and state == "done" and pace_misses(slug) and not pace_waived(slug):
+            state, note = "stale", "pace misses: " + ", ".join(f"{k} {v}" for k, v, _ in pace_misses(slug)) + " (fix lines.json, voice again)"
+        if stage in ("stills", "motion") and os.path.exists(out):
+            found = [l for l in colour_misses(slug) if l.endswith("[stills]" if stage == "stills" else "[draft]")]
+            note = "; ".join(found) + (" (build/stills/colour.txt)" if stage == "stills" else " (build/colour-draft.txt)") if found else ""
         if stage == "collide" and os.path.exists(out) and open(out).read().strip():
             note = f"{len(open(out).read().strip().splitlines())} collision(s) to fix"
         if stage == "check" and not os.path.exists(sdir(slug, "Scene.tsx")):
@@ -1283,17 +1680,36 @@ def approved(slug, gate):
     return bool(a) and os.path.exists(f) and abs(a["mtime"] - os.path.getmtime(f)) < 1e-3
 
 
-def cmd_approve(slug, gate, undo=False):
+def gate_misses(slug, gate, measure=False):
+    """What the measured gate of an approval misses: the pace of the voice made from lines.json (script; with
+    `measure` a voice track that has no pace.json yet is measured now), the colour of the sheet and draft (stills)."""
+    if gate == "script":
+        return [f"{k} {v} ({hint})" for k, v, hint in pace_misses(slug, measure) or []]
+    return colour_misses(slug)
+
+
+def cmd_approve(slug, gate, undo=False, force=False, strict=False):
+    """Record (or withdraw) the OK. With `strict` (the command line) it is refused while the gate's measured targets
+    miss, unless `force`. An approval recorded over a miss is marked `forced`: that is what lets `go` and `voice`
+    carry on with the miss. The panel's Approve button is the user's own click and is not strict."""
     if gate not in GATED:
         sys.exit(f"approve what? {' | '.join(GATED)}")
     f = GATED[gate](slug)
     if not undo and not os.path.exists(f):
         sys.exit(f"nothing to approve: {os.path.relpath(f, ROOT)} does not exist")
     a = approvals(slug)
+    found = [] if undo else gate_misses(slug, gate, measure=strict)
+    if found and strict and not force:
+        sys.exit(f"not approved: the {gate} misses its targets:\n  " + "\n  ".join(found)
+                 + f"\nfix it and approve again, or accept the miss with `approve {slug} {gate} --force`")
+    if found:
+        print("approved over these misses:\n  " + "\n  ".join(found))
+    if gate == "script" and not undo and pace_misses(slug) is None:
+        print("pace not measured for these lines yet: `voice` measures it and stops on a miss")
     if undo:
         a.pop(gate, None)
     else:
-        a[gate] = {"mtime": os.path.getmtime(f), "at": time.strftime("%Y-%m-%d %H:%M:%S")}
+        a[gate] = {"mtime": os.path.getmtime(f), "at": time.strftime("%Y-%m-%d %H:%M:%S"), **({"forced": True} if found else {})}
     os.makedirs(os.path.dirname(approvals_path(slug)), exist_ok=True)
     json.dump(a, open(approvals_path(slug), "w"), indent=1)
     print(f"{slug}: {gate} {'approval withdrawn' if undo else 'approved'} ({os.path.relpath(f, ROOT)})")
@@ -1354,7 +1770,8 @@ def cmd_status(slug):
 
 def cmd_go(slug, to="motion", plan=False, hd=False):
     """Run every missing or stale stage up to `to`, in order. Stops when lines.json is still the template, when
-    `check` fails, or when `collide` finds a puppet inside the set. By default it stops before the render (look at
+    `voice` misses its pace targets, when `check` fails, when the stills sheet or the motion draft misses the colour
+    targets (until `approve <slug> stills --force`), or when `collide` finds a puppet inside the set. By default it stops before the render (look at
     the stills first); `--to report` goes on through render and report."""
     if to not in STAGES:
         sys.exit(f"--to must be one of {', '.join(STAGES)}")
@@ -1383,13 +1800,17 @@ def cmd_go(slug, to="motion", plan=False, hd=False):
         if gate and not approved(slug, gate):
             look = "read lines.json with the user" if gate == "script" else "look at build/stills/contact.jpg with the user"
             sys.exit(f"stopped before {stage}: {gate} not approved ({look}, then `pipeline.py approve {slug} {gate}`)")
+        if stage in ("motion", "render") and colour_stop(slug):  # a miss left standing from an earlier run
+            sys.exit(f"stopped before {stage}: {colour_stop(slug)}")
         print(f"\n===== {stage} =====", flush=True)
         try:
             timed(slug, stage, calls[stage], ["--2k"] if stage == "render" and hd else [])
         except SystemExit as e:
             if e.code:
-                sys.exit(f"stopped: {stage} failed")
+                sys.exit(f"stopped: {stage} failed" + (f": {e.code.strip()}" if isinstance(e.code, str) else ""))
             raise
+        if stage in ("stills", "motion") and colour_stop(slug):
+            sys.exit(f"stopped: {colour_stop(slug)}")
         if stage == "collide" and open(stage_files(slug)["collide"][0]).read().strip():
             sys.exit("stopped: collide found puppets inside the set (videos/<slug>/build/collide/collide.txt)")
     print("\n" + ("done up to " + to if to != "report" else "done"))
@@ -1458,15 +1879,16 @@ if __name__ == "__main__":
         call = {
             "new": lambda: cmd_new(args[0], args[1]),
             "voice": lambda: cmd_voice(args[0]),
-            "pace": lambda: pace_check(args[0]),
+            "scaffold": lambda: __import__("scaffold").main(given),
+            "pace": lambda: pace_check(args[0]),  # ends non-zero on a miss, like voice
             "register": cmd_register,
             "physics": lambda: cmd_physics(args[0]),
             "check": lambda: cmd_check(args[0]),
             "stills": lambda: cmd_stills(args[0], args[1] if len(args) > 1 and not args[1].startswith("--") else None, shots),
             "collide": lambda: cmd_collide(args[0], shots),
-            "motion": lambda: cmd_motion(args[0]),
+            "motion": lambda: cmd_motion(args[0], shots),
             "framing": lambda: cmd_framing(args[0]),
-            "render": lambda: cmd_render(args[0], hd),
+            "render": lambda: cmd_render(args[0], hd, shots),
             "glitch": lambda: cmd_glitch(args[0], args[1] if len(args) > 1 else None),
             "qa": lambda: cmd_qa(args[0], args[1] if len(args) > 1 else None),
             "report": lambda: cmd_report(args[0]),
@@ -1476,7 +1898,7 @@ if __name__ == "__main__":
             "music": lambda: cmd_music(args[0]),
             "mix": lambda: cmd_mix(args[0]),
             "look": lambda: cmd_look(args[0], args[1], args[2] if len(args) > 2 else None),
-            "approve": lambda: cmd_approve(args[0], args[1] if len(args) > 1 else "", flag(args, "--undo")),
+            "approve": lambda: cmd_approve(args[0], args[1] if len(args) > 1 else "", flag(args, "--undo"), flag(args, "--force"), strict=True),
             "web": lambda: cmd_web(int(option(args, "--port", "8766"))),
             "go": lambda: cmd_go(args[0], option(args, "--to", "motion"), flag(args, "--plan"), hd),
         }[cmd]

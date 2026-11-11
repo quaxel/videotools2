@@ -6,6 +6,7 @@ import { useOwned } from "./BalloonSets";
 import { GodRays } from "./godrays";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // A palace throne room built from references (guide/references/throne-room.md): Iznik-style tile dado round cream
 // plaster walls, a canopied throne on a two-step dais, tall arched grilled windows, a checker of big stone floor tiles
@@ -48,10 +49,6 @@ export const STAND: Vec3 = [1.95, 0, -1.9]; // the jewel stand
 export const BENCH = { x: 3.95, z0: -2.2, z1: 2.4, h: 0.4 };
 export const TILE = 0.5; // floor tile size
 
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 export const flicker = (t: number, seed: number) =>
   0.82 + 0.1 * Math.sin(t * 0.9 + seed) + 0.05 * Math.sin(t * 2.3 + seed * 1.7) + 0.03 * Math.sin(t * 5.1 + seed * 0.3);
 

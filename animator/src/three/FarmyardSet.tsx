@@ -6,6 +6,7 @@ import { Campfire, firePoint, Haze, SmokePlume } from "./LakeSet";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import { SkyDome, SUN_DIR } from "./sky";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // A Kentucky farmyard on a clear March morning in 1876, built from photo references
 // (guide/references/kentucky-farmyard-1876.md). Floor y = 0 is short early-spring grass with a trodden dirt patch.
@@ -31,11 +32,6 @@ export const farmLight = (frame: number, fire = false): PuppetLight => ({
   distant: [{ direction: [-0.55, 0.75, 0.45], color: "#fff0d0", strength: 1.1 }],
   points: fire ? [{ ...firePoint(KETTLE, frame), strength: 1.8 * (firePoint(KETTLE, frame).strength / 2.8), range: 0.9 }] : [],
 });
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // ---------- textures ----------
 

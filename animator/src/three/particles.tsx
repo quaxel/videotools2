@@ -2,6 +2,7 @@ import { useThree } from "@react-three/fiber";
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { toonRamp } from "./toon";
+import { rand } from "../engine/helpers";
 
 // Particle effects as a pure function of the frame: every particle's birth, direction, speed, spin and colour come
 // from its seed, its position from a closed-form flight (gravity with air drag), so any frame renders on its own.
@@ -14,10 +15,6 @@ import { toonRamp } from "./toon";
 type Vec3 = [number, number, number];
 export type ParticleKind = "confetti" | "sparks" | "dust" | "stars";
 
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 const between = (i: number, [a, b]: [number, number]) => a + (b - a) * rand(i);
 
 type Kind = {

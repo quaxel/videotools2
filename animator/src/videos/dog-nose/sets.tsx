@@ -2,7 +2,8 @@ import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { CameraRig, CameraShot, canvasTexture, PuppetLight, SkyDome, Vec3 } from "../../engine";
 import { rnd } from "../pisces-sign/props";
-import { Ball, Cap, CoffeeMug, Cyl, Drumstick, frac, Hydrant, Mailbox, PizzaSlice, RBox, ScentRibbon, Sock, SockPile, StinkLines, WheelieBin } from "./props";
+import { LightShaft, Lights, Motes, useOwnedGeo, useOwnedTex } from "../../three/primitives";
+import { Ball, Cap, CoffeeMug, Cyl, Drumstick, Hydrant, Mailbox, PizzaSlice, RBox, ScentRibbon, Sock, SockPile, StinkLines, WheelieBin } from "./props";
 
 // Sets for "You Wake Up With a Dog's Nose", in a Pixar look (guide/references/suburb-street.md): rounded, bevelled
 // forms with smooth shading and no ink, warm bounce light, light shafts with dust motes, haze, dense dressing.
@@ -14,67 +15,9 @@ const FONT = "'Arial Black', Impact, sans-serif";
 
 // ---------- building blocks ----------
 
-export const useOwnedGeo = <T extends THREE.BufferGeometry>(make: () => T, deps: unknown[]) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const g = useMemo(make, deps);
-  useEffect(() => () => g.dispose(), [g]);
-  return g;
-};
-export const useOwnedTex = (make: () => THREE.Texture, deps: unknown[] = []) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const t = useMemo(make, deps);
-  useEffect(() => () => t.dispose(), [t]);
-  return t;
-};
-
-// A shaft of light: two crossed additive planes fading from the source down to the floor.
-export const LightShaft: React.FC<{ from: Vec3; to: Vec3; width: number; color?: string; opacity?: number }> = ({ from, to, width, color = "#ffe2a8", opacity = 0.35 }) => {
-  const tex = useOwnedTex(() =>
-    canvasTexture(128, 256, (ctx) => {
-      const g = ctx.createLinearGradient(0, 0, 0, 256);
-      g.addColorStop(0, "rgba(255,255,255,0.95)");
-      g.addColorStop(0.6, "rgba(255,255,255,0.35)");
-      g.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, 128, 256);
-      const h = ctx.createLinearGradient(0, 0, 128, 0);
-      h.addColorStop(0, "rgba(0,0,0,1)");
-      h.addColorStop(0.25, "rgba(0,0,0,0)");
-      h.addColorStop(0.75, "rgba(0,0,0,0)");
-      h.addColorStop(1, "rgba(0,0,0,1)");
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = h;
-      ctx.fillRect(0, 0, 128, 256);
-    }),
-  );
-  const a = new THREE.Vector3(...from);
-  const b = new THREE.Vector3(...to);
-  const len = a.distanceTo(b);
-  const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), b.clone().sub(a).normalize());
-  return (
-    <group position={from} quaternion={q} userData={{ ghost: true }}>
-      {[0, Math.PI / 2].map((ry) => (
-        <mesh key={ry} position={[0, -len / 2, 0]} rotation={[0, ry, 0]} renderOrder={5}>
-          <planeGeometry args={[width, len]} />
-          <meshBasicMaterial map={tex} color={color} transparent opacity={opacity} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} toneMapped={false} />
-        </mesh>
-      ))}
-    </group>
-  );
-};
-
-// Dust motes drifting in a box (in light shafts, over the street at golden hour).
-export const Motes: React.FC<{ center: Vec3; size: Vec3; f: number; count?: number; color?: string; r?: number }> = ({ center, size, f, count = 40, color = "#fff1c8", r = 0.006 }) => (
-  <group userData={{ ghost: true }}>
-    {Array.from({ length: count }, (_, i) => {
-      const x = center[0] + (rnd(i) - 0.5) * size[0] + Math.sin(f * 0.02 + i) * 0.05;
-      const y = center[1] + (frac(rnd(i + 50) + f * 0.0015 * (0.5 + rnd(i + 9))) - 0.5) * size[1];
-      const z = center[2] + (rnd(i + 99) - 0.5) * size[2] + Math.cos(f * 0.017 + i) * 0.05;
-      const tw = 0.6 + 0.4 * Math.sin(f * 0.2 + i * 3);
-      return <Ball key={i} position={[x, y, z]} radius={r * (0.6 + rnd(i + 3))} color={new THREE.Color(color).multiplyScalar(1.3 * tw).getStyle()} glow />;
-    })}
-  </group>
-);
+// useOwnedGeo, useOwnedTex, LightShaft, Motes and Lights moved to the kit (src/three/primitives.tsx); re-exported
+// here for older imports.
+export { LightShaft, Lights, Motes, useOwnedGeo, useOwnedTex } from "../../three/primitives";
 
 // Canvas textures (painted, never photos)
 export const planks = (base: string, seed: number) =>
@@ -209,49 +152,6 @@ const asphalt = () =>
       ctx.fill();
     }
   });
-
-// ---------- lights ----------
-
-export const Lights: React.FC<{ camera: CameraShot; sun: Vec3; sunColor: string; sunK: number; sky: string; ground: string; hemiK: number; ambient?: number; box?: number }> = ({
-  camera,
-  sun,
-  sunColor,
-  sunK,
-  sky,
-  ground,
-  hemiK,
-  ambient = 0.25,
-  box = 7,
-}) => {
-  const t = camera.target;
-  const target = useMemo(() => new THREE.Object3D(), []);
-  target.position.set(t[0], 0, t[2]);
-  target.updateMatrixWorld();
-  return (
-    <>
-      <ambientLight intensity={ambient} />
-      <hemisphereLight args={[sky, ground, hemiK]} />
-      <primitive object={target} />
-      <directionalLight
-        position={[t[0] + sun[0], sun[1], t[2] + sun[2]]}
-        target={target}
-        intensity={sunK}
-        color={sunColor}
-        castShadow
-        shadow-mapSize={[4096, 4096]}
-        shadow-bias={-0.0003}
-        shadow-normalBias={0.03}
-        shadow-radius={6}
-        shadow-camera-left={-box}
-        shadow-camera-right={box}
-        shadow-camera-top={box}
-        shadow-camera-bottom={-box}
-        shadow-camera-near={0.5}
-        shadow-camera-far={60}
-      />
-    </>
-  );
-};
 
 // ---------- bedroom ----------
 

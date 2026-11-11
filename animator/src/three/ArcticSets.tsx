@@ -7,6 +7,7 @@ import { SkyDome } from "./sky";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import { Blob, Cord, tiled, useOwned } from "./BalloonSets";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // Andrée's 1897 North Pole balloon and its places, built from photo references (guide/references/arctic-balloon.md):
 // - `OrnenBalloon`: the Eagle, a dark varnished silk envelope under a cord net, the load ring with gear sacks, the
@@ -23,11 +24,6 @@ type Vec3 = [number, number, number];
 const INK = "#161212";
 
 export const ORNEN = { r: 3.0, ring: 2.3, basket: 0.62, rim: 0.66 };
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // The low midnight sun behind the balloon: a warm rim on the edges facing it.
 export const arcticSunLight = (): PuppetLight => ({

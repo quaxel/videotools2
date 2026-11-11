@@ -8,6 +8,7 @@ import { Hills } from "./FarmyardSet";
 import { Haze } from "./LakeSet";
 import { Blob, useOwned } from "./BalloonSets";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // The open Mongolian steppe, built from photo references (guide/references/mongol-steppe.md): flat short grass to the
 // horizon (tan and olive patches, no trees), low round bare ridges fading in layers, a big sky. A dirt post road runs
@@ -19,11 +20,6 @@ import type { PuppetLight } from "../puppet/PuppetBillboard";
 type Vec3 = [number, number, number];
 export type SteppeMode = "dawn" | "day" | "dusk" | "night" | "sunset" | "desert";
 export const ROAD = { z: 0, half: 0.55 };
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 type Look = {
   sky: [number, string][];

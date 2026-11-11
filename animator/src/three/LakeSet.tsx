@@ -7,6 +7,7 @@ import { MOODS } from "./moods";
 import { haloTexture } from "./surfaces";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
+import { rand } from "../engine/helpers";
 
 // Outdoor location: a mountain lake at dusk. Grass bank in front (y = 0, z > -1.5), the water below it,
 // a cabin on the left, a dock running into the lake on the right, a campfire on the bank and layered
@@ -40,10 +41,6 @@ const SUN: Vec3 = [1.6, 3.1, -21.5];
 const WATER_Y = -0.24;
 
 // Deterministic 0..1 noise so every render of a frame is identical.
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // Toon cone with an inverted-hull ink outline; few sides give the faceted pine look.
 const InkCone: React.FC<{ radius: number; height: number; position: Vec3; color: string; ink?: number; sides?: number }> = ({

@@ -6,6 +6,7 @@ import { Haze, Pine, Ridge, Rock, SmokePlume } from "./LakeSet";
 import { SkyDome, CLEAR_SKY, SUN_DIR } from "./sky";
 import { InkCylinder, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // The WWII paper balloon bomb (Fu-Go) and its two places, built from photo references
 // (guide/references/balloon-bomb.md):
@@ -32,11 +33,6 @@ export const useOwned = <T extends { dispose: () => void }>(make: () => T, deps:
   const v = useMemo(make, deps);
   React.useEffect(() => () => v.dispose(), [v]);
   return v;
-};
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
 };
 
 // Dawn on the sea: the low sun straight ahead, warm rim on the edges facing it.

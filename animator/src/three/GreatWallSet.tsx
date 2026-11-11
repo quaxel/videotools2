@@ -5,6 +5,7 @@ import { canvasTexture, Halo } from "./kit";
 import { Haze } from "./LakeSet";
 import { InkBox, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // The Great Wall on a mountain crest at golden hour, built from photo references (guide/references/great-wall.md).
 // The walkway (x ±1.8, floor y = 0) runs away from the camera along -z between a tall crenellated outer parapet
@@ -27,11 +28,6 @@ export const wallLight = (): PuppetLight => ({
   shadow: 0.15,
   distant: [{ direction: [0.65, 0.45, -0.6], color: "#ffc878", strength: 1.4 }],
 });
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // ---------- textures ----------
 

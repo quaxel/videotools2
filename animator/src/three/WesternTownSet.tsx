@@ -6,6 +6,7 @@ import { CameraRig, CameraShot } from "../engine/stage";
 import { canvasTexture } from "./kit";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // A frontier main street at sunset, built from guide/references/western-street.md. The dirt street runs along -z
 // (x within ±STREET.half, floor y = 0) between raised plank boardwalks and false-front wooden buildings (fronts at
@@ -45,11 +46,6 @@ export const duskLight = (): PuppetLight => ({
     { direction: [0.3, 0.5, 1], color: "#8a7ad8", strength: 0.35 }, // violet sky bounce on the shaded side
   ],
 });
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 // ---------- painted backdrops (Codex image generation) ----------
 

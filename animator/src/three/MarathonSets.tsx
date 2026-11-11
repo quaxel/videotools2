@@ -7,6 +7,7 @@ import { Hills } from "./FarmyardSet";
 import { SkyDome } from "./sky";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // The 1904 St. Louis Olympic marathon, built from photo references (guide/references/st-louis-1904-marathon.md):
 // - RoadSet: a pale rutted dirt road running away along -z (x within ±ROAD.half, floor y = 0) between dry grass
@@ -41,11 +42,6 @@ export const summerLight = (): PuppetLight => ({
   shadow: 0.16,
   distant: [{ direction: [-0.4, 0.85, 0.45], color: "#fff0c8", strength: 1.25 }],
 });
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 const repeat = (t: THREE.Texture, x: number, y: number) => {
   t.wrapS = t.wrapT = THREE.RepeatWrapping;

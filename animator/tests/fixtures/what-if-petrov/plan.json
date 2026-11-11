@@ -1,0 +1,53 @@
+{
+  "title": "What If Petrov Had Reported the Launch?",
+  "topic": "What if Petrov had reported the launch? (1983 Soviet nuclear false alarm)",
+  "mechanism": "A satellite early-warning system mistook sunlight glinting off high clouds for five missile launches; the duty officer reasoned that a real first strike would be hundreds of missiles and ground radar showed nothing, so he reported a system fault instead of passing the warning up a chain that would have had only minutes to decide.",
+  "beats": {
+    "hook": "In 1983 a computer told one Soviet officer that American missiles were coming; he decided it was wrong. Camera glides through the bunker onto the glowing LAUNCH board with Petrov at the console.",
+    "but": "Weeks after the Korean airliner was shot down, Moscow fears an American first strike.",
+    "then": "The siren: one missile, another, five; the officer asks what to report; Petrov's job is to pass it up the chain.",
+    "conflict": "Moscow would have minutes to decide.",
+    "pivot": "You see, a real first strike would be hundreds of missiles, not five, and ground radar had nothing: he reports a system fault and waits.",
+    "so": "So what if he had reported it: the warning climbs to the Kremlin; some say other checks would have stopped it; nobody wants to find out. His reward was a reprimand and fifteen years of secrecy.",
+    "closing": "Petrov later called it fifty-fifty. He bet the computer was wrong. And he was right."
+  },
+  "seed": {
+    "what": "Petrov at his console under the LAUNCH board",
+    "first_line": 0
+  },
+  "locations": [
+    { "id": "bunker-hook", "set": "Room: Serpukhov-15 command hall, consoles, wall board", "colour": "teal green" },
+    { "id": "gate", "set": "Night forest: pines, bunker gate, antenna mast", "colour": "night blue" },
+    { "id": "watch-desk", "set": "Room: Petrov's desk with lamp and tea", "colour": "amber" },
+    { "id": "kremlin-office", "set": "Room: wood-panelled office, newspaper, map", "colour": "gold" },
+    { "id": "alarm", "set": "Command hall re-lit by the alarm, LAUNCH board flashing, counter, red phone", "colour": "red" },
+    { "id": "pivot", "set": "Dark truth room: five rockets on a stand vs a crate of HUNDREDS, ground radar scope", "colour": "violet" },
+    { "id": "radar", "set": "Room: radar console, clock, the wait", "colour": "green" },
+    { "id": "orbit", "set": "Space: satellite over the Earth, sun glinting on clouds", "colour": "black and white-blue" },
+    { "id": "chain", "set": "Dream room: staircase of desks with phones up to the KREMLIN", "colour": "pink purple" },
+    { "id": "launch-panel", "set": "Room: launch panel, button under glass, three CHECK padlocks", "colour": "dusk orange" },
+    { "id": "reprimand", "set": "Room: commander's office, stamp, file cabinet, calendar", "colour": "cream grey" },
+    { "id": "flat", "set": "Room: Petrov's flat at dawn, window", "colour": "rose gold" }
+  ],
+  "characters": [
+    { "id": "petrov", "look": "Lieutenant colonel: grey-blue uniform, dark side-parted hair" },
+    { "id": "officer", "look": "Young duty officer: olive uniform, fair hair" },
+    { "id": "operator", "look": "Console operator: woman, long brown hair, green uniform" },
+    { "id": "general", "look": "Kremlin general: grey hair, dark green uniform with gold" },
+    { "id": "commander", "look": "Commander: bald with glasses, grey uniform" }
+  ],
+  "gags": [
+    { "line": 3, "what": "The siren hits; the officer jumps and his tea glass flies, spilling" },
+    { "line": 14, "what": "The commander slams the REPRIMAND stamp; the papers jump and Petrov flinches" },
+    { "line": 15, "what": "Old Petrov flips a coin, fumbles it, and catches it" }
+  ],
+  "story_numbers": [
+    "one (missile)",
+    "another",
+    "five",
+    "hundreds",
+    "minutes",
+    "fifteen years",
+    "fifty-fifty"
+  ]
+}

@@ -7,6 +7,7 @@ import { InkCylinder, toonRamp } from "./toon";
 import { SkyDome } from "./sky";
 import { useImage } from "./WesternTownSet";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // California gold country (Sierra Nevada foothills), 1870s-80s: a rutted dirt stage road runs along x (z within
 // ±ROAD.half) through dry golden grass, valley oaks, a few pines, rocks and brush. Beyond: the Codex-painted rolling
@@ -22,11 +23,6 @@ export const goldLight = (mode: GoldMode): PuppetLight =>
   mode === "day"
     ? { tint: "#fff2d8", shadow: 0.14, distant: [{ direction: [-0.6, 0.8, 0.4], color: "#fff0d0", strength: 1.2 }] }
     : { tint: "#ffb090", tintAmount: 0.1, shadow: 0.32, distant: [{ direction: [0.3, 0.15, -1], color: "#ff8a4a", strength: 2.2 }, { direction: [-0.3, 0.5, 1], color: "#8a6ad0", strength: 0.45 }] };
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 const grassCanvas = (dusk: boolean) =>
   canvasTexture(1024, 1024, (ctx) => {

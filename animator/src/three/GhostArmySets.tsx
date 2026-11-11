@@ -9,6 +9,7 @@ import { Blob, useOwned } from "./BalloonSets";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import { SkyDome } from "./sky";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // The Ghost Army's world, built from references (guide/references/ghost-army.md): an open French field between
 // hedgerows (bocage) with poplars, haystacks and a village steeple on the far ridge; inflatable rubber Shermans that
@@ -21,10 +22,6 @@ const INK = "#161212";
 export const OD = "#5d6532"; // olive drab
 const OD_DARK = "#454b24";
 
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 const ease = (p: number) => p * p * (3 - 2 * p);
 
 // ---------- time of day ----------

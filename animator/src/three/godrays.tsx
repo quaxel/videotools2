@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import * as THREE from "three";
+import { rand } from "../engine/helpers";
 
 // Sunbeams (god rays) through a window in a wall facing +z: one slanted shaft of light per pane, from the glass down
 // to the floor, glowing where the window is and fading toward the floor, plus the panes' bright patch where they
@@ -7,11 +8,6 @@ import * as THREE from "three";
 // `sun` is the direction the light travels (into the room, downward: y < 0).
 
 type Vec3 = [number, number, number];
-
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 
 export type Pane = [Vec3, Vec3, Vec3, Vec3]; // corners on the glass: bottom-left, bottom-right, top-right, top-left
 

@@ -8,6 +8,7 @@ import { Blob, useOwned } from "./BalloonSets";
 import { InkBox, InkCylinder, toonRamp } from "./toon";
 import { SkyDome } from "./sky";
 import type { PuppetLight } from "../puppet/PuppetBillboard";
+import { rand } from "../engine/helpers";
 
 // The Mississippi at New Madrid in 1811-1812, built from guide/references/mississippi-1812.md.
 //
@@ -31,10 +32,6 @@ const INK = "#161212";
 export const RIVER = { half: 7, water: -0.32, step: -16, stepH: 2.4 };
 export const POST: Vec3 = [RIVER.half + 1.2, 0, 3];
 
-const rand = (i: number) => {
-  const s = Math.sin(i * 127.1 + 311.7) * 43758.5453;
-  return s - Math.floor(s);
-};
 const smooth = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
