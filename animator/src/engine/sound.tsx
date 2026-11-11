@@ -30,6 +30,9 @@ export const SFX_FILES = [
   "tank", "compressor", "squeak", "morse", "battle", "deflate", "hooves", "munch",
   "sniff", "roar", "bark", "slime", "notif", "skid", "clang", "crickets",
   "scrape", "snore", "clink", "bolt",
+  "static", "flutter", "coo",
+  "relays", "zap",
+  "glasscrack", "shatter", "ping", "clatter",
   // `chew` is two hard thumps and knocks when repeated: use foleyCues("munch", jawCloses(...)) for a puppet eating.
 ] as const;
 export const sfx = (name: (typeof SFX_FILES)[number]) => `sfx/${name}.wav`;

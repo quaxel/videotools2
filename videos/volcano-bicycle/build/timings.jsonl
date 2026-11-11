@@ -1,0 +1,58 @@
+{"stage": "voice", "start": "2026-11-11 00:31:29", "seconds": 103.5, "result": "ok", "args": []}
+{"stage": "voice", "start": "2026-11-11 00:34:26", "seconds": 41.9, "result": "ok", "args": []}
+{"stage": "voice", "start": "2026-11-11 00:35:25", "seconds": 36.7, "result": "ok", "args": []}
+{"stage": "voice", "start": "2026-11-11 00:36:19", "seconds": 41.0, "result": "ok", "args": []}
+{"stage": "voice", "start": "2026-11-11 00:37:13", "seconds": 30.7, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 00:47:31", "seconds": 72.1, "result": "ok", "args": ["2,15,45,75"]}
+{"stage": "stills", "start": "2026-11-11 00:49:17", "seconds": 70.8, "result": "ok", "args": ["2,15,45,75"]}
+{"stage": "stills", "start": "2026-11-11 00:51:06", "seconds": 71.7, "result": "ok", "args": ["2,15,45,75"]}
+{"stage": "stills", "start": "2026-11-11 00:52:34", "seconds": 72.5, "result": "ok", "args": ["2,15,45,75"]}
+{"stage": "stills", "start": "2026-11-11 00:54:12", "seconds": 72.4, "result": "ok", "args": ["2,15,45,75,120"]}
+{"stage": "stills", "start": "2026-11-11 00:55:56", "seconds": 23.5, "result": "ok", "args": ["2,15,45,75,120"]}
+{"stage": "stills", "start": "2026-11-11 00:56:55", "seconds": 23.3, "result": "ok", "args": ["2,15,45,75,120"]}
+{"stage": "stills", "start": "2026-11-11 00:57:31", "seconds": 23.5, "result": "ok", "args": ["2,15,45,75,120"]}
+{"stage": "stills", "start": "2026-11-11 00:58:05", "seconds": 23.1, "result": "ok", "args": ["2,15,45,75,120"]}
+{"stage": "stills", "start": "2026-11-11 00:58:43", "seconds": 22.9, "result": "ok", "args": ["2,15,45,75,120"]}
+{"stage": "stills", "start": "2026-11-11 01:09:03", "seconds": 36.3, "result": "error", "args": ["150,250,360,470,600,665,760,900,1000,1060,1130,1165,1190,1240,1290,1380,1400,1520,1650,1740"]}
+{"stage": "sync", "start": "2026-11-11 01:09:42", "seconds": 5.2, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 01:09:51", "seconds": 109.7, "result": "ok", "args": ["150,250,360,470,600,665,760,900,1000,1060,1130,1165,1190,1240,1290,1380,1400,1520,1650,1740"]}
+{"stage": "sync", "start": "2026-11-11 01:14:32", "seconds": 6.3, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 01:14:38", "seconds": 115.5, "result": "ok", "args": ["150,250,300,360,470,600,665,700,760,840,900,1000,1060,1120,1165,1190,1220,1260,1300,1380,1400,1450,1520,1650,1740"]}
+{"stage": "stills", "start": "2026-11-11 01:17:36", "seconds": 93.5, "result": "ok", "args": ["150,250,360,390,470,1000,1060,1120,1165,1230,1260,1300,1380,1420,1450,1520,1560,1650,1700,1740"]}
+{"stage": "stills", "start": "2026-11-11 01:19:57", "seconds": 58.3, "result": "ok", "args": ["150,200,360,390,995,1060,1420,1450,1650,1700,1740"]}
+{"stage": "stills", "start": "2026-11-11 01:21:36", "seconds": 42.4, "result": "ok", "args": ["140,200,280,1400,1420,1650,1740"]}
+{"stage": "stills", "start": "2026-11-11 01:22:58", "seconds": 41.2, "result": "ok", "args": ["130,200,280,1400,1420,1600,1650,1700,1755"]}
+{"stage": "stills", "start": "2026-11-11 01:24:05", "seconds": 41.6, "result": "ok", "args": ["140,200,280,1430,1460,1600,1755"]}
+{"stage": "stills", "start": "2026-11-11 01:25:15", "seconds": 42.0, "result": "ok", "args": ["140,200,290,1430,1455,1600,1680,1755"]}
+{"stage": "stills", "start": "2026-11-11 01:26:16", "seconds": 41.8, "result": "ok", "args": ["140,220,290,1442,1455,1600,1680,1755"]}
+{"stage": "stills", "start": "2026-11-11 01:27:25", "seconds": 35.6, "result": "ok", "args": ["1425,1440,1455,1600,1680,1755"]}
+{"stage": "stills", "start": "2026-11-11 01:28:24", "seconds": 25.0, "result": "ok", "args": ["1600,1680,1755"]}
+{"stage": "stills", "start": "2026-11-11 01:29:03", "seconds": 24.7, "result": "ok", "args": ["1600,1680,1755"]}
+{"stage": "check", "start": "2026-11-11 01:29:36", "seconds": 10.3, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 01:29:53", "seconds": 136.1, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 01:32:56", "seconds": 55.8, "result": "ok", "args": ["770,860,950,1240,1756"]}
+{"stage": "stills", "start": "2026-11-11 01:34:05", "seconds": 15.7, "result": "ok", "args": ["1225,1240"]}
+{"stage": "stills", "start": "2026-11-11 01:34:32", "seconds": 135.5, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 01:40:56", "seconds": 73.6, "result": "ok", "args": ["--shots", "2,6,7,10"]}
+{"stage": "check", "start": "2026-11-11 01:43:17", "seconds": 10.0, "result": "ok", "args": []}
+{"stage": "sync", "start": "2026-11-11 01:43:27", "seconds": 6.4, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 01:43:34", "seconds": 135.3, "result": "ok", "args": []}
+{"stage": "voice", "start": "2026-11-11 01:48:19", "seconds": 42.8, "result": "ok", "args": []}
+{"stage": "sync", "start": "2026-11-11 01:54:49", "seconds": 6.1, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 01:54:55", "seconds": 166.8, "result": "ok", "args": ["--shots", "1,3,4,5,6,7,8,9,10,11,12"]}
+{"stage": "stills", "start": "2026-11-11 01:58:22", "seconds": 61.4, "result": "ok", "args": ["--shots", "3,6,8,12"]}
+{"stage": "stills", "start": "2026-11-11 01:59:41", "seconds": 35.0, "result": "ok", "args": ["--shots", "8,12"]}
+{"stage": "check", "start": "2026-11-11 02:01:20", "seconds": 10.2, "result": "ok", "args": []}
+{"stage": "collide", "start": "2026-11-11 02:01:30", "seconds": 191.2, "result": "ok", "args": []}
+{"stage": "motion", "start": "2026-11-11 02:04:59", "seconds": 207.6, "result": "ok", "args": []}
+{"stage": "sync", "start": "2026-11-11 02:10:07", "seconds": 6.1, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 02:11:26", "seconds": 132.8, "result": "ok", "args": []}
+{"stage": "render", "start": "2026-11-11 02:13:51", "seconds": 155.0, "result": "ok", "args": ["--2k"]}
+{"stage": "stills", "start": "2026-11-11 02:17:42", "seconds": 44.6, "result": "ok", "args": ["--shots", "7,12"]}
+{"stage": "sync", "start": "2026-11-11 02:18:40", "seconds": 4.9, "result": "ok", "args": []}
+{"stage": "stills", "start": "2026-11-11 02:18:45", "seconds": 132.8, "result": "ok", "args": []}
+{"stage": "render", "start": "2026-11-11 02:20:58", "seconds": 155.0, "result": "ok", "args": ["--2k"]}
+{"stage": "report", "start": "2026-11-11 02:23:33", "seconds": 48.6, "result": "ok", "args": []}
+{"stage": "check", "start": "2026-11-11 02:29:14", "seconds": 10.0, "result": "ok", "args": []}
+{"stage": "collide", "start": "2026-11-11 02:29:24", "seconds": 194.6, "result": "ok", "args": []}
+{"stage": "motion", "start": "2026-11-11 02:32:38", "seconds": 122.8, "result": "ok", "args": []}

@@ -1,0 +1,78 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true, surprising history story with wonder, brisk, excited and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.32
+    },
+    "farmer": {
+      "voice": "Eric",
+      "instruct": "A hungry German farmer in 1816 shaking an empty oat sack over a thin horse, exasperated and half laughing at his bad luck, quick and loud.",
+      "seed": 6,
+      "tempo": 1.2
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "A volcano on the other side of the world may have put a German on the first bicycle."
+    },
+    {
+      "speaker": "narrator",
+      "text": "April, eighteen fifteen. Mount Tambora in Indonesia exploded, the most powerful eruption in recorded history.",
+      "say": "April, eighteen fifteen. Mount Tam-bora in Indonesia exploded, the most powerful eruption in recorded history."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Its sulphur veiled the sky, and the whole planet cooled."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In Europe, eighteen sixteen became the year without a summer. Cold rain rotted the harvests."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But oats grew scarce and costly, and many could no longer feed their horses."
+    },
+    {
+      "speaker": "farmer",
+      "text": "Not a single oat left!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "Many horses starved, or were slaughtered for meat and hides. Without a horse, every trip to town meant walking."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In Mannheim, an inventor named Karl Drais dreamed up a horse that never eats.",
+      "say": "In Mann-hime, an inventor named Karl Dry-ss dreamed up a horse that never eats."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So he built one out of wood. But where did the legs go?",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, his running machine had two wooden wheels in a line, a seat, and a handlebar to steer."
+    },
+    {
+      "speaker": "narrator",
+      "text": "There were no pedals at all. You pushed off the ground with your feet, then glided."
+    },
+    {
+      "speaker": "narrator",
+      "text": "On June twelfth, eighteen seventeen, he rode it to a coaching inn and back in about an hour."
+    },
+    {
+      "speaker": "narrator",
+      "text": "One historian argues the starving horses inspired him, though nobody can prove it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Pedals came decades later. Every bike you ride began as a wooden horse that never needed oats."
+    }
+  ]
+}

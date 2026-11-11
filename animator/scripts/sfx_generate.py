@@ -813,7 +813,123 @@ def kernel():
     return mix(knock, puff * 0.8, click(0.006, 2500, 7000) * 0.3)
 
 
+def static():
+    # Radio static for a receiver's hiss: band-limited noise with a slow swell and sparse crackles; 4 s, loops.
+    sec = 4.0
+    t = t_axis(sec)
+    x = band(noise(sec), 600, 7000) * (0.75 + 0.25 * np.sin(2 * np.pi * t / sec) ** 2)
+    for _ in range(60):
+        place(x, click(0.004, 2000, 9000) * (1.5 + rng.random() * 2), rng.random() * (sec - 0.01))
+    return loop_fade(x)
+
+
+def flutter():
+    # Pigeon wings clapping and beating as it takes off or lands: 7 soft feathery thumps, quickening then easing.
+    out = np.zeros(int(0.7 * SR))
+    at = 0.0
+    for k in range(7):
+        th = band(noise(0.06), 250, 2600) * env(0.06, 0.003, 0.018) * (1.0 - k * 0.08)
+        place(out, th, at)
+        at += 0.085 + 0.01 * abs(k - 3)
+    return out
+
+
+def coo():
+    # A pigeon's coo: a soft breathy hoot that rises and falls (about 420 Hz) with a throaty warble.
+    sec = 0.75
+    t = t_axis(sec)
+    f = 380 + 90 * np.sin(np.pi * t / sec) + 12 * np.sin(2 * np.pi * 22 * t)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    x = np.sin(ph) + 0.35 * np.sin(2 * ph) + 0.1 * np.sin(3 * ph)
+    x = low(x, 1400) + 0.08 * band(noise(sec), 300, 1500)
+    return x * np.sin(np.pi * t / sec) ** 1.5
+
+
+def relay():
+    # One telephone-type relay pulling in: a hard metallic clack of the armature with a short bright ring, pitch per take.
+    f0 = float(rng.uniform(1800, 3200))
+    clack = band(noise(0.03), 1500, 9000) * env(0.03, 0.0003, 0.004)
+    ring = (tone(f0, 0.08, (1.0,)) + 0.4 * tone(f0 * 2.3, 0.08, (1.0,))) * env(0.08, 0.0004, 0.012) * 0.35
+    body = sweep(900, 500, 0.02) * env(0.02, 0.0004, 0.005) * 0.5
+    return mix(clack, ring, body, np.concatenate([np.zeros(int(0.006 * SR)), click(0.004, 3000, 9000) * 0.4]))
+
+
+def relays():
+    # A room of relays chattering: hundreds of small clacks in uneven bursts over a low motor hum; 4 s, loops.
+    sec = 4.0
+    t = t_axis(sec)
+    x = 0.05 * band(noise(sec), 80, 400) + 0.03 * np.sin(2 * np.pi * 60 * t)
+    at = 0.0
+    while at < sec - 0.05:
+        burst = int(rng.integers(2, 7))
+        for j in range(burst):
+            f0 = float(rng.uniform(1600, 3600))
+            c = mix(band(noise(0.02), 1500, 9000) * env(0.02, 0.0003, 0.003), tone(f0, 0.03, (1.0,)) * env(0.03, 0.0003, 0.006) * 0.3)
+            place(x, c * (0.3 + rng.random() * 0.7), at + j * float(rng.uniform(0.012, 0.03)))
+        at += float(rng.uniform(0.05, 0.16))
+    return loop_fade(x)
+
+
+def zap():
+    # A small electric spark across relay points: a crackling snap with a fizz tail.
+    out = band(noise(0.18), 2000, 11000) * env(0.18, 0.0005, 0.03)
+    for _ in range(6):
+        place(out, click(0.003, 3000, 10000) * (0.6 + rng.random()), float(rng.random() * 0.12))
+    return out
+
+
+def glasscrack():
+    # Glass that cracks but holds (dropped-flask): a hard tick of the hit, then a fast run of tiny bright crackles
+    # spreading out (the web), a short glassy ring under it; no shower of pieces falling.
+    sec = 0.9
+    out = np.zeros(int(sec * SR))
+    place(out, band(noise(0.02), 2500, 12000) * env(0.02, 0.0002, 0.004) * 1.2, 0.0)
+    place(out, sweep(1400, 700, 0.03) * env(0.03, 0.0003, 0.008) * 0.6, 0.0)
+    at = 0.004
+    k = 0
+    while at < 0.42:
+        f0 = float(rng.uniform(3500, 9000))
+        c = mix(click(0.003, 4000, 14000) * (0.5 + rng.random() * 0.6), tone(f0, 0.03, (1.0,)) * env(0.03, 0.0002, 0.004) * 0.25)
+        place(out, c * np.exp(-at / 0.25), at)
+        at += float(rng.uniform(0.004, 0.02)) * (1 + k * 0.04)
+        k += 1
+    for f0 in (2630.0, 3910.0, 5170.0):
+        place(out, tone(f0, 0.6, (1.0,)) * env(0.6, 0.001, 0.12) * 0.08, 0.002)
+    return out
+
+
+def shatter():
+    # Plain glass breaking to pieces: a crash of bright noise, then pieces tinkling down and skittering.
+    sec = 1.2
+    out = np.zeros(int(sec * SR))
+    place(out, band(noise(0.25), 2000, 13000) * env(0.25, 0.0005, 0.05) * 1.0, 0.0)
+    place(out, band(noise(0.08), 400, 2500) * env(0.08, 0.0005, 0.02) * 0.6, 0.0)
+    for i in range(26):
+        at = 0.05 + float(rng.random()) ** 1.6 * 0.9
+        f0 = float(rng.uniform(3000, 9500))
+        c = mix(click(0.003, 3000, 12000) * 0.6, tone(f0, 0.06, (1.0,)) * env(0.06, 0.0003, 0.01) * 0.4)
+        place(out, c * (0.3 + 0.7 * float(rng.random())) * (1 - at / 1.1), at)
+    return out
+
+
+def ping():
+    # A small stone hitting a windscreen: a sharp tick and a short high ring.
+    out = np.zeros(int(0.5 * SR))
+    place(out, click(0.004, 3000, 12000) * 1.0, 0.0)
+    place(out, (tone(4200.0, 0.4, (1.0,)) + 0.5 * tone(6900.0, 0.4, (1.0,))) * env(0.4, 0.0005, 0.06) * 0.35, 0.0)
+    return out
+
+
+def clatter():
+    # A wooden broom handle falling on a tiled floor: a knock, a bounce and a short rattle.
+    out = np.zeros(int(0.6 * SR))
+    for at, a in ((0.0, 1.0), (0.11, 0.5), (0.19, 0.3), (0.24, 0.18)):
+        place(out, mix(band(noise(0.05), 300, 2500) * env(0.05, 0.0005, 0.012), sweep(420, 260, 0.04) * env(0.04, 0.0005, 0.01) * 0.6) * a, at)
+    return out
+
+
 if __name__ == "__main__":
+    # NOTE: a full run does NOT reproduce the committed wavs (shared rng order); generate only your own functions.
     for name, fn in [
         ("reel-spin", reel_spin),
         ("reel-stop", reel_stop),
@@ -853,3 +969,9 @@ if __name__ == "__main__":
     for name, fn in [("scrape", scrape), ("snore", snore), ("clink", clink), ("bolt", bolt)]:
         save(f"sfx/{name}.wav", fn())
     save("sfx/jingle.wav", jingle())
+    for name, fn in [("static", static), ("flutter", flutter), ("coo", coo)]:
+        save(f"sfx/{name}.wav", fn())
+    for name, fn in [("relays", relays), ("zap", zap)]:
+        save(f"sfx/{name}.wav", fn())
+    for name, fn in [("glasscrack", glasscrack), ("shatter", shatter), ("ping", ping), ("clatter", clatter)]:
+        save(f"sfx/{name}.wav", fn())

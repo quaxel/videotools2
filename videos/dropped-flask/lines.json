@@ -1,0 +1,77 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true, surprising invention story with wonder, brisk, excited and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.31
+    },
+    "benedictus": {
+      "voice": "Eric",
+      "instruct": "A young chemist late at night, suddenly remembering something important, jumping up from his chair, breathless and thrilled, quick.",
+      "seed": 6,
+      "tempo": 1.25
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "A glass flask shattered on a hard floor, and then it simply refused to fall apart."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Paris, nineteen oh three: the lab of the chemist and artist Édouard Bénédictus.",
+      "say": "Paris, nineteen oh three: the lab of the chemist and artist, Ay-dwar Bay-nay-deek-tooss."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He expected a mess of splinters. But the flask had cracked into a web, and kept its shape."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Inside, it had held collodion, a liquid plastic, which dried into a clear film that held every shard."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He set it aside, and forgot all about it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then Paris filled with motor cars, and the cars began to crash."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The story goes that he read about a crash where people were cut by flying glass."
+    },
+    {
+      "speaker": "benedictus",
+      "text": "That old flask, it held together!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "And as the story is told, he worked all night on a new kind of glass.",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, he made a sandwich: glass, a thin layer of plastic, then glass again. When it breaks, the shards stick to the plastic."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He patented it in nineteen oh nine. But car makers were slow to want it."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So its first big job was in the First World War: the eyepieces of gas masks."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then it went into car windshields, and it is still there today."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So when a stone hits your windshield, it cracks like that flask, and holds."
+    }
+  ]
+}

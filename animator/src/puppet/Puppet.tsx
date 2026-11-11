@@ -47,6 +47,7 @@ export type PuppetLook = {
   long?: boolean; // long hair down to the shoulders
   // Period dress (1870s farm folk): each is a colour, or `skirt` true for a long skirt in the outfit colour.
   skirt?: boolean; // ankle-length flared skirt (the feet show under the hem)
+  skirtHem?: number; // with `skirt`: hem height in puppet units (default -66, the ankles; -180 is just below the knee, 1940s day dress)
   apron?: string; // bib apron over the dress
   kerchief?: string; // cloth tied over the hair, knot at the nape
   hat?: string; // wide-brimmed, low-crowned felt or straw hat
@@ -149,8 +150,8 @@ export type PuppetPose = {
 
 // ---------- period costume pieces (drawn in the puppet's own units, front view unless named Side/Back) ----------
 
-const SKIRT_D = (hem: number) => `M -150 -380 C -175 -250 -212 ${hem - 80} -236 ${hem} Q 0 ${hem + 26} 236 ${hem} C 212 ${hem - 80} 175 -250 150 -380 Z`;
-const SIDE_SKIRT_D = (hem: number) => `M -124 -380 C -150 -250 -178 ${hem - 80} -196 ${hem} Q 10 ${hem + 22} 210 ${hem} C 186 ${hem - 80} 152 -250 128 -380 Z`;
+const SKIRT_D = (hem: number, w = 236) => `M -150 -380 C -175 -250 ${-w + 24} ${hem - 80} ${-w} ${hem} Q 0 ${hem + 26} ${w} ${hem} C ${w - 24} ${hem - 80} 175 -250 150 -380 Z`;
+const SIDE_SKIRT_D = (hem: number, w = 1) => `M -124 -380 C -150 -250 ${-178 * w} ${hem - 80} ${-196 * w} ${hem} Q 10 ${hem + 22} ${210 * w} ${hem} C ${186 * w} ${hem - 80} 152 -250 128 -380 Z`;
 const HAT_CROWN_D = "M -168 -930 C -176 -1030 -140 -1092 0 -1094 C 140 -1092 176 -1030 168 -930 Z";
 const SIDE_HAT_CROWN_D = "M -150 -930 C -156 -1030 -110 -1092 26 -1094 C 166 -1092 206 -1030 200 -930 Z";
 const KERCHIEF_D = "M -214 -828 C -236 -1000 -110 -1056 0 -1056 C 110 -1056 236 -1000 214 -828 C 160 -900 80 -930 0 -930 C -80 -930 -160 -900 -214 -828 Z";
@@ -1447,7 +1448,7 @@ const FrontPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> 
         {look.shorts && <Inked d={SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
         {look.tunic && <Tunic look={look} uid={patternId} hem={-176} />}
         {/* A long skirt hangs from the waist over the legs (behind the arms, so hanging hands stay in sight) */}
-        {look.skirt && <Inked d={SKIRT_D(-66 - drop)} fill={look.outfit} uid={patternId} name="skirt" />}
+        {look.skirt && <Inked d={SKIRT_D((look.skirtHem ?? -66) - drop, look.skirtHem !== undefined && look.skirtHem < -120 ? 196 : 236)} fill={look.outfit} uid={patternId} name="skirt" />}
         {/* Arms behind the body */}
         {!inFront("L") && arm("L")}
         {!inFront("R") && arm("R")}
@@ -1762,7 +1763,7 @@ const SidePuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         {look.mail && <Mail color={look.mail} uid={patternId} side />}
         {look.belt && <Belt color={look.belt} w={1} side />}
         </g>
-        {look.skirt && <Inked d={SIDE_SKIRT_D(-66 - drop)} fill={look.outfit} uid={patternId} name="skirt" />}
+        {look.skirt && <Inked d={SIDE_SKIRT_D((look.skirtHem ?? -66) - drop, look.skirtHem !== undefined && look.skirtHem < -120 ? 0.85 : 1)} fill={look.outfit} uid={patternId} name="skirt" />}
         {look.vest && <path d="M 96 -622 L 136 -560 C 146 -480 146 -400 136 -330 L 100 -330 Z" fill={look.outfit} stroke={INK} strokeWidth={8} strokeLinejoin="round" />}
         {look.suspenders && <Strap d="M 30 -628 L 22 -272" color={look.suspenders} />}
         {look.bib && <Bib text={look.bib} x={70} w={96} />}
@@ -1884,7 +1885,7 @@ const BackPuppet: React.FC<{ look: PuppetLook; pose: PuppetPose; id: string }> =
         })
       )}
       <g transform={`translate(0 ${bob})`}>
-        {look.skirt && <Inked d={SKIRT_D(-66)} fill={look.outfit} uid={patternId} name="skirt" />}
+        {look.skirt && <Inked d={SKIRT_D(look.skirtHem ?? -66, look.skirtHem !== undefined && look.skirtHem < -120 ? 196 : 236)} fill={look.outfit} uid={patternId} name="skirt" />}
         {look.tunic && <Tunic look={look} uid={patternId} hem={-176} back />}
         {look.shorts && <Inked d={SHORTS_D} fill={look.shorts} uid={patternId} name="shorts" width={10} />}
         <g transform={look.build ? `scale(${bw} 1)` : undefined}>

@@ -35,7 +35,8 @@ def main(slug):
     for i, line in enumerate(spec["lines"]):
         v = {**spec["voices"][line["speaker"]], **line.get("voice", {})}  # a line may override instruct/seed/tempo
         # tempo is applied later by voice_assemble.py, so it does not invalidate a clip
-        key = hashlib.sha1(json.dumps([line["text"], {k: x for k, x in v.items() if k != "tempo"}], sort_keys=True).encode()).hexdigest()[:12]
+        say = line.get("say", line["text"])  # a line may give a phonetic spelling to speak; captions keep `text`
+        key = hashlib.sha1(json.dumps([say, {k: x for k, x in v.items() if k != "tempo"}], sort_keys=True).encode()).hexdigest()[:12]
         wav = os.path.join(out_dir, f"{i:02d}.wav")
         stamp = wav + ".key"
         if os.path.exists(wav) and os.path.exists(stamp) and open(stamp).read() == key:
@@ -45,7 +46,7 @@ def main(slug):
         mx.random.seed(int(v.get("seed", 0)))
         parts = [
             np.asarray(r.audio, dtype=np.float32)
-            for r in model.generate(text=line["text"], voice=v["voice"], instruct=v.get("instruct") or None, lang_code="English", split_pattern="")
+            for r in model.generate(text=say, voice=v["voice"], instruct=v.get("instruct") or None, lang_code="English", split_pattern="")
         ]
         write_wav(wav, np.concatenate(parts), model.sample_rate)
         open(stamp, "w").write(key)

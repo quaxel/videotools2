@@ -1,0 +1,122 @@
+{
+  "title": "Why a Volcano Invented the Bicycle",
+  "topic": "Mount Tambora erupts in April 1815; 1816 is the Year Without a Summer; oats run short, horses starve or are slaughtered; in Mannheim Karl Drais builds the pedal-less wooden running machine and rides it on 12 June 1817; one historian (Lessing) argues the horse deaths inspired him, unproven",
+  "year": [
+    1815,
+    1817
+  ],
+  "mechanism": "Tambora's sulphur veiled the sky and cooled the planet, the 1816 harvests failed, oats ran short and horses starved or were slaughtered, and Karl Drais built a horse that never eats: a wooden two-wheeler you sit on and push along with your feet.",
+  "beats": {
+    "hook": "A volcano on the other side of the world may have put a German on the first bicycle: Drais glides past in profile on his wooden running machine, feet running, the camera tracking with him, an ash plume rising on the far horizon.",
+    "but": "April 1815: Mount Tambora in Indonesia explodes, the most powerful eruption in recorded history; its sulphur veils the sky and the planet cools.",
+    "then": "1816 in Europe: the year without a summer, cold rain rots the harvests; oats grow scarce and costly and many can no longer feed their horses. The farmer shakes an empty sack: 'Not a single oat left!'",
+    "conflict": "Horses starve or are slaughtered for meat and hides; carts stand without horses and everybody walks to town.",
+    "pivot": "You see, his running machine had two wooden wheels in a line, a seat, and a handlebar to steer (labels TWO WHEELS, SEAT, STEERING on the machine alone); then Drais rides it: NO PEDALS, he pushes off the ground with his feet, glides, wobbles and stamps a foot to stop.",
+    "so": "On 12 June 1817 he rides it to a coaching inn and back in about an hour (the bump and the hat hop on the way); one historian argues the starving horses inspired him, though nobody can prove it.",
+    "closing": "Pedals came decades later. Every bike you ride began as a wooden horse that never needed oats."
+  },
+  "triple_hook": {
+    "visual": "Karl Drais in top hat and tailcoat glides through frame in profile on the wooden running machine, both spoked wheels turning, his boots striding on the cobbles (no pedals), the camera already tracking with him; far behind, over the roofs, a grey-violet ash plume rises on the horizon.",
+    "verbal": "A volcano on the other side of the world may have put a German on the first bicycle.",
+    "text": "HOW DID ASH BUILD A BIKE?"
+  },
+  "format_note": "The running machine is drawn to the puppets' cartoon leg length: wheel radius 0.14 m, saddle top at the puppet's hip (0.34 m), so its proportions to the rider match the real one (wheels about 0.7 of the saddle height). The ash plume behind Mannheim in the hook is a picture device (Tambora is 11,000 km away; it is never claimed to be visible). No ride distance is shown: sources disagree. Boots: the kit's shin `wraps` in dark leather draw knee-high riding boots; coat tails are an overlay (costumes.tsx); in profile the waistcoat is left off (the kit draws it over the whole torso). The running machine was re-proportioned from a c. 1820 photo: wheels knee-to-hip high, tyres almost meeting. The stable horse is a thin variant of the what-if-waterloo horse (own sand3d copy).",
+  "seed": {
+    "what": "The running machine (in the hook) and the hungry horse it replaces (stable, shot 5)",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "mannheim-morning",
+      "set": "TownSet (new, props.tsx; guide/references/mannheim-1817.md): a Baden town street, plastered gabled houses with shutters, cobbles, a church tower; morning",
+      "colour": "ochre and cream"
+    },
+    {
+      "id": "tambora-night",
+      "set": "VolcanoSet (new): Sumbawa at night, the sea, the volcano's cone erupting, a fire-lit ash column, lightning in it, no people",
+      "colour": "orange-red on black"
+    },
+    {
+      "id": "ash-sky",
+      "set": "VolcanoSet at a dim dawn, camera craned high: the ash and sulphur veil spreading flat across the sky, the sun a pale disc",
+      "colour": "ash violet and sulphur yellow"
+    },
+    {
+      "id": "field-1816",
+      "set": "FieldSet (new): flattened, rotting wheat in cold rain, frost on the stalks, a farmer in a smock, a field marker 1816",
+      "colour": "cold blue-grey"
+    },
+    {
+      "id": "stable",
+      "set": "Stable (Room + props): plank stalls, an empty hay rack, a thin horse (sand3d horse from what-if-waterloo), the empty OATS sack",
+      "colour": "olive brown and straw"
+    },
+    {
+      "id": "town-square-grey",
+      "set": "TownSet overcast: a cart with its shafts on the ground and no horse, an empty hitching post, a hanging sign HORSE MEAT, the townsman and townswoman walking",
+      "colour": "slate grey"
+    },
+    {
+      "id": "workshop",
+      "set": "Drais's workshop (Room + props): workbench, tool board, lamp, a child's wooden hobby horse in his hand, the running machine under a dust sheet that he pulls off",
+      "colour": "honey amber"
+    },
+    {
+      "id": "truth-room",
+      "set": "Truth room (Room, cold), two shots: the running machine alone with labels TWO WHEELS, SEAT, STEERING; then Drais riding it with NO PEDALS",
+      "colour": "cold blue"
+    },
+    {
+      "id": "country-lane",
+      "set": "Country lane in June sun (LaneSet): fields, poplars, a milestone JUNE 12 1817 on the far side, the coaching inn with its sign COACHING INN, a pothole",
+      "colour": "green and gold"
+    },
+    {
+      "id": "historian-study",
+      "set": "Present-day historian's study at night: desk lamp, books, a small model of the running machine",
+      "colour": "violet"
+    },
+    {
+      "id": "mannheim-dusk",
+      "set": "TownSet at dusk, lanterns lit: the townsman and townswoman watch Drais glide past",
+      "colour": "rose pink and gold"
+    }
+  ],
+  "characters": [
+    {
+      "id": "drais",
+      "look": "Karl Drais, 32, Mannheim gentleman, 1817: tall black top hat (3D overlay, costumes.tsx), dark hair, white cravat with high collar points (overlay), mustard waistcoat (front views only), dark green coat, light buff pantaloons, knee-high black riding boots, a dark green tailcoat with tails. Rides the running machine; no pedals; holds a wooden hobby horse in the workshop."
+    },
+    {
+      "id": "farmer",
+      "look": "Farmer, Baden 1816: brown felt hat (kit hat, wide), brown beard, loose off-white linen smock (outfit), dark brown breeches, dark leather boots. Holds the empty OATS sack."
+    },
+    {
+      "id": "townsman",
+      "look": "Townsman, 1816-17: black top hat (overlay), grey frock coat (outfit), dark waistcoat, white cravat (overlay), grey pantaloons, black riding boots, coat tails."
+    },
+    {
+      "id": "townswoman",
+      "look": "Townswoman, 1816-17: long blue Regency dress (skirt), cream shawl (overlay), straw poke bonnet with a red ribbon tied under the chin (overlay), dark hair, dark leather shoes."
+    },
+    {
+      "id": "historian",
+      "look": "Present-day historian: grey hair, glasses, grey cardigan over a blue shirt, dark trousers, brown shoes // period-ok: present day (a present-day desk lamp on his desk)"
+    }
+  ],
+  "gags": [
+    {
+      "line": 4,
+      "what": "The farmer turns the OATS sack upside down and shakes it; one single oat drops out; the thin horse sniffs it and sighs, ears down"
+    },
+    {
+      "line": 11,
+      "what": "On the lane the running machine hits a pothole: Drais bounces up, his top hat hops off his head and he catches it, feet pedalling the air for a moment"
+    },
+    {
+      "line": 9,
+      "what": "In the truth room he pushes off, glides with the steering wobbling, and stamps a foot down to stop"
+    }
+  ],
+  "story_numbers": []
+}

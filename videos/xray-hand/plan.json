@@ -1,0 +1,135 @@
+{
+  "title": "The Green Glow That Looked Inside the Human Body",
+  "topic": "Wilhelm Röntgen, Würzburg, 8 November 1895: a screen glows green in a dark lab beside a tube wrapped in black cardboard; he sees the bones of a hand; his wife Anna Bertha's hand and ring on the first plate; X-rays",
+  "year": [
+    1895,
+    1901
+  ],
+  "mechanism": "The fast electrons inside a cathode-ray tube slam into its glass and give off invisible rays that pass through skin but are blocked by bone and metal, so a glowing screen or a photographic plate shows the bones as shadows.",
+  "beats": {
+    "hook": "In a pitch-black lab, the story goes, a professor saw the bones inside his own living hand. The green screen in the dark, the bone shadow flexing on it, Röntgen beside it; the camera pushing in.",
+    "but": "Across the room, a screen of barium platinocyanide glowed green, though the tube was wrapped in black cardboard.",
+    "then": "He blocks it with a thousand-page book, then throws a wooden board in the way: it still glows. Then his hand passes in front and the screen shows his bones; he jumps back off his chair.",
+    "conflict": "Seven weeks of tests; on 22 December his wife Anna Bertha lays her hand on a photographic plate. Her bones and wedding ring show. 'I have seen my death!'",
+    "pivot": "You see, fast electrons inside the tube slam into the glass and make invisible rays; skin lets them through, bone and metal block them and cast a shadow.",
+    "so": "So he named them X-rays, X for unknown, sent off his paper on 28 December; within weeks the news circled the world and doctors photographed broken bones; first Nobel Prize in physics in 1901; he never patented the rays.",
+    "closing": "Every X-ray you've ever had began with one green glow in the dark."
+  },
+  "triple_hook": {
+    "visual": "A big phosphor-green BARIUM SCREEN glowing in a dark lab, a black skeleton-hand shadow on it flexing its finger bones, Röntgen's green-lit face beside it, his arm reaching behind the paper; the camera already pushing in.",
+    "verbal": "In a pitch-black lab, the story goes, a professor saw the bones inside his own living hand.",
+    "text": "WHAT MADE IT GLOW?"
+  },
+  "format_note": "The Crookes tube, the barium screen, the photographic plate and the wedding ring are drawn up to 2x real size so they read on a phone. The hook shows his hand's shadow without a ring: no source says he wore one; the ring belongs to Anna Bertha's plate. Röntgen holds his hand behind the paper (the screen glows on both sides) so the shadow and his face share the frame.",
+  "seed": {
+    "what": "The labelled CROOKES TUBE wrapped in BLACK CARDBOARD, and the glowing BARIUM SCREEN",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "lab-dark-green",
+      "set": "Röntgen's Würzburg lab in the dark (new set WurzburgLab, guide/references/wurzburg-lab-1895.md): curtains drawn, the BARIUM SCREEN on its stand glowing green with the bone shadow",
+      "colour": "phosphor green on black"
+    },
+    {
+      "id": "lab-lamp",
+      "set": "The same lab by lamplight: work table, induction coil sparking, the glass CROOKES TUBE, a calendar NOV 8 1895, then he wraps the tube in BLACK CARDBOARD and turns the lamp down",
+      "colour": "amber"
+    },
+    {
+      "id": "lab-dark-navy",
+      "set": "The lab in the dark seen wide: the faint green screen across the room, the book and the wooden board thrown in the way",
+      "colour": "navy blue"
+    },
+    {
+      "id": "lab-screen-close",
+      "set": "Close on the screen: his hand behind it shows its bones; he jumps back off his chair",
+      "colour": "acid green"
+    },
+    {
+      "id": "lab-day",
+      "set": "The lab by day, snow light: plates stacked, the calendar flips to DEC 22 1895, the boxed tube on a raised block shines toward Anna Bertha's hand pressed on an upright PHOTOGRAPHIC PLATE on its stand",
+      "colour": "cream and pale grey"
+    },
+    {
+      "id": "darkroom",
+      "set": "Darkroom under a red safelight: developing trays, the wet plate held up showing her hand bones and the WEDDING RING",
+      "colour": "ruby red"
+    },
+    {
+      "id": "study",
+      "set": "His study at night: desk, oil lamp, the plate on the desk, window with night snow",
+      "colour": "violet"
+    },
+    {
+      "id": "truth-room",
+      "set": "Truth room: a giant cutaway CROOKES TUBE with ELECTRONS flying into the GLASS, X-RAYS streaming out through a giant hand model (SKIN, BONE, RING) onto a glowing screen",
+      "colour": "cold blue"
+    },
+    {
+      "id": "lecture-room",
+      "set": "Würzburg lecture room: a chalkboard with X = ?, the paper ON A NEW KIND OF RAYS on a lectern, dated DEC 28 1895",
+      "colour": "slate and walnut brown"
+    },
+    {
+      "id": "street-1896",
+      "set": "An 1896 street corner: a newspaper seller waving a paper with the hand picture; a doctor holding a plate of a broken arm",
+      "colour": "grey-blue stone and brick"
+    },
+    {
+      "id": "nobel-hall",
+      "set": "Stockholm 1901 award hall: gold curtains, the NOBEL PRIZE medal and diploma on a table, PHYSICS 1901",
+      "colour": "gold"
+    },
+    {
+      "id": "hospital-today",
+      "set": "A hospital X-ray room today: a light box with a hand X-ray glowing, a child patient and a radiographer",
+      "colour": "pale ice blue and white"
+    }
+  ],
+  "characters": [
+    {
+      "id": "roentgen",
+      "look": "Wilhelm Conrad Röntgen, 50, in 1895: thick dark hair brushed up and back, full dark beard going grey, dark frock coat over a dark waistcoat, white high-collar shirt, dark tie, dark trousers, black leather shoes. No lab coat, no hat. Holds the book, the wooden board, the black cardboard and the plate in their shots. Built as: kit short beard plus a long-beard overlay and white collar points (props.tsx CostumeOverlays); the kit has no tie, the beard covers where it would be."
+    },
+    {
+      "id": "anna",
+      "look": "Anna Bertha Röntgen, 56, in 1895: dark hair pinned up (short kit hair plus a bun overlay, props.tsx CostumeOverlays), high-necked long-sleeved dark plum dress to the floor (skirt: true), dark leather shoes; the gold wedding ring shows on her plate."
+    },
+    {
+      "id": "newsboy",
+      "look": "Newspaper seller, 1896: bare-headed boy with brown hair (no cap), grey wool jacket over a dark waistcoat, dark long trousers, dark brown leather boots; holds up a newspaper with the hand picture."
+    },
+    {
+      "id": "doctor",
+      "look": "Doctor, 1896: grey hair, round glasses, short grey beard, black frock coat over a waistcoat, white collar, black trousers, black leather shoes; holds a glass plate showing a broken arm. No hat."
+    },
+    {
+      "id": "official",
+      "look": "Award official, Stockholm 1901: grey hair, black tailcoat over a white waistcoat, black trousers, black leather shoes; hands over the medal."
+    },
+    {
+      "id": "kid",
+      "look": "Present-day child patient: dark hair, a blue hospital gown-like top, grey trousers, sneakers // period-ok: closing is present day"
+    },
+    {
+      "id": "radiographer",
+      "look": "Present-day radiographer: short fair hair, teal scrubs, white sneakers // period-ok: closing is present day"
+    }
+  ],
+  "gags": [
+    {
+      "line": 4,
+      "what": "He holds a fat 1000 PAGES book in the way, then hurls a wooden board into the gap; it clatters down; the screen keeps glowing; he scratches his head"
+    },
+    {
+      "line": 5,
+      "what": "The skeleton hand appears on the screen; he jumps up off his stool, which tips over backwards, hands flying up, then down again"
+    },
+    {
+      "line": 9,
+      "what": "Anna Bertha sees the plate, gasps 'I have seen my death!' and staggers back against the darkroom table, a tray sloshing"
+    }
+  ],
+  "story_numbers": []
+}
