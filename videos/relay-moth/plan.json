@@ -1,0 +1,130 @@
+{
+  "title": "The Real Insect Trapped in Relay 70",
+  "topic": "Harvard, 9 September 1947: during a test of the Mark II relay computer the operators trace an error to Panel F, Relay #70, find a moth trapped between its contact points, and tape it into the logbook at 1545 with 'First actual case of bug being found.' The word bug for a fault is older (Edison, 1878), which is the joke. Grace Hopper told the story widely; the page is in the Smithsonian's National Museum of American History.",
+  "year": [
+    1878,
+    1947
+  ],
+  "mechanism": "A relay is a switch closed by a magnet: current in the coil pulls the armature, which presses two contact points together so current flows on; a moth's body between the points kept them apart, so the relay could not pass its signal and the calculation went wrong.",
+  "beats": {
+    "hook": "The most famous computer bug in history was an actual bug, trapped inside a giant machine. Frame 0 is already close on a clacking rack of relays, armatures snapping in and out; a moth flutters in, lands between two contact points of the relay tagged 70 and sticks; the points spark and flicker; the camera pushing in.",
+    "but": "But that afternoon, in the middle of a test, the operators traced an error: the printer types a wrong number, a red lamp, the coffee cup jumps.",
+    "then": "They searched the machine panel by panel, relay by relay, with flashlights (one operator bangs his head on an open panel door); at 1545, in Panel F, Relay 70, they found it: a moth trapped between the contact points.",
+    "conflict": "They pulled it out, taped it into the logbook, and the operator reads out what he writes: 'First actual case of bug being found.' The camera ends on the word actual: but why the word actual?",
+    "pivot": "You see, a relay works only when its two contacts touch; the magnet pulls them together and the current flows on; with a moth's body in the way, they could not close.",
+    "so": "The word bug was already old: Edison wrote about bugs in 1878. The joke stuck: Grace Hopper, who worked on the machine, told the story again and again. So today the page, moth and all, is kept at the Smithsonian's National Museum of American History.",
+    "closing": "And the first actual bug is still taped to that page."
+  },
+  "triple_hook": {
+    "visual": "Frame 0: close on a rack of open telephone-type relays in a dim machine room (coils, armatures snapping in and out of phase, leaf-spring contact stacks, small number plates 68-72), a brown moth fluttering into frame and landing between the two silver points of relay 70, which spark and flicker as the armature keeps trying to close on it; the camera already pushing in.",
+    "verbal": "The most famous computer bug in history was an actual bug, trapped inside a giant machine.",
+    "text": "WHY DID IT GO WRONG?"
+  },
+  "format_note": "The moth is drawn about 2x its real size (sources disagree on its size) and the relays about 1.5x so they read on a phone. The sparks in the hook and the tweezers in the logbook shot are staging: no source says the points sparked or how the moth was taken out. The printer's wrong number, the red lamp and the flashlights are staging for 'traced an error'. Who found the moth is not known: the operators are unnamed, the logbook writer is an unnamed operator. Hopper is shown in 1947 in civilian clothes (a research fellow; she had left active Navy duty in 1946). The Smithsonian page is kept in the collection, not on display: shown in a storage room.",
+  "seed": {
+    "what": "The relay rack with relay 70, and the moth",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "relay-macro",
+      "set": "Close on a relay rack (props RelayRack): dim machine room, teal-steel rack, amber sparks",
+      "colour": "dark teal steel with amber"
+    },
+    {
+      "id": "lab-day",
+      "set": "Harvard Computation Laboratory by day (ComputationLab in Scene.tsx, guide/references/harvard-mark-ii-1947.md): a row of tall relay racks with MARK II on the header board, a calendar SEPT 9 1947 and a HARVARD plate on the first rack; the operators turn and walk to the racks as the camera tracks right onto an open panel of real relays",
+      "colour": "institutional mint green and cream"
+    },
+    {
+      "id": "console-alarm",
+      "set": "The operators' desk in front of the racks: the printing typewriter types a wrong number, a red ERROR lamp",
+      "colour": "red alarm"
+    },
+    {
+      "id": "aisle-dark",
+      "set": "The aisle behind the racks, lights off, two flashlight beams; open panel doors",
+      "colour": "navy blue with yellow beams"
+    },
+    {
+      "id": "panel-f",
+      "set": "Close on PANEL F under a flashlight: relays 68-72, RELAY 70 with the moth between the points",
+      "colour": "dark steel with a warm flashlight spot"
+    },
+    {
+      "id": "log-desk",
+      "set": "Top-down on the logbook on a green linoleum desk: tweezers lay the moth on the page, tape, the pencil writes the line; the push ends on the page with 'actual' underlined (the operators are hands only)",
+      "colour": "cream paper on green linoleum"
+    },
+    {
+      "id": "truth-room",
+      "set": "Truth room: a giant cutaway relay with COIL, ARMATURE, CONTACTS labels, a battery and a bulb; a giant moth wedges between the points and the bulb goes out",
+      "colour": "cold blue"
+    },
+    {
+      "id": "menlo-1878",
+      "set": "Edison's lab in 1878 by gaslight: shelves of bottles, a bench, Edison writing a letter with the word BUGS",
+      "colour": "sepia orange"
+    },
+    {
+      "id": "lab-office",
+      "set": "A Computation Laboratory office corner, late afternoon: Hopper with the logbook telling two colleagues, who laugh",
+      "colour": "violet and magenta"
+    },
+    {
+      "id": "museum-store",
+      "set": "The Smithsonian storage room today: grey steel drawer cabinets, a NATIONAL MUSEUM OF AMERICAN HISTORY sign, a curator sliding the lid off a flat box with the page",
+      "colour": "pale grey teal"
+    },
+    {
+      "id": "page-macro",
+      "set": "Close on the logbook page: the taped moth beside 1545 RELAY #70 PANEL F",
+      "colour": "warm cream"
+    }
+  ],
+  "characters": [
+    {
+      "id": "operator",
+      "look": "Mark II operator (man, about 25, 1947): short dark hair with a side parting, clean-shaven, white shirt, dark navy tie, dark grey trousers, black leather shoes. Holds the flashlight, the tweezers and the pencil. Speaks the logbook line. In the logbook shot only his hand and white cuff are seen (top-down)."
+    },
+    {
+      "id": "operator2",
+      "look": "Mark II operator (woman, about 25, 1947): shoulder-length brown hair with two 1940s victory rolls on top (kit long hair + a roll overlay), a mid-blue 1940s day dress to just below the knee with a white collar (kit skirt with skirtHem -180, collar overlay), skin-tone stockings, low dark leather shoes. Holds a flashlight."
+    },
+    {
+      "id": "hopper",
+      "look": "Grace Hopper, 40, in 1947 as a civilian research fellow: short wavy dark hair (kit short hair + curl overlay), clean face, a dark green 1940s day dress to just below the knee (kit skirt, skirtHem -180), skin-tone stockings, low dark shoes. Holds the logbook. No uniform (she had left active duty in 1946). Shot 9: in front at the centre with her own key light."
+    },
+    {
+      "id": "colleague",
+      "look": "Computation lab colleague (man, 1947): brown hair, short back and sides, grey suit jacket over a white shirt, dark tie, grey trousers, black leather shoes."
+    },
+    {
+      "id": "edison",
+      "look": "Thomas Edison, 31, in 1878: dark hair parted, clean-shaven; a dark frock coat (coat body plus skirts overlay), dark waistcoat, white shirt front with a turned-down collar, a black bow tie (cravat), dark trousers, black leather shoes; writing with a pen at a slanted desk."
+    },
+    {
+      "id": "curator",
+      "look": "Present-day museum collections staff: grey hair to the shoulders, glasses, navy cardigan, dark trousers, dark shoes; lifts the box lid. // present day"
+    }
+  ],
+  "gags": [
+    {
+      "line": 0,
+      "what": "The moth lands between relay 70's points and the relay slams on it again and again with sparks"
+    },
+    {
+      "line": 2,
+      "what": "The printer types a wrong number in red, the red lamp flashes, the operator's coffee cup jumps off its saucer and he grabs it"
+    },
+    {
+      "line": 3,
+      "what": "Searching in the dark aisle, the operator stands up into an open hatch: bonk, stars, an awkward wince"
+    },
+    {
+      "line": 8,
+      "what": "In the truth room a giant moth plops between the giant contacts; the armature bangs on it and the bulb stays dark"
+    }
+  ],
+  "story_numbers": []
+}

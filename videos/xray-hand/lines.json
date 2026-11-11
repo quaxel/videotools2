@@ -1,0 +1,89 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true, spooky science discovery story with wonder, brisk, excited and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.4
+    },
+    "anna": {
+      "voice": "Serena",
+      "instruct": "A woman in 1895 staring at an X-ray of her own hand for the first time, gasping in horror and awe.",
+      "seed": 5,
+      "tempo": 1.1
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "In a pitch-black lab, the story goes, a professor saw the bones inside his own living hand."
+    },
+    {
+      "speaker": "narrator",
+      "text": "November eighth, eighteen ninety-five. Wilhelm Röntgen was testing a cathode-ray tube.",
+      "say": "November eighth, eighteen ninety-five. Wilhelm Rentgen was testing a cathode-ray tube."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He wrapped it in black cardboard, so no light could escape."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But across the room, a screen of barium platinocyanide glowed green."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He blocked it with a thousand-page book, then a board. Still it glowed."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then his hand passed in front, and the screen showed his bones."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He spent seven weeks testing the rays."
+    },
+    {
+      "speaker": "narrator",
+      "text": "On December twenty-second, his wife Anna Bertha laid her hand on a photographic plate."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Her bones and wedding ring showed. She reportedly cried out."
+    },
+    {
+      "speaker": "anna",
+      "text": "I have seen my death!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "So how does a ray pass through skin, but not bone?",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, fast electrons inside the tube slam into the glass and make invisible rays."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Skin lets those rays through. Bone and metal block them and cast a shadow."
+    },
+    {
+      "speaker": "narrator",
+      "text": "He named them X-rays, X for unknown, and sent off his paper on December twenty-eighth."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Within weeks the news circled the world, and doctors were photographing broken bones."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In nineteen oh one, he won the first Nobel Prize in physics. He never patented the rays."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Every X-ray you've ever had began with one green glow in the dark."
+    }
+  ]
+}

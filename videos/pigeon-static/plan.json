@@ -1,0 +1,139 @@
+{
+  "title": "The Cosmic Static Trapped in Pigeon Poop",
+  "topic": "Holmdel, New Jersey, 1964-65: Arno Penzias and Robert Wilson's horn antenna hisses; pigeons nest in the horn, they clean out the white dielectric substance and send the birds away, the birds come back, the hiss stays: about 3 kelvin from every direction, the leftover glow of the Big Bang; Dicke's Princeton team is scooped; Nobel Prize in Physics 1978",
+  "year": [
+    1964,
+    1978
+  ],
+  "mechanism": "The early universe was hot and glowing; as space expanded that glow was stretched and cooled into faint microwaves at about 3 degrees above absolute zero that fill the whole sky evenly, so any sensitive antenna pointed anywhere hears the same faint hiss.",
+  "beats": {
+    "hook": "The oldest light in the universe is all around you, and two men blamed it on pigeon poop. Low inside the horn at dusk, the walls converging to the glowing throat behind two pigeons and a hissing scope; the camera pushing in.",
+    "but": "Their receiver picked up a faint, steady hiss; day or night, wherever they aimed, the hiss stayed the same; they even aimed at New York City.",
+    "then": "They looked inside the horn: two pigeons nesting on a ledge, and a layer of white dielectric substance (pigeon poop). They scrubbed it clean (Wilson slips, a pigeon flaps at Penzias) and sent the pigeons away in a box.",
+    "conflict": "Two days later the pigeons were back (accounts differ on how they finally left), and the hiss never changed at all.",
+    "pivot": "You see, the universe began hot and bright in the Big Bang; as space stretched, that glow cooled into faint microwaves at about three degrees above absolute zero; it fills the whole sky, so the horn heard it everywhere.",
+    "so": "So: in Princeton, Robert Dicke's team was about to look for that glow. \"We've been scooped.\" In 1978 Penzias and Wilson won the Nobel Prize in Physics.",
+    "closing": "They went looking for pigeon poop, and found the dawn of time."
+  },
+  "triple_hook": {
+    "visual": "Frame 0 is already low inside the giant horn at pigeon height, looking down its length: the four riveted walls converge to a glowing throat behind two grey pigeons (one pecking, one walking and cooing) on a floor of white droppings, a 1960s oscilloscope beside them with a green trace jittering; the camera already pushing in.",
+    "verbal": "The oldest light in the universe is all around you, and two men blamed it on pigeon poop.",
+    "text": "WHAT IS THIS HISS?"
+  },
+  "format_note": "The pigeons and the oscilloscope are drawn up to about 1.5x real size against the horn so they read on a phone; the horn is drawn at about 0.75 of its real size against the puppets (real: 50 ft long, 20 ft mouth). The oscilloscope on the horn's floor in the hook is staging: the real receiver sat in the cab at the horn's narrow end, where shots 3 and 8 show it. The pigeons' nest on a ledge inside the horn is staging. The calendar's DAY 1 / DAY 3 pages only stage 'two days later'.",
+  "seed": {
+    "what": "The two pigeons in the horn and the hissing trace on the receiver",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "horn-mouth-dusk",
+      "set": "Inside the horn at dusk (InsideHornSet dusk light): low view down the converging walls to the glowing throat, droppings on the floor, the test scope",
+      "colour": "warm grey metal with a gold throat glow"
+    },
+    {
+      "id": "hill-day",
+      "set": "Crawford Hill by day: the whole horn on its turntable platform with the cab on stilts, the spoked elevation wheel, gravel, trees; Penzias and Wilson on the platform",
+      "colour": "sky blue and leaf green"
+    },
+    {
+      "id": "cab-day",
+      "set": "The receiver cab by day (object shot, no puppets): RECEIVER label, NOISE needle meter, strip-chart recorder pen scribbling the hiss, a desk clock spinning through day and night",
+      "colour": "warm mustard and olive"
+    },
+    {
+      "id": "hill-night-city",
+      "set": "The hill at night: the horn turns toward the glowing New York skyline on the horizon; the cab window lit",
+      "colour": "violet night with city orange"
+    },
+    {
+      "id": "horn-inside",
+      "set": "Inside the horn near the throat: converging metal walls, a flashlight beam, a twig nest with the two pigeons, white droppings",
+      "colour": "dim sea-green metal"
+    },
+    {
+      "id": "horn-scrub",
+      "set": "Inside the horn by day, bright: Wilson in a work coat with a scrub brush and bucket, Penzias with a broom; a pigeon flaps round Penzias; Wilson slips; Penzias lifts the pigeon box",
+      "colour": "bright silver-white"
+    },
+    {
+      "id": "yard-return",
+      "set": "The gravel yard by the antenna, overcast; a calendar on a post flips DAY 1 to DAY 3; two pigeons fly back, one onto Wilson's head, one onto the empty box",
+      "colour": "overcast olive and grey"
+    },
+    {
+      "id": "cab-night",
+      "set": "The receiver cab at night under a desk lamp: the chart pen still scribbling, Penzias and Wilson glum then puzzled",
+      "colour": "deep blue with lamp yellow"
+    },
+    {
+      "id": "truth-room",
+      "set": "Truth room: a glowing patch on a grid board (UNIVERSE, BIG BANG) that cools white, yellow, orange, deep red as the grid's cells widen (SPACE STRETCHES, MICROWAVES); a thermometer drops to 3 DEGREES ABOVE ABSOLUTE ZERO",
+      "colour": "cold blue"
+    },
+    {
+      "id": "sky-night",
+      "set": "The horn under a night sky softly mottled with warm and cool microwave blotches, turning on its turntable; Penzias and Wilson small in front for scale",
+      "colour": "dark space with red and blue mottling"
+    },
+    {
+      "id": "princeton",
+      "set": "Dicke's Princeton office: PRINCETON pennant, chalkboard BIG BANG GLOW?, desk telephone, a model horn on a bench (OUR ANTENNA), two young colleagues",
+      "colour": "walnut brown and chalkboard green"
+    },
+    {
+      "id": "stockholm",
+      "set": "Stockholm award hall, 1978: gold curtains, NOBEL PRIZE PHYSICS 1978, medals lifted from the table, an official clapping; a pigeon lands on the table",
+      "colour": "gold"
+    }
+  ],
+  "characters": [
+    {
+      "id": "penzias",
+      "look": "Arno Penzias, about 31 in 1964: dark hair combed back, black-rimmed glasses, long-sleeve white shirt, narrow dark tie (props.tsx overlay), dark charcoal slacks, black leather shoes. In the scrub shot a grey work coat; holds a flashlight (S5), a broom and the pigeon box (S6). In 1978 (Stockholm): black tailcoat, white waistcoat, white bow tie, black trousers, black shoes."
+    },
+    {
+      "id": "wilson",
+      "look": "Robert Wilson, about 28 in 1964: short light-brown hair, white shirt with a dark narrow tie (open collar in the scrub shot), tan slacks, brown leather shoes. In the scrub shot a tan canvas work coat; holds a scrub brush and a bucket, then the pigeon box. In 1978 (from a 1981 photo): full reddish-brown beard, receding hair, black tailcoat, white waistcoat, white bow tie, black trousers, black shoes."
+    },
+    {
+      "id": "dicke",
+      "look": "Robert Dicke, Princeton professor, 1965: short dark hair receding, glasses, grey suit jacket over a white shirt, dark tie, grey trousers, black leather shoes; holds a black desk telephone receiver (1960s rotary phone)."
+    },
+    {
+      "id": "colleague1",
+      "look": "Young Princeton physicist, 1965: dark hair, white short-sleeve shirt, dark narrow tie, dark slacks, black leather shoes; unnamed."
+    },
+    {
+      "id": "colleague2",
+      "look": "Young Princeton physicist, 1965: sandy hair, pale blue shirt under a brown knitted sweater vest, grey slacks, brown leather shoes; unnamed."
+    },
+    {
+      "id": "official",
+      "look": "Award official, Stockholm 1978: grey hair, black tailcoat, white waistcoat, white bow tie, black trousers, black shoes; hands over the medal."
+    },
+    {
+      "id": "pigeons",
+      "look": "Two grey city pigeons (eagle-vision Pigeon, plus a flapping version in props.tsx): iridescent neck, orange eye, pink feet."
+    }
+  ],
+  "gags": [
+    {
+      "line": 9,
+      "what": "A pigeon flaps round Penzias's head as he sweeps (he flinches, broom up); Wilson, scrubbing, slips onto his back with dizzy stars and the bucket tips"
+    },
+    {
+      "line": 10,
+      "what": "Two days later the pigeons fly back: one lands on Wilson's head, one on the empty pigeon box; Penzias shrugs"
+    },
+    {
+      "line": 17,
+      "what": "Dicke hangs up the phone and slumps; a colleague drops his chalk"
+    },
+    {
+      "line": 19,
+      "what": "A pigeon lands on the Nobel table among the medals"
+    }
+  ],
+  "story_numbers": []
+}

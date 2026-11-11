@@ -1,0 +1,138 @@
+{
+  "title": "The Dropped Flask That Would Not Fall Apart",
+  "topic": "The Dropped Flask That Saved Millions of Drivers. Paris, 1903: the chemist and artist Édouard Bénédictus knocks a glass flask to the floor; it shatters but keeps its shape, because a collodion (cellulose nitrate) solution it once held had dried into a thin plastic film inside. Later (the story goes, after reading of people cut by flying glass in a car crash) he makes laminated glass: glass, plastic, glass. Patent 1909; car makers slow; first widely used in WWI gas-mask eyepieces; later car windshields, still laminated today.",
+  "year": [
+    1903,
+    1918
+  ],
+  "mechanism": "A thin plastic layer bonded to glass holds the broken pieces in place, so laminated glass cracks into a web but does not fly apart: the shards stick to the plastic.",
+  "beats": {
+    "hook": "A glass flask shattered on a hard floor, and then it simply refused to fall apart. Frame 0: the flask already in mid-fall about 1.5 m up, tumbling sideways, the camera sinking with it; it hits the terracotta tiles on 'shattered' (frame 20), a ring of shine flashes, bright crack lines race over it in a spider web, it hops, rocks and stands whole.",
+    "but": "He expected a mess of splinters (he carries a broom, then lets it drop with a clatter), but the flask had cracked into a web and kept its shape; he lifts it to his eyes. Inside, a dried collodion film held every shard.",
+    "then": "He put it back on the shelf and forgot it; then Paris filled with motor cars, and the cars began to crash (two early cars bump, a pane of glass flies to pieces, a hat flies off).",
+    "conflict": "The story goes that he read about a crash where people were cut by flying glass: at night with the newspaper he jumps up, 'The flask! The flask on the shelf!', and works through the night.",
+    "pivot": "You see, he made a sandwich: glass, a thin layer of plastic, then glass again; when it breaks, the shards stick to the plastic (a giant labelled sandwich in a cold blue room; a hammer hits it, the web spreads, nothing falls, the hammer bounces back).",
+    "so": "Patented in 1909, but car makers were slow to want it; so its first big job was the eyepieces of WWI gas masks; then car windshields, still there today.",
+    "closing": "So when a stone hits your windshield, it cracks like that flask, and holds."
+  },
+  "triple_hook": {
+    "visual": "Frame 0: a big glass flask (Erlenmeyer, aqua cartoon glass) already in mid-fall about 1.5 m above a terracotta tiled lab floor, tumbling sideways, the camera sinking with it; at frame 20 ('shattered') it hits: a white ring of shine and glints on the tiles, bright white crack lines with dark edges race over the glass in a spider web, it hops, rocks and stands whole while the camera pushes in on the web.",
+    "verbal": "A glass flask shattered on a hard floor, and then it simply refused to fall apart.",
+    "text": "THE SECRET IN YOUR WINDSHIELD"
+  },
+  "format_note": "The flask is drawn about 1.5-2x a real lab flask so the crack reads on a phone; the film inside is tinted faint amber so it can be seen (collodion film is clear). Where the flask fell from is not known (sources say shelf, desk or just dropped): the shelf fall is staging, and no height is spoken. The broom, the newspaper reading at night, the car bump in the street and the car maker waving it off are staging for the sourced lines. The crash he read about is not named (sources differ on who was hurt). The 1903-09 cars are generic early open cars, no make. Bénédictus's look is illustrative (moustache common then; no portrait used). The car crash is a red car hitting a gas lamp (staging).",
+  "seed": {
+    "what": "The cracked flask with the dried collodion film inside, on the shelf",
+    "first_line": 0
+  },
+  "locations": [
+    {
+      "id": "lab-floor",
+      "set": "Close on the terracotta tiled floor of the 1903 lab (LabSet floor corner): the flask falls, cracks and holds; a bench leg and a shelf foot behind",
+      "colour": "terracotta orange"
+    },
+    {
+      "id": "lab-day",
+      "set": "Bénédictus's Paris lab by day (LabSet in Scene.tsx, guide/references/paris-lab-1903.md): green-grey plaster walls, tall window, bottle shelves, a bench with glassware, an easel with a canvas (he is also an artist), a calendar 1903",
+      "colour": "sage green and cream"
+    },
+    {
+      "id": "flask-macro",
+      "set": "Macro on the cracked flask on the bench under a lamp: the dried film inside, labels COLLODION FILM",
+      "colour": "golden amber"
+    },
+    {
+      "id": "shelf-dusk",
+      "set": "The shelf at dusk: he puts the flask among the bottles and walks off; dust settles (dissolve from the lab, change of time)",
+      "colour": "dusky mauve"
+    },
+    {
+      "id": "street-1905",
+      "set": "A Paris street, about 1905 (cobbles, cream stone fronts with shutters and iron balconies, a striped cafe awning, gas lamps): a red early car runs into a gas lamp; its windshield sprays into pieces; a green car passes behind",
+      "colour": "sky blue and cream stone"
+    },
+    {
+      "id": "study-night",
+      "set": "His study at night: a desk lamp, the newspaper; he jumps up",
+      "colour": "night navy with a warm lamp"
+    },
+    {
+      "id": "lab-night",
+      "set": "The lab at night: glass sheets, a pot of collodion, a brush; a clock spins through the night",
+      "colour": "deep violet with lamp gold"
+    },
+    {
+      "id": "truth-room",
+      "set": "Truth room: a giant glass-plastic-glass sandwich on a stand with GLASS, PLASTIC, GLASS labels; a giant hammer hits it, the web spreads, the shards stay, the hammer bounces",
+      "colour": "cold blue"
+    },
+    {
+      "id": "garage-1909",
+      "set": "A 1909 motor workshop: an early car, a calendar 1909, the patent with a seal; the car maker waves it off",
+      "colour": "mustard and brown"
+    },
+    {
+      "id": "trench-1916",
+      "set": "A First World War trench: sandbags, duckboards, a drifting yellow-green gas cloud; a soldier in a gas mask with round eyepieces, EYEPIECES label",
+      "colour": "olive and khaki"
+    },
+    {
+      "id": "road-today",
+      "set": "A present-day car on a country road at sunset; a stone hits the windshield, a spider-web crack spreads and holds",
+      "colour": "sunset orange and asphalt grey"
+    }
+  ],
+  "characters": [
+    {
+      "id": "benedictus",
+      "look": "Édouard Bénédictus, 25 in 1903 (born 1878), chemist and artist: dark hair, a dark moustache (slug overlay), a white high stiff collar and dark tie (overlay), white shirt under a dark waistcoat (outfit white, vest dark; no lab coat), dark trousers, black leather shoes. The same in 1909 and at night."
+    },
+    {
+      "id": "motorist2",
+      "look": "Early motorist, about 1905: a grey-brown duster coat (outfit), a dark flat motoring cap (slug overlay, // period-ok: motorists' flat caps from about 1900) with goggles pushed up on it, a moustache, dark trousers, brown leather boots. Drives the red car into the gas lamp; his cap flies off."
+    },
+    {
+      "id": "carmaker",
+      "look": "Car maker in his workshop, 1909: brown hair, moustache (overlay), white shirt with a stiff collar and tie (overlay), brown waistcoat (vest), shirtsleeves, dark trousers, black leather boots; waves the patent off."
+    },
+    {
+      "id": "soldier",
+      "look": "First World War soldier, 1916: a brimmed steel helmet (slug overlay), a khaki uniform tunic (outfit), khaki trousers with puttees (wraps), brown boots, a gas mask over the face with two round glass eyepieces and a hose (slug overlay)."
+    },
+    {
+      "id": "soldier2",
+      "look": "A second First World War soldier, 1916: brimmed steel helmet, khaki tunic and trousers, puttees, brown boots, gas mask with round eyepieces."
+    },
+    {
+      "id": "driver",
+      "look": "Present-day driver: short hair, a navy hoodie, jeans, white sneakers. // present day"
+    }
+  ],
+  "gags": [
+    {
+      "line": 0,
+      "what": "The flask hits the tiles with a ring of shine; cracks race over it; it bounces, rocks and stands whole"
+    },
+    {
+      "line": 2,
+      "what": "He comes in with the broom to sweep up, then lets it drop with a clatter: the flask is still a flask; he lifts it and peers through the web"
+    },
+    {
+      "line": 5,
+      "what": "An early car runs into a gas lamp: the lamp leans, the windshield flies to pieces, the driver's cap flies off"
+    },
+    {
+      "line": 7,
+      "what": "He flings the newspaper away and bounces up: 'That old flask, it held together!'"
+    },
+    {
+      "line": 9,
+      "what": "A giant hammer hits the glass sandwich: the web spreads but nothing falls, and the hammer bounces back"
+    },
+    {
+      "line": 13,
+      "what": "A stone pings off the windshield; the driver flinches, the web spreads and holds; he lets out a breath"
+    }
+  ],
+  "story_numbers": []
+}

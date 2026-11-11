@@ -1,0 +1,109 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true, funny science discovery story with wonder, brisk, excited and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.44
+    },
+    "penzias": {
+      "voice": "Eric",
+      "instruct": "A young scientist in 1964 inside a giant antenna, announcing with mock-scientific seriousness what the pigeons left behind, crisp, clear and quick.",
+      "seed": 6,
+      "tempo": 1.25
+    },
+    "dicke": {
+      "voice": "Aiden",
+      "instruct": "A Princeton professor in 1965 slowly hanging up the phone and telling his team, half laughing, half crushed, that someone beat them to it.",
+      "seed": 3,
+      "tempo": 1.3
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "The oldest light in the universe is all around you, and two men blamed it on pigeon poop."
+    },
+    {
+      "speaker": "narrator",
+      "text": "New Jersey, nineteen sixty-four. Arno Penzias and Robert Wilson had a giant horn antenna.",
+      "say": "New Jersey, nineteen sixty-four. Arno Penzeeas and Robert Wilson had a giant horn antenna."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They wanted to hear the Milky Way."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But their receiver picked up a faint, steady hiss."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Day or night, wherever they aimed, the hiss stayed the same."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They aimed it at New York City. Same hiss."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Then they looked inside the horn. Two pigeons were nesting there."
+    },
+    {
+      "speaker": "penzias",
+      "text": "And a layer of white dielectric substance!"
+    },
+    {
+      "speaker": "narrator",
+      "text": "That's science talk for pigeon poop."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They scrubbed the horn clean and sent the pigeons away."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Two days later, the pigeons were back. Accounts differ on how they left."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And the hiss? It never changed at all."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So what hisses from every direction at once?",
+      "pauseAfter": 0.4
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, the universe began hot and bright, in the Big Bang."
+    },
+    {
+      "speaker": "narrator",
+      "text": "As space stretched, that glow cooled into faint microwaves, three degrees above absolute zero."
+    },
+    {
+      "speaker": "narrator",
+      "text": "It fills the whole sky, so the horn heard it everywhere."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In Princeton, Robert Dicke's team was about to look for that glow.",
+      "say": "In Princeton, Robert Dickey's team was about to look for that glow."
+    },
+    {
+      "speaker": "dicke",
+      "text": "We've been scooped."
+    },
+    {
+      "speaker": "narrator",
+      "text": "In nineteen seventy-eight, Penzias and Wilson won the Nobel Prize in Physics.",
+      "say": "In nineteen seventy-eight, Penzeeas and Wilson won the Nobel Prize in Physics."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They went looking for pigeon poop, and found the dawn of time."
+    }
+  ]
+}

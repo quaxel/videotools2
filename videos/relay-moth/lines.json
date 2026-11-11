@@ -1,0 +1,73 @@
+{
+  "fps": 30,
+  "voices": {
+    "narrator": {
+      "voice": "Ryan",
+      "instruct": "Gripping, energetic storyteller telling a true, funny computer history story with wonder, brisk, excited and punchy, never calm.",
+      "seed": 7,
+      "tempo": 1.47
+    },
+    "operator": {
+      "voice": "Eric",
+      "instruct": "A young computer operator in 1947 writing a logbook entry out loud, deadpan and proud of his own joke, crisp and quick.",
+      "seed": 6,
+      "tempo": 1.2
+    }
+  },
+  "lines": [
+    {
+      "speaker": "narrator",
+      "text": "The most famous computer bug in history was an actual bug, trapped inside a giant machine."
+    },
+    {
+      "speaker": "narrator",
+      "text": "Harvard, September ninth, nineteen forty-seven. The Mark II computer was being tested. It was a room full of relays, tiny switches that a magnet clicks shut.",
+      "say": "Harvard, September ninth, nineteen forty-seven. The Mark Two computer was being tested. It was a room full of relays, tiny switches that a magnet clicks shut."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But that afternoon, right in the middle of a test, the operators traced an error."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They searched the whole machine, panel by panel, relay by relay."
+    },
+    {
+      "speaker": "narrator",
+      "text": "At fifteen forty-five, in Panel F, Relay number seventy, they found it: a moth, trapped between the contact points."
+    },
+    {
+      "speaker": "narrator",
+      "text": "They pulled it out, taped it into the logbook, and wrote one line."
+    },
+    {
+      "speaker": "operator",
+      "text": "First actual case of bug being found."
+    },
+    {
+      "speaker": "narrator",
+      "text": "But why the word actual?",
+      "pauseAfter": 0.3
+    },
+    {
+      "speaker": "narrator",
+      "text": "You see, a relay works only when its two contacts touch. The magnet pulls them together, and the current flows on. With a moth's body in the way, they could not close."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And the word bug was already old. Thomas Edison wrote about bugs back in eighteen seventy-eight."
+    },
+    {
+      "speaker": "narrator",
+      "text": "The joke stuck, and Grace Hopper, who worked on the machine, told the story again and again."
+    },
+    {
+      "speaker": "narrator",
+      "text": "So today the page, moth and all, is kept at the Smithsonian's National Museum of American History."
+    },
+    {
+      "speaker": "narrator",
+      "text": "And the first actual bug is still taped right there on that page."
+    }
+  ]
+}

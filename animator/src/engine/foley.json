@@ -47,6 +47,11 @@
   "source": "synthesised, scripts/sfx_generate.py munch()",
   "license": "own"
  },
+ "relay": {
+  "count": 8,
+  "source": "synthesised, scripts/sfx_generate.py relay()",
+  "license": "own"
+ },
  "scrape": {
   "count": 6,
   "source": "synthesised, scripts/sfx_generate.py scrape()",
